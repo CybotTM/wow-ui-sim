@@ -10,9 +10,14 @@ ROOT = Path(__file__).resolve().parents[4]
 
 sys.dont_write_bytecode = True
 sys.path.insert(0, str(ROOT / 'tools'))
-from patch_audit_validation import preserved_input_matches, read_audit_json
+from patch_audit_validation import historical_json, preserved_input_matches, read_audit_json
 
-AUDIT_REVISION = '95f82e8d0f3612285886810157430da357aec5d1'
+# The sweep table retains 53 gaps at this pre-integration revision. Integration
+# replaced its referenced result with 51 gaps without updating the table. Read
+# the original blobs for that table, and the integrated blobs for final accounting;
+# patch_audit_validation pins both stages and the later closure bytes by SHA256.
+SWEEP_REVISION = '95f82e8d0f3612285886810157430da357aec5d1'
+AUDIT_REVISION = '1d2417266cc4164ac52cfee6525a4b74735638bd'
 EVIDENCE = Path(__file__).resolve().parent
 SOURCES = ROOT / 'data/patch-api/sources'
 
@@ -118,9 +123,9 @@ def check_sweeps_and_negative():
     table = read_json(EVIDENCE / 'p910-sweep-table.json')
     assert len(table) == 30 and sum(row['rows'] for row in table) == 6722
     for row in table:
-        result = read_json(EVIDENCE / row['output'])
+        result = historical_json(ROOT, (EVIDENCE / row['output']).relative_to(ROOT).as_posix(), SWEEP_REVISION)
         register = read_json(SOURCES / f"{row['patch']}-wikitext-register.json")
-        fixture = read_json(ROOT / 'tests/data' / f"patch_{row['patch'].replace('.', '_')}_sweep_known_gaps.json")
+        fixture = historical_json(ROOT, f"tests/data/patch_{row['patch'].replace('.', '_')}_sweep_known_gaps.json", SWEEP_REVISION)
         assert set(result) == {entry['id'] for entry in register['entries']}
         assert {key for key, value in result.items() if not value['ok']} == set(fixture)
         assert row['rows'] == row['ok'] + row['gaps'] == len(result)

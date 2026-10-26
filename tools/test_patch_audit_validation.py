@@ -11,6 +11,7 @@ from patch_audit_validation import (
     historical_registers,
     historical_sweep_tests,
     preserved_input_matches,
+    read_audit_bytes,
     read_audit_json,
 )
 
@@ -92,6 +93,60 @@ class PatchAuditValidationTests(unittest.TestCase):
         subprocess.run(['python3', '-B', str(directory / 'validate.py')],
                        cwd=ROOT, check=True, capture_output=True)
         self.assertEqual(result.read_bytes(), before)
+
+    def test_later_gap_closures_keep_exact_historical_inputs(self):
+        cases = (
+            ('9.1.0', '95f82e8d0f3612285886810157430da357aec5d1', 53, 48),
+            ('9.1.0', '1d2417266cc4164ac52cfee6525a4b74735638bd', 51, 48),
+            ('10.0.0', '465c908ce6c88b70a94f4ee6fdb6c0928c69a42e', 173, 170),
+            ('10.0.2', '465c908ce6c88b70a94f4ee6fdb6c0928c69a42e', 149, 148),
+            ('10.2.5', '465c908ce6c88b70a94f4ee6fdb6c0928c69a42e', 14, 3),
+            ('11.1.5', '465c908ce6c88b70a94f4ee6fdb6c0928c69a42e', 36, 35),
+            ('11.1.7', '465c908ce6c88b70a94f4ee6fdb6c0928c69a42e', 8, 2),
+        )
+        for patch, revision, old_count, live_count in cases:
+            with self.subTest(patch=patch, revision=revision):
+                path = f'tests/data/patch_{patch.replace(".", "_")}_sweep_known_gaps.json'
+                self.check_exact_replacement(path, revision, old_count, live_count)
+
+    def check_exact_replacement(self, path, revision, old_count, live_count):
+        old = git_bytes(ROOT, 'show', f'{revision}:{path}')
+        current = (ROOT / path).read_bytes()
+        digest = hashlib.sha256(old).hexdigest()
+        self.assertEqual(len(json.loads(old)), old_count)
+        self.assertEqual(len(json.loads(current)), live_count)
+        self.assertEqual(historical_json(ROOT, path, revision), json.loads(old))
+        self.assertEqual(read_audit_bytes(ROOT, ROOT / path, revision), old)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            target = root / path
+            target.parent.mkdir(parents=True)
+            for accepted in (old, current):
+                target.write_bytes(accepted)
+                self.assertTrue(preserved_input_matches(root, path, digest))
+            for rejected in (current + b'\n', json.dumps(json.loads(current)[1:]).encode()):
+                target.write_bytes(rejected)
+                self.assertFalse(preserved_input_matches(root, path, digest))
+            target.write_bytes(current)
+            self.assertFalse(preserved_input_matches(root, path, '0' * 64))
+            (root / 'unrelated.json').write_bytes(current)
+            self.assertFalse(preserved_input_matches(root, 'unrelated.json', digest))
+
+    def test_p910_preintegration_sweep_keeps_53_gap_result(self):
+        path = ('data/patch-api/evidence/9.1.0-session-2026-10-07/'
+                'p910_sweep_out-results.json')
+        revision = '95f82e8d0f3612285886810157430da357aec5d1'
+        historical = historical_json(ROOT, path, revision)
+        self.assertEqual(sum(not row['ok'] for row in historical.values()), 53)
+        current = json.loads((ROOT / path).read_bytes())
+        self.assertEqual(sum(not row['ok'] for row in current.values()), 51)
+        digest = hashlib.sha256(git_bytes(ROOT, 'show', f'{revision}:{path}')).hexdigest()
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            target = root / path
+            target.parent.mkdir(parents=True)
+            target.write_bytes((ROOT / path).read_bytes() + b'\n')
+            self.assertFalse(preserved_input_matches(root, path, digest))
 
     def test_unrecorded_json_change_is_rejected(self):
         with tempfile.TemporaryDirectory() as directory:
