@@ -4,9 +4,9 @@
 
 ## What it must do
 
-- [ ] Publish a non-nil boolean getter on Retail, PTR and Mists only in this change.
-- [ ] Read the supplied environment-local squelch flag without changing it; independent environments must not share the flag.
-- [ ] The original selected `LFGListCategorySelection_UpdateNavButtons` enables both find/start controls for false, disables both with the squelch tooltip for true, then enables both and clears both tooltips for false.
+- [x] Publish a non-nil boolean getter on Retail, PTR and Mists only in this change.
+- [x] Read the supplied environment-local squelch flag without changing it; independent environments must not share the flag.
+- [x] The original selected `LFGListCategorySelection_UpdateNavButtons` enables both find/start controls for false, disables both with the squelch tooltip for true, then enables both and clears both tooltips for false.
 
 The pinned `Blizzard_APIDocumentationGenerated/SocialRestrictionsDocumentation.lua` declares `IsSquelched` at line 96 on Retail 12.1.5.70448 and PTR 12.1.7.70493, and line 62 on Mists 5.5.4.70268. Returns are non-nil `bool` at lines 101 and 67 respectively. The original restriction calls are in `Blizzard_GroupFinder/Mainline/LFGList.lua:189` (Retail), `Mainline/LFGList.lua:176` (PTR), and `Classic/LFGList.lua:94` (Mists).
 
@@ -29,7 +29,7 @@ The unrestricted initial flag is a simulator fixture input, not a native account
 
 ## Known gaps (current cycle)
 
-- [ ] Execute paired RED/GREEN and stock captures on all three profiles.
+None in this lane. Paired original-consumer RED/GREEN, stock captures and all-target checks passed on all three profiles.
 
 ## Out of scope
 

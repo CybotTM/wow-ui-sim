@@ -1,6 +1,6 @@
-## [2026-10-25] staged | Supplied social squelch
+## [2026-10-25] proof | Supplied social squelch
 
-[Original listing controls](investigations/consumer-selection-and-red-proof.md#supplied-social-squelch) now have a supplied social-state getter with explicit Retail/PTR/Mists publication. Retail's original consumer fails at its missing getter in the test-first phase; final three-profile runtime and stock proof remain pending.
+[Original listing controls](investigations/consumer-selection-and-red-proof.md#supplied-social-squelch) pass the final three-profile false/true/false and isolation selector against byte-identical producer-only RED tests. Stock removes only the squelch pair on each profile; all-target, formatter and readability evidence is complete. Native account defaults and voice-provider policy remain excluded.
 
 ## [2026-10-25] proof | Classic defensive aura timer completion
 
