@@ -32,10 +32,9 @@ COPY .cargo/config.toml .cargo/config.toml
 COPY iced-wgpu-patched/ iced-wgpu-patched/
 COPY iced-dynamic/ iced-dynamic/
 COPY xtask/ xtask/
-# Cargo resolves workspace/dev-dependency manifests even for binary-only builds.
-COPY crates/test-harness/ crates/test-harness/
-COPY crates/sim-data/ crates/sim-data/
-COPY crates/sim-data-profile/ crates/sim-data-profile/
+# Cargo resolves all workspace/path dependencies even for binary-only builds.
+# Keep every local crate in the cached fetch layer as the workspace grows.
+COPY crates/ crates/
 
 # Cargo validates explicitly declared targets before fetching dependencies.
 # Derive empty sources from the manifest so adding targets cannot stale a list.
