@@ -14,11 +14,13 @@
 
 Pinned Mists `Blizzard_APIDocumentationGenerated/MapDocumentation.lua:168–180` declares `GetMapDisplayInfo(uiMapID: number) -> hideIcons: bool` with `MayReturnNothing = true`. There is no return struct or struct field list. The existing scalar boolean/zero-return projection matches this declaration; no profile-specific return adapter is needed.
 
-- [ ] Publish the existing producer on Mists through the same ACTIVE registration selection used by Era/Anniversary, without a second store or a Retail epoch.
+- [x] Publish the existing producer on Mists through the same ACTIVE registration selection used by Era/Anniversary, without a second store or a Retail epoch.
 - [ ] Supplied hide/show inputs must reach the provider and XML pin installed by the normally selected Mists WorldMap OnLoad, including map revisits, live updates and independent environments.
 - [ ] Preserve absent/removed zero results and exactly one supplied false boolean. Native input population and malformed-number parity remain excluded.
 
-`tests/mists_map_display.rs` selects `Blizzard_WorldMap_Mists.toc` and `Blizzard_SharedMapDataProviders_Mists.toc`, loads stock startup order, then finds the actual installed group provider and pin. It invokes the original provider `OnMapChanged:22–23`, reaching original pin `OnMapChanged:112–123` and the query at line114. No alternate consumer, fabricated provider, replacement method or vendor edit is used. The populated selector must reject constant true, false, nil and no-op producers on its own. Runtime proof is pending.
+`tests/mists_map_display.rs` selects `Blizzard_WorldMap_Mists.toc` and `Blizzard_SharedMapDataProviders_Mists.toc`, loads stock startup order, then finds the actual installed group provider and pin. It invokes the original provider `OnMapChanged:22–23`, reaching original pin `OnMapChanged:112–123` and the query at line114. No alternate consumer, fabricated provider, replacement method or vendor edit is used. The populated selector rejects constant true, false, nil and no-op producers on its own. Corrected RED reaches the original missing call at line114 after identity/provenance assertions pass. GREEN is pending.
+
+The selected boundary is after normal Blizzard startup addon loading, before `apply_post_load_workarounds`. Stock CLI startup runs that pass after Blizzard addons and again after third-party addons (`src/bin/wow_sim/startup.rs:424–444`); WorldMap XML OnLoad runs earlier during loading. A later, existing fog workaround overwrites multiple provider pins, including this group pin. That separate defect is excluded; this test does not claim post-workaround group-pin parity.
 
 ## How it works
 
