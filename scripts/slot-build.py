@@ -62,7 +62,7 @@ def artifact_units(slot, entries):
         if not match:
             continue
         name = match[1]
-        if kind == "deps" and name.startswith("lib"):
+        if kind == "deps" and path.suffix in LIBRARY_SUFFIXES and name.startswith("lib"):
             name = name[3:]
         base = path.parent.parent
         key = alias(base, name, match[2])
