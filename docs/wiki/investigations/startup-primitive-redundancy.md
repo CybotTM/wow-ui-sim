@@ -24,7 +24,7 @@ Three captures per sealed binary completed with unchanged `--no-addons --no-save
 
 Neither seal exposes a standalone `table_get_with_key` ELF symbol. Its observed zero standalone-frame count is not zero cost: the report separately measures `table_get`/`table_get_static` carrier frames and the broader UI-string registration envelope. SetText remains an unchanged control, not an optimized path.
 
-Private per-run wall times, inclusive means/standard deviations/variances, seals, argv, recovery limits, admission correction and proof ledger: `/home/osso/.local/state/wow-ui-sim/handoff/perf-build/report.md`. No gain claimed from source deletion or historical profile percentages.
+Private per-run wall times, inclusive means/standard deviations/variances, seals, argv, recovery limits, admission correction and proof ledger: private handoff report `perf-build/report.md` (not committed). No gain claimed from source deletion or historical profile percentages.
 
 ## Sources
 
