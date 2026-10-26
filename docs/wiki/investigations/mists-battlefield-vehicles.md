@@ -8,7 +8,7 @@ Verified source: 2026-10-25, Mists profile-scoped Blizzard UI cache.
 
 `Blizzard_WorldMap_Mists.toc:3,12–13` requires MapCanvas and SharedMapDataProviders and selects the Cata WorldMap Lua/XML. `Cata/Blizzard_WorldMap.lua:202` adds `VehicleDataProviderMixin`. `Blizzard_SharedMapDataProviders_Mists.toc:4–5,21` selects the game/Mists provider XML, which loads `VehicleDataProvider.lua` and declares `VehiclePinTemplate` with `VehiclePinMixin`.
 
-`Blizzard_MapCanvas.lua:451–454` iterates data providers with `pairs`. Vehicle refresh removes old pins, accepts zone-or-more-detailed map types, calls `GetBattlefieldVehicles(mapID)` at line 31, and acquires pins for alive non-player records with coordinates and an atlas. `VehiclePinMixin:Refresh` then needs `GetBattlefieldVehicleInfo` at line 57 to set rotation, atlas, dimensions, name, frame-level category and coordinates. OnUpdate queries that same record again. Fixing only the plural call would leave the supplied positive consumer incomplete.
+`Blizzard_MapCanvas.lua:451–454` iterates data providers with `pairs`. Vehicle refresh removes old pins, accepts zone-or-more-detailed map types, calls `GetBattlefieldVehicles(mapID)` at line 31, and acquires pins for alive non-player records with coordinates and an atlas. `VehiclePinMixin:Refresh` then needs `GetBattlefieldVehicleInfo` at line 58 to set rotation, atlas, dimensions, name, frame-level category and coordinates. OnUpdate queries that same record again. Fixing only the plural call would leave the supplied positive consumer incomplete.
 
 ## State boundary
 
@@ -16,7 +16,7 @@ No existing plural or singular producer exists in the simulator, including Retai
 
 ## Proof status
 
-The test loads the selected dependency closure, locates the provider installed by the original WorldMap OnLoad, checks cached Lua provenance, and invokes that original refresh directly so dispatch cannot swallow the missing-call failure. Its single selector includes both empty and positive states, rejecting a constant empty/no-op producer. Runtime proof remains pending until recorded in the task report.
+The test confirms selected dependency TOCs, loads stock startup discovery order, locates the provider installed by the original WorldMap OnLoad, checks cached Lua provenance, and invokes that original refresh directly so dispatch cannot swallow the missing-call failure. Loading only the dependency closure omitted implicit SharedXML startup dependencies and failed before the vehicle boundary; that first attempt is setup failure, not API RED. The corrected fixture reaches the original missing plural call. Its single selector includes empty and positive states: a constant empty/no-op producer contradicts the one-pin supplied state, while a constant populated producer contradicts the initial empty state. The original-consumer GREEN passes with all eleven projected fields and real XML pin acquisition/removal. The raw supplied-state before/after captures are both 12 keys / 18 occurrences: two missing-vehicle keys disappear and two existing `C_DeathInfo.GetCorpseMapPosition` keys appear. Each added key traces to `DeathMapDataProvider.lua:26`, selected at Cata WorldMap:206 and visited by MapCanvas:451–454; the second key is Blizzard ScriptErrors' re-report. No common-key count changes. This is not a zero-additions claim. The caller's historical 14/20 baseline differs from the current capture; an exact base-revision comparison and final profile checks remain pending.
 
 ## Sources
 

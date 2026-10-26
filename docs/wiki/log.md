@@ -1,6 +1,6 @@
 ## [2026-10-25] investigation | Mists battlefield vehicles
 
-[Vehicle provider boundary](investigations/mists-battlefield-vehicles.md): confirmed pinned plural/singular signatures, selected Mists TOCs, original WorldMap provider and XML pin path. Added supplied-state schema and original-consumer fixture before publication; runtime proof pending.
+[Vehicle provider boundary](investigations/mists-battlefield-vehicles.md): confirmed pinned plural/singular signatures, selected Mists TOCs, original WorldMap provider and XML pin path. Committed supplied-state schema and original-consumer fixture before publication. Corrected implicit startup dependencies, observed missing-call RED, then passed supplied-pin GREEN. Raw captures replace two vehicle errors with two traced existing DeathMap errors; final profile checks and exact base comparison are pending.
 
 ## [2026-10-25] decision | PTR SharedXML executes twice
 

@@ -4,10 +4,10 @@ Mists exposes supplied battlefield map observations through `C_PvP`. The pinned 
 
 ## What it must do
 
-- [ ] Publish `GetBattlefieldVehicles(uiMapID)` and the original pin's `GetBattlefieldVehicleInfo(vehicleIndex, uiMapID)` on Mists only.
-- [ ] Return no values outside an active battlefield or for an absent map observation; return an array for a supplied list, including an explicit empty list. The declaration permits no result; it does not specify native absence policy beyond `MayReturnNothing`.
-- [ ] Preserve supplied list order and all eleven documented record fields without generating native vehicle data.
-- [ ] Let the original selected WorldMap provider filter dead/player records, acquire the original XML pin, project the supplied name, atlas, size and position, and remove stale pins when the map or active state changes.
+- [x] Publish `GetBattlefieldVehicles(uiMapID)` and the original pin's `GetBattlefieldVehicleInfo(vehicleIndex, uiMapID)` on Mists only.
+- [x] Return no values outside an active battlefield or for an absent map observation; return an array for a supplied list, including an explicit empty list. The declaration permits no result; it does not specify native absence policy beyond `MayReturnNothing`.
+- [x] Preserve supplied list order and all eleven documented record fields without generating native vehicle data.
+- [x] Let the original selected WorldMap provider filter dead/player records, acquire the original XML pin, project the supplied name, atlas, size and position, and remove stale pins when the map or active state changes.
 
 ## How it works
 
@@ -25,7 +25,7 @@ Mists exposes supplied battlefield map observations through `C_PvP`. The pinned 
 
 ## Known gaps (current cycle)
 
-- [ ] Execute original-consumer RED/GREEN and the required profile checks.
+- [ ] Complete the required Mists/Retail all-target checks and exact paired producer-only RED proof.
 
 ## Out of scope
 
