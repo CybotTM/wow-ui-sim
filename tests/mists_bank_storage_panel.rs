@@ -69,7 +69,7 @@ fn mists_bank_and_guild_bank_support_storage_flow() {
             A_Admin.AddBagItem(0, 1, 6948, 1)
             A_Admin.AddBagItem(-1, 1, 6948, 1)
             A_Admin.ClearGuildBank()
-            A_Admin.AddGuildBankTab("General", "Interface\\\\Icons\\\\INV_Misc_Bag_10", true, true, -1, -1, false)
+            A_Admin.AddGuildBankTab("General", [[Interface\Icons\INV_Misc_Bag_10]], true, true, -1, -1, false)
             A_Admin.AddGuildBankItem(1, 1, 6948, 1)
 
             FireEvent("BANKFRAME_OPENED")
