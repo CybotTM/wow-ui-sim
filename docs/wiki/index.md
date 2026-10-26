@@ -10,6 +10,10 @@
 
 [Original active-slot proof](investigations/consumer-selection-and-red-proof.md#supplied-modern-stable-active-list) links the [supplied-record contract](../specs/stable-active-list.md): Retail/PTR exact RED/GREEN, isolated supplied records and fresh snapshots. Five finite PTR constants replace two raw stock keys at unchanged 134/154, with both additions traced. Retail stock remains 8/10 without raw changes; all seven all-target checks have zero compiler warnings. Historical whole-closure/full-Refresh obligations stay deferred; PTR specialization OnLoad and secondary-pet queries are out of scope.
 
+## [2026-10-26] feature | Exclusive addon test roots
+
+[CLI usage](reference/cli-commands.md#run-tests-addon) links the [selection contract](../specs/exclusive-addon-paths.md): explicit roots replace third-party discovery, retain bundled TestFramework and keep Blizzard UI separate. Loader/CLI RED, nine targeted GREEN cases and full CLI startup acceptance pass. All seven canonical all-target checks have zero compiler warnings; Retail stock stays 8/10. InTimeBL passes both smoke modes while exclusive discovery drops from 66 addons to only InTimeBL. Its missing challenge-mode getter remains a separate API gap.
+
 ## [2026-10-26] proof | Complete PTR Edit Mode display-info
 
 [Complete original-file proof](investigations/ptr-edit-mode-declarations.md#complete-original-display-info-initialization) links the [contract](../specs/ptr-edit-mode-declarations.md):16 declaration-backed read members, exact producer-only RED/GREEN for the whole file and original LossOfControl OnLoad, PTR stock214/280→134/154 with four individually traced additions. The separate preset remains blocked. PTR/Retail/Era each have an accepted all-target receipt with zero warnings; formatting and readability pass.
