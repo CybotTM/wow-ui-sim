@@ -703,3 +703,19 @@ The [owning contract](../../specs/wrath-friends-legacy.md) records static12340 p
 - [[client-profiles]] — cumulative `retail-12-1-5` feature selection for PTR
 
 Exact403/328 bounded acceptance: [combined evidence SSOT](../../specs/private-aura-sound-removal.md#independent-bounded-acceptance--2026-10-02), with [arg2-only space scope](../../specs/string-util-space-limit-security.md). Native and whole-page/goal acceptance excluded.
+
+## TTS preference model (edit-only staging)
+
+`src/c_api/c_tts_settings.rs` restores private Lua upvalue preference tables
+before original consumers execute and captures a private Rust persistence function.
+Each setter/Mark/reset writes the aggregate account/character tables and saved marker
+through `SavedVariablesManager`'s serializer. Its data-only parser restores the table
+without global publication or Lua execution. Storage lives under the owning CVar
+file's extensionless directory, then active profile cache subdirectory and
+`SavedVariables/TTSSettings.lua`; CVar test isolation therefore isolates these files
+too. Bootstrap transfer globals are removed after capture. No public preference
+CVars or alternate producers exist; ordinary chat channel membership stays separate.
+
+The [TTS contract](../../specs/c-factory-cf2-tts.md#staged-producer-contract-and-evidence-limits)
+owns default evidence, supported pairs, selection, UNKNOWN mappings and the approved
+non-native fresh=false/Mark=true persistent marker model. The [bounded integration proof](../investigations/cf2-tts-integration.md#bounded-verification) records exact original-consumer GREEN on six registered profiles, the corrected legacy oracle on all seven, stock-map deltas and warning gates. Native parity and full-suite acceptance remain unverified.

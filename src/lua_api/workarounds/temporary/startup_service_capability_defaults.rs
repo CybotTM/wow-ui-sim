@@ -3,16 +3,6 @@
 
 use crate::client_profile::{ACTIVE, ClientProfile};
 
-const CHAT_TYPE_TTS_PREFERENCE: &str = r#"
--- Missing system: per-chat-type text-to-speech user preferences.
--- Existing channel TTS flags do not establish the SAY/PARTY/etc. preference.
-if rawget(C_TTSSettings, "GetChatTypeEnabled") == nil then
-    function C_TTSSettings.GetChatTypeEnabled(_chatName)
-        return false
-    end
-end
-"#;
-
 const MODERN_SERVICE_CAPABILITIES: &str = r#"
 C_ContentTracking = C_ContentTracking or {}
 -- Missing system: collectable-source tracking capability/entitlement policy.
@@ -66,7 +56,6 @@ end
 "#;
 
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
-    lua.exec(CHAT_TYPE_TTS_PREFERENCE)?;
     match ACTIVE {
         ClientProfile::Retail | ClientProfile::Ptr => {
             lua.exec(MODERN_SERVICE_CAPABILITIES)?;

@@ -17,6 +17,24 @@ pub(super) fn parse_saved_variables_file_with_cache(
     Parser::new(state, source, table_size_cache).parse_file()
 }
 
+/// Read one simulator-owned table without publishing globals or executing Lua.
+pub(super) fn parse_model_value(state: &mut LuaState, source: &str) -> Result<Val, String> {
+    let mut parser = Parser::new(state, source, None);
+    parser.skip_ws();
+    if parser.parse_identifier()? != "preferences" {
+        return Err("expected preferences assignment".to_string());
+    }
+    parser.skip_ws();
+    parser.expect_byte(b'=')?;
+    let value = parser.parse_value(None)?;
+    parser.skip_field_separator();
+    parser.skip_ws();
+    if !parser.is_eof() || !matches!(value, Val::Table(_)) {
+        return Err("expected exactly one preferences table".to_string());
+    }
+    Ok(value)
+}
+
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub(super) struct SavedVariablesTableSize {
     pub array_count: usize,

@@ -83,6 +83,7 @@ pub(super) fn init_lua_state(
     trace_debug_getter_values(lua, "after_temporary_bootstrap");
     super::globals::real::heal_prediction::register(lua)?;
     super::globals::real::totems::register(lua)?;
+    crate::c_api::c_tts_settings::register(lua)?;
     crate::c_api::c_click_bindings::register(lua)?;
     #[cfg(feature = "retail-12-0-5")]
     crate::c_api::c_click_bindings_spell::register(lua.state_mut())?;
