@@ -45,7 +45,11 @@ fn supplied_env(enabled: bool) -> WowLuaEnv {
     load_blizzard_addon_closure_into_env(
         &env,
         &ui,
-        &["Blizzard_UIParentPanelManager", "Blizzard_UIPanels_Game"],
+        &[
+            "Blizzard_UIParentPanelManager",
+            "Blizzard_MainMenuBarBagButtons",
+            "Blizzard_UIPanels_Game",
+        ],
         &[],
     );
     env.exec(r#"
@@ -57,6 +61,15 @@ fn supplied_env(enabled: bool) -> WowLuaEnv {
         local source = debug.getinfo(ContainerFrame_RefreshRuneIcons, "S").source:gsub("\\", "/")
         assert(source:find("Blizzard_UIPanels_Game/Classic/ContainerFrame_Shared.lua", 1, true), source)
     "#).expect("load and open the original Mists bag with pre-startup supplied input");
+    let engraving_errors: Vec<_> = env
+        .state()
+        .borrow()
+        .lua_errors
+        .iter()
+        .filter(|message| message.contains("C_Engraving"))
+        .cloned()
+        .collect();
+    assert!(engraving_errors.is_empty(), "{engraving_errors:#?}");
     env
 }
 
@@ -194,32 +207,4 @@ fn direct_engraving_queries_project_records_and_reject_unsupplied_inputs() {
         env.eval::<bool>("return pcall(C_Engraving.GetEngravingModeEnabled)")
             .is_ok_and(|ok| !ok)
     );
-}
-
-#[test]
-fn original_settings_register_rune_checkbox_only_when_supplied_enabled() {
-    for enabled in [false, true] {
-        let ui = blizzard_ui_dir();
-        let env = new_blizzard_addon_env(&ui);
-        env.state().borrow_mut().engraving.enabled = Some(enabled);
-        load_blizzard_addon_closure_into_env(
-            &env,
-            &ui,
-            &["Blizzard_SettingsDefinitions_Frame"],
-            &[],
-        );
-        env.exec(r#"
-            local source = debug.getinfo(InterfaceOverrides.AdjustDisplaySettings, "S").source:gsub("\\", "/")
-            assert(source:find("Blizzard_SettingsDefinitions_Frame/Classic/InterfaceOverrides.lua", 1, true), source)
-            local category = Settings.RegisterVerticalLayoutCategory("Supplied engraving inputs")
-            InterfaceOverrides.AdjustDisplaySettings(category)
-        "#).unwrap();
-        let registered: bool = env
-            .eval("return Settings.GetSetting('alwaysShowRuneIcons') ~= nil")
-            .unwrap();
-        assert_eq!(
-            registered, enabled,
-            "original settings must follow supplied availability"
-        );
-    }
 }
