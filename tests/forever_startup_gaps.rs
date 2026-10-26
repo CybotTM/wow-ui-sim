@@ -238,6 +238,7 @@ fn forever_stock_target_spell_reaches_original_item_context() {
         local ok, result = xpcall(ItemButtonUtil.GetItemContext, debug.traceback)
         assert(ok, result)
         assert(result == nil and C_Spell.GetTargetSpellID() == 0)
+        assert(C_Spell.GetTargetSpellID() ~= FEED_PET_SPELL_ID)
         "#,
     )
     .expect("stock target must reach original item-context consumer");
