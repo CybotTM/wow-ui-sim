@@ -6,7 +6,7 @@ Button atlas setters create their texture region independently of atlas-pixel av
 
 - [ ] A string passed to a button atlas setter creates and publishes that slot's Texture before atlas lookup. Missing atlas data must not leave the slot nil.
 - [x] Original PTR 70493 LegacyMicroButton `SetNormal` can set its highlight region's alpha even when its atlas pixels are unavailable.
-- [x] Resolved atlas application, parent-slot fields and visibility behavior remain unchanged (10 atlas regressions and19 texture tests).
+- [x] Resolved atlas application, parent-slot fields and visibility behavior remain unchanged (10 atlas regressions and 19 texture tests).
 
 ## How it works
 
