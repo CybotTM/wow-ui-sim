@@ -278,7 +278,8 @@ fn test_c_loss_of_control_returns_seeded_active_event() {
         env.exec("assert(C_LossOfControl == nil)").unwrap();
         return;
     }
-    env.exec(include_str!("fixtures/loss_of_control.lua")).unwrap();
+    env.exec(include_str!("fixtures/loss_of_control.lua"))
+        .unwrap();
     let result: String = env
         .eval(
             r#"

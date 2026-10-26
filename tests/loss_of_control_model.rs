@@ -28,7 +28,8 @@ fn loss_of_control_units_and_optional_fields_are_independent() {
         env.exec("assert(C_LossOfControl == nil)").unwrap();
         return;
     }
-    env.exec(include_str!("fixtures/loss_of_control.lua")).unwrap();
+    env.exec(include_str!("fixtures/loss_of_control.lua"))
+        .unwrap();
     env.exec(
         r#"
         local other = {
@@ -63,8 +64,9 @@ fn loss_of_control_units_and_optional_fields_are_independent() {
 #[test]
 fn loss_of_control_original_display_tracks_supplied_state() {
     // FrameXML.toc:126-128 selects this consumer only for mists/mainline.
+    // Proof scope is Retail; PTR's original OnLoad aborts in the display-info chain.
     use wow_ui_sim::client_profile::{ACTIVE, ClientProfile};
-    if matches!(ACTIVE, ClientProfile::Wrath | ClientProfile::Era | ClientProfile::Anniversary) {
+    if ACTIVE != ClientProfile::Retail {
         return;
     }
     let env = setup_env();

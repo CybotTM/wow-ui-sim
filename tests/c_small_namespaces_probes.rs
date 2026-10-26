@@ -84,7 +84,8 @@ fn loss_of_control_get_active_data_returns_seeded_entry() {
         env.exec("assert(C_LossOfControl == nil)").unwrap();
         return;
     }
-    env.exec(include_str!("fixtures/loss_of_control.lua")).unwrap();
+    env.exec(include_str!("fixtures/loss_of_control.lua"))
+        .unwrap();
     let (spell_id, display_text, icon_texture, display_type, time_remaining): (
         i32,
         String,
@@ -117,7 +118,8 @@ fn loss_of_control_get_active_data_count_is_one() {
         env.exec("assert(C_LossOfControl == nil)").unwrap();
         return;
     }
-    env.exec(include_str!("fixtures/loss_of_control.lua")).unwrap();
+    env.exec(include_str!("fixtures/loss_of_control.lua"))
+        .unwrap();
     let count: i32 = env
         .eval("return C_LossOfControl.GetActiveLossOfControlDataCount()")
         .unwrap();
