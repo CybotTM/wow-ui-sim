@@ -594,11 +594,12 @@ class SourceFreshnessTests(unittest.TestCase):
                         "launcher does not invalidate older source mtimes")
         return self.module.prepare_source(self.tree, previous)
 
-    def run_library_step(self, profile, fresh=False, mutation=""):
+    def run_library_step(self, profile, fresh=False, mutation="", executable=False):
         """Run a separate worker against persistent outputs, without Cargo."""
         import sys
         (self.slot / ".owner").write_text("test-owner")
-        binary = self.slot / f"debug/deps/libprobe-{profile}.rmeta"
+        filename = f"probe-{profile}" if executable else f"libprobe-{profile}.rmeta"
+        binary = self.slot / "debug/deps" / filename
         emitter = (
             'import json,sys; from pathlib import Path\n'
             'binary,source=map(Path,sys.argv[1:3])\n'
@@ -609,7 +610,7 @@ class SourceFreshnessTests(unittest.TestCase):
             '    binary.with_suffix(".d").write_text(str(binary)+": src/main.rs\\n")\n'
             'exec(sys.argv[4])\n'
             'print(json.dumps({"reason":"compiler-artifact","filenames":[str(binary)],\n'
-            '    "executable":None,"fresh":fresh}))\n'
+            '    "executable":str(binary) if json.loads(sys.argv[5]) else None,"fresh":fresh}))\n'
         )
         request = self.slot / "library-request.json"
         receipt = self.slot / "library-receipt.json"
@@ -617,13 +618,14 @@ class SourceFreshnessTests(unittest.TestCase):
             "slot": str(self.slot), "worktree": str(self.tree), "owner": "test-owner",
             "unit": "library-step", "receipt": str(receipt),
             "cargo": [sys.executable, "-c", emitter, str(binary),
-                      str(self.tree / "src/main.rs"), json.dumps(fresh), mutation]}))
+                      str(self.tree / "src/main.rs"), json.dumps(fresh), mutation,
+                      json.dumps(executable)]}))
         result = subprocess.run(
             [sys.executable, "-B", str(SCRIPT), "--execute", str(request)],
             capture_output=True)
         return result, json.loads(receipt.read_text())
 
-    def build_directory_library(self):
+    def build_directory_library(self, executable=False):
         directory = self.tree / "tests/nested"
         directory.mkdir(parents=True)
         (directory / "case.rs").write_text("original case")
@@ -633,7 +635,8 @@ class SourceFreshnessTests(unittest.TestCase):
                     '(source.parent.parent / "tests/nested/case.rs").read_bytes()); '
                     'binary.with_suffix(".d").write_text('
                     'str(binary)+": src/main.rs tests\\n")')
-        result, receipt = self.run_library_step("retail", mutation=mutation)
+        result, receipt = self.run_library_step("retail", mutation=mutation,
+                                                executable=executable)
         self.assertEqual(result.returncode, 0, result.stderr)
         return receipt
 
@@ -674,6 +677,33 @@ class SourceFreshnessTests(unittest.TestCase):
     def test_directory_input_removed_file_rejects_reuse(self):
         self.assert_directory_change_rejected(
             lambda directory: (directory / "case.rs").unlink())
+
+    def test_directory_nested_edit_requires_changed_rebuilt_executable_hash(self):
+        first = self.build_directory_library(executable=True)
+        output = Path(first["reported_artifacts"][0]["executable"])
+        original = output.read_bytes()
+        verified = (self.slot / ".verified-source-identity.json").read_bytes()
+        (self.tree / "tests/nested/case.rs").write_text("changed case")
+        mutation = (f'binary.write_bytes({original!r}); '
+                    'binary.with_suffix(".d").write_text('
+                    'str(binary)+": src/main.rs tests\\n")')
+        result, receipt = self.run_library_step("retail", mutation=mutation, executable=True)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(receipt["result"], "stale-artifacts")
+        self.assertEqual(output.read_bytes(), original)
+        self.assertEqual((self.slot / ".verified-source-identity.json").read_bytes(), verified)
+        self.assertNotIn("tests/nested/case.rs", receipt["unread_package_paths"])
+
+    def test_directory_mtime_only_refresh_rejects_fresh_record(self):
+        self.build_directory_library()
+        output = str(self.slot / "debug/deps/libprobe-retail.rmeta")
+        current = {"worktree": str(self.tree), "slot": str(self.slot),
+                   "changed_paths": ["tests/nested/case.rs"],
+                   "content_changed_paths": [],
+                   "reported_artifacts": [{"filenames": [output], "fresh": True}],
+                   "target_inputs": {output: ["tests"]}}
+        self.assertEqual(self.module.find_stale_artifacts(current, {}, {}),
+                         ["debug/deps/libprobe-retail.rmeta"])
 
     def test_profile_switch_cannot_certify_an_older_library(self):
         result, _ = self.run_library_step("retail")
