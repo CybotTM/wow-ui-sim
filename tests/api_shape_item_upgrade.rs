@@ -128,19 +128,30 @@ fn original_item_util_tracks_supplied_eligibility_movement_removal_and_isolation
             DeleteCursorItem()
             A_Admin.AddBagItem(0, 1, 6948, 1)
             CheckUpgradeUnknown(firstLocation)
+            A_Admin.SetItemUpgradeEligibility(firstLocation, true)
+            CheckUpgrade(firstLocation, true)
         "#).expect("supplied location eligibility must drive original ItemUtil through lifecycle");
-        second.exec(r#"
+        second
+            .exec(
+                r#"
             CheckUpgradeUnknown(firstLocation)
             A_Admin.SetItemUpgradeEligibility(firstLocation, false)
             A_Admin.SetItemUpgradeEligibility(secondLocation, true)
             CheckUpgrade(firstLocation, false)
             CheckUpgrade(secondLocation, true)
+        "#,
+            )
+            .expect("second environment has independent supplied eligibility");
+        first
+            .exec("CheckUpgrade(firstLocation, true); CheckUpgradeUnknown(secondLocation)")
+            .unwrap();
+        second.exec(r#"
             A_Admin.SetItemUpgradeEligibility(firstLocation, true)
             CheckUpgrade(firstLocation, true)
             A_Admin.RemoveBagItem(0, 1)
             assert(ItemButtonUtil.GetItemContextMatchResultForItem(firstLocation) == ItemButtonUtil.ItemContextMatchResult.DoesNotApply)
-        "#).expect("second environment has independent supplied eligibility");
-        first.exec("CheckUpgradeUnknown(secondLocation)").unwrap();
+        "#).expect("second environment changes and removes its own observation");
+        first.exec("CheckUpgrade(firstLocation, true)").unwrap();
         assert!(first.state().borrow().lua_errors.is_empty());
         assert!(second.state().borrow().lua_errors.is_empty());
     });
