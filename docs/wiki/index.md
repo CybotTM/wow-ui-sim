@@ -23,7 +23,7 @@
 [Pet identity notes](systems/pet-battle-names.md#mists-display-identity) link the [contract](../specs/mists-pet-display-id.md): supplied optional per-pet display identity, Mists-only publication and static nil receiver trace. Existing name selectors remain unchanged; constant/value projection coverage and all new runtime proof remain pending.
 ## [2026-10-25] fix | TTS profile publication
 
-[Publication boundary](investigations/cf2-tts-integration.md#publication-gate-repair) records the Wrath namespace RED, six declaring profiles and approved positive-absence legacy applicability. Post-fix runtime proof is pending.
+[Publication boundary](investigations/cf2-tts-integration.md#publication-gate-repair) records the Wrath namespace RED, six declaring profiles, approved positive-absence legacy applicability and55 fresh exact GREEN cases. Wrath/Retail all-target checks, zero-error sparse Wrath stock and formatting pass.
 
 ## [2026-10-25] investigation | Forever startup supplied inputs
 

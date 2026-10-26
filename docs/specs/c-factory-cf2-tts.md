@@ -6,7 +6,7 @@ Slice 7 covers original ChatFrame character-save and Forever Gamepad temporary-C
 
 ### Character TTS settings
 
-- [ ] Publish the 18 modeled functions only on Retail, PTR, Mists, Era, Anniversary and WowForever, whose pinned `Blizzard_APIDocumentationGenerated/TTSSettingsDocumentation.lua` declares each function. Wrath has no pinned declaration: do not create `C_TTSSettings` or initialize its persistence there. This is a pinned-publication boundary, not proof of native absence.
+- [x] Publish the 18 modeled functions only on Retail, PTR, Mists, Era, Anniversary and WowForever, whose pinned `Blizzard_APIDocumentationGenerated/TTSSettingsDocumentation.lua` declares each function. Wrath has no pinned declaration: do not create `C_TTSSettings` or initialize its persistence there. This is a pinned-publication boundary, not proof of native absence.
 - [ ] Retail, PTR, WowForever, Mists, Era and Anniversary load unchanged cached ChatFrame consumers. Original slider callbacks drive rate0/volume0, then rate4/volume37 and rate7/volume63 with `TTSUseCharacterSettings=1`. Each numerical selector independently rejects constant/no-op producers.
 - [ ] After each pair, original ADDON_LOADED(Blizzard_ClientSavedVariables), VARIABLES_LOADED and PLAYER_ENTERING_WORLD complete CheckLoad without new Lua errors. Getters and original UpdateSliders controls agree on the pair.
 - [ ] Destroy and recreate the environment after each pair. Before original CheckLoad can mark again, C_TTSSettings getters observe saved=true and the persisted rate/volume, voice ID/name, boolean setting, chat type and supplied channel record. Both pairs replace earlier values, including false/true preferences. Original controls then render the persisted pair.

@@ -2879,4 +2879,4 @@ Cargo rewrite byte-for-byte; runtime acceptance remains pending.
 
 ## [2026-10-25] fix | TTS publication gate
 
-[Verifier repair](investigations/cf2-tts-integration.md#publication-gate-repair) gates namespace creation and persistence by the pinned profile declarations. Wrath publication regression is RED before the fix; legacy applicability retains all TTS assertions and adds positive Wrath absence checks. Both merge-parent log histories remain intact. Post-fix proof is pending.
+[Verifier repair](investigations/cf2-tts-integration.md#publication-gate-repair) gates namespace creation and persistence by the pinned profile declarations. Wrath publication regression is RED before the fix; legacy applicability retains all TTS assertions and adds positive Wrath absence checks. Both merge-parent log histories remain intact. Checkpoint `7bc8208ca` passes55 fresh exact cases, Wrath/Retail all-target checks without warnings, zero-error sparse Wrath stock and formatting. Other historical all-target/persistence evidence is not relabeled as fresh.
