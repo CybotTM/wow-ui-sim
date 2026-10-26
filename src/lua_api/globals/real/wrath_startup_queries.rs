@@ -31,6 +31,7 @@ pub(crate) fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     // The Wrath consumer combines this with IsRaidLeader. Do not read the
     // unrelated WoWLabs matchmaking party used by the earlier registration.
     LuaApiMut::register_function(lua, "IsPartyLeader", is_party_leader)?;
+    LuaApiMut::register_function(lua, "UnitIsPartyLeader", unit_is_party_leader)?;
     LuaApiMut::register_function(lua, "GetPartyMember", get_party_member)?;
     LuaApiMut::register_function(lua, "GetPartyLeaderIndex", get_party_leader_index)?;
     LuaApiMut::register_function(lua, "GetBagName", get_bag_name)?;
@@ -233,6 +234,39 @@ fn get_party_member(state: &mut LuaState) -> LuaResult<u32> {
         valid_slot && sim.party_group_active && index as usize <= sim.party_members.len()
     };
     state.push(Val::Bool(present));
+    Ok(1)
+}
+
+fn unit_is_party_leader(state: &mut LuaState) -> LuaResult<u32> {
+    if !matches!(stack_val(state, 1), Val::Str(_)) {
+        return Err(runtime_error("Usage: UnitIsPartyLeader(unit)"));
+    }
+    let unit = String::from_stack(state, 1)?;
+    let leader = {
+        let sim = borrow_state(state)?;
+        let alias_guid = match unit.as_str() {
+            "target" => sim
+                .current_target
+                .as_ref()
+                .map(|target| target.guid.as_str()),
+            "focus" => sim
+                .current_focus
+                .as_ref()
+                .map(|target| target.guid.as_str()),
+            _ => None,
+        };
+        if let Some(guid) = alias_guid {
+            let leader_token = sim.party_leader_index.map_or_else(
+                || "player".to_string(),
+                |index| format!("party{}", index + 1),
+            );
+            is_group_leader(&sim, &leader_token)
+                && guid == super::super::unit_misc::guid_for_unit(&sim, &leader_token)
+        } else {
+            is_group_leader(&sim, &unit)
+        }
+    };
+    state.push(if leader { Val::Num(1.0) } else { Val::Nil });
     Ok(1)
 }
 
