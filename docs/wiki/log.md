@@ -1,3 +1,7 @@
+## [2026-10-26] implementation | Era/Anniversary supplied engraving availability
+
+[Bounded availability contract](investigations/era-engraving-availability.md) retires only the temporary false query, reusing Mists' environment-local Option<bool> and named missing-input error. Original Era XML OnLoad rejects old constant false in both exact selectors. Full settings is preservation; other25 members, bags and full LoD UI are excluded. Remaining acceptance is pending.
+
 ## [2026-10-26] implementation | Mists transmog supplied input
 
 [Contract and selected display branch](systems/mists-transmog-enabled.md): byte-identical selectors fail producer-free RED at original line4 and pass GREEN for both real-control branches, isolation, transitions and unset recovery. The supplied-state query publishes only on Mists; no default is inferred. Bound stock is unchanged6/12; all seven all-target checks have zero warnings. Full settings, modern native-default policy and the Forever query remain outside this bounded proof.

@@ -1,3 +1,7 @@
+## [2026-10-26] implementation | Era/Anniversary supplied engraving availability
+
+[Original XML control](investigations/era-engraving-availability.md) uses the shared supplied bool reader instead of the invented false default. Only availability is published on these profiles; the other25 declared members, bags and full LoD EngravingUI remain excluded. Original Era RED rejects constant false; GREEN, stock and seven-profile acceptance are pending.
+
 ## [2026-10-26] implementation | Mists transmog supplied input
 
 [Contract and selected display branch](systems/mists-transmog-enabled.md): both exact original-line4 RED/GREEN cases prove supplied true/false control branches, isolation, transitions and named unset recovery. Mists stock remains6/12 with identical raw keys/counts; all seven full-feature all-target checks have zero warnings. Modern default-true policy, the Forever gap and later settings branches remain separate.

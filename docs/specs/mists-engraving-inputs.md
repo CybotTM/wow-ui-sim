@@ -35,7 +35,7 @@ The normal Mists bag and settings consumers read explicit environment-local engr
 ## Out of scope
 
 - LoD `Blizzard_EngravingUI`: loadable on Mists but no normal Mists UI entry.
-- Era/Anniversary engraving and their existing temporary availability default; Wrath has no pinned engraving callers.
+- [Era/Anniversary availability](era-engraving-availability.md) has its own supplied-state contract; their remaining engraving system is excluded here. Wrath has no pinned engraving callers.
 - Invented native inactive defaults, catalog/filter policy, casting transitions and refresh side effects.
 
 ## Pinned declarations

@@ -1,4 +1,4 @@
-//! Mists engraving projections from explicit, environment-local inputs.
+//! Explicit engraving availability (Mists/Era/Anniversary) and Mists query inputs.
 //! Declarations: EngravingInfoDocumentation.lua:64-79,135-147,179-238,269-271.
 use super::engraving_inputs::EngravingData;
 use super::helpers::set_table_array;
@@ -11,11 +11,18 @@ use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val, runtime_error};
 
 pub(crate) fn register(state: &mut LuaState) -> LuaResult<()> {
-    if ACTIVE != ClientProfile::Mists {
+    if !matches!(
+        ACTIVE,
+        ClientProfile::Mists | ClientProfile::Era | ClientProfile::Anniversary
+    ) {
         return Ok(());
     }
     let ns = super::ensure_namespace(state, "C_Engraving")?;
+    // All three pinned EngravingInfoDocumentation.lua files declare this at 179-186.
     table_set_rust_fn_static(state, ns, "IsEngravingEnabled", is_engraving_enabled)?;
+    if ACTIVE != ClientProfile::Mists {
+        return Ok(());
+    }
     table_set_rust_fn_static(state, ns, "GetEngravingModeEnabled", get_mode_enabled)?;
     table_set_rust_fn_static(state, ns, "GetCurrentRuneCast", get_current_rune)?;
     table_set_rust_fn_static(state, ns, "IsInventorySlotEngravable", is_slot_engravable)?;
