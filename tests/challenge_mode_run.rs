@@ -92,6 +92,7 @@ fn original_challenge_timer_reads_supplied_run_and_reset() {
 fn original_scenario_criteria_render_order_quantity_and_completion() {
     let env = load_tracker();
     env.exec(r#"
+        ScenarioObjectiveTracker:InitModule()
         A_Admin.SetScenarioCriteria({stepID=1, title='Fixture stage', description='Fixture objectives'}, {
             {criteriaID=901, description='First boss', criteriaType=165, quantity=0, totalQuantity=1, quantityString='0'},
             {criteriaID=902, description='Enemy forces', quantity=25, totalQuantity=100,
