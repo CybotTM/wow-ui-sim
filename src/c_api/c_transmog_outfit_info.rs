@@ -106,8 +106,6 @@ pub(super) fn register(state: &mut LuaState) -> LuaResult<()> {
         "CanPlayerTransmogSlot",
         can_player_transmog_slot,
     )?;
-    #[cfg(feature = "retail-12-1-0")]
-    table_set_rust_fn_static(state, namespace, "IsTransmogEnabled", is_transmog_enabled)?;
     table_set_rust_fn_static(
         state,
         namespace,
@@ -144,13 +142,6 @@ fn can_player_transmog_slot(state: &mut LuaState) -> LuaResult<u32> {
         _ => false,
     };
     state.push(Val::Bool(valid));
-    Ok(1)
-}
-
-#[cfg(feature = "retail-12-1-0")]
-fn is_transmog_enabled(state: &mut LuaState) -> LuaResult<u32> {
-    let enabled = borrow_state(state)?.transmog_enabled;
-    state.push(Val::Bool(enabled));
     Ok(1)
 }
 

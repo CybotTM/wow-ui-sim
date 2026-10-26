@@ -295,8 +295,14 @@ fn test_c_container_default_shims_have_safe_shapes() {
 }
 
 #[test]
-fn test_c_item_upgrade_availability_defaults_false() {
+fn test_c_item_upgrade_supplied_false_preserves_boolean_shape() {
     let env = env();
+    if wow_ui_sim::client_profile::ACTIVE != wow_ui_sim::client_profile::ClientProfile::Wrath {
+        env.exec(
+            "A_Admin.AddBagItem(0, 1, 6948); A_Admin.SetItemUpgradeEligibility({bagID=0, slotIndex=1}, false)",
+        )
+        .unwrap();
+    }
     let can_upgrade: bool = env
         .eval(
             r#"

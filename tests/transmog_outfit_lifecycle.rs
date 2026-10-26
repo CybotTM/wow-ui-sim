@@ -5,7 +5,8 @@ use wow_ui_sim::lua_api::WowLuaEnv;
 #[test]
 fn transmog_outfit_lifecycle_creates_renames_and_delivers_events() {
     let env = WowLuaEnv::new().unwrap();
-    env.eval::<()>(r#"
+    env.eval::<()>(
+        r#"
         local api = C_TransmogOutfitInfo
         local events = {}
         local frame = CreateFrame('Frame')
@@ -28,20 +29,31 @@ fn transmog_outfit_lifecycle_creates_renames_and_delivers_events() {
         api.ClearDisplayedOutfit(0, false)
         assert(api.GetActiveOutfitID() == 0 and api.IsEquippedGearOutfitDisplayed())
         assert(events[#events][1] == 'TRANSMOG_DISPLAYED_OUTFIT_CHANGED')
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 }
 
 #[test]
 fn transmog_outfit_lifecycle_pending_slots_commit_revert_and_isolate_outfits() {
     let env = WowLuaEnv::new().unwrap();
+    env.state().borrow_mut().transmog_availability.enabled = Some(true);
     for id in [190001, 190002, 190003] {
-        env.state().borrow_mut().transmog_appearance_sources.insert(id,
+        env.state().borrow_mut().transmog_appearance_sources.insert(
+            id,
             wow_ui_sim::lua_api::state::AppearanceSourceInfo {
-                category: 1, item_appearance_id: id, can_have_illusion: false,
-                icon: 135771, is_collected: true, item_link: String::new(),
-                transmoglink: String::new(), source_type: None, item_subclass: 0,
+                category: 1,
+                item_appearance_id: id,
+                can_have_illusion: false,
+                icon: 135771,
+                is_collected: true,
+                item_link: String::new(),
+                transmoglink: String::new(),
+                source_type: None,
+                item_subclass: 0,
                 ignore_model_attachment_checks_for_illusion: false,
-            });
+            },
+        );
     }
     env.eval::<()>(r#"
         local api = C_TransmogOutfitInfo
@@ -79,7 +91,8 @@ fn transmog_outfit_lifecycle_pending_slots_commit_revert_and_isolate_outfits() {
 #[test]
 fn transmog_outfit_lifecycle_situations_clear_reset_and_commit() {
     let env = WowLuaEnv::new().unwrap();
-    env.eval::<()>(r#"
+    env.eval::<()>(
+        r#"
         local api = C_TransmogOutfitInfo
         api.AddNewOutfit('Raid', 135771)
         api.ChangeViewedOutfit(api.GetOutfitInfoByName('Raid').outfitID)
@@ -99,5 +112,7 @@ fn transmog_outfit_lifecycle_situations_clear_reset_and_commit() {
         assert(api.GetOutfitSituation(option))
         api.ResetOutfitSituations()
         assert(not api.GetOutfitSituation(option))
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 }

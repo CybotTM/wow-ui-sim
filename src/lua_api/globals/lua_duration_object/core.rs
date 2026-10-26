@@ -146,7 +146,7 @@ pub(super) fn assign_state(state: &mut LuaState, source: Val, target: Val) -> Lu
 }
 
 pub(super) fn current_time(state: &LuaState) -> LuaResult<f64> {
-    Ok(borrow_state(state)?.start_time.elapsed().as_secs_f64())
+    Ok(borrow_state(state)?.clock_elapsed().as_secs_f64())
 }
 
 fn clock_time(state: &mut LuaState, object: Val) -> LuaResult<f64> {

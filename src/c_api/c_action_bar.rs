@@ -15,6 +15,25 @@ const HAS_ACTIVE_FIELD: bool = cfg!(any(
 ));
 const ACTION_COOLDOWN_HASH_FIELDS: usize = 4 + HAS_ACTIVE_FIELD as usize;
 
+pub(crate) fn register_keyring(state: &mut LuaState) -> LuaResult<()> {
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Ptr {
+        let namespace = crate::c_api::helpers::ensure_namespace(state, "C_ActionBar")?;
+        crate::lua_bridge::table_set_rust_fn_static(
+            state,
+            namespace,
+            "ShouldShowKeyring",
+            should_show_keyring,
+        )?;
+    }
+    Ok(())
+}
+
+fn should_show_keyring(state: &mut LuaState) -> LuaResult<u32> {
+    let enabled = borrow_state(state)?.action_bar_state.keyring_ui_enabled;
+    state.push(Val::Bool(enabled));
+    Ok(1)
+}
+
 pub(crate) fn unregister_action_ui_button(state: &mut LuaState) -> LuaResult<u32> {
     let Some(id) = crate::lua_api::methods::extract_frame_id(state, stack_val(state, 1)) else {
         return Err(rilua::runtime_error(
@@ -82,7 +101,7 @@ fn read_action_cooldown_with_gcd(state: &LuaState, ignore_gcd: bool) -> LuaResul
         _ => None,
     };
     let sim = borrow_state(state)?;
-    let now = sim.start_time.elapsed().as_secs_f64();
+    let now = sim.clock_elapsed().as_secs_f64();
     Ok(slot
         .and_then(|slot| sim.action_bars.get(&slot).copied())
         .map(|spell_id| select_cooldown_duration_times(&sim, spell_id, now, ignore_gcd))

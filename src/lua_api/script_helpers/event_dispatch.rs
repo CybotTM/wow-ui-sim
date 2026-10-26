@@ -229,18 +229,18 @@ pub fn dispatch_script(
 ///
 /// Callers should pause GC before calling this and step GC after.
 pub fn dispatch_on_update(
-    lua: &mut rilua::Lua,
+    lua: &mut LuaState,
     frame_ids: &[u64],
     elapsed: f64,
 ) -> rilua::LuaResult<()> {
     let elapsed_val = Val::Num(elapsed);
     let (mut lookup, mode_key) = {
-        let state = lua.state_mut();
+        let state = &mut *lua;
         let mode_key = state.gc.intern_string_static(ON_UPDATE_MODE_KEY.as_bytes());
         (ScriptHandlerLookup::new(state, "OnUpdate"), mode_key)
     };
     for &frame_id in frame_ids {
-        let state = lua.state_mut();
+        let state = &mut *lua;
         let frame_val = frame_ref(state, frame_id)?;
         let mode = on_update_mode_of(state, frame_val, mode_key)?;
         if !should_dispatch_on_update(state, frame_id, mode) {
@@ -251,7 +251,7 @@ pub fn dispatch_on_update(
             continue;
         };
         if mode.is_one_shot() {
-            disable_on_update_mode(lua.state_mut(), frame_id)?;
+            disable_on_update_mode(&mut *lua, frame_id)?;
         }
         for handler in handlers {
             let Val::Function(func_ref) = handler.handler else {
@@ -310,19 +310,19 @@ fn disable_on_update_mode(state: &mut LuaState, frame_id: u64) -> rilua::LuaResu
 }
 
 fn dispatch_on_update_handler(
-    lua: &mut rilua::Lua,
+    lua: &mut LuaState,
     frame_id: u64,
     frame_val: Val,
     elapsed_val: Val,
     func_ref: GcRef<Closure>,
     binding: ScriptBinding,
 ) {
-    let owner_addon = handler_owner_addon(lua.state(), frame_id);
+    let owner_addon = handler_owner_addon(&*lua, frame_id);
     let func = rilua::Function::from_gc_ref(func_ref);
     let start = Instant::now();
-    let previous_addon = replace_executing_addon(lua.state(), owner_addon);
+    let previous_addon = replace_executing_addon(&*lua, owner_addon);
     if let Err(e) = super::call_frame_handler_state(
-        lua.state_mut(),
+        &mut *lua,
         frame_id,
         Val::Function(func.gc_ref()),
         &[frame_val, elapsed_val],
@@ -331,10 +331,9 @@ fn dispatch_on_update_handler(
         // Names and sources are only needed for the report, so they are
         // resolved here instead of for every handler call.
         let registered_source =
-            super::get_script_source_binding(lua.state_mut(), frame_id, "OnUpdate", binding);
-        let source =
-            registered_source.or_else(|| handler_error_source_label(lua.state(), func_ref));
-        let (addon_name, frame_name) = handler_names(lua.state(), frame_id, owner_addon);
+            super::get_script_source_binding(&mut *lua, frame_id, "OnUpdate", binding);
+        let source = registered_source.or_else(|| handler_error_source_label(&*lua, func_ref));
+        let (addon_name, frame_name) = handler_names(&*lua, frame_id, owner_addon);
         let error = handler_error_message(
             "OnUpdate",
             frame_id,
@@ -343,15 +342,15 @@ fn dispatch_on_update_handler(
             source.as_deref(),
             &e.to_string(),
         );
-        call_error_handler(lua, &error);
+        super::call_error_handler_state(lua, &error);
     }
-    replace_executing_addon(lua.state(), previous_addon);
+    replace_executing_addon(&*lua, previous_addon);
     let elapsed = start.elapsed();
-    record_frame_timing(lua.state(), owner_addon, &start);
+    record_frame_timing(&*lua, owner_addon, &start);
     if handler_timing::should_log(elapsed) {
-        let (addon_name, frame_name) = handler_names(lua.state(), frame_id, owner_addon);
+        let (addon_name, frame_name) = handler_names(&*lua, frame_id, owner_addon);
         log_dispatched_handler(
-            lua.state(),
+            &*lua,
             func_ref,
             addon_name.as_deref(),
             "OnUpdate",

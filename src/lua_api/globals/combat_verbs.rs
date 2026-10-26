@@ -80,7 +80,7 @@ fn start_cast(
     let Ok(mut st) = borrow_state_mut(state) else {
         return None;
     };
-    let now = st.start_time.elapsed().as_secs_f64();
+    let now = st.clock_elapsed().as_secs_f64();
     let cast_id = st.next_cast_id;
     st.next_cast_id = st.next_cast_id.wrapping_add(1);
     #[cfg(feature = "player-cast-durations")]
@@ -167,7 +167,7 @@ fn start_gcd(state: &mut LuaState, duration: f64) {
     let Ok(mut st) = borrow_state_mut(state) else {
         return;
     };
-    let now = st.start_time.elapsed().as_secs_f64();
+    let now = st.clock_elapsed().as_secs_f64();
     st.gcd = Some((now, duration));
 }
 
@@ -178,7 +178,7 @@ fn start_spell_cooldown(state: &mut LuaState, spell_id: u32, duration: f64) {
     let Ok(mut st) = borrow_state_mut(state) else {
         return;
     };
-    let now = st.start_time.elapsed().as_secs_f64();
+    let now = st.clock_elapsed().as_secs_f64();
     st.spell_cooldowns.insert(
         spell_id,
         SpellCooldownState {

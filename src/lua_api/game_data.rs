@@ -551,11 +551,14 @@ fn default_party_auras(i: usize) -> (Vec<AuraInfo>, Vec<AuraInfo>) {
 ///
 /// `damage_pct` controls the intensity (fraction of max HP per tick).
 /// Returns the 1-based indices of members whose health changed (for firing UNIT_HEALTH).
-pub fn tick_party_health(members: &mut [PartyMember], damage_pct: f64) -> Vec<usize> {
+pub fn tick_party_health(
+    members: &mut [PartyMember],
+    damage_pct: f64,
+    now: std::time::Instant,
+) -> Vec<usize> {
     use std::collections::hash_map::DefaultHasher;
     use std::hash::{Hash, Hasher};
 
-    let now = std::time::Instant::now();
     let nanos = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
         .unwrap_or_default()

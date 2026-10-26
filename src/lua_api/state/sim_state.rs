@@ -15,7 +15,6 @@ pub struct SimState {
     >,
     #[cfg(feature = "retail-12-0-5")]
     pub(crate) nameplate_hit_test_insets: crate::c_api::c_nameplate_manager::NamePlateHitTestInsets,
-    #[cfg(feature = "client-wowforever")]
     pub(crate) input_interface_style: crate::c_api::c_input_interface_style::InputInterfaceStyle,
     /// Explicit mapped-stick input; None means no configured snapshot, not device absence.
     #[cfg(feature = "client-wowforever")]
@@ -27,6 +26,7 @@ pub struct SimState {
     #[cfg(feature = "client-wrath")]
     pub refer_a_friend_linked_guids: HashSet<String>,
     pub summon_friend_cooldown: crate::c_api::c_recruit_a_friend::SummonFriendCooldown,
+    pub raf_versions: Vec<crate::c_api::c_recruit_a_friend::RafVersionInfo>,
     pub widgets: WidgetRegistry,
     #[cfg(feature = "retail-12-1-5")]
     pub(crate) weather: crate::c_api::c_weather::WeatherState,
@@ -35,6 +35,9 @@ pub struct SimState {
     pub events: EventQueue,
     pub scripts: ScriptRegistry,
     pub console_output: Vec<String>,
+    /// Requested legacy tutorial IDs in call order; no flag, event or display policy.
+    pub tutorial_requests: Vec<i32>,
+    pub engraving: crate::c_api::engraving_inputs::EngravingInputs,
     pub timers: VecDeque<PendingTimer>,
     pub rilua_timers: VecDeque<crate::lua_api::timer_layout::RiluaPendingTimer>,
     /// Diagnostic strings only; remains empty without handler timing opt-in.
@@ -303,8 +306,6 @@ pub struct SimState {
     pub spell_cooldown_categories: HashMap<u32, i32>,
     /// Item whose use started a spell's current cooldown, keyed by spell ID.
     pub spell_cooldown_item_sources: HashMap<u32, i32>,
-    /// Account-level transmog availability; the simulator enables it.
-    pub transmog_enabled: bool,
     /// `C_Roleset.ApplyRolesetFilters` blocklist, in applied order.
     pub active_blocked_rolesets: Vec<String>,
     /// `C_Roleset.ApplyRolesetFilters` allowlist, in applied order.
@@ -359,9 +360,12 @@ pub struct SimState {
     #[cfg(feature = "base-spell-relationships")]
     pub base_spell_relationships: crate::c_api::spell_base::BaseSpellRelationships,
     pub spell_activation_overlays: HashSet<u32>,
-    #[cfg(feature = "retail-12-0-0")]
     pub challenge_completion: crate::c_api::c_challenge_mode::ChallengeCompletionInfo,
+    pub(crate) challenge_run: crate::c_api::challenge_run::ChallengeState,
+    pub(crate) manual_clock: Option<crate::lua_api::manual_clock::ManualClock>,
     pub spell_loss_of_control: HashMap<u32, LossOfControlInfo>,
+    pub active_loss_of_control:
+        HashMap<String, Vec<crate::c_api::c_loss_of_control::ActiveLossOfControlData>>,
     pub spell_flyouts: HashMap<u32, SpellFlyoutInfo>,
     pub action_profession_quality: HashMap<i32, ProfessionQualityInfo>,
     pub addon_base_paths: Vec<PathBuf>,
@@ -479,6 +483,7 @@ pub struct SimState {
     pub action_ui_buttons: Vec<(u64, u32)>,
     pub cursor_item: Option<CursorInfo>,
     pub container_actions: crate::c_api::container_actions::ContainerActions,
+    pub item_upgrade_eligibility: crate::c_api::item_upgrade_eligibility::ItemUpgradeEligibility,
     pub loading_addon_index: Option<u16>,
     pub loading_addon_stack: Vec<u16>,
     pub executing_addon_index: Option<u16>,
@@ -528,6 +533,9 @@ pub struct SimState {
     pub crafting: CraftingState,
     pub net_stats: NetStats,
     pub store_frame_shown: bool,
+    /// Host observations; absence is not evidence of an ineligible group.
+    pub store_public_eligibility:
+        crate::c_api::store_public_eligibility::GroupEligibilityObservations,
     pub timerunning_season_id: Option<u32>,
     pub timerunning_season_seconds_remaining: u64,
     pub modifier_keys: ModifierKeys,
@@ -551,6 +559,16 @@ pub struct SimState {
     pub lfg_list_counts: LfgListCounts,
     pub lfg_active_entry: Option<crate::lua_api::state_types::LfgActiveEntry>,
     pub can_use_premade_group: bool,
+    /// Supplied Mists LFR service availability; None leaves native policy unknown.
+    pub lfr_availability: Option<bool>,
+    /// Supplied transmog availability; None leaves native policy unknown.
+    pub transmog_availability: crate::c_api::transmog_availability::TransmogAvailability,
+    /// Forever: None is unset, Some(None) is an explicit no-result observation.
+    pub forever_outfits: Option<Option<Vec<crate::c_api::outfit_entry::OutfitEntry>>>,
+    /// Supplied Mists scenario eligibility and failure reason; None leaves policy unknown.
+    pub scenario_finder_availability: Option<(bool, String)>,
+    /// Supplied Mists active-party minimum; None leaves native policy unknown.
+    pub mists_party_min_level: Option<f64>,
     pub lfg_category_info: std::collections::HashMap<i32, LfgCategoryInfo>,
     pub lfg_active_categories: std::collections::HashSet<i32>,
     pub lfg_queued_dungeons: std::collections::HashMap<i32, std::collections::BTreeSet<i32>>,
@@ -603,12 +621,15 @@ pub struct SimState {
     /// Supplied legacy trainer visibility: available, unavailable, used.
     #[cfg(feature = "client-wrath")]
     pub wrath_trainer_filters: [bool; 3],
+    /// Host inputs for Forever 70532; other profiles do not publish these probes.
+    pub forever_startup: crate::c_api::forever_startup::StartupInputs,
     pub bank_frame_open: bool,
     pub guild_bank_frame_open: bool,
     pub bank_purchased_slots: i32,
     pub guild_bank_money: i64,
     pub current_guild_bank_tab: i32,
     pub guild_bank_items: HashMap<(i32, i32), BagItem>,
+    pub guild_bank_tabs: Vec<GuildBankTab>,
     pub merchant_frame_open: bool,
     #[cfg(feature = "client-wowforever")]
     pub merchant_repair_capable: bool,
@@ -618,6 +639,13 @@ pub struct SimState {
     pub loot_frame_open: bool,
     pub guild_registrar_open: bool,
     pub pet_stables_open: bool,
+    /// Supplied modern observations; None does not invent native initial membership.
+    pub stable_active_pets: Option<Vec<crate::c_api::c_stable_info::active_list::PetInfo>>,
+    /// Missing key is unknown; None is an explicit empty slot observation.
+    pub stable_pet_slots: HashMap<u32, Option<crate::c_api::c_stable_info::active_list::PetInfo>>,
+    /// Supplied specialization catalog; None is not an observed empty list.
+    pub stable_pet_spec_infos:
+        Option<Vec<crate::c_api::c_stable_info::pet_spec_infos::PetSpecInfo>>,
     #[cfg(any(feature = "retail-12-0-0", feature = "client-wowforever"))]
     pub allow_recent_allies_see_location: bool,
     #[cfg(feature = "client-wowforever")]
@@ -691,6 +719,7 @@ pub struct SimState {
     #[cfg(feature = "retail-12-0-0")]
     pub bnet_custom_message: String,
     pub social_friends: Vec<SocialFriend>,
+    pub social_restrictions: SocialRestrictionsState,
     /// Wrath selection retains identity when the display projection changes.
     #[cfg(feature = "client-wrath")]
     pub selected_friend_guid: Option<String>,
@@ -724,6 +753,11 @@ pub struct SimState {
     pub factions: Vec<FactionEntry>,
     pub selected_faction_index: i32,
     pub watched_faction_index: i32,
+    /// Explicit map observations, visible only while is_active_battlefield is true.
+    pub battlefield_vehicles: ::std::collections::HashMap<
+        i32,
+        Vec<crate::c_api::c_pvp::battlefield_vehicles::BattlefieldVehicle>,
+    >,
     pub battlefield_queue: BattlefieldQueue,
     pub battlefield_minimap_visible: bool,
     pub chat_channels: Vec<ChatChannel>,
@@ -734,6 +768,8 @@ pub struct SimState {
     pub pending_duel: Option<String>,
     pub pending_resurrect: Option<String>,
     pub corpse_available: bool,
+    /// Supplied corpse coordinates by UI map; never inferred from player position.
+    pub corpse_map_positions: HashMap<i32, (f64, f64)>,
     pub active_trade: Option<TradeState>,
     pub open_panels: ::std::collections::HashSet<String>,
     pub is_party_lfg: bool,

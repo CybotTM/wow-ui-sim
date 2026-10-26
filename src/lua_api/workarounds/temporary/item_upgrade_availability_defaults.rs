@@ -1,8 +1,6 @@
-//! Temporary item-upgrade availability defaults.
+//! Excluded Wrath compatibility path, retained without changing its contract.
 //!
-//! `C_ItemUpgrade.SetItemUpgradeFromLocation` / `ClearItemUpgrade` keep real
-//! simulator state for tooltip probes. Upgrade-cost and eligibility data is not
-//! modeled yet, so `CanUpgradeItem` remains a false compatibility default here.
+//! The six declaring profiles use supplied eligibility in c_api instead.
 
 const ITEM_UPGRADE_AVAILABILITY_DEFAULTS_LUA: &str = r#"
 C_ItemUpgrade = C_ItemUpgrade or __wow_namespace()
@@ -14,11 +12,14 @@ end
 "#;
 
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
+    if crate::client_profile::ACTIVE != crate::client_profile::ClientProfile::Wrath {
+        return Ok(());
+    }
     lua.exec(ITEM_UPGRADE_AVAILABILITY_DEFAULTS_LUA)?;
     Ok(())
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "client-wrath"))]
 mod tests {
     use crate::lua_api::WowLuaEnv;
 

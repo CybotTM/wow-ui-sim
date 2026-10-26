@@ -64,7 +64,23 @@ pub fn default_addons_path() -> PathBuf {
     discover_wow_resources().addons_path
 }
 
+/// Find third-party roots, replacing default discovery when CLI roots are supplied.
+pub fn find_addons_paths(exclusive_paths: &[PathBuf]) -> Vec<PathBuf> {
+    if exclusive_paths.is_empty() {
+        return default_addons_paths();
+    }
+    existing_unique_paths(exclusive_paths.to_vec())
+}
+
+pub fn exclusive_addons_path_enabled() -> bool {
+    std::env::var("WOW_SIM_ADDONS_PATH_EXCLUSIVE")
+        .is_ok_and(|value| value == "1" || value.eq_ignore_ascii_case("true"))
+}
+
 pub fn default_addons_paths() -> Vec<PathBuf> {
+    if exclusive_addons_path_enabled() {
+        return existing_unique_paths(env_path("WOW_SIM_ADDONS_PATH").into_iter().collect());
+    }
     let install_root = first_existing_path(wow_install_roots());
     existing_unique_paths(addons_path_candidates(install_root.as_ref()))
 }
@@ -201,6 +217,13 @@ fn addons_path_candidates(install_root: Option<&PathBuf>) -> Vec<PathBuf> {
     }
 
     paths
+}
+
+/// Find only the bundled test framework, without exposing other bundled addons.
+pub fn find_bundled_test_framework_toc() -> Option<PathBuf> {
+    bundled_addons_path_candidates()
+        .into_iter()
+        .find_map(|root| crate::loader::find_toc_file(&root.join("TestFramework")))
 }
 
 fn bundled_addons_path_candidates() -> Vec<PathBuf> {
@@ -443,6 +466,26 @@ mod tests {
     use std::path::{Path, PathBuf};
 
     use super::*;
+
+    #[test]
+    fn explicit_addon_roots_keep_order_and_deduplicate_existing_paths() {
+        let temp = tempfile::tempdir().unwrap();
+        let first = temp.path().join("first");
+        let second = temp.path().join("second");
+        std::fs::create_dir(&first).unwrap();
+        std::fs::create_dir(&second).unwrap();
+        let duplicate = first.join(".");
+        assert_eq!(
+            find_addons_paths(&[second.clone(), first.clone(), duplicate]),
+            vec![second, first]
+        );
+    }
+
+    #[test]
+    fn missing_explicit_addon_roots_do_not_restore_default_discovery() {
+        let temp = tempfile::tempdir().unwrap();
+        assert!(find_addons_paths(&[temp.path().join("missing")]).is_empty());
+    }
 
     #[test]
     #[cfg(feature = "client-wowforever")]

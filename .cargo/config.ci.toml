@@ -1,3 +1,4 @@
+# Keep non-local sections in sync with config.toml.
 # Windows: bump main-thread stack to 32 MB for deep addon call chains
 # (matches the runtime setrlimit bump done on unix in src/stack.rs).
 [target.x86_64-pc-windows-msvc]
@@ -8,6 +9,9 @@ rustflags = ["-C", "link-arg=-Wl,--stack,33554432"]
 
 [build]
 jobs = 4
+
+[env]
+WOW_UI_SIM_TEST_SOURCE_ROOT = { value = "", relative = true, force = true }
 
 [alias]
 xtask = "run --package xtask --"

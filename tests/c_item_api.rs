@@ -51,14 +51,22 @@ fn use_equipment_set_updates_equipped_inventory_items() {
 }
 
 #[test]
-fn equipment_set_lock_state_defaults_to_unlocked() {
+fn equipment_set_unsupplied_locks_respect_profile_contract() {
+    use wow_ui_sim::client_profile::{ACTIVE, ClientProfile};
     let env = support::env();
-    let contains_locked_items: bool = env
-        .eval(
-            "C_EquipmentSet.CreateEquipmentSet('Default Gear', ''); \
-             local setID = C_EquipmentSet.GetEquipmentSetID('Default Gear'); \
-             return C_EquipmentSet.EquipmentSetContainsLockedItems(setID)",
-        )
-        .unwrap();
-    assert!(!contains_locked_items);
+    let result = env.eval::<bool>(
+        "C_EquipmentSet.CreateEquipmentSet('Default Gear', ''); \
+         local setID = C_EquipmentSet.GetEquipmentSetID('Default Gear'); \
+         return C_EquipmentSet.EquipmentSetContainsLockedItems(setID)",
+    );
+    match ACTIVE {
+        ClientProfile::Retail | ClientProfile::Ptr | ClientProfile::WowForever | ClientProfile::Mists => {
+            let message = result.unwrap_err().to_string();
+            assert!(message.contains("native-unknown: C_EquipmentSet.EquipmentSetContainsLockedItems"));
+            assert!(message.contains("no supplied lock observation"));
+        }
+        ClientProfile::Wrath | ClientProfile::Era | ClientProfile::Anniversary => {
+            assert!(!result.unwrap(), "excluded profiles retain their legacy default");
+        }
+    }
 }

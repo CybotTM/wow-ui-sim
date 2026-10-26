@@ -79,7 +79,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     register_world_namespace_surfaces(state)?;
     register_social_namespace_surfaces(state)?;
     register_group_activity_surfaces(state)?;
-    Ok(())
+    c_api::forever_startup::register(state)
 }
 
 fn register_legacy_global_shims(lua: &mut rilua::Lua) -> LuaResult<()> {
@@ -252,6 +252,7 @@ fn register_world_activity_surfaces(state: &mut LuaState) -> LuaResult<()> {
         quest_choice::register_quest_choice_surface(state)?;
     }
     scenario_info::register_scenario_info_surface(state)?;
+    c_api::challenge_run::register(state)?;
     warband_scene::register_warband_scene_surface(state)?;
     #[cfg(any(feature = "retail-12-1-0", feature = "client-wowforever"))]
     c_api::c_player_choice::register_c_player_choice_surface(state)?;

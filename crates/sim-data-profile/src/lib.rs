@@ -13,6 +13,7 @@ pub mod atlas_elements;
     feature = "client-wowforever",
     path = "../data/global_strings_wowforever.rs"
 )]
+#[cfg_attr(feature = "client-mists", path = "../data/global_strings_mists.rs")]
 #[cfg_attr(
     all(feature = "profile-retail", feature = "retail-12-1-5"),
     path = "../data/global_strings_retail.rs"
@@ -24,6 +25,7 @@ pub mod atlas_elements;
 #[cfg_attr(
     not(any(
         feature = "client-wowforever",
+        feature = "client-mists",
         all(feature = "profile-retail", feature = "retail-12-1-5"),
         feature = "client-era",
         feature = "client-anniversary"

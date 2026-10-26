@@ -1,7 +1,8 @@
 //! Temporary Fog of War pin refresh repair.
 //!
-//! Fog of War pins need simulator-side nil-safe refresh behavior until the map
-//! pin/data-provider state matches Blizzard's startup expectations natively.
+//! SetUiMapID does not yet dispatch the native OnUiMapChanged refresh. Keep
+//! explicit refresh and stale-asset cleanup limited to FogOfWarPinTemplate pins.
+//! Retire this repair when native map-change dispatch preserves that behavior.
 
 use crate::lua_api::{LoaderEnv, WowLuaEnv};
 
@@ -95,17 +96,6 @@ local function __wow_patch_live_fog_of_war_pins(map)
 
     if type(map.EnumeratePinsByTemplate) == "function" then
         for pin in map:EnumeratePinsByTemplate("FogOfWarPinTemplate") do
-            __wow_apply_fog_of_war_pin_workaround(pin)
-        end
-    end
-
-    if type(map.dataProviders) ~= "table" then
-        return
-    end
-
-    for provider in pairs(map.dataProviders) do
-        local pin = type(provider) == "table" and rawget(provider, "pin") or nil
-        if type(pin) == "table" then
             __wow_apply_fog_of_war_pin_workaround(pin)
         end
     end

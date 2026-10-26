@@ -4,6 +4,44 @@ Runtime target update: 2026-10-23. [Selected source](../../specs/ptr-blizzard-ui
 
 Verified: 2026-10-22. Slice I0 accounts for the public source for **12.1.7 / 70424 / TOC 120107** without implementing its runtime changes. The [source-accounting spec](../../specs/patch-12-1-7-source-accounting.md) owns P01–P12, inherited category counts, header discrepancies and outstanding slices. All inherited applicability and behavior remain UNKNOWN until I4; GUID work remains deferred pending the user decision.
 
+## I4 first bounded producer repair
+
+The lane's authenticated 70493 discovery found 169 publication gaps. This [bounded contract](../../specs/ptr-i4-first-green.md) lands only Collections `C_Spell.GetItemCooldown` and GhostFrame `CanPortGraveyard`, backed by existing supplied state. SmartNavigation and RecentAllies remain prerequisite-blocked, not downstream producer REDs.
+
+The landing branch retains supplied-state tests and adds independent original-consumer transition selectors. They authenticate source bytes, load Game-selected TOC closures, and require absent/supplied/changed/removed cooldown transitions and false/true/false ghost availability. Constant nil/false producers cannot pass these selectors. Native cooldown eligibility and graveyard policy remain unknown.
+
+All aggregate 173-shape tests remain unchanged on `ptr-i4-runtime` only; they are absent from this landing packet, not ignored or weakened.
+
+Bounded proof on 2026-10-25: both siblings integrate master `7ed5a81f0`, including the PTR-input repair. GREEN `3eb4ae215` passes all four exact selectors; producer-only RED `719a15bbb` fails the unchanged original consumers at Collections line 37 and GhostFrame line 4. Supplied-state selectors also fail RED and pass GREEN. Constant/no-op rejection follows from their transition assertions; no separate mutation execution is claimed. Stock comparison against the PTR-input baseline `120379c39` is 298→296 full raw keys and 412→410 occurrences, zero additions and unchanged common-key counts. Only the GhostFrame OnLoad missing-call error and its wrapper disappear. Retail all-target checks have zero warnings; PTR has only the three inherited late-bind dead-code warnings. Formatting passes. Native policy and aggregate I4 acceptance remain unproved.
+
+## I4 GameRules and RecentAllies prerequisites
+
+Verified 2026-10-25: [batch2 contract](../../specs/ptr-i4-game-rules.md) and [original-consumer tests](../../../tests/ptr_i4_batch2.rs) bind actual game/glue TOC selection. Initial executions reach missing AccountHasSDEnabled at Barbershop line269, IsSDHDToggleEnabled at line261, IsSelfFoundAllowed at CharacterCreate line2366, and RecentAlliesInteractionCategoryFilter at RecentAlliesUtil line4. The SD setter is first blocked by its documented usage-location enum at line273; the preset default is first blocked by the toggle query at GraphicsOverrides line78. Those two are not downstream API REDs. The hardcore popup diagnostic is retained before its missing producer is repaired.
+
+The first producer step publishes the two proven enum prerequisites and metadata from the pinned 70493 APIDocumentation. Its exact replay passes the original RecentAllies labels selector, then reaches the missing setter at Barbershop line273 and the missing hardcore query at popup line3512. Five state-backed functions are implemented after these and the earlier direct query REDs. Final merged Barbershop toggle, checked-state and setter transitions, CharacterCreate and popup selectors pass. The preset callback remains blocked by missing CHARACTER_MODELS during proxy registration; that selector, its unused supplied field and aggregate I4 tests were removed from this landing packet by explicit scope decision and retained for follow-up. No ignores, hidden gates or preset producer were added. No native capability defaults, telemetry policy, argument restrictions or secret handling are inferred.
+
+### Supplied WoWHack mode
+
+The separate `IsWoWHack` extension reaches original RED at `GameRulesUtil.lua:207` through MicroMenu OnLoad/InitializeButtons and at `Blizzard_UIErrorsFrame/Mainline/UIErrorsFrame.lua:12`. Its PTR-only producer compares the existing supplied `game_rules.active_game_mode` with the existing GameMode enum declaration, without adding a numeric mode constant. Tests change Standard/WoWHack/Plunderstorm modes and observe `MicroMenu.addedButtons`, energy-message acceptance and the original error-frame anchor. Each selector rejects a constant query independently. Both exact original-consumer GREENs pass at `423d5aaa4` after their own original-line REDs. Final merged acceptance passes; no native mode-selection policy is inferred.
+
+### Batch2 landing proof
+
+Verified 2026-10-25: runtime GREEN `f2e4308ea` and producer-only RED `86c054f29` have identical tests and differ only in `src/c_api/ptr_i4_game_rules.rs`. Each of eight original-consumer selectors lists exactly one test, then runs once. RED fails at Barbershop269/273/261, CharacterCreate2366, GameDialogDefs3512, RecentAlliesUtil4, GameRulesUtil207 through MicroMenu OnLoad, and UIErrorsFrame12. GREEN passes each selector. A separate Retail absence selector passes. Transition assertions reject constant/no-op producers; no executed mutation build is claimed.
+
+Fresh stock startup changes the `ff5718756` baseline from 296 raw keys / 410 occurrences to 272 / 378: 34 removed keys, ten additions, unchanged common-key counts. All additions are retained and individually traced in the landing packet:
+
+| Added raw error keys | Original successor path |
+|---|---|
+| RecentAllies support query and its reporter copy (2) | The enum repairs Util4, so Templates448 reaches the defined filter helper, which calls missing `C_RecentAllies.IsInteractionCategoryFilterSupportedForCurrentGameType` at Util32. |
+| ChatFrame1 Edit Mode OnLoad and its reporter copy (2) | `IsWoWHack` no longer aborts GameRulesUtil227. PrimaryChatFrame OnLoad enters `EditModeSystemMixin.OnSystemLoad` and reaches missing `GetSystemSettingDisplayInfoMap` at EditModeSystemTemplates27. |
+| MainStatusTrackingBarContainer Edit Mode OnLoad and its reporter copy (2) | InitializeBars passes the repaired GameRulesUtil144 query, then OnSystemLoad reaches the same missing map method. |
+| SecondaryStatusTrackingBarContainer Edit Mode OnLoad and its reporter copy (2) | The second container follows the same original initialization sequence; its distinct raw keys are retained. |
+| ChatFrame1 docking event and its reporter copy (2) | Primary OnLoad now fails in Edit Mode before `FCFDock_SetPrimary`. The event passes the repaired GameRulesUtil227 query and reaches `FCFDock_AddChatFrame` with no primary, reporting FloatingChatFrame2266. |
+
+The defining EditModeSettingDisplayInfo file already fails at257 on missing `BossFrameGrowDirection`; its map method is declared later. That unchanged failure explains the three newly reached OnLoad failures. These successor gaps are outside this bounded packet, not hidden or fixed. Current master `2679cb658` is PTR-runtime-equivalent to the baseline: runtime source/data are unchanged, and Cargo feature changes affect only Era/Anniversary.
+
+PTR all-target check passes with only the three inherited `fast_handler_late_bind` dead-code warnings; Retail has zero warnings. Both JSON records and plain diagnostics were inspected. The first PTR check certificate migration rejection received its one permitted retry, which passed. Formatting passes; the full normal test list contains no aggregate I4 or preset selector. Slot1 is released with idle-process and CPU receipts. The current merge-tree conflicts only in `docs/wiki/log.md`; main must resolve that documentation conflict without another lane merge.
+
 ## Empty inventory is not patch coverage
 
 The direct page has prose and a link to 1.60.1, but no function/event/enum/CVar/widget tables. The existing `tools/gen_patch_wikitext_register.py` successfully emits `entries: []` and `header_counts: []` for it. This correctly describes the direct inventory, not complete patch coverage. No dummy API rows or invented aliases are added to make it nonempty.

@@ -1,3 +1,275 @@
+## [2026-10-26] bounded proof | Shared ammo requirement observation
+
+[Original slots and exact error probes](investigations/forever-startup-gaps.md#shared-ptrforever-ammo-observation): both PTR/Forever XML-bound RED/GREEN pairs and two existing Forever preservation cases pass. The asserted-failure xpcall follows `mists_scenario_minlevel`, with false status, exact message and original frame assertions. Stock PTR122/138→122/138 and Forever26/26→44/44 has complete per-key attribution, not clean startup. All seven full-feature all-target checks have zero Cargo JSON/plain compiler warnings;23 CVar guards and10 pinned-input hashes are unchanged. No native ammo default or derivation is inferred.
+
+## [2026-10-26] implementation | Shared transmog supplied input
+
+[Model and bounded proof](systems/transmog-availability.md) link the [contract](../specs/transmog-availability.md): the Mists Option<bool> is shared with Retail/PTR and replaces all three modern scalar reads. All eight exact Retail/PTR producer-only RED/shared-producer GREEN pairs pass with byte-identical tests; seventeen legacy cases and both original Mists selectors pass. Paired raw stock stays Retail0/0 and PTR122/138; all74 launch CVar guards are unchanged. All seven full-feature all-target checks pass with zero Cargo JSON/plain compiler warnings; later proof documentation does not change executable inputs. A pre-existing transmog bootstrap nil call is disclosed, not repaired by this lane.
+
+## [2026-10-26] bounded proof | Supplied pet specialization catalog
+
+[Final supplied-catalog proof](investigations/consumer-selection-and-red-proof.md#supplied-pet-specialization-catalog): five original-consumer RED/GREEN pairs, four supplementary GREEN cases, PTR122/138 with only two attributed unknown-state replacements and byte-identical Retail0/0. Seven all-target checks have zero compiler warnings; formatting/readability,36 CVar guards and27 pinned input hashes pass. Other-profile absence is compiled-not-executed; I1 owns its runtime coverage. No native default/catalog or menu-generation claim is added.
+
+## [2026-10-26] runtime proof | Supplied pet specialization catalog
+
+[Bounded original callbacks](investigations/consumer-selection-and-red-proof.md#supplied-pet-specialization-catalog): five RED/GREEN pairs and four supplementary GREENs pass; PTR stock122/138 replaces only the nil-member primary/reporter with named-unknown keys, Retail stays0/0. Hidden Refresh skips exactly original GenerateMenu247, not getter/options/SetupMenu execution. Seven all-target gates remain pending; other-profile absence runtime is deferred to I1.
+
+## [2026-10-26] staged | Supplied pet specialization catalog
+
+[Consumer investigation](investigations/consumer-selection-and-red-proof.md#supplied-pet-specialization-catalog) links the supplied-list contract and records the strict unknown default. The input scaffold passes its targeted test. Getter delivery follows observed original PTR OnLoad1205/Refresh1217 RED; supplied GREEN, Retail and final gates remain pending.
+
+## [2026-10-26] implementation | Supplied voice settings access
+
+[Model and original callback](systems/voice-settings-access.md) record the six-profile declaration-backed query, unknown-state error and host-supplied observation. All 18 exact original-consumer GREEN/producer-free RED pairs pass with byte-identical tests; Wrath preserves absence. Seven all-target checks have zero warnings, all seven paired raw stock maps equal the supplied master baselines, and 98 final launch CVar guards are unchanged. No native readiness default, device catalog, complete initialization, timer cancellation or unsupplied forecast readiness is inferred.
+
+## [2026-10-26] implementation | Era/Anniversary supplied engraving availability
+
+[Bounded availability contract](investigations/era-engraving-availability.md) retires only the temporary false query, reusing Mists' environment-local Option<bool> and named missing-input error. Both profiles' exact original XML selectors reject constant false and pass supplied true/false, unset recovery and isolation. False-input settings remains preservation. Each stock map changes0/0→2/2: original OnLoad unset error plus ScriptErrors echo, individually traced to the removed shim. Seven all-target checks have zero JSON/plain warnings. Other25 members, bags and full LoD UI remain excluded.
+
+## [2026-10-26] implementation | Mists transmog supplied input
+
+[Contract and selected display branch](systems/mists-transmog-enabled.md): byte-identical selectors fail producer-free RED at original line4 and pass GREEN for both real-control branches, isolation, transitions and unset recovery. The supplied-state query publishes only on Mists; no default is inferred. Bound stock is unchanged6/12; all seven all-target checks have zero warnings. Full settings, modern native-default policy and the Forever query remain outside this bounded proof.
+
+## [2026-10-26] investigation | Mists engraving supplied inputs
+
+[Selected original consumers](investigations/mists-engraving-inputs.md) now have three exact corrected-input GREEN cases and producer-free RED with byte-identical tests. At this historical bag-lane checkpoint, seven Mists-only members projected supplied state; later [shared availability and settings proof](investigations/mists-engraving-inputs.md#shared-availability-and-input-supply) supersedes the publication inventory and display-settings blocker below. Original bag slot IDs and the established GetTexture fileID contract corrected fixture assumptions without changing vendor/texture behavior. Stock stays 6/12; old storage remains a named-boundary failure. Settings was blocked at the earlier missing IsTransmogEnabled call; the linked successor resolves it. All seven full-feature all-target checks pass with zero JSON/plain warnings; no other-profile runtime parity is claimed.
+
+## [2026-10-26] proof | Supplied equipment-set locked items
+
+[Original equipment consumers](systems/equipment-set-locks.md#original-consumer-proof) and the [contract](../specs/equipment-set-locks.md#bounded-proof--2026-10-26) close the supplied-state slice on R/P/F/M: 24 exact GREENs, 12 intended producer-only REDs, four zero-warning all-target checks and unchanged raw stock maps. Inputs are item-ID observations, not native lock criteria; W/E/A and item upgrades remain excluded.
+
+## [2026-10-26] implementation | Equipment-set supplied lock query
+
+[Saved-set projection](systems/equipment-set-locks.md) replaces the constant-false path on R/P/F/M, with explicit native-unknown errors and strict boolean admin inputs. Original Retail equipment/membership/error REDs and the nil-observation RED were observed before the producer change. Final four-profile acceptance is pending; W/E/A and item upgrades remain excluded.
+
+## [2026-10-26] staged | Supplied equipment-set lock inputs
+
+[Item-ID observations](systems/equipment-set-locks.md) back simulator admin supply/clear methods on R/P/F/M. The missing-admin Retail RED was observed; original-consumer query RED/GREEN and four-profile gates remain pending. No native lock/default policy is claimed.
+
+## [2026-10-26] proof | Supplied StorePublic eligibility
+
+[Final proof and limits](systems/store-public-eligibility.md#final-proof-2026-10-26): GREEN `23eb582af` and RED `ec6ab6a76` integrate master `17baa3e9a` with identical tests. Six original-helper/direct-input pairs, Wrath absence, preserved defaults, seven unchanged raw stock pairs and seven zero-warning all-target checks pass. All 68 protected runtime invocations preserve host CVar bytes/stat. Missing input is distinct from false; native policy and working storefront remain unclaimed.
+
+## [2026-10-26] proof | Complete PTR Mainline preset construction
+
+[Original preset proof](investigations/ptr-edit-mode-declarations.md#complete-original-mainline-preset-construction) records declared EndCap/SwingTimer indices and metadata, first-read RED/unchanged whole-file GREEN, concrete settings/anchors and shared maps. Stock134/154→130/148 has no added keys; original ClearBlockedAuras remains missing, and the stateful original SetUnit replay explains why fewer event-route errors do not prove an API repair. Newer aura stock124/140 is a different production base. Seven separate all-target receipts have zero JSON/plain compiler warnings; formatting/readability and all nine current-byte CVar guards pass.
+
+## [2026-10-26] bounded proof | Challenge run clock
+
+[Final scoped evidence](systems/challenge-mode-run.md) records original timer/icon RED/GREEN, six-profile criteria query state, all seven clock/check profiles, protected stock equality and both InTimeBL modes. The two invented-default probes now use strict absence or supplied map metadata without dropping unrelated assertions. Original criteria initialization is BLOCKED at undeclared ShouldShowCriteria; no exception is swallowed. Inactive key shape remains unknown, and forecast voice/ambient errors remain visible.
+
+## [2026-10-26] implementation | Legacy tutorial request recorder
+
+[Consumer investigation](investigations/invented-query-defaults.md#legacy-tutorial-request-boundary) records the four legacy profiles, the already-selected TutorialFrame listener, and the absent native global. Original Mists storage-flow RED remains unchanged; bounded state recorder adds no event/flag/UI policy. GREEN advances past976 through all Lua assertions, but the test still fails its collected-error gate (C_Engraving:315 next). Four-profile state/publication tests pass, stock maps are byte-identical, and all seven canonical all-target checks have zero warnings.
+
+## [2026-10-26] proof | Modern stable active-list observations
+
+[Original active-slot RED/GREEN](investigations/consumer-selection-and-red-proof.md#supplied-modern-stable-active-list) proves Retail/PTR supplied transitions, isolation and snapshots through original XML slots. The [contract](../specs/stable-active-list.md) records finite PTR prerequisite chains and the explicit historical deferral. PTR stock remains 134/154 with a traced two-key replacement; Retail remains 8/10 without raw changes. All seven canonical all-target checks have zero compiler warnings, formatting/readability pass, and all 29 runtime payloads retain unchanged original CVar guards.
+
+## [2026-10-26] feature | Exclusive addon test roots
+
+[CLI reference](reference/cli-commands.md#run-tests-addon) and [contract](../specs/exclusive-addon-paths.md) document repeatable CLI roots and environment-only isolation. Candidate discovery, explicit addon loading and test lookup share the selected roots; bundled TestFramework is located explicitly. Ordinary loader/CLI RED, nine targeted GREEN cases, three full CLI acceptance assertions and all seven zero-warning canonical all-target checks pass. Retail stock remains exactly 8 raw keys / 10 occurrences. Both InTimeBL runs pass 10 unit, 4 generator and 4 simulator assertions; exclusive discovery loads only InTimeBL rather than 66 candidates. The observed missing C_ChallengeMode.GetActiveChallengeMapID remains report-only, outside the CLI feature.
+
+## [2026-10-25] investigation | Aura XML event identity
+
+[Fixture boundary](investigations/consumer-selection-and-red-proof.md#cf-2-selected-unit-aura-cleanup) identifies the installed XML delegating wrapper, not a changed Blizzard mixin. The corrected event proof retains target assertions and observes original body dispatch plus event-specific aura visibility. Execution remains pending.
+
+## [2026-10-24] static producer | CF-2 selected-unit aura cleanup
+
+[Consumer and contradiction proof](investigations/consumer-selection-and-red-proof.md#cf-2-selected-unit-aura-cleanup) links the [contract](../specs/clear-blocked-auras.md): Retail/PTR clear the existing effective unit block set in place; three unchanged original-consumer selectors discriminate constant/no-op/wrong-unit/global clears. Nil rejection stays a separate authorized non-native policy. No build, test, slot or native-parity proof.
+## [2026-10-26] proof | Complete PTR Edit Mode display-info
+
+[Complete original-file proof](investigations/ptr-edit-mode-declarations.md#complete-original-display-info-initialization) links the [contract](../specs/ptr-edit-mode-declarations.md):16 declaration-backed read members, exact producer-only RED/GREEN for the whole file and original LossOfControl OnLoad, PTR stock214/280→134/154 with four individually traced additions. The separate preset remains blocked. PTR/Retail/Era each have an accepted all-target receipt with zero warnings; formatting and readability pass.
+
+## [2026-10-26] proof | Supplied item-upgrade eligibility
+
+[Final six-profile proof](systems/item-upgrade-eligibility.md#final-proof--2026-10-26) closes the [supplied-location contract](../specs/item-upgrade-eligibility.md): original generic ItemUtil RED/GREEN, independent inputs, movement/removal, diagnostics, isolation and the reproduced SetReagentCount recreation regression. All seven all-target checks have zero JSON/plain warnings; six raw stock maps are unchanged. The three Mists/Era/Anniversary bag-helper preservation cases remain explicitly BLOCKED at the existing incompatible Blizzard_POIButton TOC, before the seed/query. The fixture supplies a shown-frame context, not an original upgrade window.
+
+## [2026-10-26] implementation | PTR SwingTimer declarations
+
+[Original SwingTimer constructor](investigations/ptr-edit-mode-declarations.md#swingtimer-declaration-boundary) reaches the exact Scale RED at800/801. Both pinned declaration families and metadata pass unchanged full-constructor GREEN through the existing runtime-only PTR gate. Exact master/GREEN stock stays216/282, with both new raw keys traced to the absent SwingTimer system map key at797. That next boundary remains unfixed. PTR/Retail/Era all-target checks have separate accepted receipts and zero warnings; formatting/readability pass.
+
+## [2026-10-26] proof | Forever temporary CVars
+
+[Single overlay and original listener identity](systems/forever-temporary-cvars.md) records original Gamepad/TargetLogic RED, persisted-file protection, authenticated normal/secure replay listeners, and the explicit unmodelled nil diagnostic. Four exact Forever GREEN cases pass at 70e4d148b. Stock remains byte-identical at 26/26→26/26, formatting passes and all seven canonical all-target checks have zero warnings at 6f50f3002. Accepted TTS bytes and historical nil deferral are unchanged.
+
+## [2026-10-26] implementation | Supplied active loss of control
+
+[Model and final proof](systems/lua-api.md#active-loss-of-control-state) link the [contract](../specs/active-loss-of-control.md). Byte-identical Retail original-display RED/GREEN, explicit overlay fixture, and positive Wrath absence pass. All seven raw stock maps are unchanged; all seven separate all-target checks pass with zero compiler warnings. PTR consumer proof was deferred at this checkpoint; the [later restored proof](systems/lua-api.md#restored-ptr-original-consumer-proof-2026-10-26) follows the merged display-info repair without fixture replacement.
+
+## [2026-10-26] implementation | Mists supplied LFR availability
+
+[Original PVEFrame and optional availability](systems/mists-lfr-availability.md): original-line missing-function RED is observed; the separate C API module publishes only on ACTIVE Mists, returns supplied booleans and raises an approved named missing-input error when unset. The revised byte-identical pair passes GREEN with ten observations and fails RED at line229. A line observer proves LFR state before the exact out-of-scope scenario error. Stock remains 6/12 with two missing-input key replacements and unchanged survivors. Mists/Retail/Era all-target checks have zero warnings; formatting and changed-line readability pass.
+
+## [2026-10-26] proof | Supplied query catalogs
+
+[Audit and contracts](investigations/invented-query-defaults.md) record pinned declarations, selected original Mists bank and Retail/PTR/Forever RAF RED/GREEN, byte-identical producer-only RED tests, unchanged stock maps, seven zero-warning all-target checks and formatting/readability. The fresh RAF assertion now expects zero and an explicit one-version sibling preserves its old checks. Transmog stays unresolved and unchanged. The old Mists storage flow still fails before the bank assertions at the same missing TriggerTutorial boundary on base and GREEN; no assertion is weakened.
+
+## [2026-10-25] proof | Mists supplied map display
+
+[Original group-provider proof](investigations/map-display-info-model.md#mists-original-onload-consumer--2026-10-25) passes exact corrected RED and supplied-state GREEN plus return-arity preservation. Stock 10/16→8/14 has no additions. Mists/Retail/Era/Anniversary all-target checks pass with zero warnings; formatting and readability pass. The actual OnLoad boundary precedes post-load fog-pin mutation; the separate defect is recorded, not fixed.
+
+## [2026-10-25] proof | PTR completed module imports
+
+[Original consumers and shared registry](systems/addon-module-imports.md#ptr-original-consumers--2026-10-25) link the [module contract](../specs/addon-module-imports.md#ptr-original-module-consumers): each exact selector rejects constant/no-op imports, original Utility identity and behavior pass, Forever preservation passes, and all seven all-target checks have zero warnings. The checkpoint separates traced raw stock-key replacements, cfg-equivalent proof carry-over and unsupported-profile runtime limits.
+
+## [2026-10-25] Retail/PTR proof | CF-2 party minimum
+
+[Original consumers](investigations/consumer-selection-and-red-proof.md#cf-2-party-minimum-staging) pass both exact RED→GREEN selectors on R/P; stock12/14→10/12 and244/312→242/310 has no additions/count changes. Lane tests remain isolated from removed TTS tests. Private fixture/producer imports and PTR TOC selection are repaired. R/P/Era all-target checks have zero warnings; formatting/readability and all 28 original-CVar guards pass. Mists remains deferred.
+
+## [2026-10-24] static producer | CF-2 party minimum
+
+[Producer and proof limits](investigations/consumer-selection-and-red-proof.md#static-producer-preparation) update the [contract](../specs/party-min-level-scenario-availability.md): Retail/PTR supplied roster minimum and subtype/random-filtered scenario projections, no new defaults or test edits. Producer-only RED child prepared for future slots; no runtime or compiler proof. Mists remains blocked on IsLFREnabled.
+
+## [2026-10-25] repair | Fog pin workaround scope
+
+[Template-only refresh](investigations/world-map-fog-of-war-overlay-model.md#post-load-workaround-scope) removes the provider.pin scan that copied fog callbacks onto unrelated pins. Original WorldMap group and highlight RED/GREEN pass on Retail, Mists and Era; original Retail fog refresh preservation passes. Stock maps remain exactly 12/14, 8/14 and 0/0, with no additions. All seven all-target checks have zero warnings; formatting and readability pass. Native SetUiMapID callback dispatch remains missing, so the fog refresh substitute stays.
+
+## [2026-10-25] proof | Supplied social squelch
+
+[Original listing controls](investigations/consumer-selection-and-red-proof.md#supplied-social-squelch) pass the final three-profile false/true/false and isolation selector against byte-identical producer-only RED tests. Stock removes only the squelch pair on each profile; all-target, formatter and readability evidence is complete. Native account defaults and voice-provider policy remain excluded.
+
+## [2026-10-25] proof | Forever explicit gamepad capability
+
+[Capability state and wrapper proof](systems/gamepad-mapped-state.md#explicit-enabled-capability) links the [contract](../specs/forever-gamepad-enabled.md): existing GamePadEnable CVar input, independent of mapped sticks; original secure restricted wrapper RED/GREEN, unchanged 26/26 Forever stock. Retail/PTR exact absence controls pass; their stock maps remain 16/18 and 296/410. All three all-target checks and formatting pass under the pre-I1 warning allowance. Native device detection remains unknown; startup is not clean.
+
+## [2026-10-25] investigation | PTR regional names
+
+[Sequential original-consumer proof](investigations/ptr-regional-names.md) distinguishes both missing calls before full GREEN. PTR clears all UnitFrame155 keys (296/410→272/348), with 6 added raw keys individually traced. Forever 70532 remains exactly 26/26; naming/graveyard preservation passes. Retail/PTR/Forever all-target checks satisfy zero/known-three warning limits.
+
+## [2026-10-25] proof | Final housing PTR/Retail acceptance
+
+[Final original-consumer proof](systems/housing-spatial-presence.md#final-ptrretail-acceptance): PTR housing GREEN/endpoint RED, talent false→true→false, Retail eight-state preservation, traced stock deltas, and zero-warning PTR/Retail all-target checks. The documented PTR unlock-level constant preserves Retail/Forever publication.
+
+## [2026-10-25] proof | Housing texture boundary and remaining PTR dependency
+
+[Accepted texture/retail gates](systems/housing-spatial-presence.md#texture-fix-acceptance-and-remaining-ptr-dependency): original PTR template RED/GREEN, Retail eight-state preservation, both all-target checks and formatting pass. PTR housing/talent remains blocked on separately owned IsWoWHack. Raw stock additions are traced without masking.
+
+## [2026-10-25] fix | Button atlas region lifetime
+
+[Original PTR template RED](systems/housing-spatial-presence.md#ptr-microbutton-region-lifetime) shows the shared active setter skipped region creation on a lookup miss. Restore region creation/publication before optional pixel application; no vendor or catalog fabrication. GREEN pending.
+
+## [2026-10-25] implementation | PTR talent-award history
+
+[Original startup RED](systems/housing-spatial-presence.md#ptr-talent-award-startup-boundary) identifies the declared C_SpecializationInfo endpoint. A supplied lifetime-history boolean avoids invented level/rank policy; the producer and false/true/false consumer test are staged for GREEN.
+
+## [2026-10-25] proof | Retail housing plot and PTR dependency
+
+[Accepted proof and limits](systems/housing-spatial-presence.md#accepted-retail-proof-and-ptr-dependency): repaired original Retail eight-state consumer GREEN, missing-producer RED, both interior selectors on both sides and six callable mutants. Final repaired-source checks are Retail zero warnings/PTR three allowed warnings. PTR eight-state acceptance is BLOCKED-ON the separate input-interface-style merge; no native policy or current PTR GREEN claim.
+
+## [2026-10-25] fixture | Housing bootstrap observer lifetime
+
+[Observed third-state failure and repair](systems/housing-spatial-presence.md#bootstrap-observer-lifetime): use the real bootstrap load phase so the first full addon load cannot replace the observed publisher. Assertions and production/vendor code are unchanged; paired repaired-fixture proof remains pending.
+
+## [2026-10-25] implementation | PTR keyring startup boundary
+
+[Original startup RED](systems/housing-spatial-presence.md#ptr-keyring-startup-boundary) links the [PTR capability contract](../specs/ptr-keyring-capability.md). Declared C_ActionBar.ShouldShowKeyring projects supplied action-bar state, without a C_Container alias or invented native constant. Original-consumer GREEN remains pending.
+
+## [2026-10-25] implementation | Housing plot blocker boundary
+
+[Current-house shape and startup](systems/housing-spatial-presence.md#current-house-shape-and-ptr-startup) links the [nullable snapshot contract](../specs/current-house-info.md): original tutorial data/utility fixture loads, state-backed documented HouseInfo and declared PTR-only SHARD_TRANSFER. Merged original-consumer RED observed; GREEN and final proof pending. Native policy remains unknown.
+
+## [2026-10-24] staged | Housing house-or-plot presence
+
+Added [spatial presence model](systems/housing-spatial-presence.md) and [contract](../specs/house-or-plot-presence.md), original registered-event selector, profile TOC evidence and static contradiction matrix. Runtime/compile gates remain pending; Forever's selected consumer and excluded downstream controls bootstrap are distinct.
+## [2026-10-25] proof | Classic defensive aura timer completion
+
+The [completion matrix](../specs/aura-spell-classification-identifiers.md#classic-completion-proof--2026-10-25) records Era/Anniversary stock-timer RED/GREEN, original AuraUtil preservation and exact stock differences with no additions. Era/Anniversary all-target checks retain only the three permitted dead-code warnings; Retail has none. Known TTS residue remains separately owned, so no baseline is changed.
+
+## [2026-10-25] investigation | Classic opaque aura timers
+
+[Original callback attribution](investigations/classic-startup-producer-cascades.md#opaque-private-aura-timers) resolves four erased nil calls to the declared defensive query. Existing-model Era/Anniversary capability repair is staged; runtime GREEN and checks remain pending. TTS is separately owned.
+
+## [2026-10-25] investigation | Mists battlefield vehicles
+
+[Vehicle provider boundary](investigations/mists-battlefield-vehicles.md): confirmed pinned plural/singular signatures, selected Mists TOCs, original WorldMap provider and XML pin path. Committed supplied-state schema and original-consumer fixture before publication. Corrected implicit startup dependencies, observed missing-call RED, then passed supplied-pin GREEN. Raw captures replace two vehicle errors with two traced existing DeathMap errors; exact base `05f95ab1c` reproduces BEFORE 12/18, paired producer-only RED fails with identical tests, and Mists all-target checking passes with three inherited warnings. Retail all-target checking passes with zero warnings; formatting and readability pass. Native vehicle population remains intentionally unmodeled.
+
+## [2026-10-25] proof | PTR I4 batch2 landing
+
+[Eight exact consumer pairs](investigations/patch-12-1-7-api-audit.md#batch2-landing-proof) pass GREEN and fail producer-only RED at original Blizzard lines. Stock296/410→272/378 retains ten individually traced successor keys. Retail/PTR all-target checks meet zero/known-three warning limits; formatting and Retail absence pass. Preset and aggregate tests remain outside the normal suite. Slot1 is released; the current merge-tree has only a wiki-log conflict for main.
+
+## [2026-10-25] implementation | PTR supplied WoWHack mode
+
+[Original consumer REDs](investigations/patch-12-1-7-api-audit.md#supplied-wowhack-mode) reach MicroMenu207 and UIErrorsFrame12. The [contract](../specs/ptr-i4-game-rules.md) uses existing active-mode state and enum data; both exact consumer GREENs pass. Final merged stock/check acceptance remains pending.
+
+## [2026-10-25] implementation | PTR I4 supplied GameRules inputs
+
+[Five original-line RED boundaries](investigations/patch-12-1-7-api-audit.md#i4-gamerules-and-recentallies-prerequisites) precede capability queries and SD selection mutation. Enum-only replay passes RecentAllies labels. Preset query and final runtime/check acceptance remain pending.
+
+## [2026-10-25] prerequisites | PTR I4 GameRules and RecentAllies
+
+[Source-bound original RED](investigations/patch-12-1-7-api-audit.md#i4-gamerules-and-recentallies-prerequisites) records Barbershop, CharacterCreate and RecentAllies boundaries plus upstream setter/preset blockers. Only documented enum prerequisites are implemented in this step; six function producers and GREEN remain pending.
+
+## [2026-10-25] decision | PTR SharedXML executes twice
+
+[User decision](investigations/ptr-input-interface-style.md#user-decision-two-environments-2026-10-25) corrects only the PTR listener expectation to two, one per normal/secure environment. Native modern count remains unproven; Retail decompilation is the revisit boundary. [Final proof](investigations/ptr-input-interface-style.md#approved-twice-final-proof-2026-10-25): exact PTR GREEN passes, producer-only RED rejects the original event, PTR/Retail all-target checks pass with allowed-three/zero warnings. Forever case 1 is a documented missing API without capability state; report-only. Slot 2 released.
+
+## [2026-10-25] runtime proof | PTR input listener environment count
+
+[Slot-2 results](investigations/ptr-input-interface-style.md#slot-2-execution-2026-10-25): RED reaches the original rejected event; GREEN records two listeners via normal/secure replay and is blocked by a native answer. Forever 3/4 pass; both all-target gates pass with the allowed inherited warnings. Raw stock maps retain all successor errors.
+
+## [2026-10-25] static stage | PTR input event validity
+
+[Original-consumer extension](investigations/ptr-input-interface-style.md#ptr-event-validity-extension-2026-10-25) records the documented PTR epoch exception, load-error and listener registration assertions, and the new event-only RED/GREEN pair above the existing namespace publication. No slot, compilation or runtime proof.
+
+## [2026-10-24] static stage | PTR input interface style
+
+[Selected consumer and contradiction table](investigations/ptr-input-interface-style.md) link the [contract](../specs/ptr-input-interface-style.md): authenticated PTR70493 docs, original SharedXML runtime-selection selector and existing state model. Separate test-first and GREEN source phases expose the existing model to PTR through ACTIVE; no build, slot or runtime RED/GREEN.
+## [2026-10-25] proof | Forever native-unknown-only baseline
+
+[Baseline](../baselines/README.md#forever-lua-errors) and [consumer scope](investigations/forever-startup-gaps.md) bind 21 passing exact selectors and the stock capture at `1fcbddf67`. No idle sentinel or locality catalog is invented; housing's excluded positive publisher is explicit. One all-target check per requested profile passes at `b910efd8d`: Retail zero warnings, Forever/PTR three expressly allowed inherited dead-code warnings each. Formatting passes; no warning suppression or source change to the separately owned late-bind test is retained.
+
+## [2026-10-25] investigation | Forever startup supplied inputs
+
+[Startup gaps](investigations/forever-startup-gaps.md) records the 76-message reproduction, eight original-consumer RED→GREEN selectors and explicit native-unknown target/locality boundaries. First repaired capture:40 raw messages; remaining service fixes and final acceptance pending.
+
+## [2026-10-25] fix | Byte-preserving Lua source/cache boundary
+
+Updated [CASC cache](systems/casc-asset-cache.md#blizzard-ui-lua-source-bytes) and [contract](../specs/casc-loading.md#blizzard-ui-source-bytes): Lua cache reads/content markers are byte-based; XML/TOC/XSD remain strict UTF-8. Production TOC/addon loading was already raw-byte safe. Exact fixture tests cover sync and runtime boundaries.
+
+## [2026-10-25] source | Forever wowf product selection
+
+[Selected-target checkpoint](../updating-blizzard-ui-to-a-new-patch.md#current-selected-target--october-25-2026) records wowf 1.60.1.70532 / build2582289d81e380163c7a13472df4cb81, repaired live desktop indexes, idle Syncthing and authenticated local root/encoding. Selector/regression now expect wowf. Builds, offline sync, baseline and startup await a released slot after club-unread-integrate and S49; static work is not runtime acceptance.
+## [2026-10-25] staged | Forever verified non-resident Gethe sources
+
+[Cache rule](systems/casc-asset-cache.md#forever-mapped-non-resident-sources) and [contract](../specs/casc-loading.md#forever-mapped-non-resident-ui-sources) record immutable same-build Gethe blobs only for mapped EKeys absent from local indexes, raw CKey/MD5 validation and per-file provenance. Resident CASC and unmapped failures remain separate. Static tests/code committed separately; execution and stock startup remain pending.
+## [2026-10-24] static producer | CF-2 Classic map display
+
+[Map display model](investigations/map-display-info-model.md#cf-2-classic-publication--static-producer-2026-10-24) records Era/Anniversary publication through the existing backing state and numeric/security parser. Tests are unchanged; static GREEN/RED source custody is separate from pending runtime acceptance. No build, test or slot.
+## [2026-10-25] investigation | S49 rejected refresh repair
+
+[Companion spell backing](investigations/wrath-companion-cooldown.md#s49-reject-repair-static-2026-10-25): portable receipt paths and seeded-mount selector regression staged; generated catalogs and runtime proof still await a slot.
+
+## [2026-10-24] investigation | Companion S1/S2 and accepted req-13
+
+[Cooldown notes](investigations/wrath-companion-cooldown.md) replace guessed
+arbitration with req-13 ordered-history signed endpoint/tie and sticky-enable
+rules. Shared source-category flags, absent-player zero returns and supplied
+critter spell joins now have original-consumer selectors. Static contradiction
+table only; edit-only work, no runtime proof. Rune applicability remains UNKNOWN.
+
+## [2026-10-24] investigation | Companion pre-review repair
+
+[Cooldown notes](investigations/wrath-companion-cooldown.md) now bind each cooldown
+selector to original PetPaperDollFrame widget observations. Matching supplied
+start-recovery categories gate GCD; on-hold state controls numeric enable.
+Static-only contradiction table and Q5 UNKNOWN ledger retained. Runtime remains
+blocked until wrath-relic-slot merges; unchanged error assertions still apply.
+## [2026-10-24] static stage | CF-2 PvP completion
+
+Updated [consumer evidence](investigations/consumer-selection-and-red-proof.md#cf-2-supplied-pvp-match-completion) and [contract](../specs/pvp-match-completion.md) with the Retail/PTR supplied-state producer, unchanged original-consumer selector, paired producer-only subtraction and standalone constant/no-op contradictions. Existing HasMatchStarted and Forever remain unchanged. No build, runtime test, slot, push or native-parity claim.
+## [2026-10-25] build | Debug metadata and persistent-slot incremental reuse
+
+Dev/test profiles use `debug = 0` (cherry-pick `7a49b872c`); source-line backtraces are unavailable. The sim-data optimization level is unchanged. [Slot builds](../remote-builds.md#local-slot-builds) enable incremental compilation only through the fixed per-slot BindPaths source path. Python RED/GREEN evidence is recorded in `/home/osso/.local/state/wow-ui-sim/handoff/ct-incr-debug0/REPORT.md`; no Rust build was run.
+
+## [2026-10-25] maintenance | Utility command admission and lock rebase
+
+[Findings](investigations/compile-bin-lockwatch.md) record rebase to `b2ca0becd`, current command feature admission, preserved historical evidence, and two offline metadata runs: 781 unchanged package records and stable lock bytes. Master already normalized the lock; no compile or CPU proof.
+
+## [2026-10-25] investigation | Compile binary selection
+
+[Source findings](investigations/compile-bin-lockwatch.md) and [contract](../specs/integration-bin-selection.md): opt-in utility bins preserve wow-sim test consumers and operational builders. Static-only; no slot/build/CPU proof.
+
 ## [2026-10-24] design | Generated data crate boundary
 
 [Crate split](design/generated-data-crates.md) preserves the root facade and selected tables while isolating common catalogs from profile features. Same-slot touched-root rebuild 413.80→258.52 s; peak child RSS6,189,056→2,717,272 KiB. Retail/Wrath checks and94 bounded Rust tests pass; all23 generated files retain their hashes. Single warm-dependency samples, not a cold-build or full-profile claim.
@@ -20,6 +292,10 @@
 ## [2026-10-24] investigation | Wrath guild-info staging
 
 [Native consumer and model](investigations/wrath-guild-info.md) links the [contract](../specs/wrath-guild-info.md): existing cache/rank-right reuse, Wrath-only empty/no-guild initialization, two original OnShow branch selectors, static contradiction/selection proof and batch3 seed prerequisites. Edit-only; RED/GREEN, stock and Retail36/42 preservation remain deferred.
+
+## [2026-10-24] source | Forever 70532 static refresh
+
+[New target](../updating-blizzard-ui-to-a-new-patch.md#current-selected-target--october-25-2026) follows the user's installed-build decision: Gethe ca8368f, manifest +55/-3 and limited listfile +55/-1. All 4,486 source blobs match Git and all paths map. Build identity selects 70532; no build, runtime sync, baseline recapture or warning-free proof yet. Prior 70374 evidence remains historical.
 
 ## [2026-10-24] proof | Bounded reload XML source reuse
 
@@ -2721,15 +2997,30 @@ Linked the [supplement](../wowdecomp-audit/cataclysm-15595.md) from the [referen
 
 [Lessons learned](investigations/consumer-selection-and-red-proof.md): TOC-selected implementations, not cached presence, establish profile applicability. Register applicable tests at compile time; each producer RED selector must independently reject constant/no-op behavior. Static evidence only; preservation boundaries remain separate.
 
+## [2026-10-24] source | TTS preference producer staging
+
+Added [model ownership](systems/lua-api.md#tts-preference-model-edit-only-staging)
+and linked [contract](../specs/c-factory-cf2-tts.md): legacy-source defaults,
+original-callback static RED, bool/void saved API, UNKNOWN names/keys and ASK-USER
+persistence/marker assumptions. Edit-only; no runtime or native acceptance.
+
+## [2026-10-24] source | TTS approved persistence decisions
+
+Updated [model mechanics](systems/lua-api.md#tts-preference-model-edit-only-staging)
+and [contract](../specs/c-factory-cf2-tts.md#user-decisions--2026-10-24): reuse
+SavedVariables serialization for profile-isolated private preferences and marker;
+replace the public-CVar oracle with getter-based reopen checks. Fresh=false/Mark=true
+is explicitly user-approved, non-native. Relocated the TTS index entry away from
+master's concurrent Reload XML insertion; no merge performed. No builds or runtime proof.
+## [2026-10-24] investigation | Wrath companion cooldown and creature-ID source
+[Source review](investigations/wrath-companion-cooldown.md) records accepted laptop request11 Q2/Q5, existing cooldown-state reuse, absent generated effect-misc data, and retained UnitHasRelicSlot/cursorOffset blockers. Tests and producer staged separately; no build, test, slot use or runtime-success claim.
+## 2026-10-24 | CF-2 SuperTrack edit-only staging
+Added supplied-state system/contract and selected original-consumer tests. Retired overlapping target defaults; priority remains explicitly unsupported. Runtime RED/GREEN, mutants and profile preservation remain slot obligations.
 ## 2026-10-24 — CF-2 pet-battle name staging
-
 Added [pet name projection](systems/pet-battle-names.md) and [contract](../specs/pet-battle-names.md), traced four profile TOCs through original XML/event/name consumers. No build/runtime proof claimed; parent owns frozen RED/GREEN and stock accounting.
-
 ## 2026-10-24 — PTR 70493 source refresh
-
 Updated client-profiles runtime-cache/source identity and epoch links from the authenticated 70493 source contract and exact failing startup baseline. Original 4cc resume and host RED precede producer changes; decoded range/content proof and partial-provenance completion remain distinct from compatibility. Retail master 36/42 exact preservation accepted; Forever paired master 78/82 exact preservation accepted; source/CVar guards unchanged.
 ## [2026-10-24] source | Combat-log filter record staging
-
 [Consumer-selection notes](investigations/consumer-selection-and-red-proof.md#combat-log-processor-filter-staging) link the [bounded contract](../specs/combat-log-event-filters.md): original Retail/PTR lifecycle selector, opaque state-backed Add/Clear, static constant/no-op contradiction. Forever is selected but uncovered. Edit-only; no new runtime RED/GREEN, native matching or validation parity claim.
 
 ## 2026-10-24 | CF-2 SuperTrack edit-only staging
@@ -2742,9 +3033,16 @@ Updated [[club-membership]] and [bounded contract](../specs/club-self-invitation
 
 Ingested accepted laptop Q1 into the [Lua API notes](systems/lua-api.md#wrath-relic-class-capability) and [spec](../specs/wrath-unit-has-relic-slot.md). Class flags remain explicit inputs; unknown class mappings not invented. Edit-only, no runtime acceptance.
 
+## 2026-10-24 — CF-2 party minimum staging
+
+Linked party-minimum contract and selected ScenarioFinder XML/Lua proof recipe in consumer-selection notes/index. Both standalone selectors vary supplied roster and catalog bounds. No builds, observed RED/GREEN, stock capture or producer changes; Mists IsLFREnabled remains a separate possible setup blocker.
 ## [2026-10-24] source | Patch 12.1.7 I4a inherited accounting
 
 Updated [source audit](investigations/patch-12-1-7-api-audit.md#i4a-immutable-companion-not-applicability-acceptance), [contract](../specs/patch-12-1-7-source-accounting.md#i4a-inherited-applicability-worklist) and index for immutable companion accounting, explicit per-profile UNKNOWN source/selection/proof boundaries and grouped I4b selectors. I0 artifacts unchanged; no builds, cache observations or native/runtime acceptance.
+
+## [2026-10-24] investigation | S49 same-build refresh and CSV truncation
+
+[Refresh boundary](investigations/wrath-companion-cooldown.md#same-build-spelltrait-refresh-and-csv-boundary) records 70391-only trait/spell receipts, 426 CSV-native dangling occurrences and zero generator-introduced references. Provisional descriptions expose physical-line CRLF truncation. Logical-record reader/loader fixes and concrete tests are staged, not executed; corrected regeneration and runtime GREEN await a released slot.
 
 ## 2026-10-24 — Patch 12.1.7 I4b static staging
 
@@ -2757,6 +3055,76 @@ Updated the [bank investigation](investigations/wrath-guild-info.md#accepted-run
 ## 2026-10-24 — Wrath guild-bank current-master integration
 
 [Bounded refresh](investigations/wrath-guild-info.md#current-master-integration-proof) at14606d868 merges master08b423c5c: Wrath/Retail all-target checks0warnings, five bank exact PASS, Wrath stock[], fresh Retail30/34 unchanged with no added/removed keys. All13 CVar receipts preserve original stat/hash; slot0 released. Historical RED/GREEN matrix not repeated.
+
+## 2026-10-24 — Mists pet display identity
+
+- Updated [pet identity](systems/pet-battle-names.md#mists-display-identity) and added the [contract](../specs/mists-pet-display-id.md). Static consumer/receiver trace, optional supplied identity and native-return questions; no runtime proof.
+## 2026-10-25 — Stable-path slot build adoption (static)
+
+Added the nonblocking [slot launcher](../../scripts/slot-build.py) and
+[usage/owner contract](../remote-builds.md#local-slot-builds): fixed source mount
+per slot, exact `.owner` match and literal capacity ADD admission. Focused Python
+tests only; no compile or service launch. The normalized lock matches the saved
+Cargo rewrite byte-for-byte; runtime acceptance remains pending.
+
+## [2026-10-25] integration | CF-2 TTS fixture deferrals
+
+[Restoration inventory](investigations/cf2-tts-integration.md) records thirteen whole-file deferrals, their passing cases and origin owners, plus the failing mixed-file Gamepad exception. Current Forever TTS cases pass; two newly passing Forever files remain unchanged. Final profile gates remain separate.
+
+## [2026-10-25] test | TTS Alternate UI default oracle
+
+[Source-backed correction](investigations/cf2-tts-integration.md#alternate-voice-oracle-correction) changes the legacy voiceType1 test from0 to1. Pinned Blizzard legacy UI defaults and migration support1; APIDocumentation does not establish native default parity. Forever70532 TTS cases and exact26/26 master stock comparison pass.
+
+## [2026-10-25] verification | TTS bounded integration
+
+[Bounded proof matrix](investigations/cf2-tts-integration.md#bounded-verification) records37 passing exact cases, seven all-target checks with the clarified inherited-warning allowance, seven raw stock comparisons and source-backed Mists additions. Fresh library reuse has dep-info content identity; native parity and full-suite acceptance remain excluded.
+2026-10-25: Staged the [landable I4 first batch](investigations/patch-12-1-7-api-audit.md#i4-first-bounded-producer-repair), with original-consumer transitions and aggregate staging tests retained only on the lane.
+
+2026-10-25: Completed bounded I4 landing proof after integrating PTR-input: four exact RED/GREEN pairs, original missing calls at Collections line 37 and GhostFrame line 4, stock 298→296 raw keys with zero additions, zero/known-three Retail/PTR warnings, and formatting. Aggregate I4 and native policies remain outside this acceptance.
+
+## [2026-10-25] Mists corpse map position
+
+[Supplied corpse observations](systems/mists-corpse-map-position.md) bind the pinned nilable vector query to the original DeathMapDataProvider and selected Wrath XML pin. Exact original-consumer GREEN and producer-only RED pass their expected boundaries with identical test bytes. Stock remains 12/18: two corpse keys clear and two existing GroupMembers GetMapDisplayInfo keys are individually traced. Mists/Retail all-target checks have zero warnings; fmt passes.
+
+## [2026-10-25] fix | TTS publication gate
+
+[Verifier repair](investigations/cf2-tts-integration.md#publication-gate-repair) gates namespace creation and persistence by the pinned profile declarations. Wrath publication regression is RED before the fix; legacy applicability retains all TTS assertions and adds positive Wrath absence checks. Both merge-parent log histories remain intact. Checkpoint `7bc8208ca` passes55 fresh exact cases, Wrath/Retail all-target checks without warnings, zero-error sparse Wrath stock and formatting. Other historical all-target/persistence evidence is not relabeled as fresh.
+
+## 2026-10-25 — PTR Edit Mode declaration slice
+
+Recorded [declarations and original consumers](investigations/ptr-edit-mode-declarations.md), separate RED/GREEN selectors, supplied-map boundary, stock delta and the report-only SwingTimerSetting successor. Runtime ACTIVE gating preserves the single compiled implementation. PTR/Retail/Era full-feature all-target checks pass with zero JSON/plain warnings and separate accepted source-binding receipts; formatting and readability pass.
+
+## [2026-10-26] proof | Supplied supertracking restoration
+
+[Restored content obligations](systems/super-track-state.md#deferred-content-coverage-restoration) pass two exact original-consumer selectors on Retail/PTR/Forever. Each rejects the producer-subtracted sibling with identical test bytes. Existing supplied pairs, clear/re-entry and listener-time cache state need no producer changes. Fresh base/restoration stock maps are identical at 10/12, 216/282 and 26/26; zero-warning all-target checks, fmt and manual Rust readability pass. Broader quest/highlight and native-policy obligations remain unverified by this lane.
+
+## 2026-10-26 — Restored PTR loss-of-control consumer proof
+
+Updated the [active-effect model](systems/lua-api.md#restored-ptr-original-consumer-proof-2026-10-26) and [contract](../specs/active-loss-of-control.md#consumer-proof): reauthenticated pinned PTR declarations/selection, original OnLoad prerequisite, two exact byte-identical subtraction RED/GREEN cases, empty/supplied/clear display behavior and two-environment isolation. No producer change; bound PTR stock remains134/154 with no raw-key/count deltas. All seven separate full-feature canonical all-target checks have zero JSON/plain compiler warnings; formatting and changed-line readability pass.
+
+## 2026-10-26 — Mists supplied scenario finder eligibility
+
+Added the [supplied bool/string contract](../specs/mists-scenario-finder.md) and [environment-local model](systems/mists-scenario-finder.md). Pinned Mists declaration and selected original PVEFrame270 support a separate optional input, not party-level/catalog inference. Both original entry selectors and the advanced LFR callback regression reject the missing producer at270 and pass byte-identical full-callback GREEN. Supplied tuples, reasons, level independence, two-environment isolation and unset recovery pass. The LFR successor advance retains every visibility/gap assertion. Mists stock stays6/12 without additions, removals or count changes. All seven full-feature all-target checks have zero JSON/plain warnings; formatting and manual Rust readability pass. Native policy, catalog production and broader startup cleanup remain outside scope.
+
+## [2026-10-26] implementation | Mists supplied party minimum
+
+[Supplied minimum](systems/mists-scenario-finder.md#supplied-active-party-minimum) links the [bounded contract](../specs/mists-party-minimum.md). Three exact producer-subtracted REDs and three GREENs prove the original58 boundary, empty-catalog preservation, direct85/90/isolation and explicit errors. Stock stays6/12 with two individually traced diagnostic replacements; catalog discrimination is blocked. All seven full-feature all-target checks pass with zero compiler warnings. Formatting/readability pass; other-profile runtime parity is not claimed.
+
+## 2026-10-26 — Supplied stable pet slots
+
+Added [slot observations and merged proof](systems/stable-pet-info.md) with the [contract](../specs/stable-pet-info.md). Six exact original-consumer REDs fail at the intended missing-query boundaries, and fourteen GREEN cases pass at GREEN6f1f29349 / RED2c66b42ec. Stock stays Retail0/0 and PTR122/138 without per-key changes; seven all-target checks have zero JSON/plain warnings, including the approved Mists-only field repair. All100 CVar guards pass. Excluded-profile publication remains compiled-not-executed in this lane; full-window and native ownership/default policy remain separate.
+
+## 2026-10-26 — Pinned Mists global strings and reputation exposure
+
+Added the [70268 contract](../specs/mists-global-strings.md) and [source/consumer investigation](investigations/mists-global-strings.md). Full decrypted DB2/CSV agreement covers19,914 rows, including the second section; one byte-identical original-consumer selector rejects the foreign table at Setting34 and passes through131/138 with the real pinned setting name. Stock6/12→8/14 exposes an unchanged Retail temporary reputation seed, not a fabricated-label requirement. Pinned API declarations prevent an unsupported account-wide-concept absence claim; a whole-cache Lua/XML scan finds only the missing label's use and no definition. All seven full-feature all-target checks pass with zero JSON/plain compiler warnings. These checks do not establish other profiles' full runtime localization parity.
+
+## [2026-10-26] reconciliation | Merged engraving availability and settings
+
+Reconciled tracked specs and wiki against merged master `35dedb8b6` and the two lane reports. [Shared engraving availability](investigations/mists-engraving-inputs.md#shared-availability-and-input-supply) is the source of truth for profile publication, literal Rust input supply, the absent Lua admin setter and native-unknown values. [Merged settings proof and stock effects](investigations/mists-engraving-inputs.md#merged-settings-proof-and-stock-effects) replaces the obsolete Mists display-settings blocker and links Era/Anniversary error attribution. Historical receipts remain labeled historical. Documentation only; no new build or runtime proof is claimed.
+
+## 2026-10-26 — Forever Camelot spellbook
+
+Recorded [supplied observations](systems/forever-camelot-spellbook.md), selected-constructor ordering, three exact RED/GREEN pairs, unchanged 26/26 stock and seven zero-warning all-target checks. Linked the shared availability model and retained the item-browsing/device-startup limits.
 
 ## 2026-10-25 | ingest | Phase-3 core crate boundaries
 

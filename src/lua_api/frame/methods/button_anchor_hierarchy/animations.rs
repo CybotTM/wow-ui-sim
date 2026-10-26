@@ -40,7 +40,10 @@ pub(super) use fields::{
     animation_set_flipbook_frames, animation_set_flipbook_rows, animation_set_order,
     animation_set_start_delay, set_animation_child_key,
 };
-pub(crate) use runtime::{advance_animation_groups, stop_animation_groups_for_hidden_subtree};
+pub(crate) use runtime::{
+    advance_animation_groups, advance_animation_groups_state,
+    stop_animation_groups_for_hidden_subtree,
+};
 
 use fields::{push_anim_field, with_animation_state_mut};
 use path_runtime::apply_group_motion_state;
