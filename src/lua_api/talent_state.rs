@@ -140,6 +140,9 @@ fn default_loadout_states_for_spec(active_spec_id: u32) -> HashMap<i32, TalentLo
 
 /// Talent tree interactive state.
 pub struct TalentState {
+    /// Supplied lifetime talent-award history; false means empty host history.
+    /// Native acquisition and its relationship to level/current ranks are unknown.
+    pub has_earned_talent_point: bool,
     /// Active spec ID for the current loadout state.
     pub active_spec_id: u32,
     /// Spec currently loaded into the talent viewer surface.
@@ -198,6 +201,7 @@ impl TalentState {
         let config_states = default_loadout_states_for_spec(active_spec_id);
 
         Self {
+            has_earned_talent_point: false,
             active_spec_id,
             view_spec_id: None,
             node_ranks,

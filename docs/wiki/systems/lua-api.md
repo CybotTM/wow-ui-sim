@@ -179,6 +179,16 @@ Saved pre-producer RED at `d0c7969641adf566502d840d9651ed54c8fedca5` selected28:
 
 No producer GREEN, acceptance, profile/global privacy, UI or data parity claim. Current checkpoint remains **194 pending / 153 bounded / 14 partial / 1 metadata; 362 IDs; 72 capabilities**. Separate233/239 acceptance `5523335834f0b3ed26d1c1168f2551b82419111a` adds no proof here;237/241 stay uncredited.
 
+## Active loss-of-control state
+
+`C_LossOfControl` reads an empty-default per-unit `SimState.active_loss_of_control` map, not the spell-cooldown `LossOfControlInfo` map. [Contract and pinned declarations](../../specs/active-loss-of-control.md) define the record and `A_Admin` input. The existing registrar omits Wrath, where no pinned declaration or consumer exists; all other registrations remain in place. Input does not synthesize events or infer aura effects. Duration objects require supplied start/duration fields.
+
+Producer `95f8d1350` and test source `958b233d2` pass the original selected Retail `LossOfControlFrame:UpdateDisplay` empty → supplied → removed visibility/count transition. The producer-only RED sibling uses byte-identical tests and fails the fresh-world visibility assertion before any admin input. Seven exact Retail cases pass, including the existing manually fired ADDED overlay with unchanged display assertions. PTR state/query cases and the positive Wrath absence case pass.
+
+All seven stock maps are exactly unchanged against the master producer: Retail 12/14, PTR 232/300, Mists 6/12, Forever 26/26, and Era/Anniversary/Wrath 0/0 (keys/occurrences). Separate canonical all-target receipts pass with zero JSON/plain compiler warnings on every profile. Formatting and manual readability pass. No native acquisition, expiry, secrecy, or automatic event-policy claim is made.
+
+PTR consumer proof is deferred: original OnLoad aborts at `Blizzard_EditMode/Shared/EditModeSystemTemplates.lua:27` because `GetSystemSettingDisplayInfoMap` is missing; the later data path fails at `Blizzard_FrameXML/LossOfControlFrame.lua:183` on uninitialized `secondsWidth`. The display-info chunk must reach its method declaration at line 1628 before this consumer can be proved. No fixture initialization replaces that aborted step. The native TOC family selection and Retail-only proof scope are recorded in the contract.
+
 ## Retail 12.0.5 action loss-of-control cooldown info
 
 Producer `831aa8553` implements **EXACT239**, `C_ActionBar.GetActionLossOfControlCooldownInfo`, not237 (`GetActionDisplayCount`). [Contract, inventory and corrected RED SSOT](../../specs/action-loss-control-cooldown-info.md) owns requirements and evidence. Read-only selection follows existing action slot → spell → typed `spell_loss_of_control` map; no new state or acquisition. A fresh five-field snapshot copies `startTime`, `duration`, `modRate`, `isActive`, and `shouldReplaceNormalCooldown`. Missing records use inferred inactive `(0,0,1,false,false)`; flags copy verbatim, without activation, GCD selection or expiry calculation.

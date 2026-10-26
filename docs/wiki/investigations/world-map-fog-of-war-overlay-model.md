@@ -69,6 +69,49 @@ fully unexplored.
   stubs (`if type(...) ~= "function" then ... end`) so the Rust surface wins
   when present.
 
+## Post-load workaround scope
+
+The refresh workaround originated in `9fe3bf87a` and moved to the temporary
+workaround module in `dbd854837`. It substitutes the native fog-frame map-change
+refresh: pinned `FogOfWarPinMixin:OnMapChanged` calls `SetUiMapID`, then the
+native `OnUiMapChanged` callback calls `TryFindingBestFogOfWarID`. The active
+rilua `map_frames.rs` implementation stores the map ID without dispatching
+that callback. The explicit refresh and missing-asset cleanup remain needed;
+retire this workaround when the native callback/lifecycle is implemented and
+original-pin preservation tests pass without it.
+
+Its extra provider scan was wrong: `provider.pin` is not a fog-pin identity.
+It copied the fog map callback and fog refresh method onto unrelated pins on
+both WorldMap and BattlefieldMap. Mists runtime evidence identified group,
+highlight, exploration and quest-blob pins affected by this mutation.
+
+The repair removes that scan. `MapCanvasMixin:AcquirePin` acquires every pin
+from `pinPools[pinTemplate]`, and `EnumeratePinsByTemplate` enumerates the active
+pool. Therefore `FogOfWarPinTemplate` enumeration covers the actual fog pins
+without changing unrelated provider pins. This is an identity constraint, not a
+profile gate: each profile's selected WorldMap and provider XML owns which
+pins exist. Classic Cata/Vanilla WorldMap source leaves its fog provider
+commented out; the original fog refresh preservation case is Retail-only.
+
+[Original WorldMap regression tests](../../../tests/fog_of_war_pin_scope.rs)
+select the original startup-installed group and highlight pins and cross both
+post-load passes. They preserve the group's original map callback and the
+highlight pin's lack of a map callback or fog refresh method. Group callbacks
+still consume supplied display state on
+profiles that publish that separate query. Mists callback identity is tested
+without replacing its independently missing query. The Retail fog case checks
+map rebinding, stale background/mask cleanup and missing-fog hiding.
+
+Verification at `96dee83ff`:
+
+- Original group and highlight selectors independently fail before the repair
+  and pass afterward on Retail, Mists and Era, with byte-identical tests.
+- Original Retail fog refresh and cleanup preservation passes.
+- Exact stock maps remain Retail 12 keys/14 occurrences, Mists 8/14 and Era 0/0,
+  with equal CVar inputs and no added, removed or changed-count keys.
+- All seven client profiles pass all-target checks with zero Cargo/plain
+  warnings; formatting and changed-Rust readability pass.
+
 ## Verification
 
 - `cargo test --test c_map_api test_c_fog_of_war_returns_nil_for_current_map_without_fog_data -- --nocapture`
@@ -79,6 +122,10 @@ fully unexplored.
 - `cargo test --test test_keybindings_panels_detail world_map_exploration_pin_has_visible_overlay_textures_after_opening -- --nocapture`
 
 ## Sources
+
+- [Temporary fog refresh](../../../src/lua_api/workarounds/temporary/fog_of_war_pin.rs) — exact template scope and remaining refresh substitute
+- [Active map-frame methods](../../../src/lua_api/frame/methods/map_frames.rs) — map ID storage without native callback dispatch
+- [Original WorldMap regression cases](../../../tests/fog_of_war_pin_scope.rs) — non-fog callback preservation and Retail fog cleanup
 
 - [data/db2/UiMapFogOfWar.csv](../../../data/db2/UiMapFogOfWar.csv) — local fog
   presence data used by `C_FogOfWar`

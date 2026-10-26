@@ -1,4 +1,4 @@
-//! Forever's already-loaded addon module registry and native import boundary.
+//! Already-loaded addon module registry shared by PTR and Forever.
 
 use std::collections::{HashMap, HashSet};
 use std::path::{Component, Path};
@@ -36,8 +36,14 @@ pub(crate) struct ModuleToken {
     generation: u64,
 }
 
-/// Install before secure-environment copying. The caller owns profile gating.
-pub(crate) fn initialize(state: &mut LuaState) -> LuaResult<()> {
+/// One profile decision for publication and TOC/XML completion tracking.
+pub(crate) const fn enabled() -> bool {
+    use crate::client_profile::{ACTIVE, ClientProfile};
+    matches!(ACTIVE, ClientProfile::Ptr | ClientProfile::WowForever)
+}
+
+/// Install before secure-environment copying; only Forever publishes `require`.
+pub(crate) fn initialize(state: &mut LuaState, publish_require: bool) -> LuaResult<()> {
     let app = state
         .app_data_mut::<WowLuaAppData>()
         .ok_or_else(|| runtime_error("missing WowLuaAppData"))?;
@@ -48,8 +54,10 @@ pub(crate) fn initialize(state: &mut LuaState) -> LuaResult<()> {
             registry_set(state, key, table);
         }
     }
-    state.register_function("require", require_module)?;
-    // Reuse completed-module policy for the observed Forever import calls.
+    if publish_require {
+        state.register_function("require", require_module)?;
+    }
+    // Reuse completed-module policy for the original PTR/Forever import calls.
     // This does not establish native import/require semantic or identity parity.
     state.register_function("import", require_module)
 }
@@ -262,7 +270,7 @@ mod tests {
             global_slots: None,
             addon_modules: None,
         });
-        initialize(lua.state_mut()).unwrap();
+        initialize(lua.state_mut(), true).unwrap();
         lua
     }
 
@@ -581,7 +589,7 @@ mod tests {
             "executions = (executions or 0) + 1; return executions",
         )
         .unwrap();
-        initialize(lua.state_mut()).unwrap();
+        initialize(lua.state_mut(), true).unwrap();
         run(
             &mut lua,
             "assert(require('Addon.Once') == 1); assert(require('Addon.Once') == 1); assert(executions == 1)",

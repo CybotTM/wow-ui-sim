@@ -46,6 +46,8 @@ pub struct CVarStorage {
     registered_original_names: RwLock<HashMap<String, String>>,
     /// Runtime overrides (lowercase key -> value), persisted to disk.
     overrides: RwLock<HashMap<String, String>>,
+    /// Effective session-only values, never included in persisted overrides.
+    temporary_overrides: RwLock<HashMap<String, String>>,
     /// Path to persist overrides.
     storage_path: PathBuf,
 }
@@ -62,6 +64,7 @@ impl CVarStorage {
             registered_defaults: RwLock::new(HashMap::new()),
             registered_original_names: RwLock::new(HashMap::new()),
             overrides: RwLock::new(overrides),
+            temporary_overrides: RwLock::new(HashMap::new()),
             storage_path: path,
         }
     }
@@ -77,6 +80,7 @@ impl CVarStorage {
             registered_defaults: RwLock::new(HashMap::new()),
             registered_original_names: RwLock::new(HashMap::new()),
             overrides: RwLock::new(overrides),
+            temporary_overrides: RwLock::new(HashMap::new()),
             storage_path: path,
         }
     }
@@ -89,13 +93,16 @@ impl CVarStorage {
             .join("SavedVariables")
     }
 
-    /// Get a CVar value (override takes precedence over default).
+    /// Get the effective value (temporary, persisted, then default).
     pub fn get(&self, name: &str) -> Option<String> {
         let key = name.to_lowercase();
         if is_profile_removed_cvar_key(&key) {
             return None;
         }
-        // Check overrides first
+        if let Some(value) = self.temporary_overrides.read().unwrap().get(&key) {
+            return Some(value.clone());
+        }
+        // Persisted overrides remain separate from temporary effective values.
         if let Some(value) = self.overrides.read().unwrap().get(&key) {
             return Some(value.clone());
         }
@@ -132,6 +139,22 @@ impl CVarStorage {
             .insert(key, value.to_string());
         self.save();
         true
+    }
+
+    /// Set an effective temporary value without changing or saving persisted state.
+    pub(crate) fn set_temporary(&self, name: &str, value: &str) {
+        self.temporary_overrides
+            .write()
+            .unwrap()
+            .insert(name.to_lowercase(), value.to_owned());
+    }
+
+    /// Remove a temporary value so reads reveal the persisted value or default.
+    pub(crate) fn remove_temporary(&self, name: &str) {
+        self.temporary_overrides
+            .write()
+            .unwrap()
+            .remove(&name.to_lowercase());
     }
 
     /// Get all known CVar names in original case (defaults + overrides).

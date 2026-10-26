@@ -409,6 +409,11 @@ fn apply_atlas_setter(
     atlas_name: &str,
     set_button_field: fn(&mut crate::widget::Frame, String, (f32, f32, f32, f32)),
 ) -> LuaResult<()> {
+    // The button owns a texture region even when atlas pixels are unavailable.
+    let tex_id = ensure_button_texture_child(state, button_id, parent_key)?;
+    if let Some(tid) = tex_id {
+        sync_child_to_rilua(state, button_id, parent_key, tid)?;
+    }
     let Some(lookup) = crate::atlas::get_render_atlas_info(atlas_name) else {
         return Ok(());
     };
@@ -419,7 +424,6 @@ fn apply_atlas_setter(
         lookup.info.bottom_tex_coord,
     );
     let file = lookup.info.file.to_string();
-    let tex_id = ensure_button_texture_child(state, button_id, parent_key)?;
     let mut sim = borrow_state_mut(state)?;
     if let Some(tid) = tex_id {
         if let Some(tex) = sim.widgets.get_mut_visual(tid) {
@@ -435,10 +439,6 @@ fn apply_atlas_setter(
     let should_show = button_texture_should_show(&sim, button_id, parent_key);
     if let Some(tid) = tex_id {
         sim.widgets.set_visible(tid, should_show);
-    }
-    drop(sim);
-    if let Some(tid) = tex_id {
-        let _ = sync_child_to_rilua(state, button_id, parent_key, tid);
     }
     Ok(())
 }

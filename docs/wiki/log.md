@@ -5,6 +5,38 @@
 ## [2026-10-24] static producer | CF-2 selected-unit aura cleanup
 
 [Consumer and contradiction proof](investigations/consumer-selection-and-red-proof.md#cf-2-selected-unit-aura-cleanup) links the [contract](../specs/clear-blocked-auras.md): Retail/PTR clear the existing effective unit block set in place; three unchanged original-consumer selectors discriminate constant/no-op/wrong-unit/global clears. Nil rejection stays a separate authorized non-native policy. No build, test, slot or native-parity proof.
+## [2026-10-26] implementation | PTR SwingTimer declarations
+
+[Original SwingTimer constructor](investigations/ptr-edit-mode-declarations.md#swingtimer-declaration-boundary) reaches the exact Scale RED at800/801. Both pinned declaration families and metadata pass unchanged full-constructor GREEN through the existing runtime-only PTR gate. Exact master/GREEN stock stays216/282, with both new raw keys traced to the absent SwingTimer system map key at797. That next boundary remains unfixed. PTR/Retail/Era all-target checks have separate accepted receipts and zero warnings; formatting/readability pass.
+
+## [2026-10-26] proof | Forever temporary CVars
+
+[Single overlay and original listener identity](systems/forever-temporary-cvars.md) records original Gamepad/TargetLogic RED, persisted-file protection, authenticated normal/secure replay listeners, and the explicit unmodelled nil diagnostic. Four exact Forever GREEN cases pass at 70e4d148b. Stock remains byte-identical at 26/26→26/26, formatting passes and all seven canonical all-target checks have zero warnings at 6f50f3002. Accepted TTS bytes and historical nil deferral are unchanged.
+
+## [2026-10-26] implementation | Supplied active loss of control
+
+[Model and final proof](systems/lua-api.md#active-loss-of-control-state) link the [contract](../specs/active-loss-of-control.md). Byte-identical Retail original-display RED/GREEN, explicit overlay fixture, and positive Wrath absence pass. All seven raw stock maps are unchanged; all seven separate all-target checks pass with zero compiler warnings. PTR consumer proof is deferred to its original display-info initialization chain without fixture replacement.
+
+## [2026-10-25] proof | Mists supplied map display
+
+[Original group-provider proof](investigations/map-display-info-model.md#mists-original-onload-consumer--2026-10-25) passes exact corrected RED and supplied-state GREEN plus return-arity preservation. Stock 10/16→8/14 has no additions. Mists/Retail/Era/Anniversary all-target checks pass with zero warnings; formatting and readability pass. The actual OnLoad boundary precedes post-load fog-pin mutation; the separate defect is recorded, not fixed.
+
+## [2026-10-25] proof | PTR completed module imports
+
+[Original consumers and shared registry](systems/addon-module-imports.md#ptr-original-consumers--2026-10-25) link the [module contract](../specs/addon-module-imports.md#ptr-original-module-consumers): each exact selector rejects constant/no-op imports, original Utility identity and behavior pass, Forever preservation passes, and all seven all-target checks have zero warnings. The checkpoint separates traced raw stock-key replacements, cfg-equivalent proof carry-over and unsupported-profile runtime limits.
+
+## [2026-10-25] Retail/PTR proof | CF-2 party minimum
+
+[Original consumers](investigations/consumer-selection-and-red-proof.md#cf-2-party-minimum-staging) pass both exact RED→GREEN selectors on R/P; stock12/14→10/12 and244/312→242/310 has no additions/count changes. Lane tests remain isolated from removed TTS tests. Private fixture/producer imports and PTR TOC selection are repaired. R/P/Era all-target checks have zero warnings; formatting/readability and all 28 original-CVar guards pass. Mists remains deferred.
+
+## [2026-10-24] static producer | CF-2 party minimum
+
+[Producer and proof limits](investigations/consumer-selection-and-red-proof.md#static-producer-preparation) update the [contract](../specs/party-min-level-scenario-availability.md): Retail/PTR supplied roster minimum and subtype/random-filtered scenario projections, no new defaults or test edits. Producer-only RED child prepared for future slots; no runtime or compiler proof. Mists remains blocked on IsLFREnabled.
+
+## [2026-10-25] repair | Fog pin workaround scope
+
+[Template-only refresh](investigations/world-map-fog-of-war-overlay-model.md#post-load-workaround-scope) removes the provider.pin scan that copied fog callbacks onto unrelated pins. Original WorldMap group and highlight RED/GREEN pass on Retail, Mists and Era; original Retail fog refresh preservation passes. Stock maps remain exactly 12/14, 8/14 and 0/0, with no additions. All seven all-target checks have zero warnings; formatting and readability pass. Native SetUiMapID callback dispatch remains missing, so the fog refresh substitute stays.
+
 ## [2026-10-25] proof | Supplied social squelch
 
 [Original listing controls](investigations/consumer-selection-and-red-proof.md#supplied-social-squelch) pass the final three-profile false/true/false and isolation selector against byte-identical producer-only RED tests. Stock removes only the squelch pair on each profile; all-target, formatter and readability evidence is complete. Native account defaults and voice-provider policy remain excluded.
@@ -17,6 +49,41 @@
 
 [Sequential original-consumer proof](investigations/ptr-regional-names.md) distinguishes both missing calls before full GREEN. PTR clears all UnitFrame155 keys (296/410→272/348), with 6 added raw keys individually traced. Forever 70532 remains exactly 26/26; naming/graveyard preservation passes. Retail/PTR/Forever all-target checks satisfy zero/known-three warning limits.
 
+## [2026-10-25] proof | Final housing PTR/Retail acceptance
+
+[Final original-consumer proof](systems/housing-spatial-presence.md#final-ptrretail-acceptance): PTR housing GREEN/endpoint RED, talent false→true→false, Retail eight-state preservation, traced stock deltas, and zero-warning PTR/Retail all-target checks. The documented PTR unlock-level constant preserves Retail/Forever publication.
+
+## [2026-10-25] proof | Housing texture boundary and remaining PTR dependency
+
+[Accepted texture/retail gates](systems/housing-spatial-presence.md#texture-fix-acceptance-and-remaining-ptr-dependency): original PTR template RED/GREEN, Retail eight-state preservation, both all-target checks and formatting pass. PTR housing/talent remains blocked on separately owned IsWoWHack. Raw stock additions are traced without masking.
+
+## [2026-10-25] fix | Button atlas region lifetime
+
+[Original PTR template RED](systems/housing-spatial-presence.md#ptr-microbutton-region-lifetime) shows the shared active setter skipped region creation on a lookup miss. Restore region creation/publication before optional pixel application; no vendor or catalog fabrication. GREEN pending.
+
+## [2026-10-25] implementation | PTR talent-award history
+
+[Original startup RED](systems/housing-spatial-presence.md#ptr-talent-award-startup-boundary) identifies the declared C_SpecializationInfo endpoint. A supplied lifetime-history boolean avoids invented level/rank policy; the producer and false/true/false consumer test are staged for GREEN.
+
+## [2026-10-25] proof | Retail housing plot and PTR dependency
+
+[Accepted proof and limits](systems/housing-spatial-presence.md#accepted-retail-proof-and-ptr-dependency): repaired original Retail eight-state consumer GREEN, missing-producer RED, both interior selectors on both sides and six callable mutants. Final repaired-source checks are Retail zero warnings/PTR three allowed warnings. PTR eight-state acceptance is BLOCKED-ON the separate input-interface-style merge; no native policy or current PTR GREEN claim.
+
+## [2026-10-25] fixture | Housing bootstrap observer lifetime
+
+[Observed third-state failure and repair](systems/housing-spatial-presence.md#bootstrap-observer-lifetime): use the real bootstrap load phase so the first full addon load cannot replace the observed publisher. Assertions and production/vendor code are unchanged; paired repaired-fixture proof remains pending.
+
+## [2026-10-25] implementation | PTR keyring startup boundary
+
+[Original startup RED](systems/housing-spatial-presence.md#ptr-keyring-startup-boundary) links the [PTR capability contract](../specs/ptr-keyring-capability.md). Declared C_ActionBar.ShouldShowKeyring projects supplied action-bar state, without a C_Container alias or invented native constant. Original-consumer GREEN remains pending.
+
+## [2026-10-25] implementation | Housing plot blocker boundary
+
+[Current-house shape and startup](systems/housing-spatial-presence.md#current-house-shape-and-ptr-startup) links the [nullable snapshot contract](../specs/current-house-info.md): original tutorial data/utility fixture loads, state-backed documented HouseInfo and declared PTR-only SHARD_TRANSFER. Merged original-consumer RED observed; GREEN and final proof pending. Native policy remains unknown.
+
+## [2026-10-24] staged | Housing house-or-plot presence
+
+Added [spatial presence model](systems/housing-spatial-presence.md) and [contract](../specs/house-or-plot-presence.md), original registered-event selector, profile TOC evidence and static contradiction matrix. Runtime/compile gates remain pending; Forever's selected consumer and excluded downstream controls bootstrap are distinct.
 ## [2026-10-25] proof | Classic defensive aura timer completion
 
 The [completion matrix](../specs/aura-spell-classification-identifiers.md#classic-completion-proof--2026-10-25) records Era/Anniversary stock-timer RED/GREEN, original AuraUtil preservation and exact stock differences with no additions. Era/Anniversary all-target checks retain only the three permitted dead-code warnings; Retail has none. Known TTS residue remains separately owned, so no baseline is changed.
@@ -2878,6 +2945,9 @@ Updated [[club-membership]] and [bounded contract](../specs/club-self-invitation
 
 Ingested accepted laptop Q1 into the [Lua API notes](systems/lua-api.md#wrath-relic-class-capability) and [spec](../specs/wrath-unit-has-relic-slot.md). Class flags remain explicit inputs; unknown class mappings not invented. Edit-only, no runtime acceptance.
 
+## 2026-10-24 — CF-2 party minimum staging
+
+Linked party-minimum contract and selected ScenarioFinder XML/Lua proof recipe in consumer-selection notes/index. Both standalone selectors vary supplied roster and catalog bounds. No builds, observed RED/GREEN, stock capture or producer changes; Mists IsLFREnabled remains a separate possible setup blocker.
 ## [2026-10-24] source | Patch 12.1.7 I4a inherited accounting
 
 Updated [source audit](investigations/patch-12-1-7-api-audit.md#i4a-immutable-companion-not-applicability-acceptance), [contract](../specs/patch-12-1-7-source-accounting.md#i4a-inherited-applicability-worklist) and index for immutable companion accounting, explicit per-profile UNKNOWN source/selection/proof boundaries and grouped I4b selectors. I0 artifacts unchanged; no builds, cache observations or native/runtime acceptance.
@@ -2931,3 +3001,11 @@ Cargo rewrite byte-for-byte; runtime acceptance remains pending.
 ## [2026-10-25] fix | TTS publication gate
 
 [Verifier repair](investigations/cf2-tts-integration.md#publication-gate-repair) gates namespace creation and persistence by the pinned profile declarations. Wrath publication regression is RED before the fix; legacy applicability retains all TTS assertions and adds positive Wrath absence checks. Both merge-parent log histories remain intact. Checkpoint `7bc8208ca` passes55 fresh exact cases, Wrath/Retail all-target checks without warnings, zero-error sparse Wrath stock and formatting. Other historical all-target/persistence evidence is not relabeled as fresh.
+
+## 2026-10-25 — PTR Edit Mode declaration slice
+
+Recorded [declarations and original consumers](investigations/ptr-edit-mode-declarations.md), separate RED/GREEN selectors, supplied-map boundary, stock delta and the report-only SwingTimerSetting successor. Runtime ACTIVE gating preserves the single compiled implementation. PTR/Retail/Era full-feature all-target checks pass with zero JSON/plain warnings and separate accepted source-binding receipts; formatting and readability pass.
+
+## [2026-10-26] proof | Supplied supertracking restoration
+
+[Restored content obligations](systems/super-track-state.md#deferred-content-coverage-restoration) pass two exact original-consumer selectors on Retail/PTR/Forever. Each rejects the producer-subtracted sibling with identical test bytes. Existing supplied pairs, clear/re-entry and listener-time cache state need no producer changes. Fresh base/restoration stock maps are identical at 10/12, 216/282 and 26/26; zero-warning all-target checks, fmt and manual Rust readability pass. Broader quest/highlight and native-policy obligations remain unverified by this lane.

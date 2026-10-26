@@ -331,6 +331,7 @@ mod c_ping_texture_kits;
 pub use c_ping_texture_kits::PingTextureKits;
 #[cfg(any(feature = "retail-12-1-0", feature = "client-wowforever"))]
 mod c_cvar_readiness;
+pub mod c_loss_of_control;
 #[cfg(not(feature = "client-wrath"))]
 mod combat_audio_throttle;
 #[cfg(feature = "client-mists")]
@@ -352,6 +353,7 @@ pub mod private_aura_anchors;
 pub(crate) mod private_aura_callbacks;
 #[cfg(feature = "retail-12-0-5")]
 pub mod private_aura_sounds;
+pub(crate) mod ptr_edit_mode_enums;
 pub(crate) mod seconds_formatter;
 #[cfg(feature = "base-spell-relationships")]
 pub mod spell_base;

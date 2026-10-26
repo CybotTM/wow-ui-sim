@@ -5,6 +5,77 @@
 ## [2026-10-24] static producer | CF-2 selected-unit aura cleanup
 
 [Consumer and contradiction proof](investigations/consumer-selection-and-red-proof.md#cf-2-selected-unit-aura-cleanup) links the [contract](../specs/clear-blocked-auras.md): Retail/PTR clear the existing effective unit block set in place; three unchanged original-consumer selectors discriminate constant/no-op/wrong-unit/global clears. Nil rejection stays a separate authorized non-native policy. No build, test, slot or native-parity proof.
+## [2026-10-26] implementation | PTR SwingTimer declarations
+
+[Original SwingTimer constructor](investigations/ptr-edit-mode-declarations.md#swingtimer-declaration-boundary) links the [contract](../specs/ptr-edit-mode-declarations.md): all seven setting identifiers, three visibility choices and their metadata pass byte-identical original Scale-boundary RED/full-constructor GREEN. Stock stays216/282 with both replacement raw keys traced to the absent SwingTimer system key; that next boundary is unfixed. PTR/Retail/Era separate all-target receipts have zero warnings; formatting/readability pass. Other profiles keep their existing declaration paths.
+
+## [2026-10-26] proof | Supplied supertracking restoration
+
+[Content cache/listener preservation](systems/super-track-state.md#deferred-content-coverage-restoration) restores the two deferred supertracking obligations on Retail/PTR/Forever without producer changes. Each exact selector rejects a byte-identical producer-subtracted sibling. Stock maps remain 10/12, 216/282 and 26/26 with no raw-key/count changes; all three all-target checks have zero warnings, and fmt passes.
+
+## [2026-10-26] proof | Forever temporary CVars
+
+[Single overlay and original listener identity](systems/forever-temporary-cvars.md) links the [contract](../specs/c-factory-cf2-tts.md#forever-temporary-cvars): original Gamepad/TargetLogic RED, one effective/persisted store, original normal/secure listener discrimination, and explicit unsupported nil diagnostic. Four exact Forever GREEN cases, protected stock at 26/26→26/26 with no raw changes, formatting and all seven zero-warning all-target checks pass. Historical nil shape stays deferred.
+
+## [2026-10-26] implementation | Supplied active loss-of-control state
+
+[Active-effect model and proof](systems/lua-api.md#active-loss-of-control-state) link the [contract](../specs/active-loss-of-control.md): empty per-unit state, declared record shapes, explicit admin input and executed Wrath absence. Byte-identical Retail original-consumer RED/GREEN and the existing event overlay pass. All seven raw stock maps are unchanged, and all seven separate all-target checks have zero compiler warnings. PTR consumer proof remains explicitly deferred to the upstream display-info initialization chain; no failed OnLoad step is replaced.
+
+## [2026-10-25] implementation | PTR Edit Mode declarations
+
+[Two original boundaries](investigations/ptr-edit-mode-declarations.md) link the [contract](../specs/ptr-edit-mode-declarations.md): declaration-backed boss directions and Gamepad preset, independent exact RED/GREEN and 270/376→268/374 stock. Display-info:800 SwingTimerSetting is the traced successor, not part of this slice. The module compiles on all profiles and publishes only when ACTIVE is PTR. PTR/Retail/Era full-feature all-target checks pass with zero warnings and separate accepted source-binding receipts; formatting and readability pass.
+
+## [2026-10-25] proof | Mists supplied map display
+
+[Original group-provider proof](investigations/map-display-info-model.md#mists-original-onload-consumer--2026-10-25) links the [contract](../specs/map-display-info.md#mists-original-group-provider-contract): shared-model publication, original OnLoad-boundary RED/GREEN, identical RED tests and stock 10/16→8/14 without additions. Mists/Retail/Era/Anniversary all-target checks pass with zero warnings; formatting passes. A later fog-pin overwrite remains a separate, unfixed defect.
+
+## [2026-10-25] proof | PTR completed module imports
+
+[Original consumers and shared registry](systems/addon-module-imports.md#ptr-original-consumers--2026-10-25) link the [module contract](../specs/addon-module-imports.md#ptr-original-module-consumers): each exact selector rejects constant/no-op imports, original Utility identity and behavior pass, Forever preservation passes, and all seven all-target checks have zero warnings. The checkpoint separates traced raw stock-key replacements, cfg-equivalent proof carry-over and unsupported-profile runtime limits.
+
+## [2026-10-25] proof | Final housing PTR/Retail acceptance
+
+[Final original-consumer proof](systems/housing-spatial-presence.md#final-ptrretail-acceptance): PTR housing GREEN/endpoint RED, talent false→true→false, Retail eight-state preservation, traced stock deltas, and zero-warning PTR/Retail all-target checks. The documented PTR unlock-level constant preserves Retail/Forever publication.
+
+## [2026-10-25] proof | Housing texture boundary and remaining PTR dependency
+
+[Accepted texture/retail gates](systems/housing-spatial-presence.md#texture-fix-acceptance-and-remaining-ptr-dependency): original PTR template RED/GREEN, Retail eight-state preservation, both all-target checks and formatting pass. PTR housing/talent remains blocked on separately owned IsWoWHack. Raw stock additions are traced without masking.
+
+## [2026-10-25] fix | Button atlas region lifetime
+
+[Original PTR template RED](systems/housing-spatial-presence.md#ptr-microbutton-region-lifetime) shows the shared active setter skipped region creation on a lookup miss. Restore region creation/publication before optional pixel application; no vendor or catalog fabrication. GREEN pending.
+
+## [2026-10-25] implementation | PTR talent-award history
+
+[Original startup RED](systems/housing-spatial-presence.md#ptr-talent-award-startup-boundary) identifies the declared C_SpecializationInfo endpoint. A supplied lifetime-history boolean avoids invented level/rank policy; the producer and false/true/false consumer test are staged for GREEN.
+
+## [2026-10-25] proof | Retail housing plot and PTR dependency
+
+[Accepted proof and limits](systems/housing-spatial-presence.md#accepted-retail-proof-and-ptr-dependency): repaired original Retail eight-state consumer GREEN, missing-producer RED, both interior selectors on both sides and six callable mutants. Final repaired-source checks are Retail zero warnings/PTR three allowed warnings. PTR eight-state acceptance is BLOCKED-ON the separate input-interface-style merge; no native policy or current PTR GREEN claim.
+
+## [2026-10-25] fixture | Housing bootstrap observer lifetime
+
+[Observed third-state failure and repair](systems/housing-spatial-presence.md#bootstrap-observer-lifetime): use the real bootstrap load phase so the first full addon load cannot replace the observed publisher. Assertions and production/vendor code are unchanged; paired repaired-fixture proof remains pending.
+
+## [2026-10-25] implementation | PTR keyring startup boundary
+
+[Original startup RED](systems/housing-spatial-presence.md#ptr-keyring-startup-boundary) links the [PTR capability contract](../specs/ptr-keyring-capability.md). Declared C_ActionBar.ShouldShowKeyring projects supplied action-bar state, without a C_Container alias or invented native constant. Original-consumer GREEN remains pending.
+
+## [2026-10-25] implementation | Housing plot blocker boundary
+
+[Current-house shape and startup](systems/housing-spatial-presence.md#current-house-shape-and-ptr-startup) links the [nullable snapshot contract](../specs/current-house-info.md): original tutorial data/utility fixture loads, state-backed documented HouseInfo and declared PTR-only SHARD_TRANSFER. Merged original-consumer RED observed; GREEN and final proof pending. Native policy remains unknown.
+
+## [2026-10-24] staged | Housing house-or-plot presence
+
+[Spatial model and selected consumer](systems/housing-spatial-presence.md) links the [contract](../specs/house-or-plot-presence.md): existing area input, Retail/PTR registered-world-event selector, constant/no-op contradictions and Forever downstream TOC restriction. Static staging only; no compilation or runtime proof.
+
+## [2026-10-25] Retail/PTR proof | CF-2 party minimum
+
+[Original-consumer proof](investigations/consumer-selection-and-red-proof.md#cf-2-party-minimum-staging) passes specific/random RED→GREEN on Retail/PTR with original XML/Lua provenance and disjoint ID sets. Empty-catalog preservation passes. Stock R12/14→10/12 and P244/312→242/310 removes only GetMinLevel pairs, with no additions/count changes. R/P/Era all-target checks have zero warnings; formatting/readability pass. Mists remains a separate supplied-LFR boundary.
+
+## [2026-10-24] staged | CF-2 supplied party minimum
+
+[Original-consumer staging](investigations/consumer-selection-and-red-proof.md#cf-2-party-minimum-staging) links the [bounded contract](../specs/party-min-level-scenario-availability.md): Retail/PTR supplied party minimum and scenario catalog producer prepared statically, with unchanged selected-consumer tests and producer-only RED child. No compiled listing, observed RED/GREEN or stock proof. Mists remains LFR-blocked; no behavior added.
 ## [2026-10-25] investigation | Mists battlefield vehicles
 
 [Original vehicle consumer](investigations/mists-battlefield-vehicles.md) links the [contract](../specs/mists-battlefield-vehicles.md): pinned API declarations, selected WorldMap provider/pins and supplied per-map state. Original-consumer missing-call RED and supplied-pin GREEN pass. Both raw captures contain 12 keys / 18 occurrences; vehicle errors are replaced by individually traced existing DeathMap provider errors. Exact base reproduces the 12/18 BEFORE map, and byte-identical paired producer-only RED fails as required. Mists/Retail all-target checks pass with three inherited/zero warnings; formatting and readability pass.
@@ -3864,7 +3935,7 @@ The sixteen retail 12.0.0 `Enum.EditModeDamageMeterSetting.*` and `Enum.EditMode
 | [[root-region-render-order]] | Root-level regions in the same draw layer must sort by ascending creation id; the old reverse-id tie breaker made newer root regions draw underneath older ones |
 | [[world-map-create-texture-sublevel]] | World-map textures were created at sublevel 0 because `CreateTexture(..., subLevel)` ignored its fourth argument; immediate `SetDrawLayer()` repair churn is now gone |
 | [[world-map-fog-of-war-first-open-size]] | First-open world-map fog pins could keep a stale size because `FogOfWarPinMixin` only resized on canvas scale changes; simulator now patches size-change handling for existing and future pins |
-| [[world-map-fog-of-war-overlay-model]] | Current world map has no `UiMapFogOfWar` entry; simulator hides fake fog, seeds one real unexplored chunk, and now serves `C_MapExplorationInfo` from DB2-backed Rust handlers for non-current maps too |
+| [[world-map-fog-of-war-overlay-model]] | DB2-backed fog presence and exploration overlays; template-scoped post-load refresh leaves unrelated map pins unchanged |
 | [[mists-world-map-startup]] | Mists startup failures came from missing profile-cache files, escaped `Interface/AddOns` XML paths, QuestUtil reset timing, missing GameTooltipTemplate Lua, and narrow Mists-only proving-grounds/EditMode gaps |
 | [[world-map-texture-loading-budget]] | World map tile uploads were hidden in BC texture work; retained-path follow-up fixed cached-request selection, dirty-sentinel clobbering, inverted request priority, and the staged-vs-ready texture state bug; later Lua pin retries were simplified to single deferred refreshes; current live startup trace shows the first world-map `present` already textured while atlas-ready still climbs `6 -> 24 -> 33 -> 282 -> 335`, and later redraws continue because `strata_dirty=0x1c` stays set after `textures_pending=false`; a fresh no-world-map retained trace after the BC-negative cache change dropped peak `draw textures` from `482.2ms` to `283.2ms` and `bc_parse` from `240.6ms` to `139.2ms` |
 | [[dropdown-intrinsic-script-chain]] | Reputation dropdowns did not open because style-template scripts replaced intrinsic `DropdownButton` scripts; simulator now chains intrinsic handlers, stores `RegisterForMouse`, and propagates child mouse clicks to parents |

@@ -28,7 +28,6 @@ pub struct StartupInputs {
     pub match_complete: bool,
     pub target_spell_id: Option<i32>,
     pub character_tts_settings_saved: bool,
-    pub temporary_cvars: HashMap<String, String>,
     pub external_event: Option<ExternalEvent>,
     pub group_buff_alerts: Vec<GroupBuffAlert>,
 }
@@ -51,31 +50,36 @@ pub(crate) fn register(state: &mut LuaState) -> LuaResult<()> {
     register_character_queries(state)?;
     register_services(state)?;
     let cvar = ensure_namespace(state, "C_CVar")?;
+    // Forever 70532 CVarDocumentation.lua:171 and :114; both return no values.
+    table_set_rust_fn_static(state, cvar, "SetTempCVar", set_temporary_cvar)?;
     table_set_rust_fn_static(state, cvar, "RemoveTempCVar", remove_temporary_cvar)
+}
+
+fn set_temporary_cvar(state: &mut LuaState) -> LuaResult<u32> {
+    let name = String::from_stack(state, 1)?;
+    let value = match crate::lua_bridge::stack_val(state, 2) {
+        Val::Nil => {
+            return Err(rilua::runtime_error(
+                "SetTempCVar: unmodelled nil-value case; native semantics are unknown",
+            ));
+        }
+        // Original Gamepad/Core.lua supplies numbers to the cstring argument.
+        Val::Num(number) => number.to_string(),
+        _ => String::from_stack(state, 2)?,
+    };
+    borrow_state(state)?.cvars.set_temporary(&name, &value);
+    Ok(0)
 }
 
 fn remove_temporary_cvar(state: &mut LuaState) -> LuaResult<u32> {
     let name = String::from_stack(state, 1)?;
-    borrow_state_mut(state)?
-        .forever_startup
-        .temporary_cvars
-        .remove(&name.to_lowercase());
+    borrow_state(state)?.cvars.remove_temporary(&name);
     Ok(0)
 }
 
-/// Current scalar read: Forever's explicit temporary overlay precedes saved values.
+/// Lua and Rust current-value readers share the same effective CVar storage.
 pub(crate) fn read_current_cvar(state: &LuaState, name: &str) -> LuaResult<Option<String>> {
-    let sim = borrow_state(state)?;
-    if ACTIVE == ClientProfile::WowForever {
-        if let Some(value) = sim
-            .forever_startup
-            .temporary_cvars
-            .get(&name.to_lowercase())
-        {
-            return Ok(Some(value.clone()));
-        }
-    }
-    Ok(sim.cvars.get(name))
+    Ok(borrow_state(state)?.cvars.get(name))
 }
 
 fn register_services(state: &mut LuaState) -> LuaResult<()> {

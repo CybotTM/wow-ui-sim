@@ -103,11 +103,14 @@ pub(super) fn init_lua_state(
     #[cfg(feature = "retail-12-1-0")]
     crate::ptr::compat_bootstrap::init(lua)?;
     #[cfg(feature = "client-wowforever")]
-    {
-        lua.exec(include_str!("../workarounds/temporary/securecopy.lua"))?;
-        crate::loader::addon_modules::initialize(lua.state_mut())?;
-        rilua::table_security::register_table_security(lua)?;
+    lua.exec(include_str!("../workarounds/temporary/securecopy.lua"))?;
+    if crate::loader::addon_modules::enabled() {
+        let publish_require =
+            crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::WowForever;
+        crate::loader::addon_modules::initialize(lua.state_mut(), publish_require)?;
     }
+    #[cfg(feature = "client-wowforever")]
+    rilua::table_security::register_table_security(lua)?;
     trace_debug_getter_values(lua, "after_profile_bootstrap");
     // secureenv is shallow-copied from `_G` here. It keeps its copy of
     // the dangerous globals (dofile / loadfile / require / string.dump /

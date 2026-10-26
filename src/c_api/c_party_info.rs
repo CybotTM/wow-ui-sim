@@ -41,6 +41,12 @@ const AVAILABLE_LOOT_METHODS: [i32; 5] = [0, 1, 2, 3, 4];
 pub(crate) fn register_c_party_info_surface(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_PartyInfo")?;
     register_group_membership_probes(state, table_ref)?;
+    if matches!(
+        crate::client_profile::ACTIVE,
+        crate::client_profile::ClientProfile::Retail | crate::client_profile::ClientProfile::Ptr
+    ) {
+        table_set_rust_fn_static(state, table_ref, "GetMinLevel", c_party_info_get_min_level)?;
+    }
     register_loot_method_probes(state, table_ref)?;
     #[cfg(feature = "retail-12-0-5")]
     {
@@ -48,6 +54,23 @@ pub(crate) fn register_c_party_info_surface(state: &mut LuaState) -> LuaResult<(
         countdown::register(state, table_ref)?;
     }
     Ok(())
+}
+
+/// Minimum of the supplied player and active roster; no separate party snapshot.
+fn c_party_info_get_min_level(state: &mut LuaState) -> LuaResult<u32> {
+    let minimum = {
+        let sim = crate::lua_api::methods::borrow_state(state)?;
+        if sim.party_group_active {
+            sim.party_members
+                .iter()
+                .map(|member| member.level)
+                .fold(sim.player.level, i32::min)
+        } else {
+            sim.player.level
+        }
+    };
+    state.push(Val::Num(minimum as f64));
+    Ok(1)
 }
 
 fn register_group_membership_probes(

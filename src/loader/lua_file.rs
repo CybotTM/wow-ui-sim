@@ -32,18 +32,21 @@ pub fn load_lua_file(
 
     let timing_before = LuaFileTimingSnapshot::from_load_timing(timing);
     let func = compile_lua_file(env, &patched_source, &chunk_name, timing)?;
-    #[cfg(feature = "client-wowforever")]
-    let module = begin_addon_module(env, &func, path, ctx)?;
+    let module = if super::addon_modules::enabled() {
+        Some(begin_addon_module(env, &func, path, ctx)?)
+    } else {
+        None
+    };
     let execution = execute_lua_file(env, func, ctx, &chunk_name, timing);
-    #[cfg(feature = "client-wowforever")]
-    complete_addon_module(env, module, &execution)?;
+    if let Some(module) = module {
+        complete_addon_module(env, module, &execution)?;
+    }
     execution?;
     super::record_lua_file_timing(timing_before.diff(&chunk_name, timing));
 
     Ok(())
 }
 
-#[cfg(feature = "client-wowforever")]
 fn begin_addon_module(
     env: &LoaderEnv<'_>,
     function: &rilua::Function,
@@ -64,7 +67,6 @@ fn begin_addon_module(
     })
 }
 
-#[cfg(feature = "client-wowforever")]
 fn read_addon_module_dependencies(env: &LoaderEnv<'_>, name: &str) -> Vec<String> {
     let state = env.state().borrow();
     let addon = state
@@ -87,7 +89,6 @@ fn read_addon_module_dependencies(env: &LoaderEnv<'_>, name: &str) -> Vec<String
     )
 }
 
-#[cfg(feature = "client-wowforever")]
 fn complete_addon_module(
     env: &LoaderEnv<'_>,
     token: super::addon_modules::ModuleToken,
