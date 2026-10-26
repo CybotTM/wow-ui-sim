@@ -86,12 +86,15 @@ fn assert_no_engraving_errors(env: &WowLuaEnv) {
 #[test]
 fn original_bag_rune_icons_follow_supplied_mode_availability_and_slots() {
     let env = supplied_env();
-    env.exec(r#"
+    env.exec(
+        r#"
         ContainerFrame_RefreshRuneIcons(ContainerFrame1, C_Engraving.GetEngravingModeEnabled())
         assert(EngravingBagButtons[1].subicon:IsShown())
         assert(EngravingBagButtons[1].subicon:GetTexture() == 134400)
-        assert(EngravingBagButtons[2].subicon:GetTexture() == "Interface\\PaperDoll\\UI-Backpack-EmptySlot")
-    "#).unwrap();
+        assert(EngravingBagButtons[2].subicon:GetTexture() == 136509)
+    "#,
+    )
+    .unwrap();
     env.state().borrow_mut().engraving.mode_enabled = Some(false);
     env.exec(
         r#"
