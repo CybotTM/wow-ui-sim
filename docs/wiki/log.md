@@ -1,6 +1,6 @@
 ## [2026-10-26] proof | Complete PTR Mainline preset construction
 
-[Original preset proof](investigations/ptr-edit-mode-declarations.md#complete-original-mainline-preset-construction) records declared EndCap/SwingTimer indices and metadata, first-read RED/unchanged whole-file GREEN, concrete settings/anchors and shared maps. Stock134/154→130/148 has no added keys; original ClearBlockedAuras remains missing, and the stateful original SetUnit replay explains why fewer event-route errors do not prove an API repair. Newer aura stock124/140 is a different production base.
+[Original preset proof](investigations/ptr-edit-mode-declarations.md#complete-original-mainline-preset-construction) records declared EndCap/SwingTimer indices and metadata, first-read RED/unchanged whole-file GREEN, concrete settings/anchors and shared maps. Stock134/154→130/148 has no added keys; original ClearBlockedAuras remains missing, and the stateful original SetUnit replay explains why fewer event-route errors do not prove an API repair. Newer aura stock124/140 is a different production base. Seven separate all-target receipts have zero JSON/plain compiler warnings; formatting/readability and all nine current-byte CVar guards pass.
 
 ## [2026-10-26] implementation | Legacy tutorial request recorder
 

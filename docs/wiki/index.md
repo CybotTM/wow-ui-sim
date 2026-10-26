@@ -1,6 +1,6 @@
 ## [2026-10-26] proof | Complete PTR Mainline preset construction
 
-[Whole original-file proof](investigations/ptr-edit-mode-declarations.md#complete-original-mainline-preset-construction) links the [two-family contract](../specs/ptr-edit-mode-declarations.md): pinned EndCap and SwingTimer indices, byte-identical first-EndCap RED/whole-preset GREEN, distinct records and exact anchors in all three maps. Paired17baa stock134/154→130/148 removes four raw keys with no additions; event-route ClearBlockedAuras disappearance is not an API repair. Native layout policy and full Edit Mode lifecycle remain outside this proof.
+[Whole original-file proof](investigations/ptr-edit-mode-declarations.md#complete-original-mainline-preset-construction) links the [two-family contract](../specs/ptr-edit-mode-declarations.md): pinned EndCap and SwingTimer indices, byte-identical first-EndCap RED/whole-preset GREEN, distinct records and exact anchors in all three maps. Paired17baa stock134/154→130/148 removes four raw keys with no additions; event-route ClearBlockedAuras disappearance is not an API repair. All seven all-target checks have zero JSON/plain compiler warnings; formatting/readability and nine original-CVar guards pass. Native layout policy and full Edit Mode lifecycle remain outside this proof.
 
 ## [2026-10-26] implementation | Legacy tutorial request recorder
 

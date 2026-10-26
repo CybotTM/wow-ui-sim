@@ -64,6 +64,8 @@ Paired stock uses the accepted production base `17baa3e9a` (RED adds only tests/
 
 The original `ArenaUnitFrameDebuffMixin:SetUnit` at455–467 assigns `self.unitToken` before calling `Update`; a later identical token returns early. A diagnostic replay, without replacing any function or adding the missing API, resets only child-local tokens and calls original `RefreshMembers`: attempts1–5 fail at490 while assigned-member count advances1–5; attempt6 succeeds with the API still nil. Existing bootstrap guarded refreshes (`apply_system_anchors.lua:496,512`) can consume this state before the reported events. That ordering explanation is source-based inference; the replay proves the state mechanism, not the exact stock refresh schedule. Stock reduction must not be presented as native arena correctness. Newer master's124/140 aura baseline is separate from this lane's17baa base.
 
+All seven full-feature all-target checks (PTR, Retail, Wrath, Mists, Era, Anniversary, Forever) have separate accepted canonical slot-build receipts, zero Cargo JSON/plain compiler warnings or errors, and no dep-info errors. They cover producer `d125680f0` and documentation-only `dd6ab124d`; later documentation does not invalidate Rust proof. Formatting and changed-Rust manual readability pass. Nine guarded runtime invocations preserve the current persisted CVar bytes and full recorded stat/hash, using fresh child-only copies and O_NOATIME reads.
+
 ## Sources
 
 - [Contract](../../specs/ptr-edit-mode-declarations.md).
