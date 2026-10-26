@@ -32,7 +32,7 @@ pub(crate) fn active_profile_casc_product() -> &'static str {
         crate::client_profile::ClientProfile::Era
         | crate::client_profile::ClientProfile::Anniversary => "wow_classic_era",
         crate::client_profile::ClientProfile::Retail => "wow",
-        crate::client_profile::ClientProfile::WowForever => "wow_classic_beta",
+        crate::client_profile::ClientProfile::WowForever => "wowf",
     }
 }
 
@@ -182,8 +182,8 @@ mod tests {
 
     #[test]
     #[cfg(feature = "client-wowforever")]
-    fn wowforever_profile_selects_classic_beta_product() {
-        assert_eq!(super::active_profile_casc_product(), "wow_classic_beta");
+    fn wowforever_profile_selects_wowf_product() {
+        assert_eq!(super::active_profile_casc_product(), "wowf");
     }
 
     #[test]

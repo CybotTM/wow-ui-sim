@@ -21,6 +21,8 @@ struct PointerTemplateExpectation {
     offset: f32,
 }
 
+// Wrath has no ArrowCallout vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn arrow_callout_pointer_templates_define_atlases_and_looping_animation() {
     let ui = parse_xml_file(&arrow_callout_xml())
@@ -40,7 +42,9 @@ fn arrow_callout_pointer_templates_define_atlases_and_looping_animation() {
         assert_template_animation(frame, expectation);
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn arrow_callout_container_templates_define_expected_child_surface() {
     let ui = parse_xml_file(&arrow_callout_xml())
@@ -79,6 +83,7 @@ fn arrow_callout_container_templates_define_expected_child_surface() {
         Some(true),
         "`WidgetContainerCalloutTemplate` must be hidden by default"
     );
+}
 }
 
 fn pointer_template_expectations() -> &'static [PointerTemplateExpectation] {

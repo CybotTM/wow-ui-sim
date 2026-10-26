@@ -1,9 +1,13 @@
 //! Tests for the addon loader.
 
-mod account_store;
+post_wrath_ui_fixture! {
+    mod account_store;
+}
 mod button_text;
 mod button_textures;
 mod lua_loading;
+mod reload_factory_xml;
+mod reload_xml_cost;
 mod runtime_template_anchors;
 mod runtime_template_misc;
 mod runtime_template_parenting;
@@ -91,10 +95,12 @@ fn val_to_rust_string(env: &WowLuaEnv, value: Val) -> String {
         .unwrap_or_else(|| panic!("expected string value, got {}", value.type_name()))
 }
 
+post_wrath_ui_fixture! {
 fn blizzard_ui_dir() -> PathBuf {
     crate::client_profile::blizzard_ui_addons_dir_under(std::path::Path::new(env!(
         "CARGO_MANIFEST_DIR"
     )))
+}
 }
 
 /// Create a test environment, write XML content, load it, return context.
@@ -119,6 +125,7 @@ pub(super) fn load_test_xml(dir_suffix: &str, xml_content: &str) -> TestCtx {
         &xml_path,
         &ctx,
         &mut LoadTiming::default(),
+        &mut Vec::new(),
     )
     .unwrap();
 
@@ -196,7 +203,14 @@ fn preload_shared_templates(env: &WowLuaEnv) {
     )
     .unwrap();
     let loader_env = env.loader_env();
-    load_xml_file(&loader_env, &xml_path, &ctx, &mut LoadTiming::default()).unwrap();
+    load_xml_file(
+        &loader_env,
+        &xml_path,
+        &ctx,
+        &mut LoadTiming::default(),
+        &mut Vec::new(),
+    )
+    .unwrap();
 }
 
 #[test]

@@ -1,6 +1,7 @@
 use super::*;
 
 pub struct SimState {
+    pub wrath_relic_slot: crate::lua_api::globals::real::wrath_relic_slot::RelicSlotState,
     pub plain_global_inputs: crate::lua_api::globals::real::publication_12_0_0::PlainGlobalInputs,
     pub(crate) private_aura_anchors: crate::c_api::private_aura_anchors::PrivateAuraAnchors,
     /// Explicit pending records only; empty default and lifecycle are simulator policy.
@@ -14,7 +15,6 @@ pub struct SimState {
     >,
     #[cfg(feature = "retail-12-0-5")]
     pub(crate) nameplate_hit_test_insets: crate::c_api::c_nameplate_manager::NamePlateHitTestInsets,
-    #[cfg(feature = "client-wowforever")]
     pub(crate) input_interface_style: crate::c_api::c_input_interface_style::InputInterfaceStyle,
     /// Explicit mapped-stick input; None means no configured snapshot, not device absence.
     #[cfg(feature = "client-wowforever")]
@@ -26,6 +26,7 @@ pub struct SimState {
     #[cfg(feature = "client-wrath")]
     pub refer_a_friend_linked_guids: HashSet<String>,
     pub summon_friend_cooldown: crate::c_api::c_recruit_a_friend::SummonFriendCooldown,
+    pub raf_versions: Vec<crate::c_api::c_recruit_a_friend::RafVersionInfo>,
     pub widgets: WidgetRegistry,
     #[cfg(feature = "retail-12-1-5")]
     pub(crate) weather: crate::c_api::c_weather::WeatherState,
@@ -34,6 +35,9 @@ pub struct SimState {
     pub events: EventQueue,
     pub scripts: ScriptRegistry,
     pub console_output: Vec<String>,
+    /// Requested legacy tutorial IDs in call order; no flag, event or display policy.
+    pub tutorial_requests: Vec<i32>,
+    pub engraving: crate::c_api::engraving_inputs::EngravingInputs,
     pub timers: VecDeque<PendingTimer>,
     pub rilua_timers: VecDeque<crate::lua_api::timer_layout::RiluaPendingTimer>,
     /// Diagnostic strings only; remains empty without handler timing opt-in.
@@ -190,8 +194,8 @@ pub struct SimState {
     #[cfg(feature = "retail-12-0-0")]
     pub limited_input_allowed: [bool; 4],
     /// INFERRED empty host range inputs and tier-completion snapshots.
-    #[cfg(feature = "retail-12-0-0")]
-    pub action_spell_ranges: HashMap<u32, crate::c_api::c_action_bar_queries::ActionSpellRange>,
+    #[cfg(any(feature = "retail-12-0-0", feature = "client-wrath"))]
+    pub action_spell_ranges: HashMap<u32, crate::c_api::action_spell_range::ActionSpellRange>,
     #[cfg(feature = "retail-12-0-0")]
     pub weekly_reward_progress:
         HashMap<i32, Vec<crate::c_api::c_weekly_rewards::ActivityTierProgress>>,
@@ -275,7 +279,6 @@ pub struct SimState {
     pub outfit_situations_enabled: bool,
     /// Explicit filter values only; native defaults and set filtering are unmodeled.
     pub transmog_set_filters: HashMap<i32, bool>,
-    #[cfg(feature = "retail-12-0-0")]
     pub transmog_sets: crate::c_api::c_transmog_sets::TransmogSets,
     #[cfg(feature = "retail-12-0-0")]
     pub transmog_custom_sets: crate::c_api::c_transmog_collection::CustomSets,
@@ -303,8 +306,6 @@ pub struct SimState {
     pub spell_cooldown_categories: HashMap<u32, i32>,
     /// Item whose use started a spell's current cooldown, keyed by spell ID.
     pub spell_cooldown_item_sources: HashMap<u32, i32>,
-    /// Account-level transmog availability; the simulator enables it.
-    pub transmog_enabled: bool,
     /// `C_Roleset.ApplyRolesetFilters` blocklist, in applied order.
     pub active_blocked_rolesets: Vec<String>,
     /// `C_Roleset.ApplyRolesetFilters` allowlist, in applied order.
@@ -346,7 +347,7 @@ pub struct SimState {
     pub cooldown_aura_associations:
         crate::c_api::c_unit_aura_cooldown_spells::CooldownAuraAssociations,
     /// INFERRED explicit spell flags only; no classification catalog or acquisition.
-    #[cfg(feature = "retail-12-0-5")]
+    #[cfg(feature = "aura-spell-classifications")]
     pub aura_spell_classifications:
         crate::c_api::c_unit_aura_classification::AuraSpellClassifications,
     /// INFERRED host-declared sound IDs only; no Add acquisition or playback model.
@@ -359,9 +360,12 @@ pub struct SimState {
     #[cfg(feature = "base-spell-relationships")]
     pub base_spell_relationships: crate::c_api::spell_base::BaseSpellRelationships,
     pub spell_activation_overlays: HashSet<u32>,
-    #[cfg(feature = "retail-12-0-0")]
     pub challenge_completion: crate::c_api::c_challenge_mode::ChallengeCompletionInfo,
+    pub(crate) challenge_run: crate::c_api::challenge_run::ChallengeState,
+    pub(crate) manual_clock: Option<crate::lua_api::manual_clock::ManualClock>,
     pub spell_loss_of_control: HashMap<u32, LossOfControlInfo>,
+    pub active_loss_of_control:
+        HashMap<String, Vec<crate::c_api::c_loss_of_control::ActiveLossOfControlData>>,
     pub spell_flyouts: HashMap<u32, SpellFlyoutInfo>,
     pub action_profession_quality: HashMap<i32, ProfessionQualityInfo>,
     pub addon_base_paths: Vec<PathBuf>,
@@ -417,7 +421,7 @@ pub struct SimState {
     #[cfg(feature = "retail-12-0-0")]
     pub combat_audio_spec_settings: HashMap<(i32, i32), f64>,
     /// INFERRED shared throttle seconds by throttle type; unconfigured zero.
-    #[cfg(feature = "retail-12-0-0")]
+    #[cfg(not(feature = "client-wrath"))]
     pub combat_audio_throttles: HashMap<i32, f64>,
     /// Simulator tracking membership; empty initially, independent of task records.
     pub neighborhood_tracked_tasks: BTreeSet<i32>,
@@ -425,6 +429,9 @@ pub struct SimState {
     pub weapon_enchants: [Vec<crate::c_api::weapon_enchants::WeaponEnchant>; 3],
     pub sound_manager: Option<SoundManager>,
     pub last_sound_kit_requested: Option<u32>,
+    /// Last formatted Wrath UI error requested by the modeled quest feedback path.
+    #[cfg(feature = "client-wrath")]
+    pub last_ui_error_message: Option<String>,
     /// Last legacy string bytes, including unknown/ambiguous names; no playback implied.
     #[cfg(feature = "client-wrath")]
     pub last_sound_name_requested: Option<Vec<u8>>,
@@ -436,7 +443,6 @@ pub struct SimState {
     pub cooldown_viewer_cooldowns:
         std::collections::BTreeMap<i32, crate::c_api::c_cooldown_viewer::CooldownViewerCooldown>,
     /// Explicit supplied availability; independent of cooldown catalog and UI settings.
-    #[cfg(feature = "retail-12-0-0")]
     pub cooldown_viewer_availability: crate::c_api::c_cooldown_viewer::CooldownViewerAvailability,
     #[cfg(feature = "retail-12-1-0")]
     pub last_sound_request: Option<crate::c_api::c_sound::PlaySoundRequest>,
@@ -477,6 +483,7 @@ pub struct SimState {
     pub action_ui_buttons: Vec<(u64, u32)>,
     pub cursor_item: Option<CursorInfo>,
     pub container_actions: crate::c_api::container_actions::ContainerActions,
+    pub item_upgrade_eligibility: crate::c_api::item_upgrade_eligibility::ItemUpgradeEligibility,
     pub loading_addon_index: Option<u16>,
     pub loading_addon_stack: Vec<u16>,
     pub executing_addon_index: Option<u16>,
@@ -526,6 +533,9 @@ pub struct SimState {
     pub crafting: CraftingState,
     pub net_stats: NetStats,
     pub store_frame_shown: bool,
+    /// Host observations; absence is not evidence of an ineligible group.
+    pub store_public_eligibility:
+        crate::c_api::store_public_eligibility::GroupEligibilityObservations,
     pub timerunning_season_id: Option<u32>,
     pub timerunning_season_seconds_remaining: u64,
     pub modifier_keys: ModifierKeys,
@@ -549,6 +559,16 @@ pub struct SimState {
     pub lfg_list_counts: LfgListCounts,
     pub lfg_active_entry: Option<crate::lua_api::state_types::LfgActiveEntry>,
     pub can_use_premade_group: bool,
+    /// Supplied Mists LFR service availability; None leaves native policy unknown.
+    pub lfr_availability: Option<bool>,
+    /// Supplied transmog availability; None leaves native policy unknown.
+    pub transmog_availability: crate::c_api::transmog_availability::TransmogAvailability,
+    /// Forever: None is unset, Some(None) is an explicit no-result observation.
+    pub forever_outfits: Option<Option<Vec<crate::c_api::outfit_entry::OutfitEntry>>>,
+    /// Supplied Mists scenario eligibility and failure reason; None leaves policy unknown.
+    pub scenario_finder_availability: Option<(bool, String)>,
+    /// Supplied Mists active-party minimum; None leaves native policy unknown.
+    pub mists_party_min_level: Option<f64>,
     pub lfg_category_info: std::collections::HashMap<i32, LfgCategoryInfo>,
     pub lfg_active_categories: std::collections::HashSet<i32>,
     pub lfg_queued_dungeons: std::collections::HashMap<i32, std::collections::BTreeSet<i32>>,
@@ -577,6 +597,7 @@ pub struct SimState {
     pub artifact_relic_items: HashSet<i32>,
     pub quest_log: Vec<u32>,
     pub quest_log_entries: QuestLogState,
+    pub super_track: crate::c_api::c_super_track::SuperTrackState,
     /// Explicit ordinary-watch metadata; seeded once, not derived on every query.
     #[cfg(feature = "client-wowforever")]
     pub quest_watch_types: HashMap<i32, crate::c_api::QuestWatchType>,
@@ -595,16 +616,20 @@ pub struct SimState {
     #[cfg(feature = "retail-12-0-7")]
     pub quest_short_expiration_warnings: HashSet<u32>,
     pub abandon_quest_id: Option<u32>,
-    pub tracked_achievements: HashSet<i32>,
+    /// Unique tracked IDs in insertion order, shared by legacy tracking globals.
+    pub tracked_achievements: Vec<i32>,
     /// Supplied legacy trainer visibility: available, unavailable, used.
     #[cfg(feature = "client-wrath")]
     pub wrath_trainer_filters: [bool; 3],
+    /// Host inputs for Forever 70532; other profiles do not publish these probes.
+    pub forever_startup: crate::c_api::forever_startup::StartupInputs,
     pub bank_frame_open: bool,
     pub guild_bank_frame_open: bool,
     pub bank_purchased_slots: i32,
     pub guild_bank_money: i64,
     pub current_guild_bank_tab: i32,
     pub guild_bank_items: HashMap<(i32, i32), BagItem>,
+    pub guild_bank_tabs: Vec<GuildBankTab>,
     pub merchant_frame_open: bool,
     #[cfg(feature = "client-wowforever")]
     pub merchant_repair_capable: bool,
@@ -614,6 +639,13 @@ pub struct SimState {
     pub loot_frame_open: bool,
     pub guild_registrar_open: bool,
     pub pet_stables_open: bool,
+    /// Supplied modern observations; None does not invent native initial membership.
+    pub stable_active_pets: Option<Vec<crate::c_api::c_stable_info::active_list::PetInfo>>,
+    /// Missing key is unknown; None is an explicit empty slot observation.
+    pub stable_pet_slots: HashMap<u32, Option<crate::c_api::c_stable_info::active_list::PetInfo>>,
+    /// Supplied specialization catalog; None is not an observed empty list.
+    pub stable_pet_spec_infos:
+        Option<Vec<crate::c_api::c_stable_info::pet_spec_infos::PetSpecInfo>>,
     #[cfg(any(feature = "retail-12-0-0", feature = "client-wowforever"))]
     pub allow_recent_allies_see_location: bool,
     #[cfg(feature = "client-wowforever")]
@@ -637,6 +669,8 @@ pub struct SimState {
     pub pet_actions: Vec<PetActionSlot>,
     pub glyph: GlyphState,
     pub currency_info: HashMap<i32, CurrencyInfo>,
+    /// Explicit Wrath-only legacy categories; modern currency queries do not read this.
+    pub wrath_currency: super::super::globals::real::wrath_currency::CurrencyListState,
     #[cfg(feature = "client-retail")]
     pub(crate) currency_list: crate::c_api::currency_list::CurrencyListState,
     /// Explicit (War Mode applies, limit once per tooltip) flags; no inferred catalog.
@@ -685,6 +719,10 @@ pub struct SimState {
     #[cfg(feature = "retail-12-0-0")]
     pub bnet_custom_message: String,
     pub social_friends: Vec<SocialFriend>,
+    pub social_restrictions: SocialRestrictionsState,
+    /// Wrath selection retains identity when the display projection changes.
+    #[cfg(feature = "client-wrath")]
+    pub selected_friend_guid: Option<String>,
     pub auction_browse_results: Vec<AuctionBrowseResult>,
     pub auction_replicate_items: Vec<AuctionReplicateItem>,
     pub auction_owned: Vec<OwnedAuction>,
@@ -715,6 +753,11 @@ pub struct SimState {
     pub factions: Vec<FactionEntry>,
     pub selected_faction_index: i32,
     pub watched_faction_index: i32,
+    /// Explicit map observations, visible only while is_active_battlefield is true.
+    pub battlefield_vehicles: ::std::collections::HashMap<
+        i32,
+        Vec<crate::c_api::c_pvp::battlefield_vehicles::BattlefieldVehicle>,
+    >,
     pub battlefield_queue: BattlefieldQueue,
     pub battlefield_minimap_visible: bool,
     pub chat_channels: Vec<ChatChannel>,
@@ -725,6 +768,8 @@ pub struct SimState {
     pub pending_duel: Option<String>,
     pub pending_resurrect: Option<String>,
     pub corpse_available: bool,
+    /// Supplied corpse coordinates by UI map; never inferred from player position.
+    pub corpse_map_positions: HashMap<i32, (f64, f64)>,
     pub active_trade: Option<TradeState>,
     pub open_panels: ::std::collections::HashSet<String>,
     pub is_party_lfg: bool,
@@ -798,6 +843,18 @@ pub struct SimState {
     pub debug_borders: bool,
     pub debug_anchors: bool,
     pub simulator_exit_requested: bool,
+    pub ui_reload_requested: bool,
+    /// Explicit host-supplied cinematic playback state; no playback engine implied.
+    pub cinematic_active: bool,
+    /// World entry is distinct from IsLoggedIn; supplied/transitioned by the owner.
+    pub in_world: bool,
+    /// Wrath reload's temporary protected-action phase, not the player's combat bit.
+    pub reload_allows_protected_actions: bool,
+    /// Supplied readiness of the two account CVar chunks; not a network client.
+    pub account_cvar_chunks_ready: [bool; 2],
+    pub(crate) account_cvar_callback_pending: bool,
+    /// Simulator lifecycle marker, not a native event-order assertion.
+    pub ui_reloaded: bool,
 }
 
 impl SimState {

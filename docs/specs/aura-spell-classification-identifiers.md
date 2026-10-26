@@ -8,7 +8,7 @@ All model, representation, miss and security policies below are **INFERRED simul
 
 ### Explicit classification input
 
-- [x] Own a public `AuraSpellClassification` record with independent `is_big_defensive: bool` and `is_private: bool` fields and `Clone`, `Copy`, `Default` (both false). Own public `AuraSpellClassifications { pub spells: HashMap<u32, AuraSpellClassification> }`, empty `Default`, under `retail-12-0-5` with a public per-environment `SimState.aura_spell_classifications` field.
+- [x] Own a public `AuraSpellClassification` record with independent `is_big_defensive: bool` and `is_private: bool` fields and `Clone`, `Copy`, `Default` (both false). Own public `AuraSpellClassifications { pub spells: HashMap<u32, AuraSpellClassification> }`, empty `Default`, under `aura-spell-classifications` (Retail12.0.5+, Forever, Era and Anniversary) with a public per-environment `SimState.aura_spell_classifications` field.
 - [x] Use only explicitly declared resolved spell-ID records. Fixture101=(true,false),202=(false,true),303=(true,true),404=(false,false) covers both flags independently. No manufactured production catalog.
 - [x] Each API returns exactly one **public boolean**, corresponding to its independent flag; missing resolved records and unseeded public strings return false.
 - [x] Host replacement/removal and alias mutation take effect immediately. Queries leave records, aliases and caller input unchanged; environments isolate their inputs.
@@ -38,12 +38,36 @@ All model, representation, miss and security policies below are **INFERRED simul
 ## Implementation inventory
 
 - `src/c_api/c_unit_aura_classification.rs`: unchanged independent bool record/empty explicit map; sole two getters read a copied resolved-ID record or default and push the corresponding public boolean.
-- `src/lua_api/globals/register.rs`: `retail-12-0-5` registration after existing aura namespace/state initialization.
-- `src/c_api/mod.rs`: unchanged public `retail-12-0-5` module declaration.
+- `src/lua_api/globals/register.rs`: shared capability registration after existing aura namespace/state initialization; `AuraIsPrivate` publication remains Retail12.0.5+ only.
+- `src/c_api/mod.rs`: public `aura-spell-classifications` module declaration.
 - `src/lua_api/state/sim_state.rs`: public feature-gated classification input next to cooldown associations.
 - `src/lua_api/state.rs`: empty default initializer next to cooldown associations.
 - `src/c_api/c_spell.rs`: `read_public_spell_identifier_at` shares strict public validation/conservative actual-VM secret rejection across both classification getters and the cooldown getter, then calls the unchanged alias-first `read_spell_identifier_at` resolver.
 - `src/c_api/c_unit_aura_cooldown_spells.rs`: existing getter now calls the shared validator; public number/nil results and API-specific errors preserved.
+
+## Forever publication — 2026-10-22
+
+The shared capability exposes only the existing defensive getter on Forever; other profiles and Forever's unrelated nil members retain their behavior. The [original T6 callback attribution and proof](c-namespace-nil-members.md#forever-original-opaque-timer-pair--2026-10-22) owns the stock failure boundary and original-consumer regression. No model, catalog or security policy changes.
+
+## Era/Anniversary publication — 2026-10-25
+
+Both pinned profiles declare `AuraIsBigDefensive` in `Blizzard_APIDocumentationGenerated/UnitAuraDocumentation.lua:50`, with required `SpellIdentifier` at line55 and nonnil boolean at line60. Only these two profiles gain the existing `aura-spell-classifications` capability; `AuraIsPrivate` publication remains unchanged.
+
+The [Classic callback investigation](../wiki/investigations/classic-startup-producer-cascades.md#opaque-private-aura-timers) owns the original timer attribution. `tests/classic_startup_residuals.rs` exercises the stock queued-callback boundary; `tests/cfactory_t6_opaque.rs` preserves original AuraUtil supplied-true/miss behavior and unrelated-member absence. No new model, functions, catalog, identifier policy or native classifications.
+
+### Classic completion proof — 2026-10-25
+
+Runtime proof covers `e90dc385a` (producer `12adc03ad`; later changes are documentation only). Each test case has an exact one-test list followed by one execution. All new runtimes used a fresh byte-exact copy of current CVars; O_NOATIME guards confirm that the persisted original did not change.
+
+| Boundary | Era | Anniversary | Proof limit |
+|---|---|---|---|
+| `classic_startup_residuals::classic_original_startup_timers_complete_without_lua_errors` | RED at `91472bc52`; GREEN at `e90dc385a` | RED at `91472bc52`; GREEN at `e90dc385a` | Each RED has four erased nil calls plus four reporter echoes. Saved original-callback replay on valid `5d867ef38` seals provides Blizzard-line attribution, not a second RED selector. |
+| Original AuraUtil `original_aura_util_classifies_an_unlisted_spell` and `original_aura_util_reads_declared_defensive_classification` | Both PASS | Both PASS | Preservation: cached false, supplied true/miss, one return and unrelated/private-member absence. The stock missing-callee RED alone does not reject constant false. |
+| Stock startup against preserved master `5d867ef38` | 4 keys/10 occurrences → 2/2 | 4 keys/10 occurrences → 2/2 | Exactly eight timer/echo occurrences removed; no added keys or changed retained counts. Both cached source trees match their saved snapshots. |
+| `cargo check --all-targets`, `sound,gui,casc,tools,client-<profile>`, `-j1` | PASS | PASS | Each has only three known `dead_code` warnings: `find_original_frame`, `original_on_click`, `original_script`. Retail also PASS with zero warnings. Cargo JSON and plain-text stderr reviewed. |
+| Formatting and changed-Rust readability | PASS | PASS | Reused valid `12adc03ad` evidence; `e90dc385a` changes documentation only. |
+
+The remaining two keys are the known missing `C_TTSSettings.MarkCharacterSettingsSaved` call and its ScriptErrors echo, unchanged in both profiles. The separate TTS lane owns that repair. They are not native-unknown residue, so this lane changes no `docs/baselines` files. No GUI, full-suite, native spell-catalog or native security-policy acceptance is claimed. Canonical slot-guard receipts accepted all continuation builds/checks; no rejected artifact was executed.
 
 ## Tests asserting this spec
 

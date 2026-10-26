@@ -10,6 +10,8 @@ const QUEST_CHOICE_EVENTS: &[&str] = &[
     "QUEST_ACCEPTED",
 ];
 
+// Wrath has no AdventureMap vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn quest_choice_provider_on_added_registers_exact_events() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -57,6 +59,7 @@ fn quest_choice_provider_on_added_registers_exact_events() {
 
         assert_provider_event_surface(surface);
     });
+}
 }
 
 type ProviderEventSurface = (i64, bool, bool, bool, Option<String>, bool, i64);

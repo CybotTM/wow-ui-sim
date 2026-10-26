@@ -20,6 +20,8 @@ const CURRENCY_INFO_METHODS: &[(&str, rilua::RustFn)] = &[
     ("SetCurrencyBackpack", set_currency_backpack),
     #[cfg(feature = "client-retail")]
     ("SetCurrencyBackpackByID", set_currency_backpack_by_id),
+    #[cfg(feature = "client-retail")]
+    ("SetCurrencyUnused", set_currency_unused),
     ("GetCurrencyListSize", c_currency_get_list_size),
     ("GetCurrencyListInfo", c_currency_get_list_info),
     (
@@ -45,7 +47,11 @@ const CURRENCY_INFO_METHODS: &[(&str, rilua::RustFn)] = &[
         c_currency_get_war_resources_currency_id,
     ),
 ];
-const CURRENCY_LIST_INFO_HASH_FIELDS: usize = 9;
+const CURRENCY_LIST_INFO_HASH_FIELDS: usize = if cfg!(feature = "client-retail") {
+    12
+} else {
+    9
+};
 const CURRENCY_INFO_HASH_FIELDS: usize = 24;
 const CURRENCY_DISPLAY_INFO_HASH_FIELDS: usize = 6;
 const GOLD_COIN_ICON_FILE_ID: i32 = 133784;
@@ -53,6 +59,8 @@ const SILVER_COIN_ICON_FILE_ID: i32 = 133785;
 const COPPER_COIN_ICON_FILE_ID: i32 = 133786;
 
 pub(super) fn register_c_currency_info(state: &mut LuaState) -> LuaResult<()> {
+    #[cfg(feature = "client-wrath")]
+    crate::lua_api::globals::real::wrath_currency::register(state)?;
     let table_ref = ensure_namespace(state, "C_CurrencyInfo")?;
     for &(name, func) in CURRENCY_INFO_METHODS {
         table_set_rust_fn_static(state, table_ref, name, func)?;
@@ -162,6 +170,23 @@ fn read_currency_list_entry(
     }
 }
 
+#[cfg(feature = "client-retail")]
+fn set_currency_unused(state: &mut LuaState) -> LuaResult<u32> {
+    let index = i32::from_stack(state, 1)?;
+    let unused = bool::from_stack(state, 2)?;
+    let Some(entry) = read_currency_list_entry(state, index)? else {
+        return Ok(0);
+    };
+    if entry.is_header {
+        return Ok(0);
+    }
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(info) = sim.currency_info.get_mut(&entry.currency_id) {
+        info.is_type_unused = unused;
+    }
+    Ok(0)
+}
+
 fn c_currency_get_list_info(state: &mut LuaState) -> LuaResult<u32> {
     let index = i32::from_stack(state, 1)?;
     let Some(entry) = read_currency_list_entry(state, index)? else {
@@ -192,6 +217,13 @@ fn c_currency_get_list_info(state: &mut LuaState) -> LuaResult<u32> {
     {
         let watched = borrow_state(state)?.currency_list.is_watched(entry);
         table_set_static(state, info, "isShowInBackpack", Val::Bool(watched));
+        table_set_static(
+            state,
+            info,
+            "isTypeUnused",
+            Val::Bool(display.is_type_unused),
+        );
+        table_set_static(state, info, "discovered", Val::Bool(display.discovered));
     }
     #[cfg(feature = "client-retail")]
     if entry.is_header {

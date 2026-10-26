@@ -5,6 +5,7 @@ use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use wow_ui_sim::font::WowFontSystem;
 use wow_ui_sim::lua_api::WowLuaEnv;
+use wow_ui_sim::saved_variables::SavedVariablesManager;
 use wow_ui_sim::startup::{apply_delay, run_extra_update_ticks, settle_headless_startup};
 
 pub(super) fn run_gui(dispatch: CommandDispatch) -> Result<(), Box<dyn std::error::Error>> {
@@ -61,7 +62,7 @@ fn headless_click_probe_plan(
     }
 }
 
-pub(super) fn dispatch_screenshot(dispatch: CommandDispatch) {
+pub(super) fn dispatch_screenshot(mut dispatch: CommandDispatch) {
     let Some(Commands::Screenshot {
         output,
         width,
@@ -75,7 +76,8 @@ pub(super) fn dispatch_screenshot(dispatch: CommandDispatch) {
         unreachable!("dispatch_screenshot only fires for Commands::Screenshot");
     };
     run_screenshot(
-        &dispatch.env,
+        &mut dispatch.env,
+        &mut dispatch.saved_vars,
         &dispatch.font_system,
         ScreenshotCommand {
             output,
@@ -254,11 +256,12 @@ pub(super) struct ScreenshotCommand<'a> {
 }
 
 pub(super) fn run_screenshot(
-    env: &WowLuaEnv,
+    env: &mut WowLuaEnv,
+    saved_vars: &mut Option<SavedVariablesManager>,
     font_system: &Rc<RefCell<WowFontSystem>>,
     command: ScreenshotCommand<'_>,
 ) {
-    prepare_screenshot_env(env, &command);
+    prepare_screenshot_env(env, saved_vars, &command);
     let (batch, glyph_atlas) = build_screenshot_batch(
         env,
         font_system,
@@ -282,12 +285,22 @@ pub(super) fn run_screenshot(
     );
 }
 
-fn prepare_screenshot_env(env: &WowLuaEnv, command: &ScreenshotCommand<'_>) {
+fn prepare_screenshot_env(
+    env: &mut WowLuaEnv,
+    saved_vars: &mut Option<SavedVariablesManager>,
+    command: &ScreenshotCommand<'_>,
+) {
     settle_headless_startup(env);
+    env.service_headless_reload(saved_vars)
+        .expect("screenshot startup ReloadUI failed");
     env.set_screen_size(command.width as f32, command.height as f32);
     wow_ui_sim::debug_helpers::debug_show_game_menu(env);
     run_screenshot_exec_lua(env, command);
+    env.service_headless_reload(saved_vars)
+        .expect("screenshot script ReloadUI failed");
     run_extra_update_ticks(env, 3);
+    env.service_headless_reload(saved_vars)
+        .expect("screenshot timer ReloadUI failed");
     apply_delay(command.delay);
 }
 
@@ -446,4 +459,31 @@ fn create_texture_manager(env: &WowLuaEnv) -> Rc<RefCell<wow_ui_sim::texture::Te
     mgr.preload_talent_panel_textures(&config.player_class);
     drop(mgr);
     texture_manager
+}
+
+#[cfg(test)]
+mod reload_tests {
+    use super::*;
+
+    #[test]
+    fn reload_ui_screenshot_owner_observes_fresh_environment() {
+        let mut env = WowLuaEnv::new().unwrap();
+        let command = ScreenshotCommand {
+            output: PathBuf::from("unused.webp"),
+            width: 800,
+            height: 600,
+            filter: None,
+            crop: None,
+            png: false,
+            delay: None,
+            exec_lua: Some("reload_sentinel = true; ReloadUI()"),
+            exec_lua_secure: false,
+            dump_tree: None,
+        };
+        prepare_screenshot_env(&mut env, &mut None, &command);
+        assert!(
+            env.eval::<bool>("return reload_sentinel == nil").unwrap(),
+            "screenshot must service reload before building render output"
+        );
+    }
 }

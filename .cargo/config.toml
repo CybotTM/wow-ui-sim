@@ -1,3 +1,4 @@
+# Keep non-local sections in sync with config.ci.toml.
 [target.x86_64-unknown-linux-gnu]
 linker = "clang"
 rustflags = ["-C", "target-cpu=native", "-C", "link-arg=-fuse-ld=mold", "-C", "link-arg=-Wl,--thread-count=4"]
@@ -12,6 +13,9 @@ rustflags = ["-C", "link-arg=-Wl,--stack,33554432"]
 
 [build]
 jobs = 4
+
+[env]
+WOW_UI_SIM_TEST_SOURCE_ROOT = { value = "", relative = true, force = true }
 
 [alias]
 xtask = "run --package xtask --"

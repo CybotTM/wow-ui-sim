@@ -8,6 +8,8 @@ const ROOT: &str = "Blizzard_AzeriteEssenceUI";
 const PASSIVE_ONE_SLOT: i32 = 1;
 const MILESTONE_ID: i32 = 50;
 
+// AzeriteEssenceUI vendor handlers/templates do not ship in Wrath; modeled API probes stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_azerite_essence_ui_unlock_milestone_updates_slot_frame() {
     common::with_perf_lock(|| {
@@ -95,6 +97,7 @@ fn blizzard_azerite_essence_ui_unlock_milestone_updates_slot_frame() {
             });
         });
     });
+}
 }
 
 fn seed_unlock_milestone_state(state: &mut SimState) {

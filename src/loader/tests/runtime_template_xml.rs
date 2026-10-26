@@ -177,9 +177,18 @@ fn test_runtime_button_template_inherits_texture_slots() {
 
 #[test]
 fn test_runtime_template_partitioned_child_binds_private_method_handlers() {
-    let t = load_test_xml(
-        "runtime-template-partitioned-private-method-handlers",
-        r#"
+    // INFERRED as native Wrath behavior; tests the modeled generic XML dispatcher.
+    assert_partitioned_child_handlers("Frame");
+}
+
+#[cfg(feature = "aura-xml-widgets")]
+#[test]
+fn test_runtime_aura_container_partitioned_child_binds_private_method_handlers() {
+    assert_partitioned_child_handlers("AuraContainer");
+}
+
+fn assert_partitioned_child_handlers(widget_type: &str) {
+    let xml = r#"
         <Ui xmlns="http://www.blizzard.com/wow/ui/">
             <Script>
                 PartitionedAuraPrivateMixin = {}
@@ -211,8 +220,11 @@ fn test_runtime_template_partitioned_child_binds_private_method_handlers() {
                 </Frames>
             </Frame>
         </Ui>
-        "#,
-    );
+        "#;
+    let xml = xml
+        .replace("<AuraContainer", &format!("<{widget_type}"))
+        .replace("</AuraContainer>", &format!("</{widget_type}>"));
+    let t = load_test_xml("runtime-template-partitioned-private-method-handlers", &xml);
 
     t.assert_lua_true(
         "return PartitionedAuraContainerParent.Auras ~= nil",
@@ -580,6 +592,7 @@ fn test_xml_instance_keeps_inherited_checkbutton_parent_key() {
         .unwrap();
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn test_catalog_shop_file_prefix_numeric_error_probe() {
     let env = WowLuaEnv::new().expect("lua env");
@@ -644,8 +657,7 @@ fn test_catalog_shop_file_prefix_numeric_error_probe() {
                     &env.loader_env(),
                     &file,
                     &ctx,
-                    &mut LoadTiming::default(),
-                )
+                    &mut LoadTiming::default(), &mut Vec::new())
                 .unwrap_or_else(|error| panic!("{} should load: {error}", file.display()));
             }
             _ => continue,
@@ -667,7 +679,9 @@ fn test_catalog_shop_file_prefix_numeric_error_probe() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn test_catalog_shop_xml_numeric_error_without_main_onload() {
     let env = WowLuaEnv::new().expect("lua env");
@@ -740,8 +754,7 @@ fn test_catalog_shop_xml_numeric_error_without_main_onload() {
         &env.loader_env(),
         &xml_path,
         &ctx,
-        &mut LoadTiming::default(),
-    )
+        &mut LoadTiming::default(), &mut Vec::new())
     .unwrap_or_else(|error| panic!("{} should load: {error}", xml_path.display()));
     let errors = env.state().borrow().lua_errors.clone();
     let targeted: Vec<_> = errors
@@ -753,6 +766,7 @@ fn test_catalog_shop_xml_numeric_error_without_main_onload() {
         targeted.is_empty(),
         "CatalogShop xml still introduced numeric load error with product card layout disabled: {targeted:?}"
     );
+}
 }
 
 #[test]

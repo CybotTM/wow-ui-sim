@@ -3,7 +3,7 @@
 #[path = "common/publication_sweep.rs"]
 mod publication_sweep;
 
-use publication_sweep::{SweepSpec, run_factory_publication_sweep, run_publication_sweep};
+use publication_sweep::{SweepSpec, run_publication_sweep, run_sweep};
 use wow_ui_sim::lua_api::WowLuaEnv;
 
 const REGISTER: &str = include_str!("../data/patch-api/sources/3.0.2-wikitext-register.json");
@@ -100,7 +100,7 @@ fn patch_3_0_2_exact_factory_publication_gaps() {
         "current-retail interface: {}",
         wow_ui_sim::client_profile::ACTIVE_INTERFACE_VERSION
     );
-    run_factory_publication_sweep(&env, &SPEC);
+    run_sweep(&env, &SPEC, std::collections::BTreeMap::new);
 }
 
 #[test]

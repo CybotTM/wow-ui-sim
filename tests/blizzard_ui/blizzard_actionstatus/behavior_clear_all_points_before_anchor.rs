@@ -1,5 +1,14 @@
 //! Anchor reset behavior for `Blizzard_ActionStatus`.
 
+#![cfg(any(
+    feature = "client-retail",
+    feature = "client-ptr",
+    feature = "client-mists",
+    feature = "client-era",
+    feature = "client-anniversary",
+    feature = "client-wowforever"
+))]
+
 use crate::common::blizzard_addon_harness::with_blizzard_addon_smoke_shape;
 
 const ROOT: &str = "Blizzard_ActionStatus";

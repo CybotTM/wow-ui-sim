@@ -34,6 +34,7 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_major_factions_find_toc_resolves_bare_variant() {
     let resolved =
@@ -48,7 +49,9 @@ fn blizzard_major_factions_find_toc_resolves_bare_variant() {
          `find_toc_file` resolves to the bare file after the `_Mainline.toc` lookup misses"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_major_factions_toc_declares_eager_load_with_default_allow_load_game() {
     let toc = TocFile::from_file(&major_factions_toc()).expect("Blizzard_MajorFactions TOC parses");
@@ -108,7 +111,9 @@ fn blizzard_major_factions_toc_declares_eager_load_with_default_allow_load_game(
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_major_factions_toc_lists_seven_files_in_load_order() {
     let toc = TocFile::from_file(&major_factions_toc()).expect("Blizzard_MajorFactions TOC parses");
@@ -128,7 +133,9 @@ fn blizzard_major_factions_toc_lists_seven_files_in_load_order() {
          + virtual-template pairs co-located"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_major_factions_directory_holds_ten_entries() {
     let entries = std::fs::read_dir(major_factions_dir())
@@ -143,7 +150,9 @@ fn blizzard_major_factions_directory_holds_ten_entries() {
          their respective sibling .xml files"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_major_factions_auto_discovered_on_game_screen_only() {
     let game_addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Game);
@@ -174,6 +183,7 @@ fn blizzard_major_factions_auto_discovered_on_game_screen_only() {
              reputation context, no MAJOR_FACTION_* event source)"
         );
     }
+}
 }
 
 prefork_full_ui_case! {
@@ -639,6 +649,7 @@ fn blizzard_major_factions_renown_toast_inherits_celebration_banner(env: &WowLua
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_major_factions_localization_module_is_empty_placeholder() {
     let raw = std::fs::read_to_string(major_factions_dir().join("Localization.lua"))
@@ -657,4 +668,5 @@ fn blizzard_major_factions_localization_module_is_empty_placeholder() {
          contract; either appearing here would mean Blizzard added per-locale post-load \
          tweaks (a meaningful upstream change worth flagging)"
     );
+}
 }

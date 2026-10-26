@@ -1,5 +1,7 @@
 //! H1 consumer tests. Cache files are inputs, never edited; no native oracle.
-use super::test_support::{build_test_app, rebuild_hittable_cache};
+use super::test_support::build_test_app;
+#[cfg(feature = "client-retail")]
+use super::test_support::rebuild_hittable_cache;
 use super::*;
 use crate::render::{GlyphAtlas, QuadBatch, WowFontSystem};
 use crate::screen::ScreenKind;

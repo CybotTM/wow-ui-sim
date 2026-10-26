@@ -79,7 +79,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     register_world_namespace_surfaces(state)?;
     register_social_namespace_surfaces(state)?;
     register_group_activity_surfaces(state)?;
-    Ok(())
+    c_api::forever_startup::register(state)
 }
 
 fn register_legacy_global_shims(lua: &mut rilua::Lua) -> LuaResult<()> {
@@ -252,6 +252,7 @@ fn register_world_activity_surfaces(state: &mut LuaState) -> LuaResult<()> {
         quest_choice::register_quest_choice_surface(state)?;
     }
     scenario_info::register_scenario_info_surface(state)?;
+    c_api::challenge_run::register(state)?;
     warband_scene::register_warband_scene_surface(state)?;
     #[cfg(any(feature = "retail-12-1-0", feature = "client-wowforever"))]
     c_api::c_player_choice::register_c_player_choice_surface(state)?;
@@ -295,6 +296,7 @@ fn register_group_activity_surfaces(state: &mut LuaState) -> LuaResult<()> {
     c_api::c_death_recap::register_c_death_recap_surface(state)?;
     c_api::c_discord::register_c_discord_surface(state)?;
     c_api::c_party_info::register_c_party_info_surface(state)?;
+    c_api::c_guild_info::register(state)?;
     player_info::register_player_info_surface(state)?;
     c_api::c_lfg_info::register_c_lfg_info_surface(state)?;
     c_api::c_pet_battles::register_c_pet_battles_surface(state)?;

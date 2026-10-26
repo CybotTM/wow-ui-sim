@@ -24,6 +24,7 @@ end
 return table.concat(failures, "\n")
 "#;
 
+post_wrath_ui_fixture! {
 #[test]
 fn auth_challenge_ui_public_globals_exist_after_load() {
     common::with_perf_lock(|| {
@@ -53,4 +54,5 @@ fn auth_challenge_ui_public_globals_exist_after_load() {
             });
         });
     });
+}
 }

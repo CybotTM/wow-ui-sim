@@ -83,14 +83,21 @@ fn require_is_module_lookup_on_both_forever_environments() {
         .eval("local public = pcall(require, 'os'); local secure = pcall(__secureenv.require, 'os'); return public, secure")
         .unwrap();
     assert!(!public_ok, "Forever does not expose host package loading");
-    assert!(!secure_ok, "secure Forever imports use the same addon registry");
+    assert!(
+        !secure_ok,
+        "secure Forever imports use the same addon registry"
+    );
 }
 
 #[test]
-fn import_is_only_available_on_forever_in_both_environments() {
+fn import_is_only_available_on_module_profiles_in_both_environments() {
     let env = env();
     let (g, secure) = probe(&env, "import");
-    let expected = if cfg!(feature = "client-wowforever") {
+    let expected = if matches!(
+        wow_ui_sim::client_profile::ACTIVE,
+        wow_ui_sim::client_profile::ClientProfile::Ptr
+            | wow_ui_sim::client_profile::ClientProfile::WowForever
+    ) {
         "function"
     } else {
         "nil"

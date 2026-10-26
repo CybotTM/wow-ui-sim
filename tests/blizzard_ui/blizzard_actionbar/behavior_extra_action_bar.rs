@@ -212,6 +212,7 @@ const SPELL_ID: u32 = 100;
 const EXPECTED_ICON_FILE_DATA_ID: i64 = 132337;
 const EXPECTED_ICON_SUFFIX: &str = "Ability_Warrior_Charge";
 
+post_wrath_ui_fixture! {
 #[test]
 fn extra_action_button_show_and_icon_round_trip_through_update_events() {
     test_timeout! {
@@ -350,4 +351,5 @@ fn extra_action_button_show_and_icon_round_trip_through_update_events() {
         );
     });
     }
+}
 }

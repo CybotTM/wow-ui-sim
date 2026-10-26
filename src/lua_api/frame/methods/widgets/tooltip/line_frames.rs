@@ -76,6 +76,10 @@ fn ensure_tooltip_line_id(
     if let Some(existing_id) =
         find_existing_tooltip_line_id(state, tooltip_id, right_side, line_index)
     {
+        if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
+            let mut sim = borrow_state_mut(state)?;
+            record_tooltip_line_child_id(&mut sim, tooltip_id, existing_id, right_side, line_index);
+        }
         return Ok(Some(existing_id));
     }
 
@@ -163,6 +167,7 @@ pub(super) fn sync_tooltip_line_frame(
     let Some(line) = line else {
         return Ok(None);
     };
+    let wrap = line.wrap;
     let (text, color, text_segments) = tooltip_line_frame_content(line, right_side);
     let stripped = text
         .as_ref()
@@ -173,6 +178,10 @@ pub(super) fn sync_tooltip_line_frame(
         frame.text_stripped = stripped;
         frame.text_color = color;
         frame.text_segments = text_segments;
+        if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
+            frame.word_wrap = !right_side && wrap;
+            frame.visible = frame.text.as_ref().is_some_and(|text| !text.is_empty());
+        }
     }
     Ok(Some(line_id))
 }
@@ -268,6 +277,9 @@ fn add_texture_line(
 
 pub(super) fn add_texture(state: &mut LuaState) -> LuaResult<u32> {
     let tooltip_id = frame_id_from_stack(state, 1)?;
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
+        return super::wrath::attach_texture(state, tooltip_id);
+    }
     let texture = match stack_val(state, 2) {
         Val::Num(value) if value >= 0.0 => Some(TooltipTexture::FileDataId(value as u32)),
         value => val_to_string(state, value)

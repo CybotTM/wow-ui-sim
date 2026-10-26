@@ -13,7 +13,11 @@ mod task_quest;
 #[cfg(feature = "client-wrath")]
 mod wrath_gossip;
 #[cfg(feature = "client-wrath")]
+mod wrath_objectives;
+#[cfg(feature = "client-wrath")]
 mod wrath_quest_log;
+#[cfg(feature = "client-wrath")]
+mod wrath_quest_watch;
 
 use crate::lua_api::methods::create_table;
 use rilua::Val;

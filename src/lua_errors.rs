@@ -25,7 +25,8 @@ struct UniqueLuaError {
 /// We restore it before printing JSON so only JSON goes to stdout.
 /// `exec_lua` is optional Lua code to execute after startup events.
 pub fn run_lua_errors(
-    env: &WowLuaEnv,
+    env: &mut WowLuaEnv,
+    saved_vars: &mut Option<crate::saved_variables::SavedVariablesManager>,
     saved_stdout: Option<i32>,
     exec_lua: Option<&str>,
     exec_lua_secure: bool,
@@ -36,6 +37,8 @@ pub fn run_lua_errors(
     collect_lua_error_startup(env);
 
     restore_stderr(saved_stderr);
+    env.service_headless_reload(saved_vars)
+        .expect("lua-errors startup ReloadUI failed");
 
     // Restore stdout BEFORE exec-lua so user `print(...)` lands on the
     // real stdout, not the stderr-redirect that startup logging used.
@@ -68,7 +71,11 @@ pub fn run_lua_errors(
         if let Err(e) = env.exec_maybe_secure(&probe_code, exec_lua_secure) {
             call_error_handler(&mut env.rilua_mut(), &format!("[exec-lua] error: {e}"));
         }
+        env.service_headless_reload(saved_vars)
+            .expect("lua-errors script ReloadUI failed");
         run_lua_error_update_ticks(env);
+        env.service_headless_reload(saved_vars)
+            .expect("lua-errors timer ReloadUI failed");
     }
 
     print_rehash_stats();

@@ -101,6 +101,8 @@ return dialog.height,
        dialog.pointY or 0
 "#;
 
+// Wrath has no AdventureMap vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn quest_dialog_refresh_details_branches_on_widgets_rewards_and_portrait() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -132,6 +134,7 @@ fn quest_dialog_refresh_details_branches_on_widgets_rewards_and_portrait() {
             },
         );
     });
+}
 }
 
 #[derive(Clone, Copy)]

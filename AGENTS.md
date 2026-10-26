@@ -12,14 +12,14 @@
 
 - Standing user authorization: delete binary artifacts from merged or superseded epochs under `~/.local/state/wow-ui-sim/{verification,handoff}`. Binary artifacts are ELF executables, rlib/rmeta/so/a files, and copied target/deps/incremental trees. Keep all text evidence and hashes. Record each deleted path, size and sha256 in a manifest. Skip epochs that active agents use and epochs modified in the last 6 hours.
 
-- Reuse the canonical `target/` by default. Alternate `CARGO_TARGET_DIR` caches are limited to four reusable slots: `~/.cache/wow-ui-sim-targets/slot-{0,1,2,3}`. Never create per-task, per-revision, or per-worktree target directories. Check active use before reassigning or pruning a slot; preserve proof logs and sealed artifacts outside build caches.
+- Reuse the canonical `target/` by default. Alternate `CARGO_TARGET_DIR` caches are limited to four reusable slots: `~/.cache/wow-ui-sim-targets/slot-{0,1,2,3}`. Never create per-task, per-revision, or per-worktree target directories. Slot builds must use `scripts/slot-build.py`: `CARGO_INCREMENTAL=1` relies on its fixed BindPaths source path per slot. [Measurement](~/.local/state/wow-ui-sim/handoff/compile-throughput-20261025/stablepath-experiment.md): touch 781→90 CPU-s, one-line edit 694→71 CPU-s, about 4.4 GiB for the measured workload, not a growth bound. The launcher prunes owned slots above a configurable cap; see [slot limits and usage](docs/remote-builds.md#local-slot-builds). Check active use before reassigning or pruning a slot; preserve proof logs and sealed artifacts outside build caches.
 
 - `python3 scripts/build-host.py --build-host desktop --run -- <args>` builds and runs in desktop WSL; `--build-host local` does both here. Bare Cargo remains local.
 - `--bin wow-cli`, `--release`, `--features`, and `--no-default-features` preserve their Cargo meanings. Alternate client profiles require `--no-default-features`.
 - `python3 scripts/build-host.py --test --test integration FILTER -- --nocapture` runs targeted Rust tests; `--test` must be the last helper option. `python3 scripts/build-host.py --check` checks without launching.
 - PTR: `python3 scripts/build-host.py --no-default-features --features sound,gui,casc,client-ptr --test --test integration FILTER -- --nocapture`; replace the test tail with `--check` to check that profile.
 - `--save-build-host desktop|local` changes the shared default at `~/.config/game-engine/build-host`. Host failures never select another host. Native tool selection: desktop pinned Rust 1.98.1 via rustup; local installed Arch Cargo/rustc, no rustup (observed 2026-10-10: `/usr/bin/cargo` and `/usr/bin/rustc` 1.99.0; state, not a pin). Record actual `cargo -V` and `rustc -Vv` for build evidence.
-- Full suite runs async only: `full-suite submit [ref] --profile PROFILE --target-dir SLOT --build-jobs 1`, then continue other work; check `full-suite status [ref]` later. Profile defaults to retail; select each of seven profiles explicitly for matrix coverage. Target slot is required; build jobs default to 1, separate from nextest workers (default 16). See [runner policy](docs/remote-builds.md#asynchronous-full-suite). Never wait or poll synchronously on it or on long builds.
+- Full suite runs async only: `full-suite submit SHA --profile PROFILE --target-dir SLOT --build-jobs 1`, then continue other work; check `full-suite status SHA` later. Profile defaults to retail; select each of seven profiles explicitly for matrix coverage. Target slot is required; build jobs default to 1, separate from nextest workers (default 16). See source-binding/default-REF warnings in [runner policy](docs/remote-builds.md#asynchronous-full-suite). Never wait or poll synchronously on it or on long builds.
 - Match admission CPU usage and capacity to the measured cgroup; caller-local `nproc` can reflect only a polling service's quota. The shared helper uses `getconf _NPROCESSORS_ONLN` for an unlimited host-wide slice. See [CPU scope](docs/remote-builds.md#local-admission-cpu-scope).
 - Shared runner: `/syncthing/Sync/Projects/world-of-osso/game-engine/scripts/`; `BUILD_HOST_SCRIPTS` overrides its location. Runtime caches/assets belong to the selected host; see [native workflow](docs/remote-builds.md).
 
@@ -31,6 +31,7 @@
 
 - Before treating missing CASC mappings as a blocker, follow [the mapping refresh workflow](docs/updating-blizzard-ui-to-a-new-patch.md): refresh and regenerate the listfile, rebuild, then investigate residual misses.
 
+- Before claiming RED or applicability, prove the original consumer is runtime-selected (TOC flavor/[Game]/[Family]/AllowLoad/ExcludeLoadGameType), and that each RED selector alone rejects constant/no-op producers; otherwise label it preservation. See [consumer selection and RED proof](docs/wiki/investigations/consumer-selection-and-red-proof.md).
 - Do not jump to local UI or output-layer patches just because they are the fastest visible fix.
 - Treat render/layout/UI mismatches as evidence first, not as proof that the render/layout/UI layer is the right fix target.
 - If a framework or Blizzard/vendor path is behaving badly, prefer fixing the simulator/model/input state first unless evidence shows the downstream layer itself is wrong.
@@ -313,7 +314,7 @@ cargo release-linux
 cargo release-current
 ```
 
-These aliases build both `wow-sim` and `wow-cli` with `--release --no-default-features --features sound,gui`. This intentionally excludes the `fast-build` feature so release builds use non-dynamic iced. The `gui` feature requires `casc`, so release GUI builds always include CASC asset loading.
+These aliases build both `wow-sim` and `wow-cli` with `--release --no-default-features --features sound,gui,tools`. This intentionally excludes the `fast-build` feature so release builds use non-dynamic iced. The `gui` feature requires `casc`, so release GUI builds always include CASC asset loading.
 
 ### CLI Arguments
 
@@ -388,6 +389,10 @@ Three-part horizontally-stretched button used for most Blizzard UI action button
 - `--filter` matches frame **display names** (global name or `.parentKey`) per-frame, printing only matching frames
 - `--filter-key` matches display names and prints the **full subtree** of matching frames — use this to explore a frame's children
 - Debug script hook: `src/main.rs` loads `/tmp/debug-scrollbox-update.lua` before GUI starts (not available in dump command)
+
+## Utility binary builds
+
+Direct Cargo builds/runs of `wow-cli`, `panel-visual-metrics`, `bench_talents`, `bench_spellbook`, and `bench_steady_state` require `--features tools` (before `--`). Use `cargo build --bin wow-cli --features tools` or `cargo build --bins --features tools`; GUI-gated benches still require `gui`. Build before using bare `wow-cli` commands; the executable has no runtime `--features` flag. The build-host helper and release aliases enable `tools` automatically. See [utility builds](README.md#utility-binary-builds).
 
 ## CLI Tools
 

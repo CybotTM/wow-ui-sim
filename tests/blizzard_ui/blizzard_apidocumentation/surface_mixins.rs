@@ -87,6 +87,8 @@ const API_KIND_MIXIN_TYPES: &[(&str, &str)] = &[
     ("TablesAPIMixin", "table"),
 ];
 
+// APIDocumentation vendor handlers/templates do not ship in Wrath; modeled API probes stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn api_documentation_mixin_exposes_expected_methods() {
     with_blizzard_addon_startup_shape(&[], &[], |env, _loaded| {
@@ -106,7 +108,9 @@ fn api_documentation_mixin_exposes_expected_methods() {
         }
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn base_api_mixin_exposes_expected_methods() {
     with_blizzard_addon_startup_shape(&[], &[], |env, _loaded| {
@@ -124,7 +128,9 @@ fn base_api_mixin_exposes_expected_methods() {
         }
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn systems_api_mixin_inherits_base_and_exposes_expected_overrides() {
     with_blizzard_addon_startup_shape(&[], &[], |env, _loaded| {
@@ -160,7 +166,9 @@ fn systems_api_mixin_inherits_base_and_exposes_expected_overrides() {
         }
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn api_kind_mixins_return_dispatch_type_strings() {
     with_blizzard_addon_startup_shape(&[], &[], |env, _loaded| {
@@ -177,6 +185,7 @@ fn api_kind_mixins_return_dispatch_type_strings() {
             );
         }
     });
+}
 }
 
 fn load_api_documentation(env: &wow_ui_sim::lua_api::WowLuaEnv) {

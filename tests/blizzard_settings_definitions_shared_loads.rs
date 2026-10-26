@@ -8,7 +8,8 @@ use wow_ui_sim::startup::fire_startup_events_for_screen;
 use wow_ui_sim::toc::TocFile;
 
 fn blizzard_ui_dir() -> PathBuf {
-    wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available")
+    wow_ui_sim::paths::default_blizzard_ui_addons_path()
+        .expect("Blizzard UI cache should be available")
 }
 
 fn definitions_shared_dir() -> PathBuf {
@@ -67,6 +68,8 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_bare_toc() {
     let resolved = find_toc_file(&definitions_shared_dir())
@@ -82,7 +85,9 @@ fn find_toc_file_resolves_bare_toc() {
          text-preview entries"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_declares_eager_both_with_four_hard_deps_and_per_character_saved_vars() {
     let toc = TocFile::from_file(&definitions_shared_toc())
@@ -149,7 +154,9 @@ fn toc_declares_eager_both_with_four_hard_deps_and_per_character_saved_vars() {
          and sees no badges despite never having opened settings on that char"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_raw_bytes_pin_load_saved_variables_first_for_pre_lua_sv_loading() {
     let raw = std::fs::read_to_string(definitions_shared_toc())
@@ -175,7 +182,9 @@ fn toc_raw_bytes_pin_load_saved_variables_first_for_pre_lua_sv_loading() {
          Blizzard_Colors, Blizzard_AccessibilityTemplates"
     ));
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn family_placeholder_in_toc_body_resolves_to_mainline_subdir() {
     let toc = TocFile::from_file(&definitions_shared_toc())
@@ -215,7 +224,9 @@ fn family_placeholder_in_toc_body_resolves_to_mainline_subdir() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_body_first_seven_entries_are_cross_flavor_files_in_declared_order() {
     let toc = TocFile::from_file(&definitions_shared_toc())
@@ -249,7 +260,9 @@ fn toc_body_first_seven_entries_are_cross_flavor_files_in_declared_order() {
          declare the remaining cross-flavor mixins"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn appears_on_every_screen_eager_discovery() {
     let ui = blizzard_ui_dir();
@@ -272,7 +285,9 @@ fn appears_on_every_screen_eager_discovery() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn root_directory_holds_eight_top_level_lua_xml_files_plus_mainline_subdir() {
     let dir = definitions_shared_dir();
@@ -317,6 +332,7 @@ fn root_directory_holds_eight_top_level_lua_xml_files_plus_mainline_subdir() {
              `[AllowLoadGameType mainline]` postfix filter"
         );
     }
+}
 }
 
 prefork_full_ui_case! {

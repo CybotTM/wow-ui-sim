@@ -120,6 +120,7 @@ type SearchProgressProbe = (
     String,
 );
 
+post_wrath_ui_fixture! {
 #[test]
 fn search_progress_bar_on_update_writes_ratio_times_max_then_self_clears_on_completion() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -285,4 +286,5 @@ fn search_progress_bar_on_update_writes_ratio_times_max_then_self_clears_on_comp
              would have failed first."
         );
     });
+}
 }

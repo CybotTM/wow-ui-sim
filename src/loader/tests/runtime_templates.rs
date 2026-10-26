@@ -629,8 +629,7 @@ fn test_runtime_template_local_mixin_and_key_value_apply() {
         &env.loader_env(),
         &xml_path,
         &ctx,
-        &mut LoadTiming::default(),
-    )
+        &mut LoadTiming::default(), &mut Vec::new())
     .unwrap();
 
     let result: String = env

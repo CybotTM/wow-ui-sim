@@ -5,6 +5,8 @@ use crate::common::blizzard_addon_harness::with_blizzard_addon_startup_shape;
 const ROOT: &str = "Blizzard_AddOnList";
 const TEST_ADDON: &str = "InitialShowProbeAddon";
 
+// Wrath has no AddonList vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn initial_show_and_update_populates_scroll_rows_for_registered_addons() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -44,6 +46,7 @@ fn initial_show_and_update_populates_scroll_rows_for_registered_addons() {
             "`AddonList_Update()` must include the explicitly registered probe addon in the ScrollBox rows"
         );
     });
+}
 }
 
 fn register_probe_addon(env: &wow_ui_sim::lua_api::WowLuaEnv) {

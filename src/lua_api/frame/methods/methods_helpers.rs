@@ -43,7 +43,7 @@ pub fn can_change_protected_state_for(state: &mut LuaState, id: u64) -> bool {
     let Ok(sim) = borrow_state(state) else {
         return true;
     };
-    !sim.player.in_combat || !frame_blocks_protected_state(&sim.widgets, id)
+    !sim.in_combat_lockdown() || !frame_blocks_protected_state(&sim.widgets, id)
 }
 
 pub fn frame_blocks_protected_state(widgets: &WidgetRegistry, id: u64) -> bool {

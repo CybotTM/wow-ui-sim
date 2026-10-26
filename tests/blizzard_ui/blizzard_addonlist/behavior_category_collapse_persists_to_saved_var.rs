@@ -6,6 +6,8 @@ use wow_ui_sim::lua_api::AddonInfo;
 const ROOT: &str = "Blizzard_AddOnList";
 const PROBE_ADDON: &str = "AddonListCategoryCollapseProbe";
 
+// Wrath has no AddonList vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn category_collapse_persists_to_saved_variable_and_rebuilt_tree() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -131,6 +133,7 @@ fn category_collapse_persists_to_saved_variable_and_rebuilt_tree() {
             "`AddonList_Update` must show child addon nodes after expansion"
         );
     });
+}
 }
 
 type CategoryCollapseProbe = (bool, bool, bool, bool, bool, bool, bool, bool);

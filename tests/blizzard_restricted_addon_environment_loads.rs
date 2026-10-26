@@ -141,6 +141,8 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_bare_toc() {
     let resolved = find_toc_file(&restricted_dir())
@@ -155,7 +157,9 @@ fn find_toc_file_resolves_bare_toc() {
          tries `_Mainline.toc` first (miss) then bare (hit)"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_title_carries_spaces_verbatim() {
     let toc = TocFile::from_file(&restricted_toc())
@@ -169,7 +173,9 @@ fn toc_title_carries_spaces_verbatim() {
          uses for IsAddOnLoaded lookups and dependency resolution; the Title is purely cosmetic"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_declares_eager_game_only_with_classic_standard_allowlist() {
     let toc = TocFile::from_file(&restricted_toc())
@@ -215,7 +221,9 @@ fn toc_declares_eager_game_only_with_classic_standard_allowlist() {
          load time would explode"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_lists_ten_retail_files_in_documented_order() {
     let toc = TocFile::from_file(&restricted_toc())
@@ -234,7 +242,9 @@ fn toc_lists_ten_retail_files_in_documented_order() {
         "Retail parsing must retain the first ten ordered files and filter the classic-gated SecureAuraHeader pair"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn restricted_environment_lua_carries_secure_env_per_file_override() {
     let toc = TocFile::from_file(&restricted_toc())
@@ -279,7 +289,9 @@ fn restricted_environment_lua_carries_secure_env_per_file_override() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn allows_screen_returns_true_only_for_game() {
     let toc = TocFile::from_file(&restricted_toc())
@@ -303,7 +315,9 @@ fn allows_screen_returns_true_only_for_game() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn included_in_eager_discovery_for_game_screen() {
     let addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Game);
@@ -318,6 +332,7 @@ fn included_in_eager_discovery_for_game_screen() {
          secure-handler globals are referenced by countless Blizzard XML templates' OnLoad \
          attributes that resolve at load time"
     );
+}
 }
 
 #[test]
@@ -341,6 +356,7 @@ fn excluded_from_eager_discovery_on_glue_screens() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn root_directory_holds_ten_lua_and_two_xml_files() {
     let mut entries: Vec<String> = std::fs::read_dir(restricted_dir())
@@ -358,6 +374,7 @@ fn root_directory_holds_ten_lua_and_two_xml_files() {
         entries, expected,
         "Retail 12.1 root must contain exactly its ten Lua and two XML TOC body files"
     );
+}
 }
 
 prefork_full_ui_case! {
@@ -852,6 +869,7 @@ fn named_manager_frames_publish_globally_under_secure_template(env: &WowLuaEnv) 
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn xml_files_declare_only_virtual_templates() {
     let handler_xml = std::fs::read_to_string(restricted_dir().join("SecureHandlerTemplates.xml"))
@@ -887,4 +905,5 @@ fn xml_files_declare_only_virtual_templates() {
             && aura_xml.contains("virtual=\"true\""),
         "Retail 12.1 keeps the virtual aura header and button templates in SecureAuraHeader.xml, separate from group-header templates"
     );
+}
 }

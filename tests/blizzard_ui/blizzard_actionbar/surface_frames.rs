@@ -130,6 +130,7 @@ const NUM_BUTTONS: usize = 12;
 
 #[test]
 fn main_action_bar_publishes_expected_panel_identity() {
+    wrath_action_case!(callbacks::main_identity);
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
         let frame_type: String = env
             .eval(&format!("return type(_G[{FRAME_NAME:?}])"))
@@ -190,6 +191,7 @@ fn main_action_bar_publishes_expected_panel_identity() {
 
 #[test]
 fn main_action_bar_publishes_action_button_globals_and_button_containers() {
+    wrath_action_case!(callbacks::main_buttons);
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
         for slot in 1..=NUM_BUTTONS {
             let action_button_name = format!("ActionButton{slot}");
@@ -313,6 +315,7 @@ const PLAN_NAMED_MULTI_BARS: &[(&str, &str)] = &[
 /// EditMode reparenting logic firing pre-load.
 #[test]
 fn multi_bars_publish_expected_panel_identity() {
+    wrath_action_case!(callbacks::multibar_identity);
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
         for (bar_name, xml_site) in PLAN_NAMED_MULTI_BARS {
             let frame_type: String = env
@@ -400,6 +403,7 @@ fn multi_bars_publish_expected_panel_identity() {
 /// the bar in question.
 #[test]
 fn multi_bars_publish_their_button_globals_and_button_containers() {
+    wrath_action_case!(callbacks::multibar_buttons);
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
         for (bar_name, xml_site) in PLAN_NAMED_MULTI_BARS {
             for slot in 1..=NUM_BUTTONS {
@@ -481,6 +485,7 @@ fn multi_bars_publish_their_button_globals_and_button_containers() {
 
 #[test]
 fn main_action_bar_does_not_publish_plan_named_button_globals() {
+    wrath_action_case!(callbacks::main_alias_absence);
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
         for slot in 1..=NUM_BUTTONS {
             let plan_named_button = format!("MainActionBarButton{slot}");
@@ -567,6 +572,7 @@ const PLAN_NAMED_EVENT_ROUTING_FRAMES: &[(&str, &str)] = &[
     ),
 ];
 
+post_wrath_ui_fixture! {
 #[test]
 fn plan_named_event_routing_frames_exist_with_register_frame_surface() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -613,7 +619,9 @@ fn plan_named_event_routing_frames_exist_with_register_frame_surface() {
         }
     });
 }
+}
 
+post_wrath_ui_fixture! {
 /// Pin `SpellFlyout` identity. Declared at `Shared/SpellFlyout.xml:62`
 /// as a `toplevel="true"` `frameStrata="DIALOG"` `hidden="true"` Frame
 /// inheriting `SecureFrameTemplate, ResizeLayoutFrame, FlyoutPopupTemplate`
@@ -687,7 +695,9 @@ fn spell_flyout_publishes_dialog_strata_hidden_by_default() {
         );
     });
 }
+}
 
+post_wrath_ui_fixture! {
 /// Pin `StatusTrackingBarManager` identity together with its two
 /// `parentKey` child containers. Declared at
 /// `Mainline/StatusTrackingBar.xml:35-62` as a `parent="UIParent"`
@@ -747,4 +757,5 @@ fn status_tracking_bar_manager_publishes_main_and_secondary_parent_key_children(
             );
         }
     });
+}
 }

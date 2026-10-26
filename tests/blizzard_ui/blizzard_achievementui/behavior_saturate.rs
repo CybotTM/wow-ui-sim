@@ -237,6 +237,27 @@ const IN_GUILD_VIEW_UPVALUE_HELPER: &str = r#"
 #[test]
 fn saturate_dispatches_three_way_style_via_in_guild_view_and_account_wide_and_fires_full_common_tail()
  {
+    if crate::common::wrath_achievement_fixtures::assert_native(
+        r#"
+        local row = CreateFrame("Button", "F08Style", AchievementFrameAchievements, "AchievementTemplate")
+        local desaturatedTexture = F08StyleBackground:GetTexture()
+        row:Saturate()
+        assert(row.saturated)
+        assert(F08StyleBackground:GetTexture() ~= desaturatedTexture)
+        local expected = AchievementFrame:CreateTexture()
+        expected:SetTexture("Interface\\AchievementFrame\\UI-Achievement-Parchment-Horizontal")
+        assert(expected:GetTexture() ~= nil)
+        assert(F08StyleBackground:GetTexture() == expected:GetTexture())
+        local r, g, b = row.description:GetTextColor()
+        assert(r == 0 and g == 0 and b == 0)
+        local x, y = row.description:GetShadowOffset()
+        assert(x == 0 and y == 0)
+        row:Saturate()
+        assert(row.saturated)
+        "#,
+    ) {
+        return;
+    }
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
         let observations: SaturateProbe = env
             .eval(&format!(
@@ -394,6 +415,28 @@ fn saturate_dispatches_three_way_style_via_in_guild_view_and_account_wide_and_fi
 #[test]
 fn desaturate_clears_saturated_style_unconditionally_fires_common_tail_and_has_no_idempotence_guard()
  {
+    if crate::common::wrath_achievement_fixtures::assert_native(
+        r#"
+        local row = CreateFrame("Button", "F08Style", AchievementFrameAchievements, "AchievementTemplate")
+        row:Saturate()
+        local saturatedTexture = F08StyleBackground:GetTexture()
+        row:Desaturate()
+        assert(not row.saturated)
+        assert(F08StyleBackground:GetTexture() ~= saturatedTexture)
+        local expected = AchievementFrame:CreateTexture()
+        expected:SetTexture("Interface\\AchievementFrame\\UI-Achievement-Parchment-Horizontal-Desaturated")
+        assert(expected:GetTexture() ~= nil)
+        assert(F08StyleBackground:GetTexture() == expected:GetTexture())
+        local r, g, b = row.description:GetTextColor()
+        assert(r == 1 and g == 1 and b == 1)
+        local x, y = row.description:GetShadowOffset()
+        assert(x == 1 and y == -1)
+        row:Desaturate()
+        assert(not row.saturated)
+        "#,
+    ) {
+        return;
+    }
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
         let observations: DesaturateProbe = env
             .eval(&format!(

@@ -5,6 +5,7 @@ use wow_ui_sim::lua_api::WowLuaEnv;
 fn install_three_ranks(env: &WowLuaEnv) {
     env.exec(
         r#"
+        A_Admin.SetGuildInfo("Heroes of Azeroth", "Member", 2)
         A_Admin.SetGuildRanks({
             { name = "Guild Leader", flags = { true, true, true } },
             { name = "Officer",      flags = { true, false, true } },
@@ -16,8 +17,9 @@ fn install_three_ranks(env: &WowLuaEnv) {
 }
 
 #[test]
-fn default_seeded_guild_has_rank_names() {
+fn supplied_guild_has_rank_names() {
     let env = WowLuaEnv::new().unwrap();
+    install_three_ranks(&env);
     let (count, first, second, third): (i32, String, String, String) = env
         .eval(
             r#"
@@ -44,8 +46,12 @@ fn no_guild_returns_no_ranks() {
     assert_eq!(count, 0);
     assert_eq!(name, "");
 
-    let flags_count: i32 = env.eval(r#"return #GuildControlGetRankFlags()"#).unwrap();
-    assert_eq!(flags_count, 0);
+    // Wrath's unselected-rank flags read is undefined natively. The separate
+    // native contract case supplies a valid selected rank before removing guild state.
+    if wow_ui_sim::client_profile::ACTIVE != wow_ui_sim::client_profile::ClientProfile::Wrath {
+        let flags_count: i32 = env.eval(r#"return #GuildControlGetRankFlags()"#).unwrap();
+        assert_eq!(flags_count, 0);
+    }
 }
 
 #[test]
@@ -61,6 +67,7 @@ fn get_num_members_in_rank_counts_roster_members_by_rank() {
     use wow_ui_sim::lua_api::state::GuildMember;
 
     let env = WowLuaEnv::new().unwrap();
+    env.state().borrow_mut().world.guild_name = Some("Heroes of Azeroth".into());
     env.state().borrow_mut().world.guild_members = vec![
         GuildMember {
             name: "Alpha".into(),
@@ -178,6 +185,17 @@ fn out_of_range_explicit_index_returns_empty() {
 fn rank_flags_round_trip_as_boolean_array() {
     let env = WowLuaEnv::new().unwrap();
     install_three_ranks(&env);
+    if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
+        env.exec(
+            r#"
+            GuildControlSetRank(2)
+            local first, second, third = GuildControlGetRankFlags()
+            assert(first == 1 and second == nil and third == 1)
+        "#,
+        )
+        .expect("Wrath returns positional stored rights, not a boolean table");
+        return;
+    }
     let flags: (bool, bool, bool) = env
         .eval(
             r#"

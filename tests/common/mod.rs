@@ -1,6 +1,14 @@
 //! Shared test helpers.
 
+include!(concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/tests/common/profile_fixtures.rs"
+));
+
+#[cfg(feature = "client-wrath")]
+pub mod action_bar_fixture;
 pub mod addon_coverage_baseline;
+pub mod auction_fixtures;
 #[cfg(feature = "retail-12-1-0")]
 pub mod aura_container_harness;
 pub mod blizzard_addon_harness;
@@ -8,12 +16,15 @@ pub mod blizzard_addon_manifest;
 mod event_helpers;
 pub mod game_menu_fixture;
 pub mod panel_fixtures;
+pub mod wrath_autocomplete;
 #[cfg(target_os = "linux")]
 pub(crate) mod prefork_process;
 #[cfg(target_os = "linux")]
 mod timeout_reexec;
 pub(crate) mod workload_gate;
 mod workload_gate_core;
+pub mod wrath_achievement_fixtures;
+pub mod wrath_watch_fixture;
 
 use std::ops::Deref;
 use std::path::{Path, PathBuf};
@@ -232,16 +243,54 @@ pub fn load_click_binding_bootstrap(env: &WowLuaEnv, ui: &Path) {
     );
 }
 
-/// Helper to load Blizzard_SharedXML templates for tests that need them.
-/// Returns the environment with templates loaded.
+/// Parse the native core inventory for profiles predating modular Blizzard addons.
+pub fn native_framexml_toc() -> wow_ui_sim::toc::TocFile {
+    let path = wow_ui_sim::client_profile::blizzard_ui_framexml_toc()
+        .expect("native FrameXML cache should be synced");
+    wow_ui_sim::toc::TocFile::from_file(&path).expect("native FrameXML TOC should parse")
+}
+
+/// Match production's top-level FrameXML load before discovering split addons.
+pub fn load_profile_framexml(env: &WowLuaEnv) {
+    if let Some(toc) = wow_ui_sim::client_profile::blizzard_ui_framexml_toc() {
+        load_addon(&env.loader_env(), &toc).expect("native FrameXML should load");
+    }
+}
+
+/// Load the active profile's native panel templates, not a synthetic replacement.
 pub fn env_with_shared_xml() -> WowLuaEnv {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
-    let ui = blizzard_ui_dir();
-
-    load_required_blizzard_addon(&env, &ui, "Blizzard_SharedXMLBase");
-    load_required_blizzard_addon(&env, &ui, "Blizzard_SharedXML");
-
+    if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
+        load_wrath_panel_templates(&env);
+    } else {
+        let ui = blizzard_ui_dir();
+        load_required_blizzard_addon(&env, &ui, "Blizzard_SharedXMLBase");
+        load_required_blizzard_addon(&env, &ui, "Blizzard_SharedXML");
+    }
     env
+}
+
+fn load_wrath_panel_templates(env: &WowLuaEnv) {
+    let toc_path = wow_ui_sim::client_profile::blizzard_ui_framexml_toc()
+        .expect("Wrath FrameXML cache should be synced");
+    let root = toc_path
+        .parent()
+        .expect("FrameXML TOC should have a parent");
+    let toc = wow_ui_sim::toc::TocFile::parse(root, "UIPanelTemplates.lua\nUIPanelTemplates.xml\n");
+    let result = wow_ui_sim::loader::load_addon_from_toc(&env.loader_env(), &toc)
+        .expect("Failed to load native Wrath panel templates");
+    assert!(result.warnings.is_empty(), "{:?}", result.warnings);
+    assert!(
+        result.missing_requirements.is_empty(),
+        "{:?}",
+        result.missing_requirements
+    );
+}
+
+/// Both native Faux template layouts publish `$parent` children as named globals.
+/// Wrath does not additionally publish the modern parentKey fields.
+pub fn template_child_name(parent_name: &str, suffix: &str) -> String {
+    format!("{parent_name}{suffix}")
 }
 
 pub fn fire_addon_loaded(env: &WowLuaEnv, addon_name: &str) {
@@ -314,6 +363,9 @@ const _: () = {
     let _ = std::mem::size_of::<LockedEnv>();
     let _ = lock_env as fn(EnvBuilder) -> LockedEnv;
     let _ = env_with_shared_xml as fn() -> WowLuaEnv;
+    let _ = wrath_autocomplete::load_and_assert_native as fn(&'static str);
+    let _ = wrath_watch_fixture::seed_watch_quests as fn(&WowLuaEnv);
+    let _ = template_child_name as fn(&str, &str) -> String;
     let _ = fire_addon_loaded as fn(&WowLuaEnv, &str);
     let _ = fire_player_entering_world as fn(&WowLuaEnv, bool, bool);
     let _ = call_global_if_present as fn(&WowLuaEnv, &str);

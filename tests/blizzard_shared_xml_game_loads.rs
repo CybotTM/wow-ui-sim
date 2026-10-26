@@ -45,6 +45,8 @@ const PUBLISHED_MIXINS: &[&str] = &[
 
 const VIRTUAL_LIST_TEMPLATES: &[&str] = &["CollapseButtonTemplate", "ListHeaderVisualTemplate"];
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_bare_toc() {
     let resolved = find_toc_file(&shared_xml_game_dir()).expect("SharedXMLGame TOC resolves");
@@ -61,7 +63,9 @@ fn find_toc_file_resolves_bare_toc() {
          Standard at parse time"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn dependencies_accessor_returns_repeated_singular_deps() {
     let toc = TocFile::from_file(&shared_xml_game_toc()).expect("TOC parses");
@@ -75,7 +79,9 @@ fn dependencies_accessor_returns_repeated_singular_deps() {
         "repeated `## Dep:` directives must be exposed in source order"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn singular_dep_directives_present_in_raw_metadata() {
     let raw = std::fs::read_to_string(shared_xml_game_toc()).expect("TOC reads utf-8");
@@ -96,7 +102,9 @@ fn singular_dep_directives_present_in_raw_metadata() {
          color tables that Blizzard_Colors publishes"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_is_game_only_with_no_load_on_demand() {
     let toc = TocFile::from_file(&shared_xml_game_toc()).expect("TOC parses");
@@ -123,7 +131,9 @@ fn toc_is_game_only_with_no_load_on_demand() {
     assert!(!toc.allows_screen(ScreenKind::CharacterSelect));
     assert!(!toc.allows_screen(ScreenKind::CharacterCreate));
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_raw_bytes_pin_minimal_metadata_surface() {
     let raw = std::fs::read_to_string(shared_xml_game_toc()).expect("TOC reads utf-8");
@@ -144,7 +154,9 @@ fn toc_raw_bytes_pin_minimal_metadata_surface() {
     assert!(!raw.contains("## Dependencies"));
     assert!(!raw.contains("## UseSecureEnvironment"));
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn body_substitutes_family_and_drops_vanilla_only_entries() {
     let toc = TocFile::from_file(&shared_xml_game_toc()).expect("TOC parses");
@@ -184,7 +196,9 @@ fn body_substitutes_family_and_drops_vanilla_only_entries() {
          logic regressed. Got: {body:?}"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn body_count_matches_filtered_filesystem_layout() {
     let toc = TocFile::from_file(&shared_xml_game_toc()).expect("TOC parses");
@@ -208,7 +222,9 @@ fn body_count_matches_filtered_filesystem_layout() {
     );
     assert_eq!(xml_count, 0, "No XML entries survive the Mainline filter");
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn tooltip_lua_precedes_dressup_and_loot_specialization() {
     let toc = TocFile::from_file(&shared_xml_game_toc()).expect("TOC parses");
@@ -252,7 +268,9 @@ fn tooltip_lua_precedes_dressup_and_loot_specialization() {
          {loot_specialization}"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn eager_discovery_includes_addon_only_on_game_screen() {
     let game_addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Game);
@@ -281,6 +299,7 @@ fn eager_discovery_includes_addon_only_on_game_screen() {
              for the dress-up + tooltip layer to operate against"
         );
     }
+}
 }
 
 prefork_full_ui_case! {

@@ -14,7 +14,7 @@ pub(super) fn parse_function_family<'a>(stmt: &'a str) -> Option<FastHandlerRef<
 
 fn parse_direct_function_shapes<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
     if let Some(function_name) = parse_global_function_suffix(stmt, "(self)") {
-        return Some(FastHandlerRef::Function(function_name));
+        return Some(FastHandlerRef::FunctionWithSelfArg(function_name));
     }
     if let Some(function_name) = parse_global_function_suffix(stmt, "()") {
         return Some(FastHandlerRef::FunctionNoArgs(function_name));

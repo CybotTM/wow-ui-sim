@@ -8,6 +8,7 @@ fn blizzard_dir() -> PathBuf {
     .join("Blizzard_SharedXMLBase")
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn test_parse_callback_registrant_xml() {
     let path = blizzard_dir().join("CallbackRegistrant.xml");
@@ -38,7 +39,9 @@ fn test_parse_callback_registrant_xml() {
     assert!(has_script, "Expected Script element");
     assert!(has_frame, "Expected Frame element");
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn test_parse_color_swatch_xml() {
     let path = blizzard_dir().join("ColorSwatch.xml");
@@ -74,11 +77,22 @@ fn test_parse_color_swatch_xml() {
     }
     panic!("ColorSwatchTemplate frame not found");
 }
+}
 
 #[test]
 fn test_parse_all_xml_in_shared_xml_base() {
     // Try to parse all XML files in the directory
-    let dir = blizzard_dir();
+    let dir = if wow_ui_sim::client_profile::ACTIVE
+        == wow_ui_sim::client_profile::ClientProfile::Wrath
+    {
+        wow_ui_sim::client_profile::blizzard_ui_framexml_toc()
+            .expect("native FrameXML cache should be synced")
+            .parent()
+            .unwrap()
+            .to_path_buf()
+    } else {
+        blizzard_dir()
+    };
     let mut parsed = 0;
     let mut failed = Vec::new();
 

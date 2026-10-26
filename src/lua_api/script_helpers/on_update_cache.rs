@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 
+use rilua::Val;
 use rilua::vm::state::LuaState;
-use rilua::{LuaApi, LuaApiMut, Val};
 
 use super::{ON_POST_UPDATE_SCRIPTS_KEY, ON_UPDATE_SCRIPTS_KEY, registry_table};
 
@@ -30,18 +30,16 @@ pub(super) fn sync_on_update_runtime_cache(state: &mut LuaState, widget_id: u64)
 
 /// Rebuild `SimState::on_update_frames` from registry handler caches if
 /// incremental sync previously missed updates due borrow contention.
-pub fn reconcile_on_update_runtime_cache_if_dirty(lua: &mut rilua::Lua) {
+pub fn reconcile_on_update_runtime_cache_if_dirty(state: &mut LuaState) {
     use crate::lua_api::env::WowLuaAppData;
 
-    let is_dirty = lua
-        .state()
+    let is_dirty = state
         .app_data::<WowLuaAppData>()
         .is_some_and(|app| app.on_update_cache_dirty);
     if !is_dirty {
         return;
     }
 
-    let state = lua.state_mut();
     let tracked = collect_on_update_handler_ids(state);
 
     let Some(app) = state.app_data_mut::<WowLuaAppData>() else {

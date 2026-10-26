@@ -9,9 +9,15 @@ build = "build.rs"
 autotests = false
 
 [workspace]
-members = [".", "xtask", "crates/test-harness"]
+members = [".", "xtask", "crates/test-harness", "crates/sim-data", "crates/sim-data-profile", "crates/sim-lua-bridge", "crates/sim-event", "crates/sim-toc", "crates/sim-xml"]
 
 [dependencies]
+sim-xml = { path = "crates/sim-xml" }
+sim-toc = { path = "crates/sim-toc" }
+sim-event = { path = "crates/sim-event" }
+sim-lua-bridge = { path = "crates/sim-lua-bridge" }
+sim-data = { path = "crates/sim-data" }
+sim-data-profile = { path = "crates/sim-data-profile" }
 icu_casemap = { version = "=2.1.1", default-features = false, features = ["compiled_data"] }
 icu_locale_core = { version = "=2.1.1", default-features = false, features = ["alloc"] }
 icu_locale = { version = "=2.1.1", default-features = false, features = ["compiled_data"] }
@@ -60,7 +66,7 @@ bytemuck = { version = "1.21", features = ["derive"], optional = true }
 pollster = { version = "0.4", optional = true }
 webp = { version = "0.3.1", optional = true }
 rustc-hash = "2.1.2"
-asset-resolver = { git = "https://github.com/world-of-osso/asset-resolver", rev = "a626003dd4d3dbd1f157181f017694c648c84ce8", optional = true }
+asset-resolver = { git = "https://github.com/world-of-osso/asset-resolver", rev = "03753d5f60e59aaa38420ecaea1433997d45a7c8", optional = true }
 cascette-client-storage = { git = "https://github.com/Osso/cascette-rs", rev = "758d8dbfbc64d500b2f8f5b5c133d9f82fa79a48", features = ["local-install"], optional = true }
 cascette-crypto = { git = "https://github.com/Osso/cascette-rs", rev = "758d8dbfbc64d500b2f8f5b5c133d9f82fa79a48", optional = true }
 cascette-formats = { git = "https://github.com/Osso/cascette-rs", rev = "758d8dbfbc64d500b2f8f5b5c133d9f82fa79a48", optional = true }
@@ -78,16 +84,27 @@ path = "src/bin/wow_sim/main.rs"
 [[bin]]
 name = "wow-cli"
 path = "src/bin/wow_cli/main.rs"
+required-features = ["tools"]
 
 [[bin]]
 name = "bench_spellbook"
 path = "src/bin/bench_spellbook.rs"
-required-features = ["gui"]
+required-features = ["gui", "tools"]
 
 [[bin]]
 name = "bench_steady_state"
 path = "src/bin/bench_steady_state.rs"
-required-features = ["gui"]
+required-features = ["gui", "tools"]
+
+[[bin]]
+name = "bench_talents"
+path = "src/bin/bench_talents.rs"
+required-features = ["tools"]
+
+[[bin]]
+name = "panel-visual-metrics"
+path = "src/bin/panel-visual-metrics.rs"
+required-features = ["tools"]
 
 [[example]]
 name = "casc_smoke"
@@ -102,6 +119,10 @@ pollster = "0.4"
 tempfile = "3"
 
 [features]
+# Non-test utility binaries; integration tests need only wow-sim.
+tools = []
+# Opt-in installed Ellesmere AuraKit acceptance test; requires ELLESMERE_AURA_KIT_PATH.
+ellesmere-acceptance = ["client-wowforever"]
 # fast-build is opt-in because the iced dylib hits MSVC's LNK1189 object limit
 # on Windows. Local Linux dev/debug builds can use `--features fast-build` for
 # faster incremental rebuilds. Release builds should use:
@@ -118,20 +139,22 @@ intern-stats = ["rilua/intern-stats"]
 # features select one runtime profile and point at the current API epoch for
 # that channel.
 retail-12-0-0 = ["aura-instance-enumeration"]
-retail-12-0-5 = ["retail-12-0-0", "native-duration-formatting", "base-spell-relationships"]
+retail-12-0-5 = ["retail-12-0-0", "native-duration-formatting", "base-spell-relationships", "aura-spell-classifications"]
 retail-12-0-7 = ["retail-12-0-5"]
 retail-12-1-0 = ["retail-12-0-7", "aura-xml-widgets", "on-update-modes", "player-cast-durations", "forbidden-aspects", "numeric-rule-formatters", "aura-containers"]
-retail-12-1-5 = ["retail-12-1-0", "timed-signal-maps", "forbidden-animation-aspects"]
+retail-12-1-5 = ["retail-12-1-0", "timed-signal-maps", "forbidden-animation-aspects", "sim-data-profile/retail-12-1-5"]
 # Private ICU duration rendering; this capability does not publish C_Intl.
 native-duration-formatting = ["dep:cc", "dep:pkg-config", "dep:vcpkg"]
 # Existing specialization relationship model shared by Retail 12.0.5+ and Forever.
 base-spell-relationships = []
+# Explicit defensive spell classification shared by Retail, Forever and vanilla profiles.
+aura-spell-classifications = []
 # Shared keyed timer capability used by PTR and Forever.
 timed-signal-maps = []
 # Shared XML aliases and intrinsic mappings for aura frames/buttons.
-aura-xml-widgets = []
+aura-xml-widgets = ["sim-xml/aura-xml-widgets"]
 # Shared modeled AuraContainer option processors, enums and base aura secrecy queries.
-aura-containers = ["aura-instance-enumeration"]
+aura-containers = ["aura-instance-enumeration", "sim-data-profile/aura-containers"]
 # Public aura ID queries shared by Retail 12.0+ and native aura containers.
 aura-instance-enumeration = []
 # Shared numeric frame update scheduling for Mainline and Forever.
@@ -149,14 +172,14 @@ prefork-full-ui = []
 # Client profile features — exactly one profile marker must be enabled. The
 # public client-retail bundle preserves the current retail epoch; profile-retail
 # allows historical retail epoch tests against the same retail source cache.
-profile-retail = []
+profile-retail = ["sim-data-profile/profile-retail"]
 client-retail = ["profile-retail", "retail-12-1-5", "prefork-full-ui"]
 client-ptr = ["retail-12-1-5"]
 client-wrath = []
-client-mists = ["prefork-full-ui"]
-client-era = []
-client-anniversary = []
-client-wowforever = ["timed-signal-maps", "aura-xml-widgets", "on-update-modes", "player-cast-durations", "forbidden-animation-aspects", "numeric-rule-formatters", "aura-containers", "native-duration-formatting", "base-spell-relationships"]
+client-mists = ["prefork-full-ui", "sim-data-profile/client-mists"]
+client-era = ["aura-spell-classifications", "sim-data-profile/client-era"]
+client-anniversary = ["aura-spell-classifications", "sim-data-profile/client-anniversary"]
+client-wowforever = ["timed-signal-maps", "aura-xml-widgets", "on-update-modes", "player-cast-durations", "forbidden-animation-aspects", "numeric-rule-formatters", "aura-containers", "native-duration-formatting", "base-spell-relationships", "aura-spell-classifications", "sim-data-profile/client-wowforever"]
 
 [profile.release]
 lto = false
@@ -165,11 +188,16 @@ debug = "line-tables-only"
 [profile.dev]
 incremental = true
 lto = false
-debug = "line-tables-only"
+# CPU-time trial: omit debug metadata; filename/line backtraces are unavailable.
+debug = 0
 # Hit-grid rebuilds, layout resolution, and texture decode are pure data
 # traversal; opt-level 0 makes them ~5-10x slower and visibly degrades GUI
 # input latency in dev builds.
 opt-level = 1
+
+[profile.test]
+# Keep the same debug-info policy for test executables and dependencies.
+debug = 0
 
 [[test]]
 name = "frame_positions"
@@ -178,6 +206,19 @@ harness = false
 [[test]]
 name = "integration"
 path = "tests/integration.rs"
+
+[[test]]
+name = "run_tests_cli"
+path = "tests/cli/run_tests.rs"
+
+[[test]]
+name = "patch_12_1_7_toc"
+path = "tests/patch_12_1_7_toc.rs"
+
+[[test]]
+name = "wrath_core_labels_real_paths"
+path = "tests/wrath_core_labels_real_paths.rs"
+required-features = ["client-wrath"]
 
 [[test]]
 name = "prefork_full_ui"
@@ -224,6 +265,10 @@ required-features = ["client-wowforever"]
 name = "patch_12_1_audit"
 path = "patch-tests/patch_12_1.rs"
 required-features = ["client-ptr"]
+
+[[test]]
+name = "fast_handler_late_bind"
+path = "tests/fast_handler_late_bind.rs"
 
 [[test]]
 name = "frame_edit_mode_methods"
@@ -298,6 +343,31 @@ path = "tests/classic_r10r14.rs"
 [[test]]
 name = "wrath_residual_b"
 path = "tests/wrath_residual_b.rs"
+required-features = ["client-wrath"]
+
+[[test]]
+name = "wrath_reloadui_12340"
+path = "tests/wrath_reloadui_12340.rs"
+required-features = ["client-wrath"]
+
+[[test]]
+name = "wrath_quest_accept"
+path = "tests/wrath_quest_accept.rs"
+required-features = ["client-wrath"]
+
+[[test]]
+name = "wrath_quest_turn_in"
+path = "tests/wrath_quest_turn_in.rs"
+required-features = ["client-wrath"]
+
+[[test]]
+name = "wrath_quest_abandon"
+path = "tests/wrath_quest_abandon.rs"
+required-features = ["client-wrath"]
+
+[[test]]
+name = "wrath_quest_log_projection"
+path = "tests/wrath_quest_log_projection.rs"
 required-features = ["client-wrath"]
 
 [[test]]

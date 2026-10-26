@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[4]
 
 sys.dont_write_bytecode = True
 sys.path.insert(0, str(ROOT / 'tools'))
-from patch_audit_validation import historical_registers
+from patch_audit_validation import historical_registers, read_audit_bytes, read_audit_json
 
 AUDIT_REVISION = '465c908ce6c88b70a94f4ee6fdb6c0928c69a42e'
 EVIDENCE = Path(__file__).resolve().parent
@@ -18,11 +18,11 @@ SOURCES = ROOT / 'data/patch-api/sources'
 
 
 def read_json(path):
-    return json.loads(path.read_text())
+    return read_audit_json(ROOT, path, AUDIT_REVISION)
 
 
 def digest(path):
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    return hashlib.sha256(read_audit_bytes(ROOT, path, AUDIT_REVISION)).hexdigest()
 
 
 def load_tool(name):

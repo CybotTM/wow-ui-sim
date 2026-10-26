@@ -93,6 +93,25 @@ type ClickLinkProbe = (String, String, String, String, String, String);
 
 #[test]
 fn achievement_button_on_click_is_absent_but_mixin_process_click_and_link_api_work() {
+    if crate::common::wrath_achievement_fixtures::assert_native(
+        r#"
+        assert(type(AchievementButton_OnClick) == "function")
+        assert(type(ChatEdit_InsertLink) == "function")
+        local link = assert(GetAchievementLink(6))
+        assert(string.find(link, "|Hachievement:6:", 1, true))
+        local row = assert(AchievementFrameAchievements.buttons[1])
+        row.id = 6
+        -- Supply a modified-click gesture, not a replacement achievement handler.
+        IsModifiedClick = function(kind) return kind == nil or kind == "CHATLINK" end
+        local edit = ChatFrame1EditBox
+        ChatEdit_ActivateChat(edit)
+        edit:SetText("")
+        AchievementButton_OnClick(row)
+        assert(string.find(edit:GetText(), "|Hachievement:6:", 1, true))
+        "#,
+    ) {
+        return;
+    }
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
         let observations: ClickLinkProbe = env
             .eval(

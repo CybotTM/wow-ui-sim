@@ -1,7 +1,7 @@
 use super::FastHandlerRef;
 
 pub(crate) fn parse_global_family<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
-    parse_mode_or_conditional_global(stmt)
+    parse_conditional_global(stmt)
         .or_else(|| parse_literal_global_method(stmt))
         .or_else(|| parse_complex_global_method(stmt))
         .or_else(|| parse_simple_global_method(stmt))
@@ -9,23 +9,8 @@ pub(crate) fn parse_global_family<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a
         .or_else(|| parse_misc_global(stmt))
 }
 
-fn parse_mode_or_conditional_global<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
-    lfg_mode_branch(stmt)
-        .or_else(|| local_path_conditional_method(stmt))
-        .or_else(|| conditional_global_noarg(stmt))
-        .or_else(|| conditional_global_function_result(stmt))
-        .or_else(|| conditional_global_field_equals_string(stmt))
-}
-
-fn lfg_mode_branch<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
-    let (category_path, slot_path, leave_function, join_function) =
-        super::parse_get_lfg_mode_branch(stmt)?;
-    Some(FastHandlerRef::GetLfgModeBranch {
-        category_path,
-        slot_path,
-        leave_function,
-        join_function,
-    })
+fn parse_conditional_global<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
+    local_path_conditional_method(stmt).or_else(|| conditional_global_field_equals_string(stmt))
 }
 
 fn local_path_conditional_method<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
@@ -34,28 +19,6 @@ fn local_path_conditional_method<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>
         target_path,
         method_name,
     })
-}
-
-fn conditional_global_noarg<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
-    let (function_name, then_ref, else_ref) =
-        super::parse_conditional_global_noarg_then_else(stmt)?;
-    Some(FastHandlerRef::ConditionalGlobalNoArgs {
-        function_name,
-        then_ref: Box::new(then_ref),
-        else_ref: Box::new(else_ref),
-    })
-}
-
-fn conditional_global_function_result<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
-    let (function_name, arg_function_name, then_ref) =
-        super::parse_conditional_global_function_with_noarg_function_result_then(stmt)?;
-    Some(
-        FastHandlerRef::ConditionalGlobalFunctionWithNoArgFunctionResultThen {
-            function_name,
-            arg_function_name,
-            then_ref: Box::new(then_ref),
-        },
-    )
 }
 
 fn conditional_global_field_equals_string<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
@@ -371,28 +334,6 @@ fn global_method_self_field_arg<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>>
 #[cfg(test)]
 mod tests {
     use super::{FastHandlerRef, parse_global_family};
-
-    #[test]
-    fn parses_lfg_mode_branch_before_other_global_shapes() {
-        let handler = parse_global_family(
-            "local mode, subMode = GetLFGMode(categoryPath, slotPath); if ( mode == \"queued\" or mode == \"listed\" or mode == \"rolecheck\" or mode == \"suspended\" ) then LeaveQueue(categoryPath, slotPath); else JoinQueue() end",
-        );
-
-        let Some(FastHandlerRef::GetLfgModeBranch {
-            category_path,
-            slot_path,
-            leave_function,
-            join_function,
-        }) = handler
-        else {
-            panic!("expected LFG mode branch");
-        };
-
-        assert_eq!(category_path, "categoryPath");
-        assert_eq!(slot_path, Some("slotPath"));
-        assert_eq!(leave_function, "LeaveQueue");
-        assert_eq!(join_function, "JoinQueue");
-    }
 
     #[test]
     fn parses_basic_global_method_shape() {

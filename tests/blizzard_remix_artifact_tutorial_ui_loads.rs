@@ -43,6 +43,8 @@ fn load_remix_artifact_tutorial_ui(env: &WowLuaEnv) {
         .expect("Blizzard_RemixArtifactTutorialUI should load via explicit Rust loader call");
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_bare_toc() {
     let resolved =
@@ -56,7 +58,9 @@ fn find_toc_file_resolves_bare_toc() {
          src/loader/mod.rs:65 tries `_Mainline.toc` first (miss), then bare (hit) and returns it"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_declares_load_on_demand_standard_game_only_and_no_deps() {
     let toc = TocFile::from_file(&remix_toc())
@@ -111,7 +115,9 @@ fn toc_declares_load_on_demand_standard_game_only_and_no_deps() {
          of per-addon SavedVariables, so progress survives across UI reloads via the CVar store"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_lists_bootstrap_and_two_files_in_root_directory() {
     let toc = TocFile::from_file(&remix_toc())
@@ -126,7 +132,9 @@ fn toc_lists_bootstrap_and_two_files_in_root_directory() {
         "Retail 12.1.0.69497 lists the tutorial bootstrap before its Lua and XML files"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn allows_screen_returns_true_only_for_game() {
     let toc = TocFile::from_file(&remix_toc())
@@ -149,6 +157,7 @@ fn allows_screen_returns_true_only_for_game() {
         );
     }
 }
+}
 
 #[test]
 fn excluded_from_eager_discovery_via_load_on_demand() {
@@ -168,6 +177,7 @@ fn excluded_from_eager_discovery_via_load_on_demand() {
     );
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn root_directory_holds_bootstrap_and_two_files() {
     let mut entries: Vec<String> = std::fs::read_dir(remix_dir())
@@ -186,6 +196,7 @@ fn root_directory_holds_bootstrap_and_two_files() {
         ],
         "Retail 12.1.0.69497 ships the tutorial bootstrap beside its Lua and XML files"
     );
+}
 }
 
 prefork_full_ui_case! {
@@ -379,6 +390,7 @@ fn on_load_short_circuits_when_player_is_not_timerunning(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn xml_uses_method_attribute_dispatch_not_global_resolution() {
     let xml_text =
@@ -405,4 +417,5 @@ fn xml_uses_method_attribute_dispatch_not_global_resolution() {
          attribute yields the full inheritance chain. CallbackRegistrantMixin contributes the \
          OnShow/OnHide auto-register lifecycle the controller relies on"
     );
+}
 }

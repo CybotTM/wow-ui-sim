@@ -13,6 +13,7 @@ const ROOT: &str = "Blizzard_APIDocumentationGenerated";
 const DEPENDENCY: &str = "Blizzard_APIDocumentation";
 const ROOT_TOC_FILE: &str = "Blizzard_APIDocumentationGenerated.toc";
 
+post_wrath_ui_fixture! {
 #[test]
 fn generated_api_documentation_loads_after_core_api_documentation() {
     let ui_dir = blizzard_ui_dir();
@@ -36,6 +37,9 @@ fn generated_api_documentation_loads_after_core_api_documentation() {
     );
 }
 
+}
+
+post_wrath_ui_fixture! {
 #[test]
 fn generated_api_documentation_loaded_set_contains_every_toc_dependency() {
     let ui_dir = blizzard_ui_dir();
@@ -57,6 +61,7 @@ fn generated_api_documentation_loaded_set_contains_every_toc_dependency() {
             "TOC dependency `{dependency}` must be present in loaded set: {loaded:?}"
         );
     }
+}
 }
 
 fn load_declared_dependencies(ui_dir: &std::path::Path) -> Vec<String> {

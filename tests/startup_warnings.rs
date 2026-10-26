@@ -68,6 +68,11 @@ fn load_and_startup() -> StartupDiagnostics {
     let ui = blizzard_ui_dir();
     let addons = discover_blizzard_addons(&ui);
     let mut diagnostics = StartupDiagnostics::default();
+    if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
+        let toc_path = wow_ui_sim::client_profile::blizzard_ui_framexml_toc()
+            .expect("Wrath's manifest-backed FrameXML.toc should exist");
+        diagnostics.extend(collect_addon_load_diagnostics(&env, "FrameXML", &toc_path));
+    }
     for (name, toc_path) in &addons {
         diagnostics.extend(collect_addon_load_diagnostics(&env, name, toc_path));
     }
@@ -386,6 +391,7 @@ fn fire_events_and_timers(env: &WowLuaEnv) {
 /// Fails if a new annotation is introduced (we want to know about it
 /// deliberately, not silently), or if an existing annotation disappears
 /// (so we can track Blizzard's secure-env footprint across patches).
+#[cfg(not(feature = "client-wrath"))]
 #[test]
 fn test_secure_env_toc_annotations_are_exhaustive() {
     let ui = blizzard_ui_dir();
@@ -429,6 +435,7 @@ fn test_secure_env_toc_annotations_are_exhaustive() {
 /// Every annotated secure file should load without warnings and its
 /// downstream surface should be reachable — a smoke test that our per-file
 /// TOC secureenv dispatch is wired end-to-end.
+#[cfg(not(feature = "client-wrath"))]
 #[test]
 fn test_secure_env_annotated_files_load_cleanly() {
     test_timeout! {
@@ -557,6 +564,7 @@ fn test_secure_env_annotated_files_load_cleanly() {
     }
 }
 
+#[cfg(not(feature = "client-wrath"))]
 #[test]
 fn test_restricted_addon_environment_exposes_execution_surface() {
     test_timeout! {
@@ -615,6 +623,11 @@ fn test_restricted_addon_environment_exposes_execution_surface() {
 /// ObjectiveTrackerUIWidgetContainer inherits UIWidgetContainerTemplate,
 /// which inherits UIWidgetContainerNoResizeTemplate (mixin UIWidgetContainerMixin).
 /// GetNumWidgetsShowing must be available on the frame.
+#[cfg(any(
+    feature = "client-retail",
+    feature = "client-ptr",
+    feature = "client-wowforever"
+))]
 #[test]
 fn test_widget_container_mixin_applied() {
     test_timeout! {
@@ -641,6 +654,11 @@ fn test_widget_container_mixin_applied() {
     }
 }
 
+#[cfg(any(
+    feature = "client-retail",
+    feature = "client-ptr",
+    feature = "client-wowforever"
+))]
 #[test]
 fn test_load_addon_with_error_handling_loads_account_store_and_preserves_surface() {
     test_timeout! {
@@ -695,6 +713,11 @@ fn test_load_addon_with_error_handling_loads_account_store_and_preserves_surface
     }
 }
 
+#[cfg(any(
+    feature = "client-retail",
+    feature = "client-ptr",
+    feature = "client-wowforever"
+))]
 #[test]
 fn test_account_store_frame_exposes_mixin_methods_after_load() {
     test_timeout! {
@@ -727,6 +750,11 @@ fn test_account_store_frame_exposes_mixin_methods_after_load() {
     }
 }
 
+#[cfg(any(
+    feature = "client-retail",
+    feature = "client-ptr",
+    feature = "client-wowforever"
+))]
 #[test]
 fn test_account_store_set_storefront_id_is_safe_after_load() {
     test_timeout! {

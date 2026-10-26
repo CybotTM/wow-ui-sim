@@ -1,7 +1,6 @@
 //! Load smoke for `Blizzard_ActionBar`.
 //!
-//! TOC reference (`Interface/BlizzardUI/Blizzard_ActionBar/
-//! Blizzard_ActionBar_Mainline.toc`):
+//! TOC reference (active profile's `Blizzard_ActionBar` TOC):
 //!
 //! ```text
 //! ## Title: Blizzard_ActionBar
@@ -42,23 +41,41 @@
 
 use crate::common::blizzard_addon_harness::with_blizzard_addon_startup_shape;
 use crate::common::panel_fixtures::blizzard_ui_dir;
+use wow_ui_sim::loader::find_toc_file;
 use wow_ui_sim::toc::TocFile;
 
 const ROOT: &str = "Blizzard_ActionBar";
-const ROOT_TOC_FILE: &str = "Blizzard_ActionBar_Mainline.toc";
-const CURRENT_DECLARED_DEPS: &[&str] = &[
-    "Blizzard_StoreUI",
-    "Blizzard_QuickKeybind",
-    "Blizzard_EditMode",
-    "Blizzard_UIPanels_Game",
-    "Blizzard_TextStatusBar",
-    "Blizzard_Flyout",
-    "Blizzard_Colors",
-    "Blizzard_HelpPlate",
-    "Blizzard_MicroMenu",
-    "Blizzard_PingUI",
-    "Blizzard_GameMenuEsc",
-];
+const CURRENT_DECLARED_DEPS: &[&str] = match wow_ui_sim::client_profile::ACTIVE {
+    wow_ui_sim::client_profile::ClientProfile::Retail
+    | wow_ui_sim::client_profile::ClientProfile::Ptr
+    | wow_ui_sim::client_profile::ClientProfile::WowForever => &[
+        "Blizzard_StoreUI",
+        "Blizzard_QuickKeybind",
+        "Blizzard_EditMode",
+        "Blizzard_UIPanels_Game",
+        "Blizzard_TextStatusBar",
+        "Blizzard_Flyout",
+        "Blizzard_Colors",
+        "Blizzard_HelpPlate",
+        "Blizzard_MicroMenu",
+        "Blizzard_PingUI",
+        "Blizzard_GameMenuEsc",
+    ],
+    wow_ui_sim::client_profile::ClientProfile::Mists
+    | wow_ui_sim::client_profile::ClientProfile::Era
+    | wow_ui_sim::client_profile::ClientProfile::Anniversary => &[
+        "Blizzard_QuickKeybind",
+        "Blizzard_UIParent",
+        "Blizzard_EditMode",
+        "Blizzard_FrameXML",
+        "Blizzard_TextStatusBar",
+        "Blizzard_Flyout",
+        "Blizzard_Minimap",
+        "Blizzard_MicroMenu",
+    ],
+    // Wrath uses native_dependencies before reading this modern addon snapshot.
+    wow_ui_sim::client_profile::ClientProfile::Wrath => &[],
+};
 const LANE_FILE_SCOPE_MIXINS: &[&str] = &[
     "ActionBarMixin",
     "EditModeActionBarMixin",
@@ -72,6 +89,7 @@ const LANE_FILE_SCOPE_TABLES: &[&str] = &["ActionButtonUtil", "AssistedCombatMan
 
 #[test]
 fn action_bar_load_emits_no_lane_specific_lua_errors() {
+    wrath_action_case!(callbacks::load_errors);
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, loaded| {
         assert!(
             loaded.iter().any(|name| name == ROOT),
@@ -126,6 +144,7 @@ fn action_bar_load_emits_no_lane_specific_lua_errors() {
     });
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn action_bar_load_executes_file_scope_mixin_declarations() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -165,13 +184,14 @@ fn action_bar_load_executes_file_scope_mixin_declarations() {
         }
     });
 }
+}
 
 /// Pin the TOC-declared dependency contract via TWO independent grounds:
 ///
-/// 1. **Parser-grounded.** Parse `Blizzard_ActionBar_Mainline.toc` via
+/// 1. **Parser-grounded.** Parse the active profile's `Blizzard_ActionBar` TOC via
 ///    `TocFile::from_file` (the same parser the closure walker uses at
 ///    `src/loader/mod.rs:454` via `toc.dependencies().chain(toc.optional_deps())`)
-///    and assert the parser-extracted dep set matches the current retail list
+///    and assert the parser-extracted dep set matches the active profile's list
 ///    BIT-FOR-BIT. A regression where Blizzard adds, removes, or reorders a
 ///    `## Dependencies:` entry would trip this before the runtime-load
 ///    round-trip matters.
@@ -191,7 +211,10 @@ fn action_bar_load_executes_file_scope_mixin_declarations() {
 /// registry flag represents what Lua can use after startup.
 #[test]
 fn action_bar_every_declared_toc_dependency_is_loaded_after_harness_runs() {
-    let toc_path = blizzard_ui_dir().join(ROOT).join(ROOT_TOC_FILE);
+    wrath_action_case!(native_dependencies);
+
+    let toc_path = find_toc_file(&blizzard_ui_dir().join(ROOT))
+        .expect("Blizzard_ActionBar TOC for active profile");
     let toc = TocFile::from_file(&toc_path).unwrap_or_else(|e| {
         panic!(
             "TOC at `{}` MUST parse cleanly. The closure walker reads this same file via \
@@ -210,10 +233,8 @@ fn action_bar_every_declared_toc_dependency_is_loaded_after_harness_runs() {
         .collect();
     assert_eq!(
         declared_deps, current_deps,
-        "Parser-extracted dep list from `{ROOT_TOC_FILE}` MUST match the current retail TOC \
-         BIT-FOR-BIT. The current `## Dependencies:` line declares StoreUI, QuickKeybind, \
-         EditMode, UIPanels_Game, TextStatusBar, Flyout, Colors, HelpPlate, MicroMenu, PingUI, \
-         and GameMenuEsc, with no `## OptionalDeps:` line."
+        "Parser-extracted dep list from `{ROOT}` MUST match the active profile's TOC \
+         BIT-FOR-BIT, including dependency order and any optional dependencies."
     );
 
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -226,7 +247,7 @@ fn action_bar_every_declared_toc_dependency_is_loaded_after_harness_runs() {
 
             assert!(
                 is_loaded,
-                "Declared TOC dependency `{dep}` (parsed from `{ROOT_TOC_FILE}` via \
+                "Declared TOC dependency `{dep}` (parsed from `{ROOT}` via \
                  `TocFile::from_file`) MUST be runtime-loaded after the startup-shape harness \
                  finishes — `C_AddOns.IsAddOnLoaded(\"{dep}\")` returned false. Each declared \
                  dep is pre-loaded by the panel-addons baseline (cross-references in this \

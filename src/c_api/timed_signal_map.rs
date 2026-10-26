@@ -312,7 +312,7 @@ fn has_signal(state: &mut LuaState) -> LuaResult<u32> {
 
 fn signal_after(state: &mut LuaState) -> LuaResult<u32> {
     let mut deadline = signal_time(state, 3)?;
-    let now = app_state(state)?.start_time.elapsed().as_secs_f64();
+    let now = app_state(state)?.clock_elapsed().as_secs_f64();
     deadline.time += now;
     signal_at_values(state, signal_key(state, 2)?, deadline)
 }
@@ -331,7 +331,7 @@ fn signal_at_values(state: &mut LuaState, key: i64, deadline: SignalDeadline) ->
 }
 
 pub(crate) fn take_due_signals(state: &mut crate::lua_api::SimState) -> Vec<DueTimedSignal> {
-    let now = state.start_time.elapsed().as_secs_f64();
+    let now = state.clock_elapsed().as_secs_f64();
     let mut due = Vec::new();
     for (id, map) in &mut state.timed_signal_maps {
         let keys: Vec<_> = map
@@ -352,7 +352,7 @@ pub(crate) fn take_due_signals(state: &mut crate::lua_api::SimState) -> Vec<DueT
 }
 
 pub(crate) fn next_signal_delay(state: &crate::lua_api::SimState) -> Option<std::time::Duration> {
-    let now = state.start_time.elapsed().as_secs_f64();
+    let now = state.clock_elapsed().as_secs_f64();
     state
         .timed_signal_maps
         .values()

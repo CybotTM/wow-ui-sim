@@ -4,6 +4,8 @@ Two binaries: `wow-sim` (full UI load, GUI capable) and `wow-cli` (connects to r
 
 **Build before running** — compilation takes 30s+; never use `cargo run` with a timeout. Build with `cargo build --bin wow-sim`, then run with `timeout 90`.
 
+Build `wow-cli` with `cargo build --bin wow-cli --features tools` before using the bare `wow-cli` commands below; `tools` is a Cargo feature, not a runtime argument. See [utility builds](../../../README.md#utility-binary-builds).
+
 ## wow-sim Subcommands
 
 ### `lua-errors`
@@ -23,7 +25,13 @@ Run Lua-level tests from `Interface/AddOns/<addon>/tests/`. For internal logic, 
 
 ```bash
 wow-sim --no-addons --no-saved-vars run-tests MyAddon
+wow-sim --addons-path /tmp/test-addons run-tests MyAddon
 ```
+
+Use [exclusive addon roots](../../../README.md#exclusive-addon-test-runs) to
+prevent live addons from entering a test run. The guide covers repeated CLI
+roots, the environment-only mode for existing scripts, bundled TestFramework,
+and Docker/Action usage. See the [selection contract](../../specs/exclusive-addon-paths.md).
 
 ### `self-test`
 
@@ -103,7 +111,7 @@ wow-cli casc sync-blizzard-ui
 Settled-UI tick and draw CPU cost through the real GUI `update(ProcessTimers)` and shader `draw()` path, headless. Each frame forces a full OnUpdate interval, so the per-frame workload does not depend on window pacing, stale-tick dropping, or `perf` overhead. Draw covers the CPU side only (quad rebuild, texture loading), not GPU submission.
 
 ```bash
-cargo build --release --bin bench_steady_state
+cargo build --release --bin bench_steady_state --features tools
 target/release/bench_steady_state [--warmup 300] [--frames 1000] [--rounds 5]
 ```
 
@@ -114,7 +122,7 @@ Compare builds by `min p50` across rounds; single rounds vary up to ~2.6x with h
 Spellbook open/close settle cost on the same GUI path. `--cycles N` repeats close/open N times after the first open (which also loads the spellbook addon) and reports p50/p90/mean of keypress+settle and draw for the repeated phases; two 20-cycle runs agreed within 2.4%. Use it for panel-interaction before/after claims.
 
 ```bash
-cargo build --release --bin bench_spellbook
+cargo build --release --bin bench_spellbook --features tools
 target/release/bench_spellbook --cycles 20
 ```
 
@@ -125,6 +133,7 @@ Host noise: this machine mixes Zen 5 (CPUs 0-3, 12-15, 5.16 GHz) and Zen 5c (3.2
 | Flag | Effect |
 |------|--------|
 | `--no-addons` | Skip third-party addons |
+| `--addons-path DIR` | Exclusive third-party root; repeat for multiple roots |
 | `--no-saved-vars` | Skip WTF SavedVariables (~18% of load time) |
 | `--delay <ms>` | Delay after startup events (dump-tree/screenshot) |
 | `--exec-lua "code"` | Execute Lua after startup; prefix with `@` to load file |

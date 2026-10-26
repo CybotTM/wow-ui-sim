@@ -109,7 +109,7 @@
 //! - `state.equipped_artifact = Some(ArtifactInfo { item_id: 211_993,
 //!   total_xp: 350, points_spent: 2, tier: 1, ... })`. `item_id = 211_993`
 //!   ("Entombed Seraph's Casque") is one of the equipment IDs already
-//!   present in `data/items.rs`. The actual identity does not matter —
+//!   present in `crates/sim-data/data/items.rs`. The actual identity does not matter —
 //!   the test pins XP-bar behavior, not artifact metadata — but the ID
 //!   MUST be in the items DB so that `Item:CreateFromItemID(itemID)` →
 //!   `ContinueOnItemLoad` clears `IsItemEmpty()` (which calls
@@ -189,6 +189,7 @@ const EXPECTED_NUM_POINTS: i32 = 3;
 const EXPECTED_REMAINING_XP: i64 = 50;
 const EXPECTED_NEXT_COST: i64 = 200;
 
+post_wrath_ui_fixture! {
 #[test]
 fn artifact_bar_round_trips_through_artifact_xp_update_event() {
     test_timeout! {
@@ -206,6 +207,7 @@ fn artifact_bar_round_trips_through_artifact_xp_update_event() {
         assert_post_event_tick_shown(env);
     });
     }
+}
 }
 
 fn assert_cold_globals_resolve(env: &WowLuaEnv) {

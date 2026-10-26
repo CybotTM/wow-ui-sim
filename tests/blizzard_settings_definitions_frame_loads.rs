@@ -76,6 +76,7 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn retail_12_1_housing_settings_global_strings_match_pinned_export() {
     const EXPECTED: &[(&str, &str)] = &[
@@ -139,7 +140,10 @@ fn retail_12_1_housing_settings_global_strings_match_pinned_export() {
         );
     }
 }
+}
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_bare_variant() {
     assert_eq!(
@@ -149,7 +153,9 @@ fn find_toc_file_resolves_bare_variant() {
         "Retail ships the bare Blizzard_SettingsDefinitions_Frame.toc."
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_declares_eager_game_only_with_three_hard_deps() {
     let toc = TocFile::from_file(&definitions_frame_toc())
@@ -212,7 +218,9 @@ fn toc_declares_eager_game_only_with_three_hard_deps() {
     assert!(toc.saved_variables().is_empty());
     assert!(toc.saved_variables_per_character().is_empty());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_raw_bytes_pin_metadata_with_default_state_enabled() {
     let raw = std::fs::read_to_string(definitions_frame_toc())
@@ -230,7 +238,9 @@ fn toc_raw_bytes_pin_metadata_with_default_state_enabled() {
          per-account state"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_body_lists_nine_mainline_overrides_then_current_main_files() {
     let toc = TocFile::from_file(&definitions_frame_toc())
@@ -308,7 +318,9 @@ fn toc_body_lists_nine_mainline_overrides_then_current_main_files() {
          flavors have a different load shape"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn appears_only_on_game_screen_eager_discovery() {
     let ui = blizzard_ui_dir();
@@ -341,7 +353,9 @@ fn appears_only_on_game_screen_eager_discovery() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn root_directory_holds_nine_mainline_overrides_in_subdir() {
     let dir = definitions_frame_dir();
@@ -370,6 +384,7 @@ fn root_directory_holds_nine_mainline_overrides_in_subdir() {
              for mainline category-registration overrides"
         );
     }
+}
 }
 
 prefork_full_ui_case! {

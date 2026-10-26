@@ -114,7 +114,6 @@ const VIRTUAL_TEMPLATES_NOT_IN_GLOBALS: &[&str] = &[
 fn load_player_choice_after_fork(env: &WowLuaEnv) {
     load_addon(&env.loader_env(), &player_choice_toc())
         .expect("explicit load_addon for Blizzard_PlayerChoice succeeds");
-
 }
 
 fn load_full_game_ui_with_player_choice() -> WowLuaEnv {
@@ -145,6 +144,8 @@ fn load_full_game_ui_with_player_choice() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_player_choice_find_toc_resolves_bare_variant() {
     let resolved = find_toc_file(&player_choice_dir()).expect("Blizzard_PlayerChoice TOC resolves");
@@ -164,7 +165,9 @@ fn blizzard_player_choice_find_toc_resolves_bare_variant() {
         mainline.display()
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_player_choice_toc_declares_load_on_demand_with_split_dependency_keys() {
     let toc = TocFile::from_file(&player_choice_toc()).expect("Blizzard_PlayerChoice TOC parses");
@@ -219,7 +222,9 @@ fn blizzard_player_choice_toc_declares_load_on_demand_with_split_dependency_keys
          and reroll counts are all server-driven and never persisted client-side"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_player_choice_toc_declares_metadata_in_raw_bytes() {
     let raw = std::fs::read_to_string(player_choice_toc())
@@ -275,7 +280,9 @@ fn blizzard_player_choice_toc_declares_metadata_in_raw_bytes() {
          metadata profile"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_player_choice_toc_lists_bootstrap_then_twenty_files_in_canonical_order() {
     let toc = TocFile::from_file(&player_choice_toc()).expect("Blizzard_PlayerChoice TOC parses");
@@ -289,6 +296,7 @@ fn blizzard_player_choice_toc_lists_bootstrap_then_twenty_files_in_canonical_ord
         "Retail 12.1.0.69497 lists its bootstrap first, then twenty PlayerChoice source files \
          in the established paired Lua-then-XML module order"
     );
+}
 }
 
 #[test]
@@ -314,6 +322,7 @@ fn blizzard_player_choice_does_not_appear_in_eager_discovery_for_any_screen() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_player_choice_appears_in_full_addon_inventory() {
     let inventory = discover_all_blizzard_addons(&blizzard_ui_dir());
@@ -325,6 +334,7 @@ fn blizzard_player_choice_appears_in_full_addon_inventory() {
         "Blizzard_PlayerChoice must appear in `discover_all_blizzard_addons` — the full \
          inventory is a structural listing of every parseable TOC including LoD addons"
     );
+}
 }
 
 prefork_full_ui_case! {
@@ -365,11 +375,13 @@ fn blizzard_player_choice_loads_without_addon_specific_lua_errors(env: &WowLuaEn
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn blizzard_player_choice_loads_without_addon_specific_lua_errors() {
     let env = load_full_game_ui_with_player_choice();
     blizzard_player_choice_loads_without_addon_specific_lua_errors::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -389,11 +401,13 @@ fn blizzard_player_choice_is_addon_loaded_after_explicit_load(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn blizzard_player_choice_is_addon_loaded_after_explicit_load() {
     let env = load_full_game_ui_with_player_choice();
     blizzard_player_choice_is_addon_loaded_after_explicit_load::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -424,11 +438,13 @@ fn blizzard_player_choice_publishes_twenty_six_mixin_tables(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn blizzard_player_choice_publishes_twenty_six_mixin_tables() {
     let env = load_full_game_ui_with_player_choice();
     blizzard_player_choice_publishes_twenty_six_mixin_tables::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -470,11 +486,13 @@ fn blizzard_player_choice_creates_named_non_virtual_frames(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn blizzard_player_choice_creates_named_non_virtual_frames() {
     let env = load_full_game_ui_with_player_choice();
     blizzard_player_choice_creates_named_non_virtual_frames::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -517,11 +535,13 @@ fn blizzard_player_choice_does_not_leak_virtual_templates_to_globals(env: &WowLu
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn blizzard_player_choice_does_not_leak_virtual_templates_to_globals() {
     let env = load_full_game_ui_with_player_choice();
     blizzard_player_choice_does_not_leak_virtual_templates_to_globals::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -553,11 +573,13 @@ fn blizzard_player_choice_frame_renders_as_hidden_after_load(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn blizzard_player_choice_frame_renders_as_hidden_after_load() {
     let env = load_full_game_ui_with_player_choice();
     blizzard_player_choice_frame_renders_as_hidden_after_load::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -597,9 +619,11 @@ fn blizzard_player_choice_uiwidgets_dep_loaded_via_eager_discovery(env: &WowLuaE
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn blizzard_player_choice_uiwidgets_dep_loaded_via_eager_discovery() {
     let env = load_full_game_ui_with_player_choice();
     blizzard_player_choice_uiwidgets_dep_loaded_via_eager_discovery::run(&env);
+}
 }

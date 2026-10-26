@@ -115,6 +115,18 @@ type ComparisonPortraitProbe = (String, String, String, String, String, String, 
 
 #[test]
 fn comparison_update_is_absent_but_set_portrait_texture_writes_default_portrait_path() {
+    if crate::common::wrath_achievement_fixtures::assert_native(
+        r#"
+        assert(type(AchievementFrameComparison_Update) == "function")
+        AchievementFrameComparison_SetUnit("player")
+        assert(AchievementFrameComparisonHeaderPortrait.unit == "player")
+        assert(AchievementFrameComparisonHeaderPortrait:GetTexture())
+        AchievementFrameComparison_OnEvent(AchievementFrameComparison, "UNIT_PORTRAIT_UPDATE", "player")
+        assert(AchievementFrameComparisonHeaderPortrait:GetTexture())
+        "#,
+    ) {
+        return;
+    }
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
         let observations: ComparisonPortraitProbe = env
             .eval(

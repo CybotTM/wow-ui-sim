@@ -32,6 +32,10 @@ pub(crate) fn register_c_lfg_info_surface(state: &mut LuaState) -> LuaResult<()>
     register_access_methods(state, table_ref)?;
     register_category_methods(state, table_ref)?;
     register_dungeon_methods(state, table_ref)?;
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Mists {
+        super::lfr_availability::register(state, table_ref)?;
+        super::scenario_finder_availability::register(state, table_ref)?;
+    }
     register_active_dungeon_name(state, table_ref)
 }
 

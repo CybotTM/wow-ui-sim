@@ -8,6 +8,10 @@ pub(crate) mod classic_startup_defaults;
 ))]
 pub(crate) mod legacy_quest_timers;
 
+#[cfg(feature = "client-wrath")]
+pub(crate) mod wrath_attack_action;
+pub(crate) mod wrath_minimap_ping_coordinates;
+
 pub(crate) mod session_exit_defaults;
 #[cfg(feature = "client-wrath")]
 pub(crate) mod wrath_startup_defaults;
@@ -48,8 +52,6 @@ pub(crate) mod chat_window_defaults;
 pub(crate) mod class_trial_defaults;
 pub(crate) mod click_bindings_defaults;
 pub(crate) mod client_info_defaults;
-#[cfg(feature = "retail-12-0-7")]
-pub(crate) mod club_notification_defaults;
 pub(crate) mod collections_journal_namespace;
 pub(crate) mod color_defaults;
 pub(crate) mod combat_log_state;
@@ -77,6 +79,10 @@ pub(crate) mod environment_cleanup_restore;
 pub(crate) mod equipment_set_lock_defaults;
 pub(crate) mod event_scheduler_state;
 pub(crate) mod fog_of_war_pin;
+#[cfg(feature = "client-wowforever")]
+pub(crate) mod forever_bank_capability_defaults;
+#[cfg(feature = "client-wowforever")]
+pub(crate) mod forever_startup_capabilities;
 pub(crate) mod formatting_utility_defaults;
 pub(crate) mod frame_helper_defaults;
 pub(crate) mod game_rules_namespace_fallback;
@@ -91,6 +97,7 @@ pub(crate) mod guild_info_namespace_fallback;
 pub(crate) mod house_exterior_debug;
 pub(crate) mod housing_catalog_state;
 pub(crate) mod housing_dashboard_preload;
+pub(crate) mod housing_owned_house_requests;
 pub(crate) mod inert_global_defaults;
 pub(crate) mod inventory_query_defaults;
 pub(crate) mod item_button_helper_defaults;
@@ -134,6 +141,7 @@ pub(crate) mod patch_12_1_inert_defaults;
 pub(crate) mod performance_metric_defaults;
 pub(crate) mod perks_activities_state;
 pub(crate) mod perks_program_defaults;
+pub(crate) mod pet_battle_action_legality_defaults;
 pub(crate) mod pet_battle_runtime_state;
 pub(crate) mod ping_defaults;
 pub(crate) mod player_location_defaults;
@@ -166,13 +174,18 @@ pub(crate) mod shared_character_services_defaults;
 pub(crate) mod shared_xml_anim_mixins;
 pub(crate) mod shared_xml_utility_defaults;
 pub(crate) mod social_queue_defaults;
+pub(crate) mod social_service_defaults;
 pub(crate) mod sound_driver_defaults;
 pub(crate) mod source_patches;
 pub(crate) mod spell_book_static_defaults;
 pub(crate) mod spell_metadata_defaults;
 pub(crate) mod spell_static_defaults;
 pub(crate) mod spell_target_defaults;
+#[cfg(not(feature = "client-wrath"))]
+pub(crate) mod startup_condition_capability_defaults;
 pub(crate) mod startup_namespace_defaults;
+#[cfg(not(feature = "client-wrath"))]
+pub(crate) mod startup_service_capability_defaults;
 pub(crate) mod startup_windows;
 pub(crate) mod static_model_info_defaults;
 pub(crate) mod static_popup_defaults;
@@ -191,7 +204,6 @@ pub(crate) mod trade_skill_ui_fallbacks;
 pub(crate) mod transmog_outfit_slot_defaults;
 pub(crate) mod transmog_sets_defaults;
 pub(crate) mod transmog_util_defaults;
-pub(crate) mod tts_settings_defaults;
 pub(crate) mod ui_frame_manager_defaults;
 pub(crate) mod ui_parent_panel_toggles;
 pub(crate) mod ui_widget_manager_defaults;
@@ -203,3 +215,8 @@ pub(crate) mod unit_stagger_defaults;
 pub(crate) mod unit_threat_defaults;
 pub(crate) mod video_options_state;
 pub(crate) mod vignette_pin_template;
+pub(crate) mod world_service_defaults;
+#[cfg(feature = "client-wrath")]
+pub(crate) mod wrath_arena_roster;
+#[cfg(feature = "client-wrath")]
+pub(crate) mod wrath_trade_skill_filters;

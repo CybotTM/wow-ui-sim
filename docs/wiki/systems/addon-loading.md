@@ -63,6 +63,12 @@ During startup, discovery loads non-LoadOnDemand roots plus explicit LoadOnDeman
 
 `LoadResult` includes per-addon timing breakdown: `io_time`, `xml_parse_time`, `lua_exec_time`, `saved_vars_time`.
 
+### Wrath file-load diagnostics
+
+The [Wrath diagnostic contract](../../specs/xml-load-diagnostics.md) supersedes the earlier X2 Lua-handler assumption. `xml_file.rs` classifies typed open/parse errors at discovery and passes an explicit warning vector through recursive traversal; missing external Lua IO is recorded before continuation. `addon.rs` owns that vector and avoids duplicate propagated XML warnings. The original first-child-error return remains internal; lowercase Include shares Wrath continuation, and external Script inline bodies still run. Genuine Lua compile/runtime/OnLoad errors retain their existing handler paths.
+
+Native 12340 calls these STATUS_ERROR entries. Simulator retains exact texts in existing `LoadResult.warnings` / `LoadDiagnostics.warnings` strings and uses existing emission unchanged: no new severity metadata or logging path. `file_diagnostics.rs` derives backslash virtual paths lexically relative to the addon root (INFERRED mapping), including collapsed parent components; FrameXML uses `Interface\\FrameXML`. Optional context headings and FrameXML.log writing are excluded. Original-consumer RED→GREEN, Wrath67 and Retail61 bounded cases pass; stock receipts live in the owning spec. Retail's existing pathless parse-error report is deliberately preserved. FrameXML alone does not publish ScriptErrorsFrame, so its unchanged DebugTools TOC is explicitly loaded in that test. Other profiles retain simulator routing; native modern Retail behavior is UNKNOWN.
+
 ### Opted-in addon namespace access — bounded runtime proof
 
 `d91ac3476` retains the actual shared second chunk argument before file execution in [addon loading](../../../src/loader/addon.rs). [c_addons_local_table.rs](../../../src/c_api/c_addons_local_table.rs) roots namespace records in the VM registry, not SimState, and gates `C_AddOns.GetAddOnLocalTable` on loaded state, TOC opt-in and actual Blizzard-code classification. The query authenticates the original selector and rejects insecure Blizzard access without loading a target or manufacturing a table. [Addon-local-table spec](../../specs/addon-local-table.md) owns identity/lifetime/access policies and native unknowns. All six pre-fix tests reached missing registration; later GC/security assertions were unreached. Sealed Retail `e3978fd48196` now passes all six, exit0, reaching namespace identity, mutation, GC retention and security boundaries; disabled-loader3 and namespace-freeze1 controls also pass. Numeric selectors, unload and native behavior remain unknown; [shared four-producer evidence boundary](lua-api.md#current-pet-hover-and-follower-instance-models--bounded-runtime-proof) separates earlier animation/role proof.
@@ -137,6 +143,10 @@ Priority: WTF loading (`WTF/Account/{account}/SavedVariables/{addon}.lua` and pe
 
 `LoadError` wraps Io, Toc, Xml, Lua variants. Recoverable loader/XML/Lua failures accumulate in `LoadResult.warnings`; typed nil-symbol observations and missing `C_*` requirements use separate fields. Path resolution tries four strategies (case-sensitive/insensitive × relative-to-xml/addon-root) before failing.
 
+### Missing C members (F0, 2026-10-20)
+
+The [nil-member contract](../../specs/c-namespace-nil-members.md) removes arbitrary member fabrication from the shared bootstrap, housing initializer and three named namespace handlers. Shared and named handlers can record missing-member diagnostics but return nil without memoizing a value. Housing merges explicit defaults without replacing namespace metatables. Explicit defaults, state and actions remain; follow-up M1–M5/T6 own exposed runtime gaps, not F0.
+
 ### Nil-Symbol Diagnostic Reconciliation
 
 Implementation: [nil-symbol reports](../../../src/loader/addon/nil_symbol_reports.rs), [publication callbacks](../../../src/lua_api/globals/compat_overrides.rs), and [named-frame publication](../../../src/lua_api/globals/create_frame/helpers_shared.rs).
@@ -153,13 +163,15 @@ Nested runtime-addon loads finalize failures, nil observations, and missing requ
 
 ## Sources
 
+- [Wrath file diagnostic contract](../../specs/xml-load-diagnostics.md) and [file_diagnostics.rs](../../../src/loader/file_diagnostics.rs) — native channel/text policy, inferred virtual paths and bounded proof
+
 - [addon-loading-pipeline.md](../../addon-loading-pipeline.md) — TOC parsing, load flow, XML handlers, SavedVariables, load order
 - [addon_loading.rs](../../../src/bin/wow_sim/addon_loading.rs) — Blizzard eager load, third-party addon discovery, metadata pre-registration, enable-state application, and load loop
 - [toc/mod.rs](../../../src/toc/mod.rs) — TOC metadata, normal file list, `[Bootstrap]` parsing, path resolution
 - [loader/addon.rs](../../../src/loader/addon.rs) — normal addon file execution, inline `[Bootstrap]` entries, load transactions, warning finalization, and the secure replay allowlist
 - [c_addons_runtime.rs](../../../src/c_api/c_addons_runtime.rs) — runtime addon loading, typed top-level diagnostic retention, exactly-once nested forwarding, and the scoped `Blizzard_TransmogShared` compatibility window
 - [runtime.rs](../../../src/lua_api/state_types/runtime.rs) — typed diagnostic records and public/secure attribution fields
-- [runtime surface bootstrap](../../../src/lua_api/env_init/runtime_surface_bootstrap.lua) — `_G.__index` diagnostic gate, strict `C_*` namespace fallback, and raw namespace restoration
+- [runtime surface bootstrap](../../../src/lua_api/env_init/runtime_surface_bootstrap.lua) — `_G.__index` diagnostic gate, nil-returning `C_*` diagnostic lookup, and raw namespace restoration
 - [secure environment](../../../src/lua_api/globals/security/secure_env.rs) — separate secure environment and secure publication recording
 - [precompiled lifecycle helpers](../../../src/loader/precompiled.rs) — raw `_G.self` receiver snapshot/restore
 - [environment cleanup restore](../../../src/lua_api/workarounds/temporary/environment_cleanup_restore.rs) — post-cleanup namespace restoration regression proof

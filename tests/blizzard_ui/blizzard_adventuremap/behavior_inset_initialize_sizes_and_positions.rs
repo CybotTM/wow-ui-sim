@@ -15,6 +15,8 @@ const EXPECTED_HEIGHT: f64 = 309.0;
 const EXPECTED_ANCHOR_X: f64 = CANVAS_WIDTH * NORMALIZED_X;
 const EXPECTED_ANCHOR_Y: f64 = -(CANVAS_HEIGHT * NORMALIZED_Y);
 
+// Wrath has no AdventureMap vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn adventure_map_inset_initialize_sizes_textures_and_positions() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -72,6 +74,7 @@ fn adventure_map_inset_initialize_sizes_textures_and_positions() {
 
         assert_inset_initialize_surface(surface);
     });
+}
 }
 
 type InsetInitializeSurface = (

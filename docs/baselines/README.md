@@ -2,6 +2,12 @@
 
 Validation artifacts for supported client profiles.
 
+## PTR 70493 authenticated-source capture — 2026-10-24
+
+[`ptr-lua-errors.json`](ptr-lua-errors.json) is the exact stock `lua-errors` stdout captured at `e50a145a34246d32807b7ebb463c8fd04b538780` after merging master `7e786472d` into the source lane. Build `wowt 12.1.7.70493`, Interface 120107; 4,578 source files match pinned decoded size/hash. [Metadata](ptr-lua-errors.meta.json) binds build/CDN/install/Gethe identity, manifest/index/mapping/cache-provenance hashes, sealed ELF, child-only environment, unchanged source/CVar guards and retained service result.
+
+**FAILING inventory: 432 records / 612 occurrences, exit 1.** Parent accepted the reduction from 434/614: exactly the Minimap `IsInsideHouse` nil error and its ScriptErrors presentation disappear (one occurrence each), explained by master's house-interior implementation (`e3a61a390`). Independent comparison confirms no additions, changed counts or remaining-order changes. This is not clean startup or I4/panel/native acceptance. The error list is byte-identical captured stdout (SHA256 `2281134d2e6bcc216f6ad59689a96bb2cc177b76a99673b6ad454ee320fb11f6`), not hand edited. Capture receipt: `~/.local/state/wow-ui-sim/verification/p1217-merged/ptr-stock-map/receipt.json`; comparison and reconciliation receipts remain beside that capture. No build or runtime was repeated for reconciliation; later source merges are not covered by this capture. Previous 69594 baseline remains in Git at `1edff1749e4b6e0ac59358ae0f76dfe180f7b0de`; no renamed copy was added. Historical re-pin/control sections below retain their original source epochs and do not describe this 70493 capture.
+
 ## rilua re-pin baseline refresh — 2026-10-17
 
 This is the historical re-pin-only capture; the [combined Wrath inventory](#wrath-lua-errors) below supersedes its Wrath row.
@@ -19,6 +25,31 @@ Only Era, Anniversary and Wrath JSON/metadata are refreshed, byte-identical to t
 Saved evidence: `/home/osso/.local/state/wow-ui-sim/handoff/rilua-repin-rebase/report.md`, per-profile `*-startup-diff.json`, `acceptance-summary.json`, and `final-rebase-proof.json`. Five targeted tests pass under each profile (35 executions, five logical tests, including two unwind/diagnostic regressions). All original-CVar guards pass; profile cache hashes are unchanged across each capture. Existing `UnitRole` dead-code warnings remain in five non-Retail/PTR builds. These remain failing compatibility inventories for Era/Anniversary/Wrath, not native, GUI, full-suite or clean-startup acceptance. Earlier sections retain historical receipts.
 
 ## Lua Errors
+
+### Retail
+
+`retail-lua-errors.json` records stock startup with default Retail features,
+no third-party addons and no SavedVariables. Capture stdout byte-for-byte,
+including its trailing LF, using the approved build cache and an isolated
+`XDG_DATA_HOME` containing a byte-exact copy of current persisted CVars
+(see [runtime isolation](../../AGENTS.md#running-the-simulator)):
+
+```bash
+cargo build -j1 --bin wow-sim
+WOW_SIM_NO_SAVED_VARS=1 WOW_SIM_NO_ADDONS=1 timeout 90 "${CARGO_TARGET_DIR}/debug/wow-sim" lua-errors > docs/baselines/retail-lua-errors.json
+```
+
+Set `CARGO_TARGET_DIR` to the approved shared cache before building. Keep CASC
+and sound at their stock settings. Refresh only after a verified clean capture;
+do not bless new startup errors. This baseline is not full-suite, GUI or native
+parity acceptance.
+
+Verified on 2026-10-19 at runtime source `a150e228591da3c97179b606b23082d9cff9b07a`:
+**0 records / 0 occurrences, exit0 (`[]` plus LF)**; 282 Blizzard addons loaded.
+Original persisted CVar hash/stat remained unchanged. The host had no audio
+device; this is not audio-device acceptance.
+
+### Mists
 
 `mists-lua-errors.json` is the committed clean startup baseline for:
 
@@ -135,7 +166,39 @@ That capture's historical metadata bound the observation to source, manifest has
 
 ## Forever Lua Errors
 
-Current saved corrected-enUS `1.60.1.70374` capture at runtime/build source `40a010b5a`: **10 records / 14 occurrences, exit1**, still FAIL; all remaining records are Gamepad storage/empty-map errors, first nil player-storage arithmetic. The missing rich quest80002 error is absent after watch/log reconciliation. Historical source704's12/16 JSON remains privately retained as `baseline-before-watch.json` beside the current watch receipt; query coherence is not whole-startup acceptance. Historical c2bf/build57 capture **22 records / 26 occurrences, exit1**, first nil `Enum.VoiceProviderID`, remains privately retained beside current receipts. Source136 post-enum capture **58 records / 58 occurrences, exit1**, first failure missing `import`, remains privately retained. Baseline JSON copying belongs to main; this documentation update does not rewrite or authenticate the tracked JSON. Historical source `9a6ea924e` capture was **166 records / 238 occurrences, exit1**. Preset line1272 and setting-display-map cascade no longer appear; other preset errors remain. Counts are unique records/occurrences, not root-cause counts.
+Current 70532 stock capture at runtime source `1fcbddf67`: **26 records / 26
+occurrences, exit1; startup is not clean.** The JSON is byte-identical captured
+stdout (SHA256 `3f730c6ab7e75bf0c95c73239af1e60519633beea8988d6d2e6f0176bbe22abd`).
+[Metadata](wowforever-lua-errors.meta.json) classifies every record by index and
+message hash, and binds the source, ELF, copied cache, manifest and CVar guards.
+
+| Native-unknown residue | Raw records / occurrences | Reason |
+|---|---:|---|
+| `C_Spell.GetTargetSpellID` | 24 / 24 | Non-null numeric return is documented, but no idle sentinel is known; no target is supplied. Repaired bag consumers now reach this query. |
+| `C_AccountServices.GetPreferredDatacenterLocalities` | 2 / 2 | Selected callers exist, but no 70532 API declaration/publisher or native registration/return evidence is available. |
+
+Disposition: **laptop aso source-only audit 2026-10-25: native-unknown**. Only
+these expressly approved gaps are retained: 13 underlying errors and 13
+ScriptErrors reports, without deduplication or normalization. No native return
+value or locality catalog was invented. The old tracked `[]` was not a clean
+capture of this 70532 cache: the lane reproduced 76/76 and reduced it to 26/26
+(74 exact messages removed, 24 added explicit target-unknown messages, 2 unchanged;
+net 50 fewer occurrences). [The contract](../specs/forever-startup-inputs.md)
+defines the supplied models and excluded housing consumer.
+
+All 21 exact selected-consumer/preservation selectors pass at that runtime source
+(19 new, 2 preservation). This is not native parity, full-suite, GUI or all-profile
+runtime acceptance. One all-target check per profile passes at `b910efd8d`:
+Retail has zero warnings; Forever/PTR each have the same three inherited
+`dead_code` warnings in `tests/fast_handler_late_bind.rs`. The parent clarified
+on 2026-10-25 that this warning set is allowed on Forever too and belongs to a
+separate seven-profile lane. This branch leaves that file unchanged and does
+not suppress warnings. Formatting passes. Full command, CPU and release receipts
+are retained in the private Forever startup slot-run report and receipts.
+
+### Historical 70374 capture
+
+Historical saved corrected-enUS `1.60.1.70374` capture at runtime/build source `40a010b5a`: **10 records / 14 occurrences, exit1**, still FAIL; all remaining records are Gamepad storage/empty-map errors, first nil player-storage arithmetic. The missing rich quest80002 error is absent after watch/log reconciliation. Historical source704's12/16 JSON remains privately retained as `baseline-before-watch.json` beside the current watch receipt; query coherence is not whole-startup acceptance. Historical c2bf/build57 capture **22 records / 26 occurrences, exit1**, first nil `Enum.VoiceProviderID`, remains privately retained beside current receipts. Source136 post-enum capture **58 records / 58 occurrences, exit1**, first failure missing `import`, remains privately retained. Baseline JSON copying belongs to main; this documentation update does not rewrite or authenticate the tracked JSON. Historical source `9a6ea924e` capture was **166 records / 238 occurrences, exit1**. Preset line1272 and setting-display-map cascade no longer appear; other preset errors remain. Counts are unique records/occurrences, not root-cause counts.
 
 The two historical captures (source136 and `9a6ea924e`) report 272 Blizzard addons loaded and 1658/1658 bytecode-cache hits. Different explicit CASC/product environment settings and unresealed external cache inputs prevent whole-input equivalence, archive acceptance or controlled performance claims. See [verified receipts](#verified-scoped-receipts--2026-10-15) for attribution and the [locale owner](../specs/casc-loading.md#locale-checkpoint--october-15-2026) for acquisition scope. Clean startup remains open.
 

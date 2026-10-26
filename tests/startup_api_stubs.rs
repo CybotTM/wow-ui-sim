@@ -14,9 +14,6 @@ type LfgWorldBnProbe = (
     bool,
     bool,
     i32,
-    f64,
-    f64,
-    f64,
     String,
     String,
     f64,
@@ -335,9 +332,6 @@ fn startup_lfg_world_timer_and_bn_surfaces_return_empty_safe_shapes() {
         ready_check_in_progress,
         ready_check_is_battleground,
         elapsed_timer_count,
-        elapsed_timer_id,
-        elapsed_time,
-        elapsed_type,
         world_pvp_status,
         world_pvp_map,
         world_pvp_queue_id,
@@ -354,7 +348,6 @@ fn startup_lfg_world_timer_and_bn_surfaces_return_empty_safe_shapes() {
             r##"
             local queued = GetLFGQueuedList(1)
             local readyCheckInProgress, readyCheckIsBattleground = GetLFGReadyCheckUpdate()
-            local timerID, elapsedTime, timerType = GetWorldElapsedTime(7)
             local worldPvpStatus, worldPvpMap, worldPvpQueueID, worldPvpExpire, worldPvpAverage, worldPvpQueued, worldPvpSuspended =
                 GetWorldPVPQueueStatus(1)
 
@@ -363,9 +356,6 @@ fn startup_lfg_world_timer_and_bn_surfaces_return_empty_safe_shapes() {
                    readyCheckInProgress,
                    readyCheckIsBattleground,
                    select("#", GetWorldElapsedTimers()),
-                   timerID,
-                   elapsedTime,
-                   timerType,
                    worldPvpStatus,
                    worldPvpMap,
                    worldPvpQueueID,
@@ -386,9 +376,7 @@ fn startup_lfg_world_timer_and_bn_surfaces_return_empty_safe_shapes() {
         elapsed_timer_count, 0,
         "no world elapsed timers should be active"
     );
-    assert_eq!(elapsed_timer_id, 7.0);
-    assert_eq!(elapsed_time, 0.0);
-    assert_eq!(elapsed_type, 0.0);
+    assert_inactive_world_elapsed_contract(&env);
     assert_eq!(world_pvp_status, "none");
     assert_eq!(world_pvp_map, "");
     assert_eq!(world_pvp_queue_id, 0.0);
@@ -400,6 +388,22 @@ fn startup_lfg_world_timer_and_bn_surfaces_return_empty_safe_shapes() {
     assert_eq!(bn_online, 0);
     assert_eq!(bn_favorite, 0);
     assert_eq!(bn_favorite_online, 0);
+}
+
+fn assert_inactive_world_elapsed_contract(env: &wow_ui_sim::lua_api::WowLuaEnv) {
+    use wow_ui_sim::client_profile::{ACTIVE, ClientProfile};
+    let count: i32 = env.eval("return select('#', GetWorldElapsedTime(7))").unwrap();
+    if ACTIVE == ClientProfile::Wrath {
+        // Excluded Wrath retains the old ungrounded placeholder for its own lane.
+        let (id, elapsed, kind): (f64, f64, f64) =
+            env.eval("return GetWorldElapsedTime(7)").unwrap();
+        assert_eq!(count, 3);
+        assert_eq!(id, 7.0);
+        assert_eq!(elapsed, 0.0);
+        assert_eq!(kind, 0.0);
+    } else {
+        assert_eq!(count, 0, "missing supplied timers return no results");
+    }
 }
 
 #[test]

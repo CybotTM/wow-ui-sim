@@ -252,6 +252,7 @@ fn request_matches_rect(
         && (bounds.3 - (rect.1 + rect.3)).abs() <= tolerance
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn hero_spec_icon_full_ui_render_matches_isolated_crop_render() {
     if common::try_create_gpu_device().is_none() {
@@ -422,6 +423,7 @@ fn hero_spec_icon_full_ui_render_matches_isolated_crop_render() {
         );
     }
 }
+}
 
 #[test]
 fn hero_spec_icon_mask_clips_corners_but_preserves_center_pixels() {
@@ -537,6 +539,7 @@ fn assert_mask_preserves_icon_pixels(mask_path: &str) {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn hiding_hero_talents_container_only_changes_top_center_region() {
     if common::try_create_gpu_device().is_none() {
@@ -635,4 +638,5 @@ fn hiding_hero_talents_container_only_changes_top_center_region() {
             && diff.3 as f32 <= expanded_bottom,
         "Hiding HeroTalentsContainer should only affect the hero panel region: diff={diff:?} hero_rect={hero_rect:?}"
     );
+}
 }

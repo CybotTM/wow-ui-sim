@@ -15,8 +15,7 @@ use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
 #[cfg(feature = "aura-containers")]
-#[path = "../../data/spell_aura_secrecy.rs"]
-mod attributes;
+use sim_data_profile::spell_aura_secrecy as attributes;
 
 #[cfg(feature = "aura-containers")]
 const NEVER_SECRET: i32 = 0;
@@ -30,6 +29,13 @@ pub(crate) fn register(state: &mut LuaState) -> LuaResult<()> {
     let namespace = ensure_namespace(state, "C_Secrets")?;
     #[cfg(feature = "retail-12-0-0")]
     queries::register(state, namespace)?;
+    #[cfg(feature = "client-wowforever")]
+    table_set_rust_fn_static(
+        state,
+        namespace,
+        "ShouldUnitIdentityBeSecret",
+        forever_unit_identity_is_secret,
+    )?;
     #[cfg(feature = "aura-containers")]
     table_set_rust_fn_static(
         state,
@@ -67,6 +73,16 @@ fn should_cooldowns_be_secret(state: &mut LuaState) -> LuaResult<u32> {
         super::charge_state::cooldowns_are_restricted(&sim)
     };
     state.push(Val::Bool(restricted));
+    Ok(1)
+}
+
+#[cfg(feature = "client-wowforever")]
+fn forever_unit_identity_is_secret(state: &mut LuaState) -> LuaResult<u32> {
+    let value =
+        rilua::table_security::unwrap_secret(state, crate::lua_bridge::stack_val(state, 1))?;
+    let unit = crate::lua_api::methods::val_to_string(state, value).unwrap_or_default();
+    let secret = crate::lua_api::globals::unit_misc::unit_identity_is_secret(state, &unit)?;
+    state.push(Val::Bool(secret));
     Ok(1)
 }
 

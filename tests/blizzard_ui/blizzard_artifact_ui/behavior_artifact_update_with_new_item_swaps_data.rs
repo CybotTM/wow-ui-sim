@@ -7,6 +7,8 @@ const ROOT: &str = "Blizzard_ArtifactUI";
 const INITIAL_ARTIFACT_ICON: &str = "Interface/Icons/inv_sword_2h_artifactashbringer_d_01";
 const UPDATED_ARTIFACT_ICON: &str = "Interface/Icons/inv_axe_2h_artifactmaw_d_01";
 
+// ArtifactUI vendor handlers/templates do not ship in Wrath; modeled API probes stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn artifact_update_with_new_item_refreshes_all_visible_artifact_data() {
     with_blizzard_addon_smoke_shape(&[], &[], |env, _loaded| {
@@ -26,6 +28,7 @@ fn artifact_update_with_new_item_refreshes_all_visible_artifact_data() {
              mismatches: {mismatches:?}"
         );
     });
+}
 }
 
 fn seed_viewed_artifact_at_forge(env: &wow_ui_sim::lua_api::WowLuaEnv) {

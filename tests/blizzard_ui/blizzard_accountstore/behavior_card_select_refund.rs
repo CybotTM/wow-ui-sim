@@ -68,7 +68,7 @@
 //! 4. **Confirmation format mismatch (refund-specific).** The format
 //!    selected at line 177 is `ACCOUNT_STORE_REFUND_CONFIRMATION_FORMAT`
 //!    when isRefundable is true (the `and` branch of the ternary). The
-//!    actual format string at `data/global_strings.rs:22797` is
+//!    actual format string at `crates/sim-data-profile/data/global_strings.rs:22797` is
 //!    `"Are you sure you want to refund %s for %s?"`. The substring
 //!    "want to refund" is unique to the refund format (the purchase
 //!    format at line 22780 is "Are you sure you want to purchase %s for
@@ -123,6 +123,7 @@ use wow_ui_sim::lua_api::WowLuaEnv;
 
 const ROOT: &str = "Blizzard_AccountStore";
 
+post_wrath_ui_fixture! {
 #[test]
 fn select_card_refund_path_invokes_static_popup_show_generic_confirmation_with_refund_format_text()
 {
@@ -189,7 +190,7 @@ fn select_card_refund_path_invokes_static_popup_show_generic_confirmation_with_r
             captured_text_contains_refund_keyword,
             "Expected the captured confirmation text to contain \"want to refund\" — the unique \
              substring of `ACCOUNT_STORE_REFUND_CONFIRMATION_FORMAT` (\"Are you sure you want to \
-             refund %s for %s?\" per `data/global_strings.rs:22797`). The body at line 177 selects \
+             refund %s for %s?\" per `crates/sim-data-profile/data/global_strings.rs:22797`). The body at line 177 selects \
              the refund format only when `isRefundable` is true (line 176: \
              `itemInfo.status == Enum.AccountStoreItemStatus.Refundable`). A reading without \
              \"want to refund\" means either (a) the format-selection logic took the purchase arm \
@@ -201,7 +202,9 @@ fn select_card_refund_path_invokes_static_popup_show_generic_confirmation_with_r
         teardown_select_card_refund_trackers(env);
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn select_card_refund_callback_invokes_c_account_store_refund_item_with_self_item_info_id_not_caller_arg()
  {
@@ -277,7 +280,9 @@ fn select_card_refund_callback_invokes_c_account_store_refund_item_with_self_ite
         teardown_select_card_refund_trackers(env);
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn select_card_refund_path_plays_item_select_at_entry_and_item_refund_inside_callback() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -384,7 +389,9 @@ fn select_card_refund_path_plays_item_select_at_entry_and_item_refund_inside_cal
         .expect("PlaySound log tear-down must run cleanly");
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn select_card_refund_branch_does_not_call_purchase_path_play_sound_or_begin_purchase() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -459,6 +466,7 @@ fn select_card_refund_branch_does_not_call_purchase_path_play_sound_or_begin_pur
         )
         .expect("PlaySound log tear-down must run cleanly");
     });
+}
 }
 
 fn seed_select_card_refund_trackers(env: &WowLuaEnv, item_id: i64) {

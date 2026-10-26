@@ -8,6 +8,7 @@ const ROOT: &str = "Blizzard_ActionBar";
 const ACTION_ID: u32 = 1;
 const SPELL_ID: u32 = 1234;
 
+post_wrath_ui_fixture! {
 #[test]
 fn new_action_highlight_shows_until_cleared() {
     test_timeout! {
@@ -21,6 +22,7 @@ fn new_action_highlight_shows_until_cleared() {
         assert_highlight_hidden(env);
     });
     }
+}
 }
 
 fn seed_action_button_spell(env: &WowLuaEnv) {

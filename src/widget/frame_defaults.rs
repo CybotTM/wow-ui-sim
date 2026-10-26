@@ -226,6 +226,7 @@ macro_rules! frame_defaults {
             editbox_blink_speed: 0.5,
             editbox_history: Vec::new(),
             editbox_history_max: 0,
+            editbox_history_cursor: 0,
             editbox_text_insets: (0.0, 0.0, 0.0, 0.0),
             text_line_spacing: 0.0,
             editbox_count_invisible_letters: false,

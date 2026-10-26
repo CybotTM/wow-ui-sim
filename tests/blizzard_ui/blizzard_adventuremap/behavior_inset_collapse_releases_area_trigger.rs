@@ -11,6 +11,8 @@ const NUM_DETAIL_TILES: i64 = 0;
 const NORMALIZED_X: f64 = 0.25;
 const NORMALIZED_Y: f64 = 0.5;
 
+// Wrath has no AdventureMap vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn adventure_map_inset_collapse_releases_area_trigger() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -93,6 +95,7 @@ fn adventure_map_inset_collapse_releases_area_trigger() {
 
         assert_inset_collapse_surface(surface);
     });
+}
 }
 
 type InsetCollapseSurface = (bool, bool, i64, String, bool, i64, i64, i64, bool);

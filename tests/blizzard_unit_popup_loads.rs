@@ -133,6 +133,8 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_mainline_variant() {
     let resolved = find_toc_file(&unit_popup_dir()).expect("UnitPopup TOC resolves");
@@ -151,7 +153,9 @@ fn find_toc_file_resolves_mainline_variant() {
          mainline build"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_is_eager_with_one_dependency() {
     let toc = TocFile::from_file(&unit_popup_toc()).expect("TOC parses");
@@ -184,7 +188,9 @@ fn toc_is_eager_with_one_dependency() {
     assert!(!toc.is_load_first());
     assert!(toc.default_enabled());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn allow_load_game_restricts_to_in_world() {
     let toc = TocFile::from_file(&unit_popup_toc()).expect("TOC parses");
@@ -205,7 +211,9 @@ fn allow_load_game_restricts_to_in_world() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn no_allow_load_game_type_means_unrestricted() {
     let toc = TocFile::from_file(&unit_popup_toc()).expect("TOC parses");
@@ -218,7 +226,9 @@ fn no_allow_load_game_type_means_unrestricted() {
          The mainline build loads it without flavor filtering"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn mists_companion_is_restricted_on_mainline_build() {
     let mists = TocFile::from_file(&unit_popup_mists_toc()).expect("Mists TOC parses");
@@ -246,7 +256,9 @@ fn mists_companion_is_restricted_on_mainline_build() {
          keeps it as a separately-loaded addon"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_raw_bytes_pin_directives_and_representative_body_files() {
     let raw = std::fs::read_to_string(unit_popup_toc()).expect("TOC reads utf-8");
@@ -306,9 +318,17 @@ fn toc_raw_bytes_pin_directives_and_representative_body_files() {
          would skip the TOC at discovery"
     );
 }
+}
 
 #[test]
 fn family_placeholder_resolves_to_mainline_directory() {
+    if cfg!(feature = "client-wrath") {
+        let toc = crate::common::native_framexml_toc();
+        let xml = std::fs::read_to_string(toc.addon_dir.join("UnitPopup.xml")).unwrap();
+        assert!(xml.contains(r#"<Script file="UnitPopup.lua""#));
+        assert!(toc.addon_dir.join("UnitPopup.lua").is_file());
+        return;
+    }
     let resolved = unit_popup_dir().join(FAMILY_PLACEHOLDER_RESOLVED_RELATIVE);
     assert!(
         resolved.is_file(),
@@ -320,6 +340,7 @@ fn family_placeholder_resolves_to_mainline_directory() {
     );
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn game_placeholder_resolves_to_standard_directory() {
     for relative in GAME_PLACEHOLDER_RESOLVED_RELATIVES {
@@ -337,7 +358,9 @@ fn game_placeholder_resolves_to_standard_directory() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn appears_in_game_eager_discovery() {
     let addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Game);
@@ -350,6 +373,7 @@ fn appears_in_game_eager_discovery() {
          CommunitiesFrame member rows; it must be alive at \
          PLAYER_ENTERING_WORLD"
     );
+}
 }
 
 #[test]
@@ -368,6 +392,22 @@ fn absent_from_glue_screens_eager_discovery() {
 
 #[test]
 fn dep_directories_exist_on_disk() {
+    if cfg!(feature = "client-wrath") {
+        let toc = crate::common::native_framexml_toc();
+        for file in ["UIDropDownMenu.xml", "UnitPopup.xml"] {
+            assert!(
+                toc.files
+                    .iter()
+                    .any(|path| path == std::path::Path::new(file)),
+                "native dependency absent from committed FrameXML order: {file}"
+            );
+            assert!(
+                toc.addon_dir.join(file).is_file(),
+                "native dependency missing on disk: {file}"
+            );
+        }
+        return;
+    }
     for dep in TOC_DEPENDENCIES {
         let dir = blizzard_ui_dir().join(dep);
         assert!(

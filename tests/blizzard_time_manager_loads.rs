@@ -86,6 +86,7 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_mainline_flavor_toc() {
     let resolved = find_toc_file(&time_manager_dir()).expect("TimeManager TOC resolves");
@@ -98,7 +99,9 @@ fn find_toc_file_resolves_mainline_flavor_toc() {
          `_Mainline.toc` first and resolves it directly"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_is_load_on_demand_with_current_dependencies() {
     let toc = TocFile::from_file(&time_manager_toc()).expect("TOC parses");
@@ -134,7 +137,9 @@ fn toc_is_load_on_demand_with_current_dependencies() {
     );
     assert!(toc.default_enabled());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn saved_variables_per_character_published_for_stopwatch_options() {
     let toc = TocFile::from_file(&time_manager_toc()).expect("TOC parses");
@@ -156,7 +161,9 @@ fn saved_variables_per_character_published_for_stopwatch_options() {
         toc.saved_variables_per_character()
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn allow_load_game_restricts_to_game_screen_only() {
     let toc = TocFile::from_file(&time_manager_toc()).expect("TOC parses");
@@ -179,7 +186,9 @@ fn allow_load_game_restricts_to_game_screen_only() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_raw_bytes_pin_current_metadata_directives_and_bootstrap() {
     let raw = std::fs::read_to_string(time_manager_toc()).expect("TOC reads utf-8");
@@ -212,7 +221,9 @@ fn toc_raw_bytes_pin_current_metadata_directives_and_bootstrap() {
     assert!(!raw.contains("## LoadFirst"));
     assert!(!raw.contains("## DefaultState"));
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn body_resolves_bootstrap_and_three_entries_with_normalized_slashes() {
     let toc = TocFile::from_file(&time_manager_toc()).expect("TOC parses");
@@ -236,9 +247,26 @@ fn body_resolves_bootstrap_and_three_entries_with_normalized_slashes() {
          Got: {body:?}"
     );
 }
+}
 
 #[test]
 fn appears_in_game_discovery_via_blizzard_game_implicit_dependency() {
+    if cfg!(feature = "client-wrath") {
+        let env = WowLuaEnv::new().expect("native TimeManager environment");
+        env.state().borrow_mut().addon_base_paths = vec![blizzard_ui_dir()];
+        crate::common::load_profile_framexml(&env);
+        env.exec(
+            r#"
+            assert(not IsAddOnLoaded("Blizzard_TimeManager"))
+            ToggleTimeManager()
+            assert(IsAddOnLoaded("Blizzard_TimeManager"))
+            assert(TimeManagerFrame:IsShown())
+            ToggleTimeManager()
+            assert(not TimeManagerFrame:IsShown())
+        "#,
+        )
+        .expect("12340 TimeManager lazy toggle lifecycle");
+    }
     for screen in ALL_FOUR_SCREENS {
         let addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), *screen);
         let found = addons
@@ -246,7 +274,7 @@ fn appears_in_game_discovery_via_blizzard_game_implicit_dependency() {
             .any(|(name, _)| name == "Blizzard_TimeManager");
         assert_eq!(
             found,
-            *screen == ScreenKind::Game,
+            !cfg!(feature = "client-wrath") && *screen == ScreenKind::Game,
             "TimeManager should appear only for {screen:?}: Blizzard_Game pulls this LoD addon \
              through the current implicit startup dependency while AllowLoad: game excludes \
              glue screens"

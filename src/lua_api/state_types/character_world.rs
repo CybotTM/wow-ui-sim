@@ -228,9 +228,13 @@ impl Default for MovementSpeeds {
 /// "level 70 paladin" preset lives in [`PlayerState::seeded`].
 #[derive(Debug, Clone, Default)]
 pub struct PlayerState {
+    /// Explicit active-player input for the native guild-info permission predicate.
+    pub present: bool,
     pub name: String,
     /// Simulator name policy; defaults false, not an inferred native default.
     pub regional_unique_names_enabled: bool,
+    /// Supplied surname visibility; None leaves the native policy unknown.
+    pub should_display_surname: Option<bool>,
     /// Configured graveyard-port availability; false for the seeded alive player.
     pub can_port_graveyard: bool,
     pub health: i32,
@@ -328,6 +332,7 @@ impl PlayerState {
         let equipped_items = default_equipped_items();
         let stats = CharacterStats::compute(&equipped_items, 2);
         Self {
+            present: true,
             health: 100_000,
             health_max: 100_000,
             class_index: 2,
@@ -490,6 +495,10 @@ pub struct WorldState {
     /// Whether the current instance is an arena battleground. Drives
     /// `IsBattlefieldArena`.
     pub battlefield_arena: bool,
+    /// Numeric active-player guild identity; zero means no guild.
+    pub guild_id: u64,
+    /// Zero-based active-player rank into the existing guild_ranks rights cache.
+    pub guild_player_rank: usize,
     pub guild_name: Option<String>,
     pub guild_rank: Option<String>,
     pub guild_num_members: i32,
@@ -553,6 +562,9 @@ pub struct WorldState {
     /// guild. Drives `GuildControlGetNumRanks` / `GuildControlGetRankName` /
     /// `GuildControlGetRankFlags`.
     pub guild_ranks: Vec<GuildRank>,
+    /// Host-received bank permissions by zero-based control rank. Missing rows
+    /// are unavailable input, not zero permissions. Wrath seeds only rank 0.
+    pub guild_bank_rank_permissions: HashMap<usize, GuildBankRankPermissions>,
     /// 1-based rank index currently "selected" by `GuildControlSetRank`.
     /// `GuildControlGetRankName()` / `GetRankFlags()` without an explicit
     /// index return the selected rank's fields. `0` = nothing selected.
@@ -684,6 +696,15 @@ pub struct GuildRank {
     pub flags: Vec<bool>,
 }
 
+/// Received guild-bank limits/rights for one rank (build 12340).
+/// No Default: nonleader/server values must be supplied, not invented.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct GuildBankRankPermissions {
+    pub money_per_day: i64,
+    pub tab_rights: [i32; 6],
+    pub tab_stacks_per_day: [i32; 6],
+}
+
 /// Guild tabard crest data returned by `GetGuildLogoInfo()`.
 #[derive(Debug, Default, Clone, PartialEq)]
 pub struct GuildLogo {
@@ -691,6 +712,7 @@ pub struct GuildLogo {
     pub border: (f64, f64, f64),
     pub emblem: (f64, f64, f64),
     pub emblem_filename: String,
+    pub tabard_metadata: Option<crate::c_api::c_guild_info::GuildTabardMetadata>,
 }
 
 /// An active loot roll (group loot item pending a player decision).
@@ -765,6 +787,9 @@ pub struct EquipmentSet {
 #[derive(Debug, Clone, Default)]
 pub struct EquipmentManagerState {
     pub sets: Vec<EquipmentSet>,
+    /// Explicit item-ID observations, shared by saved copies of the same ID.
+    /// Absence is unknown, not an implicit unlocked observation.
+    pub item_lock_observations: HashMap<u32, bool>,
     /// Next id handed out by `CreateEquipmentSet`. Starts at 1.
     pub next_id: i32,
     /// Slots flagged via `IgnoreSlotForSave` for the *next* save. The
@@ -782,6 +807,7 @@ impl EquipmentManagerState {
         Self {
             sets: Vec::new(),
             next_id: 1,
+            item_lock_observations: HashMap::new(),
             ignored_slots_pending_save: HashSet::new(),
             last_used_set_id: None,
         }

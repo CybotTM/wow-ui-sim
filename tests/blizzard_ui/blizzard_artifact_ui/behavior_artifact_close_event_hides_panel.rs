@@ -6,6 +6,8 @@ use wow_ui_sim::lua_api::state::ArtifactInfo;
 const ROOT: &str = "Blizzard_ArtifactUI";
 const ARTIFACT_ICON: &str = "Interface/Icons/inv_sword_2h_artifactashbringer_d_01";
 
+// ArtifactUI vendor handlers/templates do not ship in Wrath; modeled API probes stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn artifact_close_event_hides_panel_and_clears_viewed_artifact() {
     with_blizzard_addon_smoke_shape(&[], &[], |env, _loaded| {
@@ -25,6 +27,7 @@ fn artifact_close_event_hides_panel_and_clears_viewed_artifact() {
             "`{ROOT}` OnHide must clear the simulator's viewed artifact state"
         );
     });
+}
 }
 
 fn seed_viewed_artifact_at_forge(env: &wow_ui_sim::lua_api::WowLuaEnv) {

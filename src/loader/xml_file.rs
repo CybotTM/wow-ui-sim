@@ -12,6 +12,9 @@ use std::time::Instant;
 use super::LoadTiming;
 use super::addon::AddonContext;
 use super::error::LoadError;
+use super::file_diagnostics::{
+    is_recorded_xml_failure, record_file_diagnostic, uses_wrath_file_diagnostics,
+};
 use super::helpers::resolve_path_with_fallback;
 use super::lua_file::load_lua_file;
 use super::xml_frame::create_frame_from_xml;
@@ -23,35 +26,63 @@ pub fn load_xml_file(
     path: &Path,
     ctx: &AddonContext,
     timing: &mut LoadTiming,
+    warnings: &mut Vec<String>,
 ) -> Result<usize, LoadError> {
     let _xml_load_addon_guard = super::enter_xml_load_addon_context(env);
     let xml_start = Instant::now();
-    let ui = parse_xml_file(path).map_err(|e| {
-        let _ = env.with_state(|state| {
-            call_error_handler_state(state, &e.to_string());
-            Ok::<(), crate::Error>(())
-        });
-        LoadError::Xml(e)
+    let ui = parse_xml_file(path).map_err(|error| {
+        if uses_wrath_file_diagnostics() {
+            let message = match &error {
+                crate::xml::XmlLoadError::Parse(_) => "Couldn't parse XML in",
+                crate::xml::XmlLoadError::Io(_) | crate::xml::XmlLoadError::IoWithPath { .. } => {
+                    "Couldn't open"
+                }
+            };
+            record_file_diagnostic(warnings, ctx, path, message);
+        } else {
+            report_xml_error(env, &error.to_string());
+        }
+        LoadError::Xml(error)
     })?;
     timing.xml_parse_time += xml_start.elapsed();
 
     let xml_dir = path.parent().unwrap_or(Path::new("."));
+    load_xml_elements(env, &ui.elements, xml_dir, ctx, timing, warnings)
+}
+
+fn load_xml_elements(
+    env: &LoaderEnv<'_>,
+    elements: &[XmlElement],
+    xml_dir: &Path,
+    ctx: &AddonContext,
+    timing: &mut LoadTiming,
+    warnings: &mut Vec<String>,
+) -> Result<usize, LoadError> {
     let mut lua_count = 0;
-
-    for element in &ui.elements {
-        lua_count += process_element_with_exclusive_timing(env, element, xml_dir, ctx, timing)
-            .map_err(|e| {
-                if !matches!(e, LoadError::Lua(_)) {
-                    let _ = env.with_state(|state| {
-                        call_error_handler_state(state, &e.to_string());
-                        Ok::<(), crate::Error>(())
-                    });
+    let mut first_include_error = None;
+    for element in elements {
+        match process_element_with_exclusive_timing(env, element, xml_dir, ctx, timing, warnings) {
+            Ok(count) => lua_count += count,
+            Err(error)
+                if uses_wrath_file_diagnostics()
+                    && matches!(
+                        element,
+                        XmlElement::Include(_) | XmlElement::IncludeLower(_)
+                    ) =>
+            {
+                // The child already reported its failure. Finish Wrath's parent
+                // siblings without turning that failure into a successful load.
+                first_include_error.get_or_insert(error);
+            }
+            Err(error) => {
+                if !matches!(error, LoadError::Lua(_)) && !is_recorded_xml_failure(&error) {
+                    report_xml_error(env, &error.to_string());
                 }
-                e
-            })?;
+                return Err(error);
+            }
+        }
     }
-
-    Ok(lua_count)
+    first_include_error.map_or(Ok(lua_count), Err)
 }
 
 /// Attribute only time not already counted in another timing bucket (Lua
@@ -62,10 +93,11 @@ fn process_element_with_exclusive_timing(
     xml_dir: &Path,
     ctx: &AddonContext,
     timing: &mut LoadTiming,
+    warnings: &mut Vec<String>,
 ) -> Result<usize, LoadError> {
     let counted_before = timing.independently_counted_time();
     let process_start = Instant::now();
-    let result = process_completed_top_level_element(env, element, xml_dir, ctx, timing);
+    let result = process_completed_top_level_element(env, element, xml_dir, ctx, timing, warnings);
     let counted_child_time = timing
         .independently_counted_time()
         .saturating_sub(counted_before);
@@ -81,9 +113,10 @@ fn process_completed_top_level_element(
     xml_dir: &Path,
     ctx: &AddonContext,
     timing: &mut LoadTiming,
+    warnings: &mut Vec<String>,
 ) -> Result<usize, LoadError> {
     if resolve_frame_element(element).is_none() {
-        return process_element(env, element, xml_dir, ctx, timing);
+        return process_element(env, element, xml_dir, ctx, timing, warnings);
     }
     let constructed = process_timed_frame(env, element, ctx, timing)?;
     if constructed && crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
@@ -103,6 +136,7 @@ fn process_element(
     xml_dir: &Path,
     ctx: &AddonContext,
     timing: &mut LoadTiming,
+    warnings: &mut Vec<String>,
 ) -> Result<usize, LoadError> {
     if let Some(animation) = top_level_animation(element) {
         register_virtual_animation(animation);
@@ -110,10 +144,10 @@ fn process_element(
     }
     match element {
         XmlElement::Script(s) | XmlElement::ScriptLower(s) => {
-            process_script(env, s, xml_dir, ctx, timing)
+            process_script(env, s, xml_dir, ctx, timing, warnings)
         }
         XmlElement::Include(i) | XmlElement::IncludeLower(i) => {
-            process_include(env, i, xml_dir, ctx, timing)
+            process_include(env, i, xml_dir, ctx, timing, warnings)
         }
         XmlElement::Font(font) => {
             create_font_object(env, font)?;
@@ -124,7 +158,7 @@ fn process_element(
             Ok(0)
         }
         XmlElement::ScopedModifier(scoped) => {
-            process_scoped_modifier(env, scoped, xml_dir, ctx, timing)
+            process_scoped_modifier(env, scoped, xml_dir, ctx, timing, warnings)
         }
         XmlElement::Texture(tex) => {
             register_virtual_texture(tex);
@@ -138,7 +172,20 @@ fn process_element(
             register_virtual_anim_group(ag);
             Ok(0)
         }
-        XmlElement::Binding(_) | XmlElement::ModifiedClick(_) => Ok(0),
+        XmlElement::Binding(binding) => {
+            if binding.name.is_some()
+                && let Some(addon) = env
+                    .state()
+                    .borrow_mut()
+                    .addons
+                    .iter_mut()
+                    .find(|addon| addon.folder_name == ctx.name)
+            {
+                addon.contains_bindings = true;
+            }
+            Ok(0)
+        }
+        XmlElement::ModifiedClick(_) => Ok(0),
         _ => process_timed_frame(env, element, ctx, timing).map(|_| 0),
     }
 }
@@ -179,6 +226,7 @@ fn process_scoped_modifier(
     xml_dir: &Path,
     ctx: &AddonContext,
     timing: &mut LoadTiming,
+    warnings: &mut Vec<String>,
 ) -> Result<usize, LoadError> {
     let scoped_env = scoped
         .scripts_use_given_env
@@ -192,7 +240,7 @@ fn process_scoped_modifier(
     )?;
     let mut count = 0;
     let result = scoped.elements.iter().try_for_each(|child| {
-        count += process_element(env, child, xml_dir, ctx, timing)?;
+        count += process_element(env, child, xml_dir, ctx, timing, warnings)?;
         Ok::<(), LoadError>(())
     });
     let restore_forbidden_object_table = saved_scope.use_forbidden_object_table;
@@ -341,22 +389,27 @@ fn process_script(
     xml_dir: &Path,
     ctx: &AddonContext,
     timing: &mut LoadTiming,
+    warnings: &mut Vec<String>,
 ) -> Result<usize, LoadError> {
-    if let Some(file) = &s.file {
+    let file_count = if let Some(file) = &s.file {
         let Some(file) = crate::toc::selected_file_path(file) else {
             return Ok(0);
         };
         let script_path = resolve_path_with_fallback(xml_dir, ctx.addon_root, file);
-        load_lua_file(env, &script_path, ctx, timing)?;
-        return Ok(1);
-    }
-
-    let Some(inline) = &s.inline else {
-        return Ok(0);
+        let result = load_xml_lua_file(env, &script_path, ctx, timing, warnings).map(|_| 1);
+        let count = continue_wrath_parent_after_child(file, result)?;
+        if !uses_wrath_file_diagnostics() {
+            return Ok(count);
+        }
+        count
+    } else {
+        0
     };
-
+    let Some(inline) = &s.inline else {
+        return Ok(file_count);
+    };
     run_inline_script(env, ctx, inline, timing)?;
-    Ok(1)
+    Ok(file_count + 1)
 }
 
 fn run_inline_script(
@@ -389,14 +442,22 @@ fn compile_inline_script(
     timing: &mut LoadTiming,
 ) -> Result<Function, LoadError> {
     let compile_start = Instant::now();
+    let profile_start = crate::loader::chunk_cache::start_generated_chunk_profile();
     let func_result =
         env.with_state(|state| LuaApiMut::load_bytes(state, inline.as_bytes(), "@inline"));
     let compile_elapsed = compile_start.elapsed();
+    crate::loader::chunk_cache::profile_generated_chunk(
+        profile_start,
+        "@inline",
+        crate::loader::bytecode_cache::content_hash(inline.as_bytes(), "@inline"),
+        inline.len(),
+        "compile",
+    );
     timing.lua_compile_time += compile_elapsed;
     timing.lua_exec_time += compile_elapsed;
 
     func_result.map_err(|e| {
-        report_inline_script_error(env, &e.to_string());
+        report_xml_error(env, &e.to_string());
         LoadError::Lua(e.to_string())
     })
 }
@@ -445,7 +506,7 @@ fn record_inline_script_call_timing(timing: &mut LoadTiming, call_start: Instant
     timing.lua_exec_time += call_elapsed;
 }
 
-fn report_inline_script_error(env: &LoaderEnv<'_>, error: &str) {
+fn report_xml_error(env: &LoaderEnv<'_>, error: &str) {
     let _ = env.with_state(|state| {
         call_error_handler_state(state, error);
         Ok::<(), crate::Error>(())
@@ -459,6 +520,7 @@ fn process_include(
     xml_dir: &Path,
     ctx: &AddonContext,
     timing: &mut LoadTiming,
+    warnings: &mut Vec<String>,
 ) -> Result<usize, LoadError> {
     let Some(file) = crate::toc::selected_file_path(&i.file) else {
         return Ok(0);
@@ -467,12 +529,42 @@ fn process_include(
     if file.ends_with(".lua") {
         // In WoW, Lua errors in <Script file="..."> includes are caught and don't
         // abort XML file processing — same as inline <Script> elements.
-        if let Err(e) = load_lua_file(env, &include_path, ctx, timing) {
+        if let Err(e) = load_xml_lua_file(env, &include_path, ctx, timing, warnings) {
             tracing::warn!("Script file include error ({}): {}", i.file, e);
         }
         Ok(1)
     } else {
-        load_xml_file(env, &include_path, ctx, timing)
+        load_xml_file(env, &include_path, ctx, timing, warnings)
+    }
+}
+
+fn load_xml_lua_file(
+    env: &LoaderEnv<'_>,
+    path: &Path,
+    ctx: &AddonContext<'_>,
+    timing: &mut LoadTiming,
+    warnings: &mut Vec<String>,
+) -> Result<(), LoadError> {
+    let result = load_lua_file(env, path, ctx, timing);
+    if uses_wrath_file_diagnostics() && matches!(&result, Err(LoadError::IoWithPath { .. })) {
+        record_file_diagnostic(warnings, ctx, path, "Error loading");
+    }
+    result
+}
+
+fn continue_wrath_parent_after_child(
+    file: &str,
+    result: Result<usize, LoadError>,
+) -> Result<usize, LoadError> {
+    if crate::client_profile::ACTIVE != crate::client_profile::ClientProfile::Wrath {
+        return result;
+    }
+    match result {
+        Ok(count) => Ok(count),
+        Err(error) => {
+            tracing::warn!("Included file error ({}): {}", file, error);
+            Ok(0)
+        }
     }
 }
 

@@ -7,7 +7,8 @@ use wow_ui_sim::screen::ScreenKind;
 use wow_ui_sim::toc::TocFile;
 
 fn blizzard_ui_dir() -> PathBuf {
-    wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available")
+    wow_ui_sim::paths::default_blizzard_ui_addons_path()
+        .expect("Blizzard UI cache should be available")
 }
 
 fn social_toast_dir() -> PathBuf {
@@ -57,6 +58,8 @@ fn load_full_ui_for(screen: ScreenKind) -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_bare_toc() {
     let resolved = find_toc_file(&social_toast_dir()).expect("SocialToast TOC resolves");
@@ -72,7 +75,9 @@ fn find_toc_file_resolves_bare_toc() {
          surface that drives the social toast queue"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn dependencies_accessor_returns_shared_xml_via_dependencies_key() {
     let toc = TocFile::from_file(&social_toast_toc()).expect("TOC parses");
@@ -92,7 +97,9 @@ fn dependencies_accessor_returns_shared_xml_via_dependencies_key() {
          BackdropTemplate that SocialToastTemplate inherits. Got: {deps:?}"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn allow_load_both_lowercase_resolves_correctly() {
     let toc = TocFile::from_file(&social_toast_toc()).expect("TOC parses");
@@ -112,7 +119,9 @@ fn allow_load_both_lowercase_resolves_correctly() {
     assert!(toc.allows_screen(ScreenKind::CharacterSelect));
     assert!(toc.allows_screen(ScreenKind::CharacterCreate));
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn allow_load_game_type_mainline_is_not_restricted() {
     let toc = TocFile::from_file(&social_toast_toc()).expect("TOC parses");
@@ -129,7 +138,9 @@ fn allow_load_game_type_mainline_is_not_restricted() {
          simulator flavor is mainline so the addon eager-loads"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_is_eager_with_no_secure_env_or_saved_vars() {
     let toc = TocFile::from_file(&social_toast_toc()).expect("TOC parses");
@@ -147,7 +158,9 @@ fn toc_is_eager_with_no_secure_env_or_saved_vars() {
     assert!(toc.optional_deps().is_empty());
     assert!(toc.default_enabled());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_raw_bytes_pin_six_metadata_directives() {
     let raw = std::fs::read_to_string(social_toast_toc()).expect("TOC reads utf-8");
@@ -178,7 +191,9 @@ fn toc_raw_bytes_pin_six_metadata_directives() {
     assert!(!raw.contains("## UseSecureEnvironment"));
     assert!(!raw.contains("## Version"));
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn body_lists_lua_before_xml() {
     let toc = TocFile::from_file(&social_toast_toc()).expect("TOC parses");
@@ -217,7 +232,9 @@ fn body_lists_lua_before_xml() {
          _G when the .xml chunk is processed"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn appears_in_eager_discovery_on_all_four_screens() {
     let ui = blizzard_ui_dir();
@@ -242,6 +259,7 @@ fn appears_in_eager_discovery_on_all_four_screens() {
              before any toast queue arrives"
         );
     }
+}
 }
 
 prefork_full_ui_case! {
@@ -294,11 +312,13 @@ fn is_addon_loaded_reports_true_after_eager_sweep(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn is_addon_loaded_reports_true_after_eager_sweep() {
     let env = load_full_ui_for(ScreenKind::Game);
     is_addon_loaded_reports_true_after_eager_sweep::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -340,11 +360,13 @@ fn publishes_three_mixin_tables_with_canonical_methods(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn publishes_three_mixin_tables_with_canonical_methods() {
     let env = load_full_ui_for(ScreenKind::Game);
     publishes_three_mixin_tables_with_canonical_methods::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -367,11 +389,13 @@ fn social_toast_mixin_calls_alert_frame_helpers_on_hover(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn social_toast_mixin_calls_alert_frame_helpers_on_hover() {
     let env = load_full_ui_for(ScreenKind::Game);
     social_toast_mixin_calls_alert_frame_helpers_on_hover::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -410,11 +434,13 @@ fn social_toast_template_materializes_with_close_button_child_and_low_strata(env
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn social_toast_template_materializes_with_close_button_child_and_low_strata() {
     let env = load_full_ui_for(ScreenKind::Game);
     social_toast_template_materializes_with_close_button_child_and_low_strata::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -445,11 +471,13 @@ fn social_toast_close_button_template_materializes_with_three_state_textures(env
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn social_toast_close_button_template_materializes_with_three_state_textures() {
     let env = load_full_ui_for(ScreenKind::Game);
     social_toast_close_button_template_materializes_with_three_state_textures::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -516,11 +544,13 @@ fn social_toast_template_inherits_backdrop_template(env: &WowLuaEnv) {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn social_toast_template_inherits_backdrop_template() {
     let env = load_full_ui_for(ScreenKind::Game);
     social_toast_template_inherits_backdrop_template::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -543,9 +573,11 @@ fn published_animation_group_template_with_default_anim_out_mixin_resolves(env: 
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn published_animation_group_template_with_default_anim_out_mixin_resolves() {
     let env = load_full_ui_for(ScreenKind::Game);
     published_animation_group_template_with_default_anim_out_mixin_resolves::run(&env);
+}
 }

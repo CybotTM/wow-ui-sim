@@ -72,6 +72,8 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_private_auras_ui_find_toc_resolves_bare_variant() {
     let resolved =
@@ -92,7 +94,9 @@ fn blizzard_private_auras_ui_find_toc_resolves_bare_variant() {
         mainline.display()
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_private_auras_ui_toc_declares_secure_game_only_addon() {
     let toc = TocFile::from_file(&private_auras_toc()).expect("Blizzard_PrivateAurasUI TOC parses");
@@ -134,7 +138,9 @@ fn blizzard_private_auras_ui_toc_declares_secure_game_only_addon() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_private_auras_ui_toc_uses_singular_dep_form() {
     let toc = TocFile::from_file(&private_auras_toc()).expect("Blizzard_PrivateAurasUI TOC parses");
@@ -163,7 +169,9 @@ fn blizzard_private_auras_ui_toc_uses_singular_dep_form() {
          side, the Lua side is a stateless view"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_private_auras_ui_toc_declares_metadata_in_raw_bytes() {
     let raw = std::fs::read_to_string(private_auras_toc())
@@ -227,7 +235,9 @@ fn blizzard_private_auras_ui_toc_declares_metadata_in_raw_bytes() {
         "TOC must NOT declare `## Version:` — unversioned"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_private_auras_ui_toc_lists_files_in_order() {
     let toc = TocFile::from_file(&private_auras_toc()).expect("Blizzard_PrivateAurasUI TOC parses");
@@ -247,7 +257,9 @@ fn blizzard_private_auras_ui_toc_lists_files_in_order() {
          `PrivateAuras.unitWatchers ~= nil` which the .lua chunk creates"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_private_auras_ui_appears_only_in_game_screen_eager_discovery() {
     let ui = blizzard_ui_dir();
@@ -279,7 +291,9 @@ fn blizzard_private_auras_ui_appears_only_in_game_screen_eager_discovery() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_private_auras_ui_appears_in_full_addon_inventory() {
     let inventory = discover_all_blizzard_addons(&blizzard_ui_dir());
@@ -292,6 +306,7 @@ fn blizzard_private_auras_ui_appears_in_full_addon_inventory() {
          unfiltered inventory at src/loader/mod.rs lists every parseable Blizzard_* TOC \
          regardless of AllowLoad gating"
     );
+}
 }
 
 prefork_full_ui_case! {
@@ -403,6 +418,7 @@ fn blizzard_private_auras_ui_scoped_named_frames_stay_out_of_global_env(env: &Wo
 }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_private_auras_ui_xml_uses_scoped_modifier_wrapper() {
     let raw = std::fs::read_to_string(private_auras_dir().join("Blizzard_PrivateAurasUI.xml"))
@@ -445,6 +461,7 @@ fn blizzard_private_auras_ui_xml_uses_scoped_modifier_wrapper() {
         "PrivateAurasTooltip must inherit SharedTooltipArtTemplate — the standard tooltip \
          art surface (border, NineSlice background) reused by every Blizzard tooltip"
     );
+}
 }
 
 prefork_full_ui_case! {

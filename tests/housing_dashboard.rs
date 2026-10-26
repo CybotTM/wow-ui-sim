@@ -87,6 +87,7 @@ fn setup_env() -> WowLuaEnv {
     common::panel_fixtures::setup_env()
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn start_tutorial_button_opens_house_finder() {
     test_timeout! {
@@ -140,7 +141,9 @@ fn start_tutorial_button_opens_house_finder() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn dashboard_house_list_request_hides_main_spinner() {
     test_timeout! {
@@ -177,7 +180,9 @@ fn dashboard_house_list_request_hides_main_spinner() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn house_finder_initial_neighborhood_loads_initial_map() {
     test_timeout! {
@@ -245,7 +250,9 @@ fn house_finder_initial_neighborhood_loads_initial_map() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn neighborhood_selector_populates_and_click_loads_selected_map() {
     test_timeout! {
@@ -335,7 +342,9 @@ fn neighborhood_selector_populates_and_click_loads_selected_map() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn plot_pin_click_selects_plot_and_shows_info() {
     test_timeout! {
@@ -415,7 +424,9 @@ fn plot_pin_click_selects_plot_and_shows_info() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn plot_pin_is_hit_testable_at_screen_position() {
     test_timeout! {
@@ -590,4 +601,5 @@ fn plot_pin_is_hit_testable_at_screen_position() {
             );
         }
     }
+}
 }

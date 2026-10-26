@@ -6,6 +6,7 @@ use common::panel_fixtures::{clear_recorded_lua_errors, recorded_lua_errors};
 const ROOT: &str = "Blizzard_AuthChallengeUI";
 const SHARED_XML: &str = "Blizzard_SharedXML";
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_auth_challenge_ui_loads_without_ingestion_errors() {
     common::with_perf_lock(|| {
@@ -43,4 +44,5 @@ fn blizzard_auth_challenge_ui_loads_without_ingestion_errors() {
             });
         });
     });
+}
 }

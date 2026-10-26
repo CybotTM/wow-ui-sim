@@ -7,6 +7,8 @@ const ROOT: &str = "Blizzard_AddOnList";
 const DEFAULT_ENABLED_ADDON: &str = "AddonListDefaultEnabledProbe";
 const DEFAULT_DISABLED_ADDON: &str = "AddonListDefaultDisabledProbe";
 
+// Wrath has no AddonList vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn reset_to_default_uses_default_enabled_state() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -72,6 +74,7 @@ fn reset_to_default_uses_default_enabled_state() {
 
         assert_reset_to_default_probe(probe);
     });
+}
 }
 
 type ResetToDefaultProbe = (bool, bool, i64, i64);

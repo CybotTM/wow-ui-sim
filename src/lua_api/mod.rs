@@ -38,13 +38,19 @@ pub(crate) mod hot_literals;
 mod key_dispatch;
 mod layout;
 pub(crate) mod loader_env;
+pub(crate) mod manual_clock;
+mod manual_timers;
 pub mod message_frame;
 #[allow(dead_code)] // Phase 3 infrastructure — callers added during VM switch
 pub(crate) mod methods;
 pub(crate) mod on_update;
 #[cfg(feature = "retail-12-0-7")]
 pub mod performance_inputs;
+#[cfg(feature = "client-wrath")]
+mod placed_frames;
 pub(crate) mod rect_geometry;
+#[cfg(test)]
+mod reload_factory_tests;
 #[allow(dead_code)] // Phase 3 infrastructure — callers added during VM switch
 pub(crate) mod script_helpers;
 #[cfg(feature = "forbidden-aspects")]
@@ -65,6 +71,7 @@ pub(crate) mod string_format;
 #[allow(dead_code)] // Phase 3 infrastructure — callers added during VM switch
 pub(crate) mod taint;
 pub(crate) mod talent_state;
+mod timer_dispatch;
 #[allow(dead_code)] // Phase 3 infrastructure — callers added during VM switch
 pub(crate) mod timer_layout;
 mod timer_processing;
@@ -72,9 +79,9 @@ pub mod tooltip;
 pub(crate) mod tracked_recipes;
 pub mod workarounds;
 pub(crate) mod workarounds_editmode;
+pub(crate) mod wrath_arguments;
 
 // Re-export public types
-#[cfg(any(feature = "retail-12-1-5", feature = "client-wowforever", test))]
 pub(crate) use env::WowLuaAppData;
 pub use env::WowLuaEnv;
 pub use globals::global_frames::hide_runtime_hidden_frames;

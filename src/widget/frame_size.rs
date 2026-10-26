@@ -21,7 +21,7 @@ impl Frame {
             + btree_set_bytes(&self.disabled_draw_layers)
             + vec_bytes(&self.mask_textures)
             + model_state_bytes(&self.model_state)
-            + vec_string_bytes(&self.editbox_history)
+            + vec_optional_string_bytes(&self.editbox_history)
             + self
                 .editbox_presentation
                 .as_deref()
@@ -110,8 +110,8 @@ fn vec_bytes<T>(values: &[T]) -> usize {
     std::mem::size_of_val(values)
 }
 
-fn vec_string_bytes(values: &[String]) -> usize {
-    vec_bytes(values) + values.iter().map(String::capacity).sum::<usize>()
+fn vec_optional_string_bytes(values: &[Option<String>]) -> usize {
+    vec_bytes(values) + values.iter().flatten().map(String::capacity).sum::<usize>()
 }
 
 fn hash_set_string_bytes(values: &HashSet<String>) -> usize {

@@ -9,6 +9,8 @@ use crate::common::panel_fixtures::{
 
 const ROOT: &str = "Blizzard_APIDocumentation";
 
+// APIDocumentation vendor handlers/templates do not ship in Wrath; modeled API probes stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn get_indent_string_stacks_three_space_blocks_linearly() {
     with_blizzard_addon_startup_shape(&[], &[], |env, _loaded| {
@@ -33,6 +35,7 @@ fn get_indent_string_stacks_three_space_blocks_linearly() {
         assert_eq!(6, two_indent, "two indent units must stack linearly");
         assert_eq!(12, four_indent, "deeper indent units must stack linearly");
     });
+}
 }
 
 fn load_api_documentation(env: &wow_ui_sim::lua_api::WowLuaEnv) {

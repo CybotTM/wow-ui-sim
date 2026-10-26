@@ -122,6 +122,13 @@ pub struct GameRulesState {
     pub glue_screen_name: String,
     /// Sparse rule store keyed by rule name. Missing key = inactive.
     pub rules: HashMap<String, GameRuleValue>,
+    /// Supplied PTR capabilities, not inferred native realm/account defaults.
+    pub hardcore_active: bool,
+    pub self_found_allowed: bool,
+    pub sd_hd_toggle_enabled: bool,
+    pub account_has_sd_enabled: bool,
+    /// Last supplied SD/HD selection origin, with no native telemetry policy.
+    pub sd_toggle_usage_location: Option<i32>,
 }
 
 impl Default for GameRulesState {
@@ -130,6 +137,11 @@ impl Default for GameRulesState {
             active_game_mode: 0,
             glue_screen_name: "CharacterSelect".into(),
             rules: HashMap::new(),
+            hardcore_active: false,
+            self_found_allowed: false,
+            sd_hd_toggle_enabled: false,
+            account_has_sd_enabled: false,
+            sd_toggle_usage_location: None,
         }
     }
 }
@@ -199,6 +211,8 @@ impl Default for PetBattleState {
 #[derive(Debug, Clone, PartialEq)]
 pub struct PetBattlePet {
     pub name: String,
+    /// Supplied model/skin identity; None means unknown simulator input.
+    pub display_id: Option<i32>,
     pub species_id: i32,
     pub level: i32,
     pub max_health: i32,
@@ -219,6 +233,7 @@ impl PetBattlePet {
     pub fn default_player() -> Self {
         Self {
             name: "Squirrel".into(),
+            display_id: None,
             species_id: 39,
             level: 1,
             max_health: 289,
@@ -235,6 +250,7 @@ impl PetBattlePet {
     pub fn default_enemy() -> Self {
         Self {
             name: "Rabbit".into(),
+            display_id: None,
             species_id: 87,
             level: 1,
             max_health: 305,
@@ -324,6 +340,8 @@ pub struct VoiceChannel {
 /// headset-check confirmation dialog has been accepted.
 #[derive(Debug, Clone)]
 pub struct VoiceChatState {
+    /// Host-supplied settings-access observation; None is unknown, not denied.
+    pub can_access_settings: Option<bool>,
     pub microphone_volume: f32,
     pub output_volume: f32,
     pub muted: bool,
@@ -364,6 +382,7 @@ pub struct VoiceChatState {
 impl Default for VoiceChatState {
     fn default() -> Self {
         Self {
+            can_access_settings: None,
             microphone_volume: 1.0,
             output_volume: 1.0,
             muted: false,
@@ -450,6 +469,14 @@ pub struct GossipQuestRow {
 #[derive(Debug, Default, Clone)]
 pub struct GossipState {
     pub active: bool,
+    /// Stored quest-dialog giver identity; zero suppresses local quest closure.
+    pub giver_guid: u64,
+    /// Supplied Wrath quest notification identity, independent of the NPC GUID.
+    #[cfg(feature = "client-wrath")]
+    pub inform_guid: u64,
+    /// Supplied Wrath quest interaction identity; not the soft-target selection.
+    #[cfg(feature = "client-wrath")]
+    pub interact_guid: u64,
     pub text: String,
     pub num_options: i32,
     pub num_available_quests: i32,

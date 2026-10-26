@@ -16,7 +16,7 @@ pub(crate) fn tick_countdown_formatters(state: &mut LuaState) -> LuaResult<()> {
         return Ok(());
     }
     // Same monotonic origin as GetTime and quad emission, not tick-delta accumulation.
-    let now = borrow_state(state)?.start_time.elapsed().as_secs_f64();
+    let now = borrow_state(state)?.clock_elapsed().as_secs_f64();
     for id in attachments {
         let text = match format_active_countdown(state, id, now) {
             Ok(text) => text,

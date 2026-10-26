@@ -11,8 +11,8 @@ mod events;
 mod helpers;
 mod rolesets;
 mod text;
-pub(crate) use text::fire_editbox_text_script;
 pub(super) use text::refresh_text_measurements;
+pub(crate) use text::{fire_editbox_text_script, set_frame_text_value};
 mod unit_event;
 
 #[cfg(feature = "on-update-modes")]

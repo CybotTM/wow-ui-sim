@@ -1,10 +1,8 @@
-//! Simple-arg arms of the global-method family: LFG branch, plain method
-//! call, and shapes with 0-1 value args past `(target, method)`.
+//! Plain global methods and shapes with 0-1 value args past `(target, method)`.
 
 use super::super::FastHandlerRef;
 use super::super::load_template;
 use super::{GlobalMethodMode, build_global_method_with_mode, call_global_method_builder};
-use crate::lua_api::globals::create_frame::helpers::resolve_global_path;
 use crate::lua_api::methods::create_string;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -27,19 +25,6 @@ fn try_build_global_method_basic_variants(
     handler_ref: &FastHandlerRef<'_>,
 ) -> LuaResult<Option<Val>> {
     match handler_ref {
-        FastHandlerRef::GetLfgModeBranch {
-            category_path,
-            slot_path,
-            leave_function,
-            join_function,
-        } => build_get_lfg_mode_branch_handler(
-            state,
-            category_path,
-            *slot_path,
-            leave_function,
-            join_function,
-        )
-        .map(Some),
         FastHandlerRef::LocalGlobalPathConditionalMethod {
             target_path,
             method_name,
@@ -101,59 +86,6 @@ fn try_build_global_method_self_arg_variants(
             .map(Some),
         _ => Ok(None),
     }
-}
-
-const TEMPLATE_GET_LFG_MODE_BRANCH: &str = r#"
-    local category_path, slot_path, leave_fn, join_fn = ...
-    local function resolve_global(path)
-        local value = getfenv(0) or _G
-        for segment in string.gmatch(path, "[^%.]+") do
-            value = value and value[segment]
-        end
-        return value
-    end
-    return function(self, ...)
-        local category = resolve_global(category_path)
-        local slot = slot_path ~= nil and resolve_global(slot_path) or nil
-        local mode, subMode
-        if slot_path ~= nil then
-            mode, subMode = GetLFGMode(category, slot)
-        else
-            mode, subMode = GetLFGMode(category)
-        end
-        if mode == "queued" or mode == "listed" or mode == "rolecheck" or mode == "suspended" then
-            if slot_path ~= nil then
-                return leave_fn(category, slot)
-            end
-            return leave_fn(category)
-        end
-        return join_fn()
-    end
-"#;
-
-fn build_get_lfg_mode_branch_handler(
-    state: &mut LuaState,
-    category_path: &str,
-    slot_path: Option<&str>,
-    leave_function: &str,
-    join_function: &str,
-) -> LuaResult<Val> {
-    let builder = load_template(
-        state,
-        TEMPLATE_GET_LFG_MODE_BRANCH,
-        "template-get-lfg-mode-branch-handler",
-    )?;
-    let category_path = create_string(state, category_path);
-    let slot_path = slot_path
-        .map(|path| create_string(state, path))
-        .unwrap_or(Val::Nil);
-    let leave_function = resolve_global_path(state, leave_function);
-    let join_function = resolve_global_path(state, join_function);
-    crate::lua_api::methods::call_function_state(
-        state,
-        Val::Function(builder.gc_ref()),
-        &[category_path, slot_path, leave_function, join_function],
-    )
 }
 
 fn build_local_global_path_conditional_method_handler(

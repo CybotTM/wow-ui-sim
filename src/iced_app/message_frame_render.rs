@@ -87,6 +87,16 @@ fn message_fade_alpha(
     if !data.fading {
         return 1.0;
     }
+    if let Some(timers) = &msg.wrath_timers {
+        if timers.time_left > 0.0 {
+            return 1.0;
+        }
+        return if data.fade_duration > 0.0 {
+            (timers.fade_left / data.fade_duration).clamp(0.0, 1.0) as f32
+        } else {
+            0.0
+        };
+    }
     let fade_timestamp = msg.timestamp.max(data.override_fade_timestamp);
     let age = now - fade_timestamp;
     if age <= data.time_visible {

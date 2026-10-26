@@ -8,7 +8,6 @@ use wow_ui_sim::render::WowFontSystem;
 
 fn blizzard_ui_dir() -> std::path::PathBuf {
     default_blizzard_ui_addons_path().expect("Blizzard UI cache should be synced")
-
 }
 
 fn setup_full_ui() -> WowLuaEnv {
@@ -22,6 +21,10 @@ fn setup_full_ui() -> WowLuaEnv {
         state.addon_base_paths = vec![ui.clone()];
     }
 
+    if cfg!(feature = "client-wrath") {
+        common::wrath_watch_fixture::seed_watch_quests(&env);
+    }
+    common::load_profile_framexml(&env);
     for (name, toc_path) in &discover_blizzard_addons(&ui) {
         if let Err(err) = load_addon(&env.loader_env(), toc_path) {
             eprintln!("[load {name}] FAILED: {err}");
@@ -29,6 +32,10 @@ fn setup_full_ui() -> WowLuaEnv {
     }
 
     env.apply_post_load_workarounds();
+    if cfg!(feature = "client-wrath") {
+        env.exec(include_str!("objective_tracker/wrath_watch.lua"))
+            .unwrap();
+    }
     wow_ui_sim::startup::settle_headless_startup(&env);
     env
 }
@@ -38,7 +45,9 @@ fn quest_objective_tracker_populates_titles_via_normal_async_load_path() {
     let env = setup_full_ui();
 
     let titles: String = env
-        .eval(
+        .eval(if cfg!(feature = "client-wrath") {
+            include_str!("objective_tracker/wrath_titles.lua")
+        } else {
             r#"
             local titles = {}
             for _, blocks in pairs(QuestObjectiveTracker.usedBlocks or {}) do
@@ -51,8 +60,8 @@ fn quest_objective_tracker_populates_titles_via_normal_async_load_path() {
             end
             table.sort(titles)
             return table.concat(titles, "|")
-            "#,
-        )
+            "#
+        })
         .unwrap();
 
     assert_eq!(titles, "Defending the Gates|Supply Run|The Lost Expedition");
@@ -63,7 +72,9 @@ fn quest_objective_tracker_measures_objective_line_text_height() {
     let env = setup_full_ui();
 
     let collapsed_lines: String = env
-        .eval(
+        .eval(if cfg!(feature = "client-wrath") {
+            include_str!("objective_tracker/wrath_line_heights.lua")
+        } else {
             r#"
             local collapsed = {}
             for _, blocks in pairs(QuestObjectiveTracker.usedBlocks or {}) do
@@ -79,8 +90,8 @@ fn quest_objective_tracker_measures_objective_line_text_height() {
             end
             table.sort(collapsed)
             return table.concat(collapsed, "|")
-            "#,
-        )
+            "#
+        })
         .unwrap();
 
     assert_eq!(

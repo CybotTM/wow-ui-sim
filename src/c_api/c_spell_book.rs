@@ -223,6 +223,18 @@ fn register_spell_book_state_queries(
     table_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
 ) -> LuaResult<()> {
     register_spell_book_owned_state_queries(state, table_ref)?;
+    if cfg!(any(
+        feature = "client-retail",
+        feature = "client-ptr",
+        feature = "client-wowforever"
+    )) {
+        table_set_rust_fn_static(
+            state,
+            table_ref,
+            "IsSpellKnownOrInSpellBook",
+            is_spell_known_or_in_spell_book,
+        )?;
+    }
     Ok(())
 }
 
@@ -506,7 +518,7 @@ fn c_spell_book_get_spell_book_item_cooldown_duration(state: &mut LuaState) -> L
     };
     let (start, seconds) = {
         let sim = borrow_state(state)?;
-        let now = sim.start_time.elapsed().as_secs_f64();
+        let now = sim.clock_elapsed().as_secs_f64();
         super::cooldown_duration::select_cooldown_duration_times(&sim, spell_id, now, ignore_gcd)
     };
     crate::lua_api::globals::lua_duration_object::push_timed_duration_object(state, start, seconds)
@@ -637,6 +649,25 @@ fn c_spell_book_get_spell_book_item_power_cost(state: &mut LuaState) -> LuaResul
 fn c_spell_book_get_override_spell(state: &mut LuaState) -> LuaResult<u32> {
     let spell_id = u32::from_stack(state, 1)?;
     state.push(Val::Num(spell_id as f64));
+    Ok(1)
+}
+
+fn is_spell_known_or_in_spell_book(state: &mut LuaState) -> LuaResult<u32> {
+    const PLAYER_SPELL_BANK: i32 = 0;
+    const PET_SPELL_BANK: i32 = 1;
+    let spell_id = u32::from_stack(state, 1)?;
+    let bank = Option::<i32>::from_stack(state, 2)?.unwrap_or(PLAYER_SPELL_BANK);
+    let present = match bank {
+        PLAYER_SPELL_BANK => {
+            spellbook_data::is_spell_known(spell_id)
+                || spellbook_data::find_spell_slot(spell_id).is_some()
+        }
+        PET_SPELL_BANK => borrow_state(state)?.pet_spells.contains(&spell_id),
+        _ => false,
+    };
+    // The existing override model is identity-only; both includeOverrides modes
+    // therefore project the same supplied membership.
+    state.push(Val::Bool(present));
     Ok(1)
 }
 

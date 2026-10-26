@@ -1,7 +1,7 @@
 //! Temporary `C_StorePublic` availability defaults.
 //!
-//! The public store surface is unmodeled. Keep its enabled/visibility probes in
-//! the temporary workaround layer instead of the generic runtime bootstrap.
+//! Enabled/visibility probes remain unmodeled and live in this workaround layer.
+//! Supplied group eligibility is implemented separately under `c_api`.
 
 const STORE_PUBLIC_DEFAULTS_LUA: &str = r#"
 C_StorePublic = C_StorePublic or __wow_namespace()
@@ -15,16 +15,6 @@ end
 if rawget(C_StorePublic, "IsEnabled") == nil then
     function C_StorePublic.IsEnabled()
         return true
-    end
-end
-
-if rawget(C_StorePublic, "DoesGroupHavePurchaseableProducts") == nil then
-    function C_StorePublic.DoesGroupHavePurchaseableProducts(groupID)
-        if type(C_StoreSecure) ~= "table" or type(C_StoreSecure.GetProducts) ~= "function" then
-            return false
-        end
-        local products = C_StoreSecure.GetProducts(groupID)
-        return type(products) == "table" and #products > 0
     end
 end
 
@@ -67,18 +57,32 @@ mod tests {
     fn installs_store_public_defaults() {
         let env = WowLuaEnv::new().expect("lua env should initialize");
 
-        let result: (bool, bool, bool, String) = env
+        let result: (bool, bool, String) = env
             .eval(
                 r#"
                 C_StorePublic.EventStoreUISetShown(true, "services")
                 return C_StorePublic.IsEnabled(),
-                       C_StorePublic.DoesGroupHavePurchaseableProducts(501),
                        rawget(C_StorePublic, "_state").shown,
                        rawget(C_StorePublic, "_state").contextKey
                 "#,
             )
             .expect("C_StorePublic defaults should run");
 
-        assert_eq!(result, (true, true, true, "services".to_string()));
+        assert_eq!(result, (true, true, "services".to_string()));
+        if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
+            env.exec("assert(rawget(C_StorePublic, 'DoesGroupHavePurchaseableProducts') == nil)")
+                .expect("no declaration-backed Wrath query");
+            return;
+        }
+        // Preserve the old group-501 assertion with an explicit observation,
+        // not an invented reduction from its seeded secure-product membership.
+        env.state()
+            .borrow_mut()
+            .store_public_eligibility
+            .insert(501, true);
+        let eligibility: bool = env
+            .eval("return C_StorePublic.DoesGroupHavePurchaseableProducts(501)")
+            .expect("supplied group observation should be queryable");
+        assert!(eligibility);
     }
 }

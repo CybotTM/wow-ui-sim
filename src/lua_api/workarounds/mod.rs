@@ -5,6 +5,12 @@ mod permanent;
 mod runtime_surfaces;
 mod temporary;
 
+#[cfg(feature = "client-wrath")]
+pub(crate) use temporary::wrath_attack_action;
+pub(crate) use temporary::wrath_minimap_ping_coordinates;
+#[cfg(feature = "client-wrath")]
+pub(crate) use temporary::{wrath_arena_roster, wrath_trade_skill_filters};
+
 pub(crate) use temporary::classic_startup_defaults::register_all as register_classic_startup_defaults;
 #[cfg(any(
     feature = "client-wrath",
@@ -203,17 +209,19 @@ fn apply_runtime_state_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
     temporary::combat_log_state::apply_bootstrap(lua)?;
     temporary::encounter_state::apply_bootstrap(lua)?;
     temporary::housing_catalog_state::apply_bootstrap(lua)?;
+    temporary::housing_owned_house_requests::apply_bootstrap(lua)?;
+    #[cfg(feature = "client-wowforever")]
+    temporary::forever_bank_capability_defaults::apply_bootstrap(lua)?;
     temporary::house_exterior_debug::apply_bootstrap(lua)?;
     temporary::map_runtime_state::apply_bootstrap(lua)?;
     temporary::perks_activities_state::apply_bootstrap(lua)?;
+    crate::c_api::private_aura_callbacks::apply_bootstrap(lua)?;
     temporary::private_aura_state::apply_bootstrap(lua)?;
     temporary::reputation_state::apply_bootstrap(lua)
 }
 
 fn apply_account_and_social_state_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
     temporary::battle_net_account_defaults::apply_bootstrap(lua)?;
-    #[cfg(feature = "retail-12-0-7")]
-    temporary::club_notification_defaults::apply_bootstrap(lua)?;
     temporary::social_queue_defaults::apply_bootstrap(lua)?;
     temporary::merchant_filter_state::apply_bootstrap(lua)
 }
@@ -271,6 +279,8 @@ fn apply_core_foundation_catalog_defaults(lua: &mut rilua::Lua) -> crate::Result
     temporary::character_create_defaults::apply_bootstrap(lua)?;
     temporary::class_trial_defaults::apply_bootstrap(lua)?;
     temporary::startup_namespace_defaults::apply_bootstrap(lua)?;
+    temporary::social_service_defaults::apply_bootstrap(lua)?;
+    temporary::world_service_defaults::apply_bootstrap(lua)?;
     temporary::click_bindings_defaults::apply_bootstrap(lua)?;
     temporary::client_info_defaults::apply_bootstrap(lua)?;
     temporary::collections_journal_namespace::apply_bootstrap(lua)?;
@@ -333,9 +343,11 @@ fn apply_core_foundation_journal_defaults(lua: &mut rilua::Lua) -> crate::Result
 
 fn apply_core_foundation_state_defaults(lua: &mut rilua::Lua) -> crate::Result<()> {
     temporary::pet_battle_runtime_state::apply_bootstrap(lua)?;
+    temporary::pet_battle_action_legality_defaults::apply_bootstrap(lua)?;
     temporary::settings_surface_defaults::apply_bootstrap(lua)?;
     temporary::tooltip_data_processor_defaults::apply_bootstrap(lua)?;
-    temporary::tts_settings_defaults::apply_bootstrap(lua)?;
+    #[cfg(not(feature = "client-wrath"))]
+    temporary::startup_service_capability_defaults::apply_bootstrap(lua)?;
     temporary::ui_widget_manager_defaults::apply_bootstrap(lua)?;
     Ok(())
 }
@@ -360,6 +372,8 @@ fn apply_format_and_game_defaults(lua: &mut rilua::Lua) -> crate::Result<()> {
     temporary::game_time_calendar_invites::apply_bootstrap(lua)?;
     temporary::gamepad_cursor_control_defaults::apply_bootstrap(lua)?;
     temporary::game_rules_namespace_fallback::apply_bootstrap(lua)?;
+    #[cfg(not(feature = "client-wrath"))]
+    temporary::startup_condition_capability_defaults::apply_bootstrap(lua)?;
     temporary::glue_character_select_defaults::apply_bootstrap(lua)?;
     temporary::guild_info_namespace_fallback::apply_bootstrap(lua)?;
     temporary::inert_global_defaults::apply_bootstrap(lua)?;
@@ -370,6 +384,8 @@ fn apply_format_and_game_defaults(lua: &mut rilua::Lua) -> crate::Result<()> {
 fn apply_inventory_and_spell_defaults(lua: &mut rilua::Lua) -> crate::Result<()> {
     temporary::dye_color_defaults::apply_bootstrap(lua)?;
     temporary::inventory_query_defaults::apply_bootstrap(lua)?;
+    #[cfg(feature = "client-wowforever")]
+    temporary::forever_startup_capabilities::apply_bootstrap(lua)?;
     temporary::item_button_helper_defaults::apply_bootstrap(lua)?;
     temporary::item_targeting_defaults::apply_bootstrap(lua)?;
     temporary::item_upgrade_availability_defaults::apply_bootstrap(lua)?;

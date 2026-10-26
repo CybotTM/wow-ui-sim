@@ -7,6 +7,7 @@ use wow_ui_sim::lua_api::WowLuaEnv;
 
 const ROOT: &str = "Blizzard_ActionBar";
 
+post_wrath_ui_fixture! {
 #[test]
 fn quick_keybind_mode_shows_button_highlights_until_closed() {
     test_timeout! {
@@ -25,6 +26,7 @@ fn quick_keybind_mode_shows_button_highlights_until_closed() {
         assert_button_highlights_hidden(env);
     });
     }
+}
 }
 
 fn isolate_quick_keybind_close_side_effects(env: &WowLuaEnv) {

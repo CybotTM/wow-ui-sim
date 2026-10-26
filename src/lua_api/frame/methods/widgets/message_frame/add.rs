@@ -2,7 +2,7 @@
 
 use super::super::shared::{opt_f32, opt_string};
 use super::scroll::truncate_messages;
-use crate::lua_api::message_frame::{Message, MessageFrameData};
+use crate::lua_api::message_frame::{Message, uses_wrath_row_lifecycle};
 use crate::lua_api::methods::{borrow_state_mut, frame_id_from_stack};
 use crate::lua_bridge::stack_val;
 use rilua::vm::state::LuaState;
@@ -39,7 +39,7 @@ pub(super) fn backfill_message(state: &mut LuaState) -> LuaResult<u32> {
 
     let mut sim = borrow_state_mut(state)?;
     log_message_sim(&sim, id, &text);
-    let timestamp = sim.start_time.elapsed().as_secs_f64();
+    let timestamp = sim.clock_elapsed().as_secs_f64();
     let data = sim.message_frames.entry(id).or_default();
     data.messages.insert(
         0,
@@ -53,6 +53,7 @@ pub(super) fn backfill_message(state: &mut LuaState) -> LuaResult<u32> {
             access_id: None,
             extra_data: None,
             timestamp,
+            wrath_timers: None,
         },
     );
     if data.messages.len() > data.max_lines {
@@ -62,27 +63,36 @@ pub(super) fn backfill_message(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
-/// Add the existing simulator message shape or the Wrath history shape.
+/// Add the profile's message shape; Wrath scrolling history uses native positions.
 pub(super) fn add_message_core_from_stack(state: &mut LuaState, id: u64, log: bool) {
     let Some(text) = opt_string(state, 2) else {
         return;
     };
-    let mut message = read_message_from_stack(state, text);
     let mut sim = match borrow_state_mut(state) {
         Ok(s) => s,
         Err(_) => return,
     };
+    let wrath_row = sim.widgets.get(id).is_some_and(uses_wrath_row_lifecycle);
+    let wrath_history = cfg!(feature = "client-wrath")
+        && sim.widgets.get(id).is_some_and(|frame| {
+            frame.object_type_name.as_deref() == Some("ScrollingMessageFrame")
+        });
+    let mut message = read_message_from_stack(state, text, wrath_history);
     if log {
         log_message_sim(&sim, id, &message.text);
     }
-    message.timestamp = sim.start_time.elapsed().as_secs_f64();
+    message.timestamp = sim.clock_elapsed().as_secs_f64();
     let data = sim.message_frames.entry(id).or_default();
-    insert_message(data, message);
+    if wrath_row {
+        data.pending_wrath_messages.push_back(message);
+        return;
+    }
+    data.insert_message(message);
     truncate_messages(data);
     data.display_dirty = true;
 }
 
-fn read_message_from_stack(state: &LuaState, text: String) -> Message {
+fn read_message_from_stack(state: &LuaState, text: String, wrath_history: bool) -> Message {
     let mut message = Message {
         text,
         r: opt_f32(state, 3).unwrap_or(1.0),
@@ -93,10 +103,10 @@ fn read_message_from_stack(state: &LuaState, text: String) -> Message {
         access_id: None,
         extra_data: None,
         timestamp: 0.0,
+        wrath_timers: None,
     };
-    // Public Wrath consumer: text, r, g, b, lineID, false, accessID, extraData.
-    let wrath_history =
-        cfg!(feature = "client-wrath") && matches!(stack_val(state, 7), Val::Bool(false));
+    // Wrath SMF: text, r, g, b, typeID, backFill, accessID, extraData.
+    // backFill ordering is separate; its value never selects an argument layout.
     if wrath_history {
         message.a = 1.0;
         message.message_id = read_optional_id(state, 6);
@@ -110,14 +120,6 @@ pub(super) fn read_optional_id(state: &LuaState, index: i32) -> Option<i64> {
     match stack_val(state, index) {
         Val::Num(n) => Some(n as i64),
         _ => None,
-    }
-}
-
-fn insert_message(data: &mut MessageFrameData, message: Message) {
-    if data.insert_mode == "TOP" {
-        data.messages.insert(0, message);
-    } else {
-        data.messages.push(message);
     }
 }
 

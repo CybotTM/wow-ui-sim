@@ -8,6 +8,12 @@ pub fn load_original_wrath_startup() -> WowLuaEnv {
     env.set_font_system(std::rc::Rc::new(std::cell::RefCell::new(
         wow_ui_sim::render::font::WowFontSystem::new_without_casc(),
     )));
+    load_original_wrath_ui(&env);
+    wow_ui_sim::startup::collect_lua_error_startup(&env);
+    env
+}
+
+pub fn load_original_wrath_ui(env: &WowLuaEnv) {
     env.set_screen_mode(ScreenKind::Game);
     let ui = wow_ui_sim::paths::default_blizzard_ui_addons_path().unwrap();
     env.state().borrow_mut().addon_base_paths = vec![ui.clone()];
@@ -25,6 +31,4 @@ pub fn load_original_wrath_startup() -> WowLuaEnv {
         .unwrap();
     }
     env.apply_post_load_workarounds();
-    wow_ui_sim::startup::collect_lua_error_startup(&env);
-    env
 }

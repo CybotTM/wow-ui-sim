@@ -23,6 +23,8 @@ fn shared_xml_selector_dir() -> PathBuf {
     blizzard_ui_dir().join("Blizzard_SharedXML/Shared/Selector")
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_bare_toc() {
     let resolved = find_toc_file(&selector_ui_dir()).expect("Blizzard_SelectorUI TOC resolves");
@@ -36,7 +38,9 @@ fn find_toc_file_resolves_bare_toc() {
          code can `IsAddOnLoaded('Blizzard_SelectorUI')` against a registered name"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_declares_only_title_and_load_on_demand() {
     let toc = TocFile::from_file(&selector_ui_toc()).expect("Blizzard_SelectorUI TOC parses");
@@ -71,7 +75,9 @@ fn toc_declares_only_title_and_load_on_demand() {
         toc.files
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_lacks_allow_load_so_falls_through_to_game_only() {
     let toc = TocFile::from_file(&selector_ui_toc()).expect("Blizzard_SelectorUI TOC parses");
@@ -95,7 +101,9 @@ fn toc_lacks_allow_load_so_falls_through_to_game_only() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_raw_bytes_contain_only_title_and_load_on_demand_lines() {
     let raw =
@@ -126,6 +134,7 @@ fn toc_raw_bytes_contain_only_title_and_load_on_demand_lines() {
          Got: {body_lines:?}"
     );
 }
+}
 
 #[test]
 fn lod_addon_excluded_from_eager_discovery_on_every_screen() {
@@ -150,6 +159,7 @@ fn lod_addon_excluded_from_eager_discovery_on_every_screen() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn root_directory_holds_only_the_toc_with_no_body_files() {
     let dir = selector_ui_dir();
@@ -168,7 +178,9 @@ fn root_directory_holds_only_the_toc_with_no_body_files() {
          Blizzard_SharedXML/Shared/Selector/. Got: {entries:?}"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn actual_selector_code_lives_in_shared_xml_body_not_this_folder() {
     let shared_dir = shared_xml_selector_dir();
@@ -203,7 +215,9 @@ fn actual_selector_code_lives_in_shared_xml_body_not_this_folder() {
         "The Mainline selector XML companion must exist outside Shared/Selector"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn shared_xml_toc_lists_selector_files_in_its_body() {
     let shared_xml_toc = blizzard_ui_dir().join("Blizzard_SharedXML/Blizzard_SharedXML.toc");
@@ -225,7 +239,9 @@ fn shared_xml_toc_lists_selector_files_in_its_body() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn explicit_load_emits_no_lua_errors_despite_empty_body() {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
@@ -249,7 +265,9 @@ fn explicit_load_emits_no_lua_errors_despite_empty_body() {
         load_errors.join("\n  ")
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn is_addon_loaded_transitions_false_to_true_after_explicit_load() {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
@@ -283,4 +301,5 @@ fn is_addon_loaded_transitions_false_to_true_after_explicit_load() {
          AddOn state machine; downstream callers can use this to gate behavior \
          on the shell's nominal presence"
     );
+}
 }

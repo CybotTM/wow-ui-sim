@@ -26,9 +26,9 @@ Bounded input contract for original Retail DamageMeter sizing and Wrath floating
 
 `tests/f2_original_mouse_consumers.rs` is shared between profiles. At source `5f5aa4563`, all six Retail cases pass: right/left geometry, maximum/minimum, stationary release and moved in-handle release. Five cases first reproduced geometry or cleanup RED; stationary release was already GREEN. Omitting physical mouse-up rejects the stationary stop assertion. Five unchanged native sizing-state tests pass. Geometry cases deliberately stop before release, so clamped motion does not assert outside-handle behavior.
 
-The original callbacks were unchanged. Root cause: StartSizing set flags without motion capture, while threshold crossing marked a script drag even without a registered handler, diverting mouse-up cleanup. The simulator now captures sizing and distinguishes registered script drags.
+The original callbacks were unchanged. [Capture/routing diagnosis](../wiki/investigations/mouse-sizing-capture.md#root-cause) owns the root cause and simulator repair; this spec owns acceptance and proof boundaries.
 
-Wrath full original FrameXML loading reached original OnDragStart but reproduced no horizontal movement. Original ChatFrame1Tab is a sibling of ChatFrame1, not its child: ancestor-only motion selection cannot find the frame started by the tab callback. StartMoving now captures its actual frame, like StartSizing. At `a23d6741d`, the original loaded XML gesture and original OnUpdate cleanup pass. Setting only the supplied frame's movable flag false preserves original OnDragStart dispatch but fails the horizontal-delta assertion, establishing non-vacuity. Cache/loader failures are setup failures, not behavioral RED; no shims may hide them.
+Wrath full original FrameXML loading reached original OnDragStart but reproduced no horizontal movement. The [Wrath sibling-capture diagnosis](../wiki/investigations/mouse-sizing-capture.md#proof-boundary) owns the capture repair. At `a23d6741d`, the original loaded XML gesture and original OnUpdate cleanup pass. Setting only the supplied frame's movable flag false preserves original OnDragStart dispatch but fails the horizontal-delta assertion, establishing non-vacuity. Cache/loader failures are setup failures, not behavioral RED; no shims may hide them.
 
 ## Exclusions and fact gaps
 

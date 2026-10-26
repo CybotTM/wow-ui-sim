@@ -11,16 +11,6 @@ pub(crate) enum FastHandlerRef<'a> {
             FastHandlerRef<'a>,
         )>,
     ),
-    ConditionalGlobalNoArgs {
-        function_name: &'a str,
-        then_ref: Box<FastHandlerRef<'a>>,
-        else_ref: Box<FastHandlerRef<'a>>,
-    },
-    ConditionalGlobalFunctionWithNoArgFunctionResultThen {
-        function_name: &'a str,
-        arg_function_name: &'a str,
-        then_ref: Box<FastHandlerRef<'a>>,
-    },
     ConditionalGlobalFieldEqualsStringThen {
         target_path: &'a str,
         field: &'a str,
@@ -250,6 +240,7 @@ pub(crate) enum FastHandlerRef<'a> {
         value: FastLiteralValue<'a>,
     },
     Function(&'a str),
+    FunctionWithSelfArg(&'a str),
     FunctionNoArgs(&'a str),
     FunctionWithSelfIdArg(&'a str),
     FunctionWithStringArg {
@@ -402,12 +393,6 @@ pub(crate) enum FastHandlerRef<'a> {
     LocalGlobalPathConditionalMethod {
         target_path: &'a str,
         method_name: &'a str,
-    },
-    GetLfgModeBranch {
-        category_path: &'a str,
-        slot_path: Option<&'a str>,
-        leave_function: &'a str,
-        join_function: &'a str,
     },
     GrandparentMethodWithNotSelfCheckedArg {
         method_name: &'a str,

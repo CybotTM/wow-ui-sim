@@ -89,7 +89,7 @@ fn register_bootstrap_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
     crate::c_api::c_voice_chat_speak::register(lua.state_mut())?;
     #[cfg(feature = "retail-12-0-5")]
     crate::c_api::c_spell_maw_powers::register(lua.state_mut())?;
-    #[cfg(feature = "retail-12-0-5")]
+    #[cfg(feature = "aura-spell-classifications")]
     crate::c_api::c_unit_aura_classification::register(lua.state_mut())?;
     #[cfg(feature = "retail-12-0-5")]
     crate::c_api::c_unit_aura_altered_form::register(lua.state_mut())?;
@@ -298,6 +298,7 @@ fn register_actor_state_probes(lua: &mut rilua::Lua) -> crate::Result<()> {
     super::real::player_identity::register_all(lua)?;
     super::unit_stats::register_all(lua)?;
     super::real::combat_stats::register_all(lua)?;
+    super::real::wrath_relic_slot::register_all(lua)?;
     #[cfg(feature = "client-wowforever")]
     super::real::forever_stat_contributions::register_all(lua)?;
     super::real::pet_stats::register_all(lua)?;
@@ -318,6 +319,7 @@ fn register_action_state_probes(lua: &mut rilua::Lua) -> crate::Result<()> {
 }
 
 fn register_progression_state_probes(lua: &mut rilua::Lua) -> crate::Result<()> {
+    super::real::tutorial_requests::register_all(lua)?;
     if matches!(
         crate::client_profile::ACTIVE,
         crate::client_profile::ClientProfile::Era
@@ -374,7 +376,7 @@ fn register_social_state_probes(lua: &mut rilua::Lua) -> crate::Result<()> {
 fn register_compat_and_admin(lua: &mut rilua::Lua) -> crate::Result<()> {
     super::compat_overrides::register_all(lua)?;
     super::bank_storage_verbs::register_guild_tabard_files(lua)?;
-    #[cfg(feature = "client-mists")]
+    #[cfg(any(feature = "client-mists", feature = "client-wrath"))]
     super::auction_verbs::register_all(lua)?;
     #[cfg(feature = "client-mists")]
     super::bank_storage_verbs::register_all(lua)?;
@@ -392,7 +394,7 @@ fn update_ui_parent_position(_state: &mut rilua::vm::state::LuaState) -> rilua::
 fn get_time(state: &mut rilua::vm::state::LuaState) -> rilua::LuaResult<u32> {
     let elapsed = {
         let sim = borrow_state(state)?;
-        sim.start_time.elapsed().as_secs_f64()
+        sim.clock_elapsed().as_secs_f64()
     };
     state.push(rilua::Val::Num(elapsed));
     Ok(1)

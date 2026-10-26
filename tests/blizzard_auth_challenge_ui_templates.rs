@@ -5,6 +5,7 @@ use common::panel_fixtures::{clear_recorded_lua_errors, recorded_lua_errors};
 
 const ROOT: &str = "Blizzard_AuthChallengeUI";
 
+post_wrath_ui_fixture! {
 #[test]
 fn auth_challenge_ui_registers_local_virtual_templates() {
     common::with_perf_lock(|| {
@@ -36,4 +37,5 @@ fn auth_challenge_ui_registers_local_virtual_templates() {
             });
         });
     });
+}
 }

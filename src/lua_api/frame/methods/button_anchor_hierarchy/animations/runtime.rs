@@ -17,10 +17,18 @@ pub(crate) fn advance_animation_groups(
     env: &crate::lua_api::env::WowLuaEnv,
     elapsed: f64,
 ) -> crate::Result<()> {
+    use rilua::LuaApiMut;
+    advance_animation_groups_state(env.rilua_mut().state_mut(), elapsed)
+}
+
+pub(crate) fn advance_animation_groups_state(
+    state: &mut rilua::vm::state::LuaState,
+    elapsed: f64,
+) -> crate::Result<()> {
     let mut finished_scripts = Vec::new();
     let mut finished_animation_scripts = Vec::new();
     let mut loop_scripts = Vec::new();
-    let mut sim = env.state().borrow_mut();
+    let mut sim = crate::lua_api::methods::borrow_state_mut(state)?;
     let group_ids: Vec<u64> = sim.active_animation_groups.iter().copied().collect();
     for group_id in group_ids {
         let Some(result) = advance_animation_group(
@@ -43,9 +51,9 @@ pub(crate) fn advance_animation_groups(
     }
     drop(sim);
 
-    fire_animation_group_scripts(env, "OnLoop", loop_scripts)?;
-    fire_animation_group_scripts(env, "OnFinished", finished_animation_scripts)?;
-    fire_animation_group_scripts(env, "OnFinished", finished_scripts)?;
+    fire_animation_group_scripts(state, "OnLoop", loop_scripts)?;
+    fire_animation_group_scripts(state, "OnFinished", finished_animation_scripts)?;
+    fire_animation_group_scripts(state, "OnFinished", finished_scripts)?;
     Ok(())
 }
 
@@ -473,12 +481,17 @@ fn apply_animation_group_outcome(
 }
 
 fn fire_animation_group_scripts(
-    env: &crate::lua_api::env::WowLuaEnv,
+    state: &mut rilua::vm::state::LuaState,
     handler_name: &str,
     frame_ids: Vec<u64>,
 ) -> crate::Result<()> {
     for frame_id in frame_ids {
-        env.fire_script_handler(frame_id, handler_name, Vec::new())?;
+        crate::lua_api::env_events::fire_script_handler_state(
+            state,
+            frame_id,
+            handler_name,
+            Vec::new(),
+        )?;
     }
     Ok(())
 }

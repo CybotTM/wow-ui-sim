@@ -9,6 +9,8 @@ const AZERITE_ITEM_ID: u32 = 158_041;
 const BAG_ID: i32 = 0;
 const SLOT_INDEX: i32 = 7;
 
+// AzeriteRespecUI vendor handlers/templates do not ship in Wrath; modeled API probes stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_azerite_respec_ui_confirm_popup_confirms_item_and_clears_panel_slot() {
     common::with_perf_lock(|| {
@@ -145,6 +147,7 @@ fn blizzard_azerite_respec_ui_confirm_popup_confirms_item_and_clears_panel_slot(
             });
         });
     });
+}
 }
 
 fn seed_respec_item(env: &wow_ui_sim::lua_api::WowLuaEnv) {

@@ -8,6 +8,8 @@ const ARTIFACT_ICON: &str = "Interface/Icons/inv_sword_2h_artifactashbringer_d_0
 const RELIC_ITEM_ID: u32 = 1_234;
 const RELIC_ITEM_LINK: &str = "|Hitem:1234::::::::80:70:::::::::|h[Test Relic]|h";
 
+// ArtifactUI vendor handlers/templates do not ship in Wrath; modeled API probes stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn inventory_hover_highlights_matching_relic_slot_and_leave_clears_it() {
     with_blizzard_addon_smoke_shape(&[], &[], |env, _loaded| {
@@ -24,6 +26,7 @@ fn inventory_hover_highlights_matching_relic_slot_and_leave_clears_it() {
              mismatches: {mismatches:?}"
         );
     });
+}
 }
 
 fn seed_viewed_artifact_with_relic_item(env: &wow_ui_sim::lua_api::WowLuaEnv) {

@@ -7,20 +7,22 @@ Client profile bundles select the runtime cache and API epoch exposed by wow-ui-
 - [x] The public `client-retail` bundle selects the retail profile and current retail 12.1.5 API epoch (`120105`), selected for installed Retail 12.1.5.70448.
 - [x] Retail API epoch features remain cumulative, so 12.1.5 includes the modeled 12.0.0, 12.0.5, 12.0.7, and 12.1.0 surfaces.
 - [x] Historical retail epochs remain selectable through `profile-retail` without enabling the current-retail bundle.
-- [x] `client-ptr` remains a distinct profile/cache while selecting the cumulative 12.1.5 API epoch (`120105`).
+- [x] `client-ptr` remains a distinct profile/cache with TOC interface `120107`, retaining the cumulative 12.1.5 API surface. This interface selection does not claim inherited 12.1.7 API coverage or refresh the source/cache pin.
+- [x] PTR 12.1.7 skips entire `##` metadata directives containing `[Family]`, `[Game]`, `[TextLocale]`, or `[RegionalTextLocale]`, preserving earlier values and dependency lists. Conditional directives such as `AllowLoadGameType` remain active; other profiles retain existing metadata handling.
+- [x] PTR and Forever expand `[RegionalTextLocale]` in TOC file paths to `enUS` for the simulator's current enUS text locale / US region. Existing `[Family]`, `[Game]`, and `[TextLocale]` file expansion is preserved; other profiles do not gain regional expansion. Alternate locale/region configuration is not modeled by this change.
 - [x] PTR CASC resolves the official `wowxptr` product; 12.1.5.69594 uses BuildConfig `4a9973f37906f8cfb344f8a9fe6777e0` and Gethe `ptr2` source commit `49b69918fcdc77e109813281e4f537d45ec7dcbf`.
-- [x] PTR `GetBuildInfo()` publishes `12.1.5`, build `69594`, and interface `120105` from the pinned source identity; non-PTR builds publish version `12.1.5` and interface `120105` with `retail-12-1-5`, `12.1.0`/`120100` with `retail-12-1-0`, otherwise `12.0.7`/`120007`. Retail build/date/trailing fields remain temporary defaults, not installed-build identity.
+- [x] PTR `GetBuildInfo()` retains `12.1.5` and build `69594` from the pinned source identity but publishes selected TOC interface `120107`; non-PTR builds publish version `12.1.5` and interface `120105` with `retail-12-1-5`, `12.1.0`/`120100` with `retail-12-1-0`, otherwise `12.0.7`/`120007`. Retail build/date/trailing fields remain temporary defaults, not installed-build identity.
 - [x] PTR 12.1.5 publishes `Enum.CurioRarity.EpicTier2 = 5` and metadata through 5; earlier retail epochs retain the four-value contract.
 - [x] Same-epoch profiles may have source-proven post-startup removals: retail 12.1 keeps `C_RecruitAFriend.IsEnabled`, while PTR hides it after startup.
 - [x] Default Retail 12.1.5 uses its separately generated shipped base GlobalStrings table (26,069 authenticated rows from 70448); 65 unreadable encrypted-section rows are omitted, not fabricated. Earlier Retail epochs, PTR and Classic retain the previous shared table; Forever retains its separate table. The original pulse-health command consumes Retail's shipped slash-command strings.
 - [x] Retail 12.1.5 admits `ALERT_AGE_VERIFICATION_RESTRICTED`, published by 70448 `SocialRestrictionsDocumentation.lua` and registered by original `Blizzard_Game/Startup.lua`; invented suffixed names remain rejected.
-- [x] `client-wowforever` selects a distinct `WowForever` profile with interface `16001`, cache `wowforever`, CASC product `wow_classic_beta`, and `_classic_beta_` install paths.
+- [x] `client-wowforever` selects a distinct `WowForever` profile with interface `16001`, cache `wowforever`, CASC product `wowf`, and unchanged `_classic_beta_` install-path discovery. Product selection does not establish addon-path parity.
 - [x] Forever resolves `[Family]` to `Mainline` and `[Game]` to `Camelot`, accepting `mainline`/`camelot` annotations, not `classic`, `standard`, or `vanilla`; matching exclusion annotations suppress files and dependencies. This follows the authenticated 1.60.1.69913 source tree, not the product name: ActionBar's mainline annotations select present `AssistedCombatManager.lua` and `ActionButtonOverrides.lua`, while its classic annotation selects absent `Mainline/MainMenuBar.lua`.
 - [x] Forever selects Camelot variants, generic `.toc`, then Mainline variants. Each flavor tier supports underscore then hyphen spellings; retaining underscore precedence is simulator policy, not a claim about native tie-order when both exist. Mainline-only load-on-demand dependencies participate in discovery and dependency ordering; no WorldMap-specific exception is used.
 - [x] Supported TOC names and `.toc` extensions match case-insensitively without demoting active-profile variants below generic. Exact spelling wins within a separator variant; remaining case collisions resolve lexically, independently of directory order. Unrelated folder names, foreign flavors, and unknown suffixes are not selected by an unrestricted scan.
 - [x] Retail/PTR retain Mainline then generic then Standard; Wrath/Mists/Era/Anniversary retain their primary flavor then generic then Classic-family variants. Named Mists GameMenu/Mainline and UIParentPanelManager/Classic compatibility variants retain their priority.
 - [x] A Carbonite-shaped package with incompatible Retail `Carbonite.toc` and compatible `Carbonite-Camelot.toc` admits the provider through discovery and the startup interface gate before its Info/Notes/Warehouse dependents load.
-- [x] Forever reports version `1.60.1`, build `70374`, and interface `16001` without enabling a retail API epoch or legacy compatibility bootstrap. Implemented metadata matches Gethe `forever` commit `735496de78ebd30ce816a0637982c556987f258c`'s `version.txt` (`1.60.1.70374`) and selected installed product `wow_classic_beta`. Neither establishes a native build date; `Jun 17 2026` and trailing fields remain temporary defaults. Focused manifest and BuildInfo identity tests PASS at runtime source136; [central receipt](../baselines/README.md#verified-scoped-receipts--2026-10-15) owns counts and attribution. Cross-profile/native/full-parent gates remain open. See the [current acquisition checkpoint](../updating-blizzard-ui-to-a-new-patch.md#current-selected-target--october-15-2026) for bounded runtime evidence.
+- [ ] Forever reports version `1.60.1`, build `70532`, and interface `16001` without enabling a retail API epoch or legacy compatibility bootstrap. Metadata and regression expectations now match Gethe `forever` commit `ca8368f2f2380cbe696854f7f2646387c278a61b`'s `version.txt` (`1.60.1.70532`) and installed product `wowf`, build key `2582289d81e380163c7a13472df4cb81` (verified October 25, 2026). Desktop latest-entry-wins residency and the synchronized local root/encoding BLTE content hashes pass; see the [selected-target checkpoint](../updating-blizzard-ui-to-a-new-patch.md#current-selected-target--october-25-2026). Simulator execution is pending; this is a new acceptance epoch, not a 70374 rerun. `Jun 17 2026` and trailing fields remain temporary defaults, not sourced native metadata. Historical 70374 identity tests at runtime source136 retain their [central receipt](../baselines/README.md#verified-scoped-receipts--2026-10-15); they do not prove 70532. Cross-profile/native/full-parent gates remain open.
 
 ## Retail 70448 bounded execution
 
@@ -66,7 +68,7 @@ The [historical failing Wrath startup inventory](../baselines/README.md#wrath-lu
 
 - `Cargo.toml` — cumulative retail epoch features and public client bundles; `retail-12-1-5` extends `retail-12-1-0` for PTR.
 - `src/client_profile.rs` — active profile/epoch selection and interface constants.
-- `src/asset_resolver_config.rs` — profile-to-CASC-product mapping (`client-ptr` uses `wowxptr`; Forever uses `wow_classic_beta`).
+- `src/asset_resolver_config.rs` — profile-to-CASC-product mapping (`client-ptr` uses `wowxptr`; Forever uses `wowf`).
 - `data/blizzard-ui-files/wowforever.txt` — Forever manifest generated from `/home/osso/.cache/wow-ui-sim/wow-ui-source/forever`; source branch `forever` and runtime cache profile `wowforever` are intentionally distinct.
 - `src/blizzard_ui_sync/pinned.rs` — reads the pinned PTR version/build identity.
 - `src/lua_api/workarounds/temporary/client_info_defaults.rs` — exposes the modeled `GetBuildInfo()` identity.
@@ -89,6 +91,42 @@ The [historical failing Wrath startup inventory](../baselines/README.md#wrath-lu
 ### Carbonite TOC development proof
 
 Loader source `31ac46b3a`: RED 4/9 TOC tests and 0/1 Carbonite provider/consumer test; targeted offline GREEN 10/10 Forever TOC, 8/8 Forever profile, 12/12 Mists TOC, 3/3 existing Mists screen-selection, and 11/11 Retail TOC tests. These 44 tests cover the selected profiles, not a fresh runtime test of every client or the entire Carbonite addon. Eight pre-existing unrelated lib-test warnings occur under Forever/Mists, also present in RED. Commands, revision scopes, and complete logs are recorded in `/tmp/forever-carbonite-toc-development-ledger.json`; final checks and actual-package startup remain integration-owned.
+
+## Startup warning test applicability
+
+The Wrath cache is the flat historical FrameXML snapshot, not the modern split-addon UI. `tests/startup_warnings.rs` must retain applicable Wrath consumers and compile-exclude only tests whose required consumer is absent.
+
+Verified 2026-10-19 against the actual Wrath cache: 382 source files plus two cache metadata files. `Blizzard_RestrictedAddOnEnvironment` is absent, as are all five files required by `test_secure_env_toc_annotations_are_exhaustive`: `Blizzard_ChatFrameBase/Shared/ChatFrameFiltersSecure.lua`, `Blizzard_CooldownViewer/CooldownViewerSecure.lua`, `Blizzard_RestrictedAddOnEnvironment/RestrictedEnvironment.lua`, and `Blizzard_UnitFrame/Shared/{TargetFrameAuraButton,TargetFrameAuraContainer}.lua`. No Wrath Lua/XML/TOC contains `EssentialCooldownViewer`, `LoadIntoEnvironment`, `GetFrameMetatable`, or `PropagateForbiddenToReferencedFrames`.
+
+Therefore `test_restricted_addon_environment_exposes_execution_surface`, `test_secure_env_annotated_files_load_cleanly`, and `test_secure_env_toc_annotations_are_exhaustive` exclude only `client-wrath`. Historical `FrameXML/SecureTemplates.xml` and `SecureHandlerTemplates.xml` do not establish the modern addon or annotated five-file contract. Other-profile eligibility and all assertions remain unchanged.
+
+`test_no_warnings_on_startup` remains enabled: Wrath ships `AddOns/Blizzard_AchievementUI/Blizzard_AchievementUI.xml`. Its achievement/stats containers inherit `HybridScrollBarTemplate`, whose `$parentBG` texture is declared by `FrameXML/HybridScrollFrame.xml`. The broad fixture must load the required authentic `FrameXML/FrameXML.toc` before loading addons, matching product startup order in `src/bin/wow_sim/addon_loading.rs`. Previously it enumerated only AddOns, omitting these templates and failing at `Blizzard_AchievementUI.lua:628` and `:1634`. FrameXML failures, handler errors and runtime diagnostics use the same strict collector as addons; none are cleared or baselined. This repairs the fixture, not Blizzard Lua or an API default.
+
+Static inventory at `fddc3bc0b`: [startup warning tests](../../tests/startup_warnings.rs) and [late fixtures](../../tests/startup_warnings/late.rs). After the three Wrath-only secure-environment exclusions, Wrath has 4 eligible tests (three of its former seven are gated), Retail 26 unchanged. These counts describe source eligibility, not passing runtime execution.
+
+The late fixtures have consumer-scoped compile-time eligibility:
+
+| Required consumer | Eligible public client profiles | Late tests |
+|---|---|---:|
+| Retained secure-action and zone-text consumers | All seven | 2 |
+| Split-addon consumers absent from the flat Wrath tree | Retail, PTR, Forever, Mists, Era, Anniversary | 8 |
+| AccountStore, BossBanner, EventUtil, FrameUtil, HousingTutorials or NewPlayerExperience consumers | Retail, PTR, Forever | 7 |
+
+The two all-profile late tests use `load_profile_framexml()`: Wrath loads its manifest-backed `FrameXML/FrameXML.toc`; other profiles load `Blizzard_FrameXML`. This helper is limited to the secure-action protection tuple and zone-text fading-helper fixtures. It does not change production startup. The broad `test_no_warnings_on_startup` fixture has the separate Wrath FrameXML-before-addons ordering described above.
+
+The parent module also restricts its widget-container test and three AccountStore tests to Retail, PTR and Forever. Its three secure-environment tests exclude only `client-wrath`, as detailed above. Static eligibility across both modules is:
+
+| Public client profile | Parent-module tests | Late tests | Total eligible tests |
+|---|---:|---:|---:|
+| Retail (`client-retail`) | 9 | 17 | 26 |
+| PTR (`client-ptr`) | 9 | 17 | 26 |
+| Forever (`client-wowforever`) | 9 | 17 | 26 |
+| Mists (`client-mists`) | 5 | 10 | 15 |
+| Era (`client-era`) | 5 | 10 | 15 |
+| Anniversary (`client-anniversary`) | 5 | 10 | 15 |
+| Wrath (`client-wrath`) | 2 | 2 | 4 |
+
+Counts assume exactly one named public `client-*` profile feature. The gates name `client-retail`, not the standalone historical `profile-retail` marker. Eligibility is not compiled discovery, runtime acceptance or a clean-startup claim.
 
 ## Forever event coverage
 

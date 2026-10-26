@@ -441,6 +441,7 @@ enum CastSlot {
 
 struct CastInfoSnapshot {
     spell_name: String,
+    spell_subtext: &'static str,
     icon_path: String,
     start_time: f64,
     end_time: f64,
@@ -460,6 +461,15 @@ fn unit_channel_info(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn push_unit_cast_info(state: &mut LuaState, slot: CastSlot) -> LuaResult<u32> {
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath
+        && !matches!(stack_val(state, 1), Val::Str(_))
+    {
+        let usage = match slot {
+            CastSlot::Casting => "Usage: UnitCastingInfo(\"unit\")",
+            CastSlot::Channeling => "Usage: UnitChannelInfo(\"unit\")",
+        };
+        return Err(rilua::runtime_error(usage));
+    }
     let unit = val_to_string(state, stack_val(state, 1)).unwrap_or_default();
     if unit != "player" {
         return Ok(0);
@@ -479,8 +489,15 @@ fn extract_cast_info(state: &mut LuaState, slot: CastSlot) -> LuaResult<Option<C
         CastSlot::Casting => sim.casting.as_ref(),
         CastSlot::Channeling => sim.channeling.as_ref(),
     };
-    Ok(source.map(|cast| CastInfoSnapshot {
+    let Some(cast) = source else {
+        return Ok(None);
+    };
+    let Some(spell_subtext) = read_cast_subtext(&sim, cast) else {
+        return Ok(None);
+    };
+    Ok(Some(CastInfoSnapshot {
         spell_name: cast.spell_name.clone(),
+        spell_subtext,
         icon_path: cast.icon_path.clone(),
         start_time: cast.start_time,
         end_time: cast.end_time(),
@@ -492,11 +509,47 @@ fn extract_cast_info(state: &mut LuaState, slot: CastSlot) -> LuaResult<Option<C
     }))
 }
 
+fn read_cast_subtext(
+    sim: &crate::lua_api::SimState,
+    cast: &crate::lua_api::game_data::CastingState,
+) -> Option<&'static str> {
+    if crate::client_profile::ACTIVE != crate::client_profile::ClientProfile::Wrath {
+        return Some("");
+    }
+    if sim.clock_elapsed().as_secs_f64() >= cast.end_time() {
+        return None;
+    }
+    crate::spells::get_spell(cast.spell_id).map(|spell| spell.subtext)
+}
+
+fn legacy_cast_icon_filename(path: &str) -> String {
+    if path.is_empty() {
+        return String::new();
+    }
+    let filename = path.replace('/', "\\");
+    if filename.to_ascii_lowercase().starts_with("interface\\") {
+        filename
+    } else {
+        format!("Interface\\{filename}")
+    }
+}
+
 fn push_common_cast_fields(state: &mut LuaState, cast_info: &CastInfoSnapshot) {
     let spell_name_val = create_string(state, &cast_info.spell_name);
+    // INFERRED: display-override and localized-channel inputs are not modeled.
     let spell_name_display_val = create_string(state, &cast_info.spell_name);
-    let icon_path_val = create_string(state, &cast_info.icon_path);
+    let icon_path_val =
+        if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
+            let filename = legacy_cast_icon_filename(&cast_info.icon_path);
+            create_string(state, &filename)
+        } else {
+            create_string(state, &cast_info.icon_path)
+        };
     state.push(spell_name_val);
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
+        let rank = create_string(state, cast_info.spell_subtext);
+        state.push(rank);
+    }
     state.push(spell_name_display_val);
     state.push(icon_path_val);
     state.push(Val::Num(cast_info.start_time * 1000.0));
@@ -506,6 +559,11 @@ fn push_common_cast_fields(state: &mut LuaState, cast_info: &CastInfoSnapshot) {
 
 fn push_cast_info(state: &mut LuaState, cast_info: &CastInfoSnapshot) -> u32 {
     push_common_cast_fields(state, cast_info);
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
+        state.push(Val::Num(cast_info.cast_id as f64));
+        state.push(Val::Bool(false));
+        return 9;
+    }
     #[cfg(feature = "player-cast-durations")]
     {
         let guid = crate::lua_api::spellcast_events::cast_guid(cast_info.cast_id);
@@ -530,6 +588,10 @@ fn push_cast_info(state: &mut LuaState, cast_info: &CastInfoSnapshot) -> u32 {
 
 fn push_channel_info(state: &mut LuaState, cast_info: &CastInfoSnapshot) -> u32 {
     push_common_cast_fields(state, cast_info);
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
+        state.push(Val::Bool(false));
+        return 8;
+    }
     state.push(Val::Bool(false));
     state.push(Val::Num(cast_info.spell_id as f64));
     state.push(Val::Bool(cast_info.num_empower_stages > 0));

@@ -1,5 +1,5 @@
 //! App-level oracles for startup budgets and the CPU-to-first-quad boundary.
-use super::app_tests::{build_test_app, draw_test_canvas};
+use super::app_tests::{build_test_app, complete_gui_startup, draw_test_canvas};
 use super::*;
 use crate::iced_app::Message;
 use crate::render::WowUiPrimitive;
@@ -445,6 +445,9 @@ mod filesystem {
         // Root changes take effect through a GUI reload. A repeated identical
         // assignment need not replace an already-failed render request handle.
         let _ = app.update(Message::ReloadUI);
+        // A real reload discards frame tables; addon bootstrap recreates textures.
+        assign_texture(&app, "rootonly", true);
+        complete_gui_startup(&mut app);
         tick(&mut app);
         let primitive = draw_test_canvas(&app, size);
         assert!(
@@ -489,6 +492,7 @@ mod filesystem {
         // creating a file first would only prove automatic filesystem freshness.
         let _ = app.update(Message::ReloadUI);
         assign_texture(&app, "rootonly", true);
+        complete_gui_startup(&mut app);
         tick(&mut app);
         let _ = draw_test_canvas(&app, size);
         assert_eq!(

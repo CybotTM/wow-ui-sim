@@ -1,3 +1,4 @@
+pub mod battlefield_vehicles;
 pub mod war_mode;
 
 #[cfg(all(
@@ -31,6 +32,29 @@ pub enum TrainingGroundKind {
 
 pub(crate) fn register_c_pvp_surface(state: &mut LuaState) -> LuaResult<()> {
     let ns = ensure_namespace(state, "C_PvP")?;
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Mists {
+        battlefield_vehicles::register(state, ns)?;
+    }
+    if matches!(
+        crate::client_profile::ACTIVE,
+        crate::client_profile::ClientProfile::Retail
+            | crate::client_profile::ClientProfile::Ptr
+            | crate::client_profile::ClientProfile::WowForever
+    ) {
+        crate::lua_bridge::table_set_rust_fn_static(state, ns, "IsMatchActive", is_match_active)?;
+    }
+    #[cfg(feature = "retail-12-0-0")]
+    if matches!(
+        crate::client_profile::ACTIVE,
+        crate::client_profile::ClientProfile::Retail | crate::client_profile::ClientProfile::Ptr
+    ) {
+        crate::lua_bridge::table_set_rust_fn_static(
+            state,
+            ns,
+            "IsMatchComplete",
+            is_match_complete,
+        )?;
+    }
     if cfg!(any(feature = "client-retail", feature = "client-ptr")) {
         war_mode::register(state, ns)?;
     }
@@ -43,6 +67,21 @@ pub(crate) fn register_c_pvp_surface(state: &mut LuaState) -> LuaResult<()> {
     active_brawl::register(state, ns)?;
     register_patch_12_1_c_pvp_surface(state, ns)?;
     register_training_grounds(state, ns)
+}
+
+fn is_match_active(state: &mut LuaState) -> LuaResult<u32> {
+    let active = crate::lua_api::methods::borrow_state(state)?.pvp_match_active;
+    state.push(rilua::Val::Bool(active));
+    Ok(1)
+}
+
+#[cfg(feature = "retail-12-0-0")]
+fn is_match_complete(state: &mut LuaState) -> LuaResult<u32> {
+    let completed = crate::lua_api::methods::borrow_state(state)?
+        .pvp_catalog
+        .match_completed;
+    state.push(rilua::Val::Bool(completed));
+    Ok(1)
 }
 
 #[cfg(feature = "retail-12-1-5")]

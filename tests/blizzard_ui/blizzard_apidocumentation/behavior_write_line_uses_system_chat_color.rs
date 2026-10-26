@@ -10,6 +10,8 @@ use crate::common::panel_fixtures::{
 const ROOT: &str = "Blizzard_APIDocumentation";
 const COLOR_TOLERANCE: f64 = 0.001;
 
+// APIDocumentation vendor handlers/templates do not ship in Wrath; modeled API probes stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn write_line_uses_system_chat_color_and_write_all_lines_preserves_order() {
     with_blizzard_addon_startup_shape(&[], &[], |env, _loaded| {
@@ -79,6 +81,7 @@ fn write_line_uses_system_chat_color_and_write_all_lines_preserves_order() {
             "WriteAllLines must append one message per input line"
         );
     });
+}
 }
 
 fn load_api_documentation(env: &wow_ui_sim::lua_api::WowLuaEnv) {

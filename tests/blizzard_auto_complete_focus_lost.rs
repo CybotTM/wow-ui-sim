@@ -36,6 +36,22 @@ return table.concat(failures, "\n")
 
 #[test]
 fn blizzard_auto_complete_focus_lost_resets_highlight_and_hides() {
+    if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
+        common::wrath_autocomplete::load_and_assert_native(
+            r#"
+AutoComplete_UpdateResults(AutoCompleteBox, 'F09Alpha', 'F09Beta')
+AutoComplete_SetSelectedIndex(AutoCompleteBox, 2)
+AutoCompleteEditBox_OnEditFocusLost(F09EditBox)
+assert(not AutoCompleteBox:IsShown())
+-- Native focus loss hides only; showing fresh results resets the selection.
+assert(AutoComplete_GetSelectedIndex(AutoCompleteBox) == 2)
+AutoComplete_UpdateResults(AutoCompleteBox, 'F09Alpha')
+assert(AutoComplete_GetSelectedIndex(AutoCompleteBox) == 0)
+"#,
+        );
+        return;
+    }
+
     common::with_perf_lock(|| {
         common::with_timeout(240, || {
             with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, loaded| {

@@ -19,6 +19,18 @@ pub fn init(lua: &mut rilua::Lua) -> crate::Result<()> {
     crate::lua_api::globals::real::wrath_legacy::register_all(lua)?;
     #[cfg(feature = "client-wrath")]
     crate::lua_api::globals::real::wrath_legacy_lfg::register_all(lua)?;
+    #[cfg(feature = "client-wrath")]
+    crate::lua_api::globals::real::wrath_talent_groups::register(lua)?;
+    #[cfg(feature = "client-wrath")]
+    crate::lua_api::globals::real::wrath_minimap_arrows::register(lua)?;
+    #[cfg(feature = "client-wrath")]
+    crate::lua_api::globals::real::wrath_calendar::register(lua)?;
+    #[cfg(feature = "client-wrath")]
+    crate::lua_api::workarounds::wrath_arena_roster::register(lua)?;
+    #[cfg(feature = "client-wrath")]
+    crate::lua_api::workarounds::wrath_trade_skill_filters::register(lua)?;
+    #[cfg(feature = "client-wrath")]
+    crate::lua_api::globals::real::wrath_auction_catalog::register(lua)?;
     lua.exec(WRATH_COMPAT_BOOTSTRAP_LUA)?;
     Ok(())
 }

@@ -12,6 +12,8 @@ const REGISTERED_EVENTS: &[&str] = &[
     "PLAYER_SOFT_INTERACT_CHANGED",
 ];
 
+// Wrath has no ArrowCallout vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn arrow_callout_frame_manager_registers_onload_events() {
     with_blizzard_addon_smoke_shape(&[], &[], |env, _loaded| {
@@ -37,6 +39,7 @@ fn arrow_callout_frame_manager_registers_onload_events() {
             "`{MANAGER_FRAME}` must register exactly the expected ArrowCalloutFrame events"
         );
     });
+}
 }
 
 fn load_arrow_callout_frame(env: &wow_ui_sim::lua_api::WowLuaEnv) {

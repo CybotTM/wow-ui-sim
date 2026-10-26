@@ -9,7 +9,6 @@
 FROM rust:1.92-bookworm AS builder
 
 # Install system build dependencies:
-# - clang + mold: fast linker configured in .cargo/config.toml
 # - git: needed by some build scripts
 # - pkg-config + cmake: required by C-backed Rust crates (mlua vendored Lua, wgpu)
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -28,12 +27,14 @@ WORKDIR /build
 # iced-wgpu-patched/ is a [patch.crates-io] override and must be present
 # before `cargo fetch` or any build step.
 COPY Cargo.toml Cargo.lock ./
-COPY .cargo/config.toml .cargo/config.toml
+# Published binaries use the portable CI config, never local target-cpu=native.
+COPY .cargo/config.ci.toml .cargo/config.toml
 COPY iced-wgpu-patched/ iced-wgpu-patched/
 COPY iced-dynamic/ iced-dynamic/
 COPY xtask/ xtask/
-# Cargo resolves workspace/dev-dependency manifests even for binary-only builds.
-COPY crates/test-harness/ crates/test-harness/
+# Cargo resolves all workspace/path dependencies even for binary-only builds.
+# Keep every local crate in the cached fetch layer as the workspace grows.
+COPY crates/ crates/
 
 # Cargo validates explicitly declared targets before fetching dependencies.
 # Derive empty sources from the manifest so adding targets cannot stale a list.

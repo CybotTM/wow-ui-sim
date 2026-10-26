@@ -10,7 +10,7 @@ use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table as RiluaTable;
 use rilua::{LuaResult, Val, runtime_error};
-use std::time::{Duration, Instant};
+use std::time::Duration;
 
 /// `SetLFGDungeonEnabled(dungeonID, enabled)` persists the checkbox state
 /// that Blizzard's LFD list stores through `LFGDungeonList_SetDungeonEnabled`.
@@ -77,7 +77,7 @@ pub(super) fn join_lfg(state: &mut LuaState) -> LuaResult<u32> {
             sim.lfg_active_categories.insert(category);
             sim.lfg_active_proposal = None;
             sim.lfg_queue_pop_due_at =
-                Some(Instant::now() + Duration::from_secs_f64(sim.lfg_queue_pop_delay_seconds));
+                Some(sim.clock_now() + Duration::from_secs_f64(sim.lfg_queue_pop_delay_seconds));
             sim.lfg_queue_pop_delay_seconds
         };
         schedule_lfg_queue_pop(state, delay)?;
@@ -132,12 +132,13 @@ fn schedule_lfg_queue_pop(state: &mut LuaState, delay: f64) -> LuaResult<()> {
         let sim = app.sim_state.borrow();
         sim.loading_addon_index.or(sim.executing_addon_index)
     };
+    let now = app.sim_state.borrow().clock_now();
     app.sim_state
         .borrow_mut()
         .rilua_timers
         .push_back(PendingTimer {
             id,
-            fire_at: Instant::now() + Duration::from_secs_f64(delay),
+            fire_at: now + Duration::from_secs_f64(delay),
             interval: None,
             remaining: None,
             cancelled: false,
@@ -154,7 +155,7 @@ fn pop_lfg_queue(state: &mut LuaState) -> LuaResult<u32> {
         let Some(due_at) = sim.lfg_queue_pop_due_at else {
             return Ok(0);
         };
-        if Instant::now() < due_at {
+        if sim.clock_now() < due_at {
             return Ok(0);
         }
         let Some((category, dungeon_id)) = first_active_queue(&sim) else {

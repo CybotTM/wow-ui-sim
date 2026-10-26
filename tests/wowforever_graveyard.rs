@@ -60,5 +60,11 @@ fn forever_graveyard_availability_changes_without_crossing_environments() {
 #[cfg(not(feature = "client-wowforever"))]
 fn graveyard_port_publication_does_not_change_other_profiles() {
     let env = WowLuaEnv::new().unwrap();
-    assert!(env.eval::<bool>("return CanPortGraveyard == nil").unwrap());
+    let is_ptr =
+        wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Ptr;
+    assert_eq!(
+        env.eval::<bool>("return type(CanPortGraveyard) == 'function'")
+            .unwrap(),
+        is_ptr
+    );
 }

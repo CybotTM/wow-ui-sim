@@ -61,6 +61,23 @@ fn init_saved_variables(
     folder_name: &str,
     mgr: &mut SavedVariablesManager,
 ) -> Vec<String> {
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
+        let loaded = env.with_state(|state| {
+            mgr.load_after_addon_code(
+                state,
+                folder_name,
+                &toc.saved_variables(),
+                &toc.saved_variables_per_character(),
+            )
+        });
+        return loaded
+            .err()
+            .map(|error| {
+                format!("Failed to load post-code SavedVariables for {folder_name}: {error}")
+            })
+            .into_iter()
+            .collect();
+    }
     let mut warnings = Vec::new();
     let wtf_result = env.with_state(|state| mgr.load_wtf_for_addon(state, folder_name));
     match wtf_result {

@@ -8,7 +8,8 @@ use wow_ui_sim::startup::fire_startup_events_for_screen;
 use wow_ui_sim::toc::TocFile;
 
 fn blizzard_ui_dir() -> PathBuf {
-    wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available")
+    wow_ui_sim::paths::default_blizzard_ui_addons_path()
+        .expect("Blizzard UI cache should be available")
 }
 
 fn ui_panel_templates_dir() -> PathBuf {
@@ -105,6 +106,8 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_mainline_variant() {
     let resolved = find_toc_file(&ui_panel_templates_dir()).expect("UIPanelTemplates TOC resolves");
@@ -117,7 +120,9 @@ fn find_toc_file_resolves_mainline_variant() {
          their templates from a different addon"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_is_eager_with_one_dependency() {
     let toc = TocFile::from_file(&ui_panel_templates_toc()).expect("TOC parses");
@@ -156,7 +161,9 @@ fn toc_is_eager_with_one_dependency() {
     assert!(!toc.is_secure_env());
     assert!(toc.default_enabled());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn allow_load_game_restricts_to_in_world() {
     let toc = TocFile::from_file(&ui_panel_templates_toc()).expect("TOC parses");
@@ -176,7 +183,9 @@ fn allow_load_game_restricts_to_in_world() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn allow_load_game_type_mainline_is_not_restricted() {
     let toc = TocFile::from_file(&ui_panel_templates_toc()).expect("TOC parses");
@@ -189,7 +198,9 @@ fn allow_load_game_type_mainline_is_not_restricted() {
          filename, the gametype field is what gates loading at runtime"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_raw_bytes_pin_six_directives_and_six_body_files() {
     let raw = std::fs::read_to_string(ui_panel_templates_toc()).expect("TOC reads utf-8");
@@ -229,7 +240,9 @@ fn toc_raw_bytes_pin_six_directives_and_six_body_files() {
     assert!(!raw.contains("## RequiredDep"));
     assert!(!raw.contains("[Family]"));
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn appears_in_game_eager_discovery() {
     let addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Game);
@@ -245,6 +258,7 @@ fn appears_in_game_eager_discovery() {
          Blizzard_ChatFrame (Mists). Without this addon the entire UI \
          dependency graph collapses"
     );
+}
 }
 
 #[test]
@@ -265,6 +279,26 @@ fn absent_from_glue_screens_eager_discovery() {
 
 #[test]
 fn dep_directories_exist_on_disk() {
+    if cfg!(feature = "client-wrath") {
+        let toc = crate::common::native_framexml_toc();
+        for file in [
+            "BasicControls.xml",
+            "UIPanelTemplates.lua",
+            "UIPanelTemplates.xml",
+        ] {
+            assert!(
+                toc.files
+                    .iter()
+                    .any(|path| path == std::path::Path::new(file)),
+                "native dependency absent from committed FrameXML order: {file}"
+            );
+            assert!(
+                toc.addon_dir.join(file).is_file(),
+                "native dependency missing on disk: {file}"
+            );
+        }
+        return;
+    }
     for dep in TOC_DEPENDENCIES {
         let dir = blizzard_ui_dir().join(dep);
         assert!(

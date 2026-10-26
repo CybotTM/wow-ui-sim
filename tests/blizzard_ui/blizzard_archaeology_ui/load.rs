@@ -8,6 +8,7 @@ const ROOT: &str = "Blizzard_ArchaeologyUI";
 const ROOT_TOC_FILE: &str = "Blizzard_ArchaeologyUI_Mainline.toc";
 const DECLARED_DEPENDENCIES: &[&str] = &["Blizzard_FrameXMLUtil", "Blizzard_HelpPlate"];
 
+post_wrath_ui_fixture! {
 #[test]
 fn archaeology_ui_loads_cleanly_with_no_recorded_lua_errors() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, loaded| {
@@ -25,6 +26,9 @@ fn archaeology_ui_loads_cleanly_with_no_recorded_lua_errors() {
     });
 }
 
+}
+
+post_wrath_ui_fixture! {
 #[test]
 fn archaeology_ui_declared_toc_dependencies_are_loaded_after_harness_runs() {
     let declared_dependencies = parse_declared_dependencies();
@@ -49,6 +53,7 @@ fn archaeology_ui_declared_toc_dependencies_are_loaded_after_harness_runs() {
             );
         }
     });
+}
 }
 
 fn parse_declared_dependencies() -> Vec<String> {

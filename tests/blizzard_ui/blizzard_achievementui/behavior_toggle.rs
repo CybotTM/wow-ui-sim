@@ -64,6 +64,23 @@ const ROOT: &str = "Blizzard_AchievementUI";
 
 #[test]
 fn toggle_achievement_frame_cycles_show_hide_and_honors_guild_view_arg() {
+    if crate::common::wrath_achievement_fixtures::assert_native(
+        r#"
+        assert(not AchievementFrame:IsShown())
+        AchievementFrame_ToggleAchievementFrame()
+        assert(AchievementFrame:IsShown() and AchievementFrame.selectedTab == 1)
+        assert(achievementFunctions == ACHIEVEMENT_FUNCTIONS)
+        AchievementFrame_ToggleAchievementFrame()
+        assert(not AchievementFrame:IsShown())
+        AchievementFrame_ToggleAchievementFrame(true)
+        assert(AchievementFrame:IsShown() and AchievementFrame.selectedTab == 2)
+        assert(achievementFunctions == STAT_FUNCTIONS and AchievementFrameStats:IsShown())
+        AchievementFrame_ToggleAchievementFrame(true)
+        assert(not AchievementFrame:IsShown())
+        "#,
+    ) {
+        return;
+    }
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
         let observations: (bool, i64, bool, bool, i64, bool) = env
             .eval(

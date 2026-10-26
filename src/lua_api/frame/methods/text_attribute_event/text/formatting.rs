@@ -341,6 +341,11 @@ pub(crate) fn set_font(state: &mut LuaState) -> LuaResult<u32> {
         set_simple_html_font(state, id, text_type, font, size, flags);
         return Ok(0);
     }
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath
+        && let Some(result) = reject_wrath_font_arguments(state, id)?
+    {
+        return Ok(result);
+    }
     let font = val_to_string(state, stack_val(state, 2));
     if font.is_none() {
         state.push(Val::Bool(false));
@@ -363,6 +368,32 @@ pub(crate) fn set_font(state: &mut LuaState) -> LuaResult<u32> {
     drop(sim);
     state.push(Val::Bool(true));
     Ok(1)
+}
+
+/// Generation acceptance is separate; this path validates only known arguments.
+fn reject_wrath_font_arguments(state: &mut LuaState, id: u64) -> LuaResult<Option<u32>> {
+    let fontstring = borrow_state(state)?
+        .widgets
+        .get(id)
+        .is_some_and(|frame| frame.widget_type == crate::widget::WidgetType::FontString);
+    let path = crate::lua_api::wrath_arguments::convert_string(state, stack_val(state, 2))?;
+    let height = match stack_val(state, 3) {
+        Val::Num(value) => Some(value),
+        _ => None,
+    };
+    if fontstring && (path.is_none() || height.is_none_or(|height| height <= 0.0)) {
+        return Err(runtime_error(
+            "SetFont: expected a filename and positive height",
+        ));
+    }
+    if !fontstring && height.is_some_and(|height| height <= 0.0) {
+        state.push(Val::Nil);
+        return Ok(Some(1));
+    }
+    if fontstring && path.as_deref() == Some("") {
+        return Ok(Some(0));
+    }
+    Ok(None)
 }
 
 /// Apply the given font fields; returns whether any of them changed.

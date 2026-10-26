@@ -28,8 +28,6 @@ const CVAR_DATA_MASK: u8 = 0x3F;
 const CVAR_DATA_TAG: u8 = 0x40;
 const DEFAULT_CVAR_BITFIELD_VERSION: u8 = b'0';
 const C_CVAR_FUNCTIONS: &[(&str, RustFn)] = &[
-    #[cfg(feature = "retail-12-1-0")]
-    ("AreCVarsLoaded", are_cvars_loaded),
     ("GetCVar", get_cvar),
     ("SetCVar", set_cvar),
     ("GetCVarBool", get_cvar_bool),
@@ -39,12 +37,6 @@ const C_CVAR_FUNCTIONS: &[(&str, RustFn)] = &[
     ("SetCVarBitfield", set_cvar_bitfield),
     ("ResetTestCVars", reset_test_cvars),
 ];
-
-#[cfg(feature = "retail-12-1-0")]
-fn are_cvars_loaded(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Bool(true));
-    Ok(1)
-}
 
 fn required_string(state: &mut LuaState, index: i32) -> Option<String> {
     Option::<String>::from_stack(state, index)
@@ -222,7 +214,9 @@ fn push_cvar_string(state: &mut LuaState, source: CvarStringSource) -> LuaResult
         return Ok(1);
     };
     let value = match source {
-        CvarStringSource::Current => borrow_state(state)?.cvars.get(&name),
+        CvarStringSource::Current => {
+            crate::c_api::forever_startup::read_current_cvar(state, &name)?
+        }
         CvarStringSource::Default => borrow_state(state)?.cvars.get_default(&name),
     };
     push_optional_string(state, value);
@@ -235,7 +229,8 @@ fn get_cvar_bool(state: &mut LuaState) -> LuaResult<u32> {
         state.push(Val::Bool(false));
         return Ok(1);
     };
-    let value = borrow_state(state)?.cvars.get_bool(&name);
+    let current = crate::c_api::forever_startup::read_current_cvar(state, &name)?;
+    let value = current.as_deref() == Some("1");
     state.push(Val::Bool(value));
     Ok(1)
 }

@@ -8,6 +8,8 @@ const DISABLED_ADDON: &str = "AddonListTriStateDisabledProbe";
 const ENABLED_ADDON: &str = "AddonListTriStateEnabledProbe";
 const PARTIAL_ADDON: &str = "AddonListTriStatePartialProbe";
 
+// Wrath has no AddonList vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn init_addon_applies_tristate_checkbox_visuals() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -119,6 +121,7 @@ fn init_addon_applies_tristate_checkbox_visuals() {
         );
         assert_eq!(partial_state, 1);
     });
+}
 }
 
 type TriStateVisuals = (

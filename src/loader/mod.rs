@@ -1,7 +1,6 @@
 //! Addon loader - loads addons from TOC files.
 
 mod addon;
-#[cfg(any(feature = "client-wowforever", test))]
 pub(crate) mod addon_modules;
 mod addon_order;
 mod addon_saved_variables;
@@ -10,11 +9,11 @@ pub(crate) mod bytecode;
 pub(crate) mod bytecode_cache;
 pub(crate) mod chunk_cache;
 mod error;
+mod file_diagnostics;
 pub(crate) mod helpers;
 pub(crate) mod helpers_anim;
 mod load_addon_trace;
 pub(crate) mod lua_file;
-#[cfg(any(feature = "client-wowforever", test))]
 pub(crate) mod module_import;
 pub(crate) mod precompiled;
 pub(crate) mod stack_taint;
@@ -26,6 +25,7 @@ mod xml_frame_codegen;
 pub(crate) mod xml_frame_extras;
 pub(crate) mod xml_layer_batch;
 mod xml_lifecycle;
+mod xml_lua_args;
 mod xml_texture;
 
 use crate::blizzard_ui_sync::is_builtin_addon_folder;
@@ -71,6 +71,24 @@ pub fn enter_bytecode_cache_read_only_mode() {
 #[doc(hidden)]
 pub fn release_prefork_parent_bytecode_cache_memory() -> Result<usize, String> {
     bytecode_cache::release_prefork_parent_memory()
+}
+
+/// Real-addon notification payload only; synthetic startup notifications are separate policy.
+pub fn addon_loaded_arguments(
+    state: &crate::lua_api::SimState,
+    addon_name: &str,
+    name_value: rilua::Val,
+) -> Vec<rilua::Val> {
+    let mut arguments = vec![name_value];
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Retail {
+        // Boolean type is authenticated; deriving its value from parsed bindings is INFERRED.
+        let contains_bindings = state
+            .addons
+            .iter()
+            .any(|addon| addon.folder_name == addon_name && addon.contains_bindings);
+        arguments.push(rilua::Val::Bool(contains_bindings));
+    }
+    arguments
 }
 
 const ENV_PROFILE_LUA_FILES: &str = "WOW_SIM_PROFILE_LUA_FILES";

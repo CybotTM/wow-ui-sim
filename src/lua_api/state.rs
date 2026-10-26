@@ -29,7 +29,6 @@ macro_rules! build_empty_sim_state {
             #[cfg(feature = "retail-12-0-5")]
             nameplate_hit_test_insets:
                 crate::c_api::c_nameplate_manager::NamePlateHitTestInsets::default(),
-            #[cfg(feature = "client-wowforever")]
             input_interface_style:
                 crate::c_api::c_input_interface_style::InputInterfaceStyle::default(),
             #[cfg(feature = "client-wowforever")]
@@ -41,6 +40,13 @@ macro_rules! build_empty_sim_state {
             #[cfg(feature = "retail-12-1-0")]
             encounter_timeline: crate::c_api::c_encounter_timeline::Timeline::default(),
             scripts: ScriptRegistry::default(),
+            ui_reload_requested: false,
+            cinematic_active: false,
+            in_world: false,
+            reload_allows_protected_actions: false,
+            account_cvar_chunks_ready: [true; 2],
+            account_cvar_callback_pending: false,
+            ui_reloaded: false,
             cvars: CVarStorage::new(),
             #[cfg(feature = "client-wrath")]
             legacy_gamma: 0.0,
@@ -54,6 +60,8 @@ macro_rules! build_empty_sim_state {
             #[cfg(feature = "client-wrath")]
             who_routing: Default::default(),
             console_output: $collections.console_output,
+            tutorial_requests: ::std::vec::Vec::new(),
+            engraving: crate::c_api::engraving_inputs::EngravingInputs::default(),
             timers: $collections.timers,
             rilua_timers: ::std::collections::VecDeque::new(),
             timer_callback_sources: ::std::collections::HashMap::new(),
@@ -217,7 +225,6 @@ macro_rules! build_empty_sim_state {
             // Simulator initial policy; native default is unverified.
             outfit_situations_enabled: false,
             transmog_set_filters: HashMap::new(),
-            #[cfg(feature = "retail-12-0-0")]
             transmog_sets: crate::c_api::c_transmog_sets::TransmogSets::default(),
             #[cfg(feature = "retail-12-0-0")]
             transmog_custom_sets: crate::c_api::c_transmog_collection::CustomSets::default(),
@@ -237,7 +244,6 @@ macro_rules! build_empty_sim_state {
             clubs: crate::c_api::club_model::ClubState::default(),
             spell_cooldown_categories: HashMap::new(),
             spell_cooldown_item_sources: HashMap::new(),
-            transmog_enabled: true,
             active_blocked_rolesets: Vec::new(),
             active_allowed_rolesets: Vec::new(),
             quest_hub_related_quests: HashMap::new(),
@@ -261,7 +267,7 @@ macro_rules! build_empty_sim_state {
             click_bindable_spells: HashSet::new(),
             #[cfg(feature = "retail-12-0-5")]
             cooldown_aura_associations: Default::default(),
-            #[cfg(feature = "retail-12-0-5")]
+            #[cfg(feature = "aura-spell-classifications")]
             aura_spell_classifications: Default::default(),
             #[cfg(feature = "retail-12-0-5")]
             private_aura_sound_registrations: Default::default(),
@@ -270,6 +276,7 @@ macro_rules! build_empty_sim_state {
             #[cfg(feature = "base-spell-relationships")]
             base_spell_relationships: Default::default(),
             spell_loss_of_control: HashMap::new(),
+            active_loss_of_control: HashMap::new(),
             spell_flyouts: HashMap::new(),
             action_profession_quality: HashMap::new(),
             addon_base_paths: $collections.addon_base_paths,
@@ -296,6 +303,7 @@ macro_rules! build_empty_sim_state {
                 any(feature = "profile-retail", feature = "client-ptr")
             ))]
             instance_identity: Default::default(),
+            wrath_relic_slot: Default::default(),
             current_target: $runtime.current_target,
             previous_target: None,
             current_focus: $runtime.current_focus,
@@ -308,9 +316,10 @@ macro_rules! build_empty_sim_state {
             sound_manager: $runtime.sound_manager,
             last_sound_kit_requested: $runtime.last_sound_kit_requested,
             #[cfg(feature = "client-wrath")]
+            last_ui_error_message: None,
+            #[cfg(feature = "client-wrath")]
             last_sound_name_requested: None,
             cooldown_viewer_cooldowns: Default::default(),
-            #[cfg(feature = "retail-12-0-0")]
             cooldown_viewer_availability: Default::default(),
             #[cfg(feature = "retail-12-0-0")]
             spell_classifications: Default::default(),
@@ -332,7 +341,7 @@ macro_rules! build_empty_sim_state {
             pet_bonus_slot_available: false,
             #[cfg(feature = "retail-12-0-0")]
             limited_input_allowed: [false; 4],
-            #[cfg(feature = "retail-12-0-0")]
+            #[cfg(any(feature = "retail-12-0-0", feature = "client-wrath"))]
             action_spell_ranges: Default::default(),
             #[cfg(feature = "retail-12-0-0")]
             weekly_reward_progress: Default::default(),
@@ -352,7 +361,7 @@ macro_rules! build_empty_sim_state {
             combat_audio_spec_settings: HashMap::new(),
             #[cfg(feature = "retail-12-0-5")]
             combat_audio_categories: Default::default(),
-            #[cfg(feature = "retail-12-0-0")]
+            #[cfg(not(feature = "client-wrath"))]
             combat_audio_throttles: HashMap::new(),
             neighborhood_tracked_tasks: BTreeSet::new(),
             weapon_enchants: Default::default(),
@@ -382,6 +391,7 @@ macro_rules! build_empty_sim_state {
             action_ui_buttons: $collections.action_ui_buttons,
             cursor_item: $runtime.cursor_item,
             container_actions: Default::default(),
+            item_upgrade_eligibility: Default::default(),
             loading_addon_index: $runtime.loading_addon_index,
             loading_addon_stack: $runtime.loading_addon_stack,
             executing_addon_index: $runtime.executing_addon_index,
@@ -430,16 +440,23 @@ macro_rules! build_empty_sim_state {
             pressed_keys: HashSet::new(),
             game_rules: GameRulesState::default(),
             discord: DiscordState::default(),
+            forever_startup: Default::default(),
             player_choice: PlayerChoiceState::default(),
             housing_service_enabled: true,
             housing: HousingState::default(),
             catalog_shop_products: Default::default(),
+            store_public_eligibility: Default::default(),
             housing_bundles: Default::default(),
             pet_battles: PetBattleState::default(),
             pet: PetState::default(),
             lfg_list_counts: LfgListCounts::default(),
             lfg_active_entry: None,
             can_use_premade_group: true,
+            lfr_availability: None,
+            transmog_availability: Default::default(),
+            forever_outfits: None,
+            scenario_finder_availability: None,
+            mists_party_min_level: None,
             lfg_category_info: default_lfg_category_info(),
             lfg_active_categories: ::std::collections::HashSet::new(),
             lfg_queued_dungeons: ::std::collections::HashMap::new(),
@@ -474,6 +491,7 @@ macro_rules! build_empty_sim_state {
             #[cfg(feature = "client-wowforever")]
             quest_watch_types: crate::c_api::seed_quest_watch_types(&quest_log_entries.entries),
             quest_log_entries,
+            super_track: Default::default(),
             quest_war_mode_eligibility: HashSet::new(),
             pending_quest_offer: None,
             quest_choice_id: None,
@@ -485,7 +503,7 @@ macro_rules! build_empty_sim_state {
             #[cfg(feature = "retail-12-0-7")]
             quest_short_expiration_warnings: ::std::collections::HashSet::new(),
             abandon_quest_id: None,
-            tracked_achievements: ::std::collections::HashSet::new(),
+            tracked_achievements: Vec::new(),
             // Simulator initial policy matches the cached trainer panel constants.
             #[cfg(feature = "client-wrath")]
             wrath_trainer_filters: [true, true, false],
@@ -495,6 +513,7 @@ macro_rules! build_empty_sim_state {
             guild_bank_money: 123_456,
             current_guild_bank_tab: 1,
             guild_bank_items: ::std::collections::HashMap::new(),
+            guild_bank_tabs: Vec::new(),
             merchant_frame_open: false,
             // Inferred default scenario: no configured repair service.
             #[cfg(feature = "client-wowforever")]
@@ -505,6 +524,9 @@ macro_rules! build_empty_sim_state {
             loot_frame_open: false,
             guild_registrar_open: false,
             pet_stables_open: false,
+            stable_active_pets: None,
+            stable_pet_slots: HashMap::new(),
+            stable_pet_spec_infos: None,
             #[cfg(any(feature = "retail-12-0-0", feature = "client-wowforever"))]
             allow_recent_allies_see_location: true,
             #[cfg(feature = "client-wowforever")]
@@ -521,6 +543,7 @@ macro_rules! build_empty_sim_state {
             #[cfg(feature = "client-wrath")]
             refer_a_friend_linked_guids: HashSet::new(),
             summon_friend_cooldown: Default::default(),
+            raf_versions: Vec::new(),
             loot_method: LootMethodState::default(),
             loot_history: LootHistoryState::default(),
             gossip: GossipState::default(),
@@ -532,6 +555,7 @@ macro_rules! build_empty_sim_state {
             pet_actions: vec![PetActionSlot::default(); 10],
             glyph: GlyphState::default(),
             currency_info: super::globals::currency_data::seeded_currency_info_map(),
+            wrath_currency: super::globals::real::wrath_currency::CurrencyListState::default(),
             #[cfg(feature = "client-retail")]
             currency_list: crate::c_api::currency_list::CurrencyListState::default(),
             currency_war_mode_bonus: HashMap::new(),
@@ -564,6 +588,9 @@ macro_rules! build_empty_sim_state {
             #[cfg(feature = "retail-12-0-0")]
             bnet_custom_message: String::new(),
             social_friends: default_social_friends(),
+            social_restrictions: SocialRestrictionsState::default(),
+            #[cfg(feature = "client-wrath")]
+            selected_friend_guid: None,
             auction_browse_results: default_auction_browse_results(),
             auction_replicate_items: default_auction_replicate_items(),
             auction_owned: Vec::new(),
@@ -596,6 +623,7 @@ macro_rules! build_empty_sim_state {
             factions: Vec::new(),
             selected_faction_index: 0,
             watched_faction_index: 0,
+            battlefield_vehicles: ::std::collections::HashMap::new(),
             battlefield_queue: BattlefieldQueue::default(),
             battlefield_minimap_visible: false,
             chat_channels: Vec::new(),
@@ -606,6 +634,7 @@ macro_rules! build_empty_sim_state {
             pending_duel: None,
             pending_resurrect: None,
             corpse_available: false,
+            corpse_map_positions: HashMap::new(),
             active_trade: None,
             open_panels: ::std::collections::HashSet::new(),
             is_party_lfg: false,
@@ -646,8 +675,9 @@ macro_rules! build_empty_sim_state {
             #[cfg(feature = "retail-12-0-5")]
             voice_chat_speak_requests: Vec::new(),
             spell_activation_overlays: ::std::collections::HashSet::new(),
-            #[cfg(feature = "retail-12-0-0")]
             challenge_completion: Default::default(),
+            challenge_run: Default::default(),
+            manual_clock: None,
             known_spells: ::std::collections::HashSet::new(),
             harmful_spells: ::std::collections::HashSet::new(),
             helpful_spells: ::std::collections::HashSet::new(),
@@ -704,11 +734,12 @@ pub use super::state_types::{
     BarberShopState, BidAuction, BnetFriend, BnetFriendInvite, BnetGameAccount, BrowseQuery,
     ChatBubble, CommodityPurchaseQuote, CommoditySearchResultInfo, CommoditySearchResults,
     CraftingState, CurrencyInfo, CursorInfo, CursorItemOrigin, DeathRecapEntry,
-    EquipmentManagerState, EquipmentSet, EquippedItem, GreatVaultActivity, GuildMember, GuildRank,
-    ItemSearchKey, ItemSearchResultInfo, ItemSearchResults, KillingBlowInfo, LfdDungeonInfo,
-    LfgActivityGroupInfo, LfgActivityInfo, LfgAdvancedFilter, LfgApplication, LfgCategoryInfo,
-    LfgRoleSelection, LoadDiagnosticAttribution, LoadDiagnostics, LootHistoryState, LootRollInfo,
-    LuaErrorRecord, MacroInfo, MapChildRect, MapData, MapRect, MirrorTimer, MissingRequirement,
+    EquipmentManagerState, EquipmentSet, EquippedItem, GreatVaultActivity,
+    GuildBankRankPermissions, GuildBankTab, GuildMember, GuildRank, ItemSearchKey,
+    ItemSearchResultInfo, ItemSearchResults, KillingBlowInfo, LfdDungeonInfo, LfgActivityGroupInfo,
+    LfgActivityInfo, LfgAdvancedFilter, LfgApplication, LfgCategoryInfo, LfgRoleSelection,
+    LoadDiagnosticAttribution, LoadDiagnostics, LootHistoryState, LootRollInfo, LuaErrorRecord,
+    MacroInfo, MapChildRect, MapData, MapRect, MirrorTimer, MissingRequirement,
     MissingRequirementKind, MovementState, MythicPlusAffix, MythicPlusRatingMapSummary,
     MythicPlusRatingSummary, MythicPlusRun, MythicPlusState, MythicPlusWeeklyBest, NilSymbolAccess,
     NilSymbolEnvironment, NilSymbolObservation, NilSymbolObservationKind, OwnedAuction,
@@ -716,8 +747,8 @@ pub use super::state_types::{
     PlayerChoiceOptionRewardInfo, PlayerChoiceRewardCurrencyInfo, PlayerChoiceRewardItemInfo,
     PlayerChoiceRewardReputationInfo, PlayerChoiceState, PlayerState, PlayerXpState, PvpHonorState,
     SEEDED_LOCAL_CHARACTER_GUID, SEEDED_LOCAL_CHARACTER_NAME, ScenarioState, ScenarioStep,
-    SecondaryPowerState, SocialFriend, SummonRequestState, TokenAuctionInfo, WorldState,
-    WowTokenState,
+    SecondaryPowerState, SocialFriend, SocialRestrictionsState, SummonRequestState,
+    TokenAuctionInfo, WorldState, WowTokenState,
 };
 #[cfg(feature = "client-retail")]
 pub use super::state_types::{EffectiveAttackPower, PowerRegen, WeaponAttackPower};
@@ -734,6 +765,7 @@ mod cursor_tooltips;
 mod defaults;
 mod sim_state;
 mod support_types;
+mod ui_reload;
 
 use defaults::*;
 pub use sim_state::SimState;

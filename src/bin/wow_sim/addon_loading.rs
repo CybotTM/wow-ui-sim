@@ -195,7 +195,10 @@ fn print_load_diagnostics(result: &LoadResult) {
 }
 
 fn fire_addon_loaded(env: &WowLuaEnv, name: &str) {
-    if let Err(e) = env.fire_event_with_args("ADDON_LOADED", &[env.lua_string(name)]) {
+    let name_value = env.lua_string(name);
+    let arguments =
+        wow_ui_sim::loader::addon_loaded_arguments(&env.state().borrow(), name, name_value);
+    if let Err(e) = env.fire_event_with_args("ADDON_LOADED", &arguments) {
         logging::println_elapsed(&format!("Error firing ADDON_LOADED for {name}: {e}"));
     }
 }
@@ -244,6 +247,7 @@ fn print_blizzard_summary(elapsed: std::time::Duration, t: &LoadTiming) {
 
 /// Scan, load, and register third-party addons; print summary.
 pub fn load_third_party_addons(
+    addon_paths: &[PathBuf],
     skip_addons: bool,
     is_test: bool,
     env: &WowLuaEnv,
@@ -256,12 +260,7 @@ pub fn load_third_party_addons(
     }
 
     let exclude = if is_test { &[][..] } else { TEST_ADDONS };
-    let addon_paths = wow_ui_sim::paths::default_addons_paths();
-    let mut addons = scan_addon_paths(&addon_paths, exclude, screen);
-    if is_test {
-        let test_addons_path = PathBuf::from(TEST_ADDONS_PATH);
-        addons.extend(scan_addons(&test_addons_path, &[], screen));
-    }
+    let mut addons = scan_addon_paths(addon_paths, exclude, screen);
     wow_ui_sim::loader::sort_addons_by_dependencies(&mut addons);
     if skip_addons {
         addons.retain(|(name, _)| TEST_ADDONS.iter().any(|t| t == name));
@@ -290,7 +289,9 @@ fn merged_addon_enable_overrides(
 ) -> Option<HashMap<String, bool>> {
     let mut overrides = addon_enable_overrides(saved_vars.as_ref()).unwrap_or_default();
 
-    if let Some(saved_vars) = saved_vars.as_mut() {
+    if !env.state().borrow().ui_reloaded
+        && let Some(saved_vars) = saved_vars.as_mut()
+    {
         match wow_ui_sim::server_snapshot_import::load_addon_enable_overrides(env, saved_vars) {
             Ok(snapshot_overrides) => overrides.extend(snapshot_overrides),
             Err(error) => logging::println_elapsed(&format!(
@@ -788,3 +789,6 @@ fn print_frame_timing_detail(t: &LoadTiming, pct: &dyn Fn(std::time::Duration) -
 
 #[cfg(test)]
 mod tests;
+
+#[cfg(all(test, feature = "profile-retail"))]
+mod reload_payload_tests;

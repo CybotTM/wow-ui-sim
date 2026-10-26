@@ -7,6 +7,13 @@
 //! housing/favor state, and blueprint import/export calls produce simulator
 //! share codes that can be round-tripped in tests.
 
+/// Supplied spatial housing state, independent of ownership.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum HousingArea {
+    HouseInterior,
+    PlotExterior,
+}
+
 mod basic_mode;
 pub mod catalog;
 #[cfg(feature = "retail-12-0-0")]
@@ -19,6 +26,14 @@ pub mod location;
 mod market;
 #[cfg(feature = "retail-12-0-7")]
 pub(crate) mod patch_12_0_7;
+#[cfg(any(
+    feature = "client-retail",
+    feature = "client-ptr",
+    feature = "client-wowforever"
+))]
+mod presence;
+
+pub mod current_house;
 
 use crate::c_api::helpers::ensure_namespace;
 #[cfg(feature = "retail-12-1-0")]
@@ -59,6 +74,12 @@ const BUDGET_TYPE_PET_DECOR: i32 = 2;
 pub(crate) fn register_c_housing_surface(state: &mut LuaState) -> LuaResult<()> {
     // Replaces an unconditional temporary surface, including non-retail profiles.
     catalog::register(state)?;
+    if matches!(
+        crate::client_profile::ACTIVE,
+        crate::client_profile::ClientProfile::Retail | crate::client_profile::ClientProfile::Ptr
+    ) {
+        current_house::register(state)?;
+    }
     #[cfg(feature = "retail-12-0-0")]
     editor::register(state)?;
     #[cfg(feature = "retail-12-0-0")]
@@ -69,6 +90,12 @@ pub(crate) fn register_c_housing_surface(state: &mut LuaState) -> LuaResult<()> 
     basic_mode::register(state)?;
     #[cfg(feature = "retail-12-0-5")]
     inspect_mode::register(state)?;
+    #[cfg(any(
+        feature = "client-retail",
+        feature = "client-ptr",
+        feature = "client-wowforever"
+    ))]
+    presence::register(state)?;
     let housing = ensure_namespace(state, "C_Housing")?;
     if cfg!(feature = "retail-12-0-0") {
         market::register(state, housing)?;

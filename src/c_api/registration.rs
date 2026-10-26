@@ -12,8 +12,13 @@ use rilua::LuaResult;
 use rilua::vm::state::LuaState;
 
 pub(crate) fn register_spell_and_widget_tables(state: &mut LuaState) -> LuaResult<()> {
-    #[cfg(feature = "client-wowforever")]
-    super::c_input_interface_style::register(state)?;
+    if matches!(
+        crate::client_profile::ACTIVE,
+        crate::client_profile::ClientProfile::Ptr
+            | crate::client_profile::ClientProfile::WowForever
+    ) {
+        super::c_input_interface_style::register(state)?;
+    }
     #[cfg(feature = "client-wowforever")]
     super::c_gamepad_ui::register(state)?;
     #[cfg(feature = "client-wowforever")]
@@ -44,6 +49,9 @@ pub(crate) fn register_item_power_tables(state: &mut LuaState) -> LuaResult<()> 
 }
 
 pub(crate) fn register_character_progression_tables(state: &mut LuaState) -> LuaResult<()> {
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Ptr {
+        super::c_player_info_name_policy::register(state)?;
+    }
     #[cfg(any(feature = "client-retail", feature = "client-ptr"))]
     super::c_player_info_guid::register(state)?;
     c_barber_shop::register_c_barber_shop_surface(state)?;
@@ -53,8 +61,11 @@ pub(crate) fn register_character_progression_tables(state: &mut LuaState) -> Lua
 }
 
 pub(crate) fn register_interaction_tables(state: &mut LuaState) -> LuaResult<()> {
+    super::c_quest_offer::register(state)?;
     super::c_store_secure::register(state)?;
+    super::store_public_eligibility::register(state)?;
     super::c_voice_chat_activity::register(state)?;
+    super::c_voice_chat_settings::register(state)?;
     #[cfg(feature = "retail-12-0-0")]
     super::c_voice_chat_volume::register(state)?;
     #[cfg(feature = "retail-12-0-0")]
@@ -99,14 +110,23 @@ pub(crate) fn register_interaction_tables(state: &mut LuaState) -> LuaResult<()>
     }
     register_classic_combat_tables(state)?;
     super::c_log::register_classic(state)?;
+    if matches!(
+        crate::client_profile::ACTIVE,
+        crate::client_profile::ClientProfile::Retail
+            | crate::client_profile::ClientProfile::Ptr
+            | crate::client_profile::ClientProfile::WowForever
+    ) {
+        super::c_log::register_error_sink(state)?;
+    }
     #[cfg(feature = "retail-12-0-5")]
     super::c_scenario_info::register(state)?;
     #[cfg(feature = "client-retail")]
     super::c_scenario_bonus::register(state)?;
-    #[cfg(feature = "retail-12-0-0")]
     super::c_transmog_sets::register(state)?;
     #[cfg(feature = "retail-12-0-0")]
     super::c_transmog_outfit_info::register(state)?;
+    super::transmog_availability::register(state)?;
+    super::forever_outfits::register(state)?;
     c_ardenweald_gardening::register_c_ardenweald_gardening_surface(state)?;
     c_arrow_callout_manager::register_c_arrow_callout_manager_surface(state)?;
     #[cfg(feature = "retail-12-1-0")]

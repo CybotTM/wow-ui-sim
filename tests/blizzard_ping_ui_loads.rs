@@ -102,6 +102,8 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_ping_ui_find_toc_resolves_bare_variant() {
     let resolved = find_toc_file(&ping_ui_dir()).expect("Blizzard_PingUI TOC resolves");
@@ -122,7 +124,9 @@ fn blizzard_ping_ui_find_toc_resolves_bare_variant() {
         mainline.display()
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_ping_ui_toc_declares_eager_secure_mainline_only_with_sharedxml_dep() {
     let toc = TocFile::from_file(&ping_ui_toc()).expect("Blizzard_PingUI TOC parses");
@@ -197,7 +201,9 @@ fn blizzard_ping_ui_toc_declares_eager_secure_mainline_only_with_sharedxml_dep()
          Blizzard_PingUI.lua), not a saved variable"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_ping_ui_toc_declares_metadata_in_raw_bytes() {
     let raw = std::fs::read_to_string(ping_ui_toc()).expect("Blizzard_PingUI TOC reads utf-8");
@@ -255,7 +261,9 @@ fn blizzard_ping_ui_toc_declares_metadata_in_raw_bytes() {
          C_PingSecure callbacks are wired before the player's first ping keystroke"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_ping_ui_toc_lists_four_files_in_canonical_order() {
     let toc = TocFile::from_file(&ping_ui_toc()).expect("Blizzard_PingUI TOC parses");
@@ -271,7 +279,9 @@ fn blizzard_ping_ui_toc_lists_four_files_in_canonical_order() {
          symbols before PingUI.xml parses"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_ping_ui_appears_in_game_screen_eager_discovery_only() {
     let game_addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Game);
@@ -300,7 +310,9 @@ fn blizzard_ping_ui_appears_in_game_screen_eager_discovery_only() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_ping_ui_appears_in_full_addon_inventory() {
     let inventory = discover_all_blizzard_addons(&blizzard_ui_dir());
@@ -311,6 +323,7 @@ fn blizzard_ping_ui_appears_in_full_addon_inventory() {
          inventory is a structural listing of every parseable TOC and includes \
          glue-restricted addons too"
     );
+}
 }
 
 prefork_full_ui_case! {
@@ -608,7 +621,7 @@ fn blizzard_ping_ui_publishes_required_localized_strings(env: &WowLuaEnv) {
             .unwrap_or_else(|err| panic!("type(_G.{key}) probe failed: {err}"));
         assert_eq!(
             kind, "string",
-            "_G.{key} must publish as a string — `data/global_strings.rs` ships the \
+            "_G.{key} must publish as a string — `crates/sim-data-profile/data/global_strings.rs` ships the \
              enUS localization for all 11 PING_TYPE_* / PING_FAILED_* keys consumed by \
              Blizzard_PingManager.lua's wedge-info table and \
              Blizzard_PingUI.lua's `C_PingSecure.DisplayError(PING_FAILED_GENERIC)` \

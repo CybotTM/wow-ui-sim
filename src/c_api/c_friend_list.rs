@@ -6,6 +6,21 @@ use crate::lua_api::state::SocialFriend;
 use rilua::Val;
 use rilua::vm::state::LuaState;
 
+/// Existing online-first simulator projection, shared by namespace and legacy reads.
+pub(crate) fn friends_in_display_order(friends: &[SocialFriend]) -> Vec<SocialFriend> {
+    let mut ordered = friends.to_vec();
+    ordered.sort_by_key(|friend| !friend.is_online);
+    ordered
+}
+
+/// Simulator response policy: enqueue refresh notification over the supplied list.
+pub(crate) fn show_friends(state: &mut LuaState) -> rilua::LuaResult<u32> {
+    crate::lua_api::methods::borrow_state_mut(state)?
+        .events
+        .push_simple("FRIENDLIST_UPDATE");
+    Ok(0)
+}
+
 #[cfg(any(feature = "client-retail", feature = "client-ptr"))]
 pub(crate) mod current {
     use super::build_friend_info_table;

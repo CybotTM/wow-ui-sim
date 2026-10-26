@@ -15,6 +15,9 @@ use super::addon_saved_variables::{
     maybe_init_saved_variables, maybe_restore_clobbered_saved_variables,
 };
 use super::error::LoadError;
+use super::file_diagnostics::{
+    is_recorded_xml_failure, record_file_diagnostic, uses_wrath_file_diagnostics,
+};
 use super::lua_file::load_lua_file;
 use super::xml_file::load_xml_file;
 use super::{LoadResult, LoadTiming};
@@ -212,8 +215,13 @@ pub fn load_addon_internal(
         return Ok(result);
     }
 
-    let saved_vars_mgr =
-        maybe_init_saved_variables(env, toc, folder_name, saved_vars_mgr, &mut result);
+    let wrath_saved_variables =
+        crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath;
+    let saved_vars_mgr = if wrath_saved_variables {
+        saved_vars_mgr
+    } else {
+        maybe_init_saved_variables(env, toc, folder_name, saved_vars_mgr, &mut result)
+    };
     let loading_guard = begin_addon_load(env, folder_name, toc);
     let ctx = build_addon_context(env, toc, folder_name)?;
     let nil_symbol_access_start = env.state().borrow().nil_symbol_accesses.len();
@@ -228,7 +236,12 @@ pub fn load_addon_internal(
         &mut result,
     );
     maybe_replay_blizzard_lua_in_secure_env(env, toc, folder_name, &ctx, &mut result);
-    maybe_restore_clobbered_saved_variables(env, folder_name, saved_vars_mgr);
+    read_conventional_binding_metadata(env, toc, folder_name, &mut result);
+    if wrath_saved_variables {
+        maybe_init_saved_variables(env, toc, folder_name, saved_vars_mgr, &mut result);
+    } else {
+        maybe_restore_clobbered_saved_variables(env, folder_name, saved_vars_mgr);
+    }
     apply_blizzard_post_load_patches(env, folder_name, &mut result);
     let addon_index = loading_guard.addon_index();
     append_nil_symbol_diagnostics(
@@ -513,6 +526,38 @@ fn load_addon_files(
     }
 }
 
+fn read_conventional_binding_metadata(
+    env: &LoaderEnv<'_>,
+    toc: &TocFile,
+    folder_name: &str,
+    result: &mut LoadResult,
+) {
+    if crate::client_profile::ACTIVE != crate::client_profile::ClientProfile::Retail {
+        return;
+    }
+    let path = toc.addon_dir.join("Bindings.xml");
+    if !path.is_file() || toc.file_paths().contains(&path) {
+        return;
+    }
+    match crate::xml::parse_xml_file(&path) {
+        Ok(ui) => {
+            let contains_bindings = ui.elements.iter().any(|element| {
+                matches!(element, crate::xml::XmlElement::Binding(binding) if binding.name.is_some())
+            });
+            if let Some(addon) = env
+                .state()
+                .borrow_mut()
+                .addons
+                .iter_mut()
+                .find(|addon| addon.folder_name == folder_name)
+            {
+                addon.contains_bindings |= contains_bindings;
+            }
+        }
+        Err(error) => result.warnings.push(format!("{}: {error}", path.display())),
+    }
+}
+
 fn loads_file_in_bootstrap_phase(
     pass: EnvironmentPass,
     is_bootstrap: bool,
@@ -601,10 +646,14 @@ fn load_addon_file(
 ) {
     let _nil_symbol_environment_guard = enter_nil_symbol_environment(env, ctx.use_secure_env);
     if !file.is_file() {
-        result.warnings.push(format!(
-            "{}: IO error: No such file or directory (os error 2)",
-            file.display()
-        ));
+        if uses_wrath_file_diagnostics() && file.extension().is_some_and(|ext| ext == "xml") {
+            record_file_diagnostic(&mut result.warnings, ctx, file, "Couldn't open");
+        } else {
+            result.warnings.push(format!(
+                "{}: IO error: No such file or directory (os error 2)",
+                file.display()
+            ));
+        }
         return;
     }
 
@@ -640,7 +689,7 @@ fn load_addon_xml_file(
     file: &std::path::Path,
 ) {
     let restore_add_to_secure_env = enable_secure_xml_frame_exports(env, ctx);
-    let load_result = load_xml_file(env, file, ctx, &mut result.timing);
+    let load_result = load_xml_file(env, file, ctx, &mut result.timing, &mut result.warnings);
     restore_secure_xml_frame_exports(env, restore_add_to_secure_env);
 
     match load_result {
@@ -648,6 +697,7 @@ fn load_addon_xml_file(
             result.xml_files += 1;
             result.lua_files += count;
         }
+        Err(error) if is_recorded_xml_failure(&error) => {}
         Err(error) => result
             .warnings
             .push(format!("{}: {}", file.display(), error)),
@@ -805,13 +855,18 @@ mod tests {
         assert_eq!(result.lua_files, 0);
         assert_eq!(result.xml_files, 0);
         assert_eq!(result.warnings.len(), 2);
-        assert!(
-            result
-                .warnings
-                .iter()
-                .all(|warning| warning.contains("No such file or directory")),
-            "missing TOC files should remain loader warnings: {:?}",
-            result.warnings
+        let lua_warning = format!(
+            "{}: IO error: No such file or directory (os error 2)",
+            addon_dir.join("Missing.lua").display()
         );
+        let xml_warning = if super::uses_wrath_file_diagnostics() {
+            "Couldn't open Interface\\AddOns\\MissingFiles\\Missing.xml".to_string()
+        } else {
+            format!(
+                "{}: IO error: No such file or directory (os error 2)",
+                addon_dir.join("Missing.xml").display()
+            )
+        };
+        assert_eq!(result.warnings, [lua_warning, xml_warning]);
     }
 }

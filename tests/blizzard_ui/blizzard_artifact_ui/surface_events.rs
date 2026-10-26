@@ -4,6 +4,7 @@ use crate::common::blizzard_addon_harness::with_blizzard_addon_smoke_shape;
 
 const ROOT: &str = "Blizzard_ArtifactUI";
 
+post_wrath_ui_fixture! {
 #[test]
 fn artifact_frame_event_lifecycle_matches_mixin_handlers() {
     with_blizzard_addon_smoke_shape(&[], &[], |env, _loaded| {
@@ -20,7 +21,10 @@ fn artifact_frame_event_lifecycle_matches_mixin_handlers() {
         );
     });
 }
+}
 
+// ArtifactUI vendor handlers/templates do not ship in Wrath; modeled API probes stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn artifact_perks_and_title_event_lifecycles_match_mixin_handlers() {
     with_blizzard_addon_smoke_shape(&[], &[], |env, _loaded| {
@@ -37,7 +41,9 @@ fn artifact_perks_and_title_event_lifecycles_match_mixin_handlers() {
         );
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn artifact_appearances_onload_registers_artifact_update() {
     with_blizzard_addon_smoke_shape(&[], &[], |env, _loaded| {
@@ -53,6 +59,7 @@ fn artifact_appearances_onload_registers_artifact_update() {
              ArtifactAppearancesMixin:OnLoad; mismatches: {mismatches:?}"
         );
     });
+}
 }
 
 fn load_artifact_ui(env: &wow_ui_sim::lua_api::WowLuaEnv) {

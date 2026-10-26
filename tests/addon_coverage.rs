@@ -22,7 +22,10 @@ const PANEL_COVERAGE_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_SharedXMLBase", "Blizzard_SharedXMLBase.toc"),
     ("Blizzard_Colors", "Blizzard_Colors_Mainline.toc"),
     ("Blizzard_SharedXML", "Blizzard_SharedXML_Mainline.toc"),
-    ("Blizzard_SharedXMLGame", "Blizzard_SharedXMLGame_Mainline.toc"),
+    (
+        "Blizzard_SharedXMLGame",
+        "Blizzard_SharedXMLGame_Mainline.toc",
+    ),
     (
         "Blizzard_UIPanelTemplates",
         "Blizzard_UIPanelTemplates_Mainline.toc",
@@ -287,6 +290,7 @@ fn fire_panel_harness_startup_events(env: &WowLuaEnv) {
 
 fn load_panel_harness_blizzard_ui(env: &WowLuaEnv) -> HashSet<String> {
     reset_template_state();
+    common::load_profile_framexml(env);
     let ui = blizzard_ui_dir();
     let roots = panel_coverage_roots();
     let closure = discover_blizzard_addon_closure_for_screen(&ui, ScreenKind::Game, &roots);
@@ -311,6 +315,10 @@ fn all_blizzard_addon_load_errors_are_tracked_per_addon_name() {
             env.set_screen_size(1024.0, 768.0);
             env.state().borrow_mut().addon_base_paths = vec![blizzard_ui_dir()];
             reset_template_state();
+            if let Some(toc) = wow_ui_sim::client_profile::blizzard_ui_framexml_toc() {
+                load_addon(&env.loader_env(), &toc)
+                    .expect("profile FrameXML should load before addons");
+            }
 
             let cached_addon_roots = cached_blizzard_addon_roots();
             let manifest_addon_roots = active_manifest_blizzard_addon_roots();
@@ -346,6 +354,7 @@ fn all_blizzard_addon_load_errors_are_tracked_per_addon_name() {
             let state = env.state().borrow();
             let grouped_errors = grouped_errors_by_addon(&state);
             println!("{}", format_full_per_addon_report(&grouped_errors));
+            eprintln!("Complete force-load Lua errors: {grouped_errors:#?}");
             let known_counts = known_error_counts();
             let actual_counts = actual_error_counts(&grouped_errors);
             let changes = classify_error_count_changes(&known_counts, &actual_counts);

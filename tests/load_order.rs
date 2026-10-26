@@ -15,6 +15,7 @@ fn blizzard_ui_dir() -> PathBuf {
     )))
 }
 
+post_wrath_ui_fixture! {
 /// Blizzard_ObjectAPI (which defines ItemMixin) must load before Blizzard_FrameXML
 /// (which uses ItemMixin in EventToastManager.lua:669).
 #[test]
@@ -47,7 +48,9 @@ fn test_object_api_loads_before_frame_xml() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 /// ItemMixin (from Blizzard_ObjectAPI) must be defined when Blizzard_FrameXML loads.
 /// EventToastManager.lua:669 does `CreateFromMixins(..., ItemMixin)` at file scope.
 #[test]
@@ -73,7 +76,9 @@ fn test_item_mixin_available_for_event_toast_manager() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 /// Blizzard_UIPanels_Game (which defines PaperDollItemSlotButton_OnLoad) must
 /// load before Blizzard_MainMenuBarBagButtons (whose OnLoad calls it).
 /// ActionBar depends on UIPanels_Game, and ActionBar sorts before BagButtons
@@ -100,7 +105,9 @@ fn test_uipanels_game_loads_before_bag_buttons() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 /// Blizzard_ItemButton and Blizzard_FrameXMLUtil must both load before
 /// Blizzard_FrameXML, which uses surfaces from each addon.
 #[test]
@@ -128,7 +135,9 @@ fn test_item_button_and_framexmlutil_load_before_framexml() {
         }
     }
 }
+}
 
+post_wrath_ui_fixture! {
 /// Startup consumers must pull their load-on-demand publisher addons without
 /// promoting unrelated load-on-demand addons into eager discovery.
 #[test]
@@ -177,6 +186,7 @@ fn test_startup_publishers_load_before_consumers() {
         );
     }
 }
+}
 
 /// Snapshot of the full resolved Blizzard addon load order.
 ///
@@ -191,6 +201,14 @@ fn test_blizzard_addon_load_order_snapshot() {
         let ui = blizzard_ui_dir();
         let addons = discover_blizzard_addons(&ui);
         let names: Vec<&str> = addons.iter().map(|(n, _)| n.as_str()).collect();
+
+        if cfg!(feature = "client-wrath") {
+            assert_eq!(names, ["Blizzard_AchievementUI", "Blizzard_MacroUI", "Blizzard_RaidUI", "Blizzard_TokenUI", "Blizzard_TrainerUI"]);
+            let toc = common::native_framexml_toc();
+            assert_eq!(toc.metadata.get("Interface").map(String::as_str), Some("30300"));
+            assert!(toc.files.first().is_some_and(|file| file == std::path::Path::new("GlobalStrings.lua")));
+            return;
+        }
 
         #[cfg(feature = "client-ptr")]
         let expected: Vec<&str> = include_str!("fixtures/ptr-12-1-5-eager-load-order.txt")
@@ -447,6 +465,7 @@ fn dump_load_order() {
 fn test_paperdoll_onload_exists_for_bag_buttons() {
     test_timeout! {
         let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+        common::load_profile_framexml(&env);
         let ui = blizzard_ui_dir();
         let addons = discover_blizzard_addons(&ui);
 

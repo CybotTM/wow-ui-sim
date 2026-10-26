@@ -33,6 +33,7 @@ return forbiddenBefore,
        child == nil or childMarkedForbidden or forbiddenAfter
 "#;
 
+post_wrath_ui_fixture! {
 #[test]
 fn auth_challenge_ui_full_lockdown_marks_tainted_mutation_attempts() {
     common::with_perf_lock(|| {
@@ -85,4 +86,5 @@ fn auth_challenge_ui_full_lockdown_marks_tainted_mutation_attempts() {
             });
         });
     });
+}
 }

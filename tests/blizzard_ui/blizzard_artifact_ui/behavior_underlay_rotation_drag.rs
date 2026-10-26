@@ -8,6 +8,8 @@ const ARTIFACT_ICON: &str = "Interface/Icons/inv_sword_2h_artifactashbringer_d_0
 const CURSOR_X: f32 = 130.0;
 const CURSOR_Y: f32 = 170.0;
 
+// ArtifactUI vendor handlers/templates do not ship in Wrath; modeled API probes stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn underlay_onupdate_rotates_when_idle_drags_from_cursor_and_honors_suppression() {
     with_blizzard_addon_smoke_shape(&[], &[], |env, _loaded| {
@@ -41,6 +43,7 @@ fn underlay_onupdate_rotates_when_idle_drags_from_cursor_and_honors_suppression(
              mismatches: {mismatches:?}"
         );
     });
+}
 }
 
 fn seed_viewed_artifact_at_forge(env: &wow_ui_sim::lua_api::WowLuaEnv, suppress_rotation: bool) {

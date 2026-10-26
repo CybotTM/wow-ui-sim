@@ -194,6 +194,22 @@ fn test_load_details() {
 
 #[test]
 fn test_load_game_menu() {
+    if cfg!(feature = "client-wrath") {
+        let env = WowLuaEnv::new().unwrap();
+        crate::common::load_profile_framexml(&env);
+        env.exec(
+            r#"
+            assert(GameMenuFrameMixin == nil)
+            assert(not GameMenuFrame:IsShown())
+            ShowUIPanel(GameMenuFrame)
+            assert(GameMenuFrame:IsShown())
+            GameMenuButtonContinue:Click()
+            assert(not GameMenuFrame:IsShown())
+        "#,
+        )
+        .expect("12340 game menu continue-button lifecycle");
+        return;
+    }
     let blizzard_ui = wow_ui_sim::client_profile::blizzard_ui_addons_dir_under(
         std::path::Path::new(env!("CARGO_MANIFEST_DIR")),
     );

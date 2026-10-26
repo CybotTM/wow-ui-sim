@@ -7,6 +7,7 @@ const ROOT: &str = "Blizzard_ActionBarController";
 
 #[test]
 fn shapeshift_events_update_stance_bar() {
+    wrath_action_case!(callbacks::stance_callbacks);
     test_timeout! {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
         env.exec(

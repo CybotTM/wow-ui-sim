@@ -792,7 +792,7 @@ mod overflow_vertical_alignment {
                 }}, '\n')
                 CursorBox:SetSize(400, 72)
                 CursorBox:SetJustifyH('LEFT')
-                CursorBox:SetJustifyV(alignment)
+                CursorBox:SetJustifyV(alignment == 'CENTER' and 'MIDDLE' or alignment)
                 CursorBox:SetText(text)
                 CursorBox:SetCursorPosition(0)
                 CursorBox:ClearFocus()

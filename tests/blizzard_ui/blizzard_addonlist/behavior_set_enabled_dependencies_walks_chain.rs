@@ -8,6 +8,8 @@ const TARGET_ADDON: &str = "AddonListDependencyTargetProbe";
 const DIRECT_DEP: &str = "AddonListDependencyDirectProbe";
 const TRANSITIVE_DEP: &str = "AddonListDependencyTransitiveProbe";
 
+// Wrath has no AddonList vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn enable_dependencies_menu_enables_target_and_transitive_dependencies() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -68,6 +70,7 @@ fn enable_dependencies_menu_enables_target_and_transitive_dependencies() {
 
         assert_enable_dependencies_probe(probe);
     });
+}
 }
 
 type EnableDependenciesProbe = (bool, i64, i64, i64);

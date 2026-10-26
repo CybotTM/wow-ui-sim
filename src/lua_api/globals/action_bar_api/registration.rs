@@ -75,6 +75,7 @@ const SLOT_MUTATION_METHODS: &[ActionBarMethod] = &[
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     let state = lua.state_mut();
     let table_ref = ensure_namespace_table(state, C_ACTION_BAR);
+    crate::c_api::c_action_bar::register_keyring(state)?;
     register_general_methods(state, table_ref)?;
     register_page_methods(state, table_ref)?;
     register_state_queries(state, table_ref)?;
@@ -83,6 +84,12 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     register_pet_slot_methods(state, table_ref)?;
     register_stateful_methods(state, table_ref)?;
     register_slot_mutation_methods(state, table_ref)?;
+    #[cfg(feature = "client-wrath")]
+    LuaApiMut::register_function(
+        state,
+        "IsAttackAction",
+        crate::lua_api::workarounds::wrath_attack_action::query_non_attack,
+    )?;
     // These approved legacy consumers share the namespaced state-backed query.
     if matches!(
         crate::client_profile::ACTIVE,
@@ -90,13 +97,17 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     ) {
         LuaApiMut::register_function(state, "IsAutoRepeatAction", is_auto_repeat_action)?;
     }
-    #[cfg(feature = "retail-12-0-0")]
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "UnregisterActionUIButton",
-        crate::c_api::c_action_bar::unregister_action_ui_button,
-    )?;
+    if cfg!(any(
+        feature = "retail-12-0-0",
+        feature = "client-wowforever"
+    )) {
+        table_set_rust_fn_static(
+            state,
+            table_ref,
+            "UnregisterActionUIButton",
+            crate::c_api::c_action_bar::unregister_action_ui_button,
+        )?;
+    }
     #[cfg(feature = "retail-12-0-0")]
     crate::c_api::c_action_bar_queries::register(state, table_ref)?;
     crate::c_api::action_macros::register(state, table_ref)?;

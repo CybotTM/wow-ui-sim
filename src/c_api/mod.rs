@@ -3,12 +3,14 @@
 //! Real/state-backed surfaces live at the root of this module. Intentionally
 //! unsupported compatibility gaps stay isolated under `permanent_shims`.
 
+pub mod c_guild_info;
 pub mod c_recruit_a_friend;
 pub(crate) mod class_catalog;
 #[cfg(any(feature = "client-era", feature = "client-anniversary"))]
 pub(crate) mod classic_startup_data;
 #[cfg(feature = "client-retail")]
 pub(crate) mod currency_list;
+pub(crate) mod ptr_i4_game_rules;
 pub mod quest_objectives;
 pub mod quest_readiness;
 pub(crate) mod quest_reward_currencies;
@@ -24,6 +26,8 @@ pub mod action_count_info;
 pub use action_count_info::ActionUseCountInfo;
 pub mod action_macros;
 pub mod action_repeat;
+#[cfg(any(feature = "retail-12-0-0", feature = "client-wrath"))]
+pub mod action_spell_range;
 pub mod action_usability;
 #[cfg(any(feature = "retail-12-0-0", feature = "client-wowforever"))]
 mod addon_messages;
@@ -72,7 +76,6 @@ pub(crate) mod c_battle_net_invite;
 pub mod c_calendar;
 pub mod c_catalog_shop;
 pub mod c_catalog_shop_products;
-#[cfg(feature = "retail-12-0-0")]
 pub mod c_challenge_mode;
 pub mod c_character_services;
 pub mod c_chat_bubbles;
@@ -86,7 +89,7 @@ pub mod c_club;
 #[cfg(feature = "retail-12-0-0")]
 pub(crate) mod c_combat_audio_alert;
 #[cfg(any(feature = "retail-12-0-0", feature = "client-wowforever"))]
-mod c_combat_log;
+pub(crate) mod c_combat_log;
 mod c_combat_text;
 pub(crate) mod c_console;
 pub mod c_cooldown_viewer;
@@ -97,6 +100,7 @@ pub mod c_cursor;
 pub mod c_curve_util;
 pub mod c_damage_meter;
 pub(crate) mod c_date_and_time;
+pub(crate) mod c_death_info;
 pub mod c_death_recap;
 #[cfg(not(feature = "retail-12-0-0"))]
 pub(crate) mod c_debug;
@@ -111,6 +115,7 @@ mod c_edit_mode;
 pub(crate) mod c_encounter_timeline;
 #[cfg(feature = "retail-12-0-0")]
 pub(crate) mod c_encounter_warnings;
+mod c_engraving;
 pub(crate) mod c_event_scheduler;
 pub(crate) mod c_friend_list;
 pub(crate) mod c_garrison_damage_classes;
@@ -119,7 +124,6 @@ pub mod c_garrison_trees;
 pub mod c_glue;
 pub mod c_housing;
 pub mod c_housing_bundles;
-#[cfg(feature = "client-wowforever")]
 pub mod c_input_interface_style;
 pub mod c_instance_encounter;
 pub mod c_intl;
@@ -163,6 +167,7 @@ pub mod c_ping_secure;
 pub mod c_player_choice;
 #[cfg(any(feature = "client-retail", feature = "client-ptr"))]
 pub(crate) mod c_player_info_guid;
+pub(crate) mod c_player_info_name_policy;
 pub mod c_player_interaction_manager;
 #[cfg(feature = "retail-12-0-0")]
 pub mod c_prey;
@@ -172,15 +177,21 @@ pub mod c_pvp_crowd_control;
 pub mod c_quest_hub;
 #[cfg(feature = "retail-12-0-5")]
 pub mod c_quest_info_system;
-#[cfg(any(
-    feature = "client-retail",
-    feature = "client-ptr",
-    feature = "client-wowforever"
-))]
-mod c_quest_log;
+pub mod c_quest_log;
 #[cfg(feature = "client-wowforever")]
 mod c_quest_log_watches;
+pub mod c_quest_offer;
+pub mod c_super_track;
+pub(crate) mod challenge_run;
 pub mod container_quest;
+pub mod engraving_inputs;
+mod forever_outfits;
+pub mod forever_startup;
+mod lfr_availability;
+pub mod outfit_entry;
+mod scenario_finder_availability;
+pub mod store_public_eligibility;
+pub mod transmog_availability;
 #[cfg(feature = "client-wowforever")]
 pub use c_quest_log_watches::QuestWatchType;
 #[cfg(feature = "client-wowforever")]
@@ -195,6 +206,7 @@ pub mod c_scenario_info;
 pub mod c_secrets;
 pub mod c_settings_util;
 pub mod c_social;
+mod c_social_restrictions;
 pub mod c_sound;
 pub mod c_spec;
 pub mod c_spell;
@@ -229,6 +241,7 @@ pub(crate) mod c_transmog_collection;
 pub(crate) mod c_voice_chat_activity;
 #[cfg(feature = "retail-12-0-5")]
 pub mod c_voice_chat_channels;
+mod c_voice_chat_settings;
 #[cfg(feature = "retail-12-0-0")]
 mod c_voice_chat_volume;
 #[cfg(feature = "retail-12-0-5")]
@@ -238,6 +251,8 @@ pub(crate) mod class_talent_commands;
 mod club_inputs;
 mod club_members;
 pub mod club_model;
+pub mod club_self_invitations;
+mod club_unread;
 pub(crate) mod crafting_execution;
 pub(crate) mod crafting_input;
 pub(crate) mod crafting_plan;
@@ -246,6 +261,7 @@ pub(crate) mod crafting_tables;
 pub(crate) mod cvar_combat_policy;
 #[cfg(feature = "retail-12-0-5")]
 pub mod equipment_set_command;
+pub(crate) mod equipment_set_locks;
 pub mod map_world_coordinates;
 #[cfg(feature = "retail-12-0-7")]
 pub(crate) mod patch_12_0_7_inputs;
@@ -263,12 +279,12 @@ pub mod c_spell_maw_powers;
 pub mod c_toy_box_info;
 #[cfg(feature = "retail-12-0-0")]
 pub mod c_transmog_outfit_info;
-#[cfg(feature = "retail-12-0-0")]
 pub mod c_transmog_sets;
+pub(crate) mod c_ui;
 pub mod c_ui_file_asset;
 #[cfg(feature = "retail-12-0-5")]
 pub(crate) mod c_unit_aura_altered_form;
-#[cfg(feature = "retail-12-0-5")]
+#[cfg(feature = "aura-spell-classifications")]
 pub mod c_unit_aura_classification;
 #[cfg(feature = "retail-12-0-5")]
 pub mod c_unit_aura_cooldown_spells;
@@ -309,6 +325,7 @@ pub mod intl_native;
 pub mod item_spell;
 #[cfg(feature = "retail-12-0-0")]
 mod item_stats;
+pub mod item_upgrade_eligibility;
 #[cfg(feature = "retail-12-0-0")]
 pub use item_stats::ItemStatsState;
 #[cfg(feature = "retail-12-0-0")]
@@ -323,6 +340,11 @@ pub use c_ping_cooldown::PingCooldownInterval;
 mod c_ping_texture_kits;
 #[cfg(feature = "retail-12-0-0")]
 pub use c_ping_texture_kits::PingTextureKits;
+#[cfg(any(feature = "retail-12-1-0", feature = "client-wowforever"))]
+mod c_cvar_readiness;
+pub mod c_loss_of_control;
+#[cfg(not(feature = "client-wrath"))]
+mod combat_audio_throttle;
 #[cfg(feature = "client-mists")]
 pub mod legacy_spell_book;
 pub(crate) mod loss_of_control;
@@ -339,8 +361,10 @@ pub(crate) mod patch_12_0_5_enums;
 pub(crate) mod patch_12_1_0_enums;
 pub mod permanent_shims;
 pub mod private_aura_anchors;
+pub(crate) mod private_aura_callbacks;
 #[cfg(feature = "retail-12-0-5")]
 pub mod private_aura_sounds;
+pub(crate) mod ptr_edit_mode_enums;
 pub(crate) mod seconds_formatter;
 #[cfg(feature = "base-spell-relationships")]
 pub mod spell_base;
@@ -363,6 +387,7 @@ pub(crate) mod forever_finite_constants;
 #[cfg(feature = "client-wowforever")]
 mod gamepad_action_bar_constants;
 
+pub(crate) mod c_tts_settings;
 mod helpers;
 #[cfg(feature = "retail-12-0-0")]
 mod patch_retired_members;
@@ -384,7 +409,17 @@ pub(crate) use registration::{
 use rilua::LuaResult;
 use rilua::vm::state::LuaState;
 
+fn supports_super_tracking() -> bool {
+    use crate::client_profile::{ACTIVE, ClientProfile};
+    matches!(
+        ACTIVE,
+        ClientProfile::Retail | ClientProfile::Ptr | ClientProfile::WowForever
+    )
+}
+
 pub(crate) fn register_utility_bootstrap_tables(state: &mut LuaState) -> LuaResult<()> {
+    c_engraving::register(state)?;
+    c_social_restrictions::register(state)?;
     c_loot_history::register_c_loot_history(state)?;
     c_date_and_time::register(state)?;
     #[cfg(feature = "retail-12-0-5")]
@@ -392,14 +427,16 @@ pub(crate) fn register_utility_bootstrap_tables(state: &mut LuaState) -> LuaResu
     #[cfg(feature = "retail-12-0-5")]
     c_navigation::register(state)?;
     c_weather::register(state)?;
+    #[cfg(not(feature = "client-wrath"))]
+    combat_audio_throttle::register(state)?;
+    #[cfg(any(feature = "retail-12-1-0", feature = "client-wowforever"))]
+    c_cvar_readiness::register(state)?;
     c_achievement_info_relations::register(state)?;
     c_calendar::register(state)?;
-    #[cfg(any(
-        feature = "client-retail",
-        feature = "client-ptr",
-        feature = "client-wowforever"
-    ))]
-    c_quest_log::register(state)?;
+    if supports_super_tracking() {
+        c_quest_log::register(state)?;
+        c_super_track::register(state)?;
+    }
     c_garrison_damage_classes::register(state)?;
     #[cfg(feature = "client-retail")]
     c_garrison_trees::register(state)?;
@@ -427,6 +464,7 @@ fn register_specialization_and_model_tables(state: &mut LuaState) -> LuaResult<(
 fn register_glue_and_display_tables(state: &mut LuaState) -> LuaResult<()> {
     c_glue::register_c_glue(state)?;
     c_login::register_c_login(state)?;
+    c_ui::register(state)?;
     permanent_shims::c_ui::register_c_ui(state)
 }
 
@@ -438,6 +476,7 @@ fn register_token_texture_xml_tables(state: &mut LuaState) -> LuaResult<()> {
     c_string_util::register_c_string_util(state)?;
     c_string_util_decimal::register_escape_decimal_non_printables(state)?;
     c_pvp::register_c_pvp_surface(state)?;
+    c_death_info::register(state)?;
     c_ping_secure::register_c_ping_secure_surface(state)?;
     #[cfg(feature = "retail-12-0-0")]
     c_ping_cooldown::register(state)?;

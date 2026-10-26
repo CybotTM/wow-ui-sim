@@ -1,5 +1,12 @@
 //! BattleNet / social friend list + summon-request state.
 
+/// Supplied local social restriction input, not a native account-policy query.
+#[derive(Debug, Clone, Default)]
+pub struct SocialRestrictionsState {
+    /// The simulator seeds an unrestricted local player; callers can supply either value.
+    pub is_squelched: bool,
+}
+
 /// Seeded local character identity used by in-game player APIs and glue
 /// character-list data. Keeping these aligned prevents UI like AddOnList from
 /// showing a random current-player name that is not present in the account's

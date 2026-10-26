@@ -41,6 +41,8 @@ pub struct QuestLogEntry {
     /// Item rewards iterated by `GetNumQuestLogRewards` /
     /// `GetQuestLogRewardInfo`. Empty for quests with no item rewards.
     pub reward_items: Vec<QuestRewardItem>,
+    /// Supplied dialog reward choices; empty means no choices.
+    pub reward_choices: Vec<QuestRewardItem>,
     /// Supplied Wrath rewards; absent spell and zero points mean no reward.
     pub reward_spell: Option<QuestRewardSpell>,
     pub reward_arena_points: u32,
@@ -92,10 +94,15 @@ pub struct QuestRewardCurrency {
 #[derive(Debug, Clone, Default)]
 pub struct QuestLogState {
     pub entries: Vec<QuestLogEntry>,
+    pub additional_highlights: HashMap<i32, crate::c_api::c_quest_log::QuestAdditionalHighlights>,
+    /// Build-12340 manual append order; IDs survive row reorder until log refresh.
+    #[cfg(feature = "client-wrath")]
+    pub manual_watch_ids: Vec<i32>,
     pub objective_progress: HashMap<i32, QuestObjectiveProgress>,
     /// Explicit quest-dialog materials; absence leaves the original UI default.
     pub background_materials: HashMap<i32, String>,
     pub readiness: crate::c_api::quest_readiness::QuestReadinessState,
+    pub offer: crate::c_api::c_quest_offer::QuestOfferState,
     /// Shared prepared output: readers do not implicitly refresh on selection.
     pub processed_reward_factions: Vec<(i32, i32)>,
     /// Player daily fields, separate from active rows and completion history.
@@ -104,9 +111,19 @@ pub struct QuestLogState {
     /// Quest IDs already turned in / permanently completed.
     /// Drives `GetAllCompletedQuestIDs` and `IsQuestFlaggedCompleted`.
     pub completed_quest_ids: HashSet<i32>,
+    /// Simulator acceptance receipt, not native inventory acquisition.
+    pub turn_in_choices: HashMap<i32, usize>,
 }
 
 impl QuestLogState {
+    /// Refresh-time cleanup, deliberately not part of the abandon response.
+    #[cfg(feature = "client-wrath")]
+    pub fn prune_manual_watches(&mut self) {
+        let entries = &self.entries;
+        self.manual_watch_ids
+            .retain(|id| entries.iter().any(|entry| entry.quest_id == *id));
+    }
+
     pub fn process_reward_factions(&mut self, quest_id: Option<u32>) {
         self.processed_reward_factions = self
             .entries
@@ -126,6 +143,7 @@ impl QuestLogState {
         self.objective_progress.remove(&quest_id);
         self.background_materials.remove(&quest_id);
         self.readiness.remove_quest(quest_id);
+        self.offer.major_faction_rewards.remove(&quest_id);
         true
     }
 
@@ -144,6 +162,7 @@ impl QuestLogState {
         self.objective_progress.remove(&quest_id);
         self.background_materials.remove(&quest_id);
         self.readiness.remove_quest(quest_id);
+        self.offer.major_faction_rewards.remove(&quest_id);
         self.completed_quest_ids.insert(quest_id);
         true
     }
@@ -178,13 +197,18 @@ impl QuestLogState {
                 glittering_geodes_entry(),
                 earthen_relic_recovery_entry(),
             ],
+            #[cfg(feature = "client-wrath")]
+            manual_watch_ids: Vec::new(),
             objective_progress: crate::c_api::quest_objectives::seeded_progress(),
             background_materials: HashMap::new(),
+            additional_highlights: HashMap::new(),
             readiness: Default::default(),
+            offer: Default::default(),
             processed_reward_factions: Vec::new(),
             #[cfg(feature = "client-wrath")]
             daily_quest_ids: [0; WRATH_DAILY_QUEST_LIMIT],
             completed_quest_ids: seeded_completed_quest_ids(),
+            turn_in_choices: HashMap::new(),
         }
     }
 }
@@ -215,6 +239,7 @@ fn ordinary_offer_entry(quest_id: i32, offer: &GossipQuestRow) -> QuestLogEntry 
         criteria_spell_texture: None,
         criteria_spell_finished: false,
         reward_items: Vec::new(),
+        reward_choices: Vec::new(),
         reward_spell: None,
         reward_arena_points: 0,
         reward_talents: 0,
@@ -248,6 +273,7 @@ fn seed_quest_defaults() -> QuestLogEntry {
         criteria_spell_texture: None,
         criteria_spell_finished: false,
         reward_items: Vec::new(),
+        reward_choices: Vec::new(),
         reward_spell: None,
         reward_arena_points: 0,
         reward_talents: 0,

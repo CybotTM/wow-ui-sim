@@ -1,8 +1,7 @@
-//! Temporary equipment-set lock defaults.
+//! Legacy equipment-set lock default for excluded Wrath/Era/Anniversary.
 //!
-//! Equipment set creation and contents are state-backed. Transient item lock
-//! state from inventory/server operations is not modeled yet, so expose the
-//! inert unlocked answer as an explicit temporary default.
+//! Retail/PTR/Forever/Mists use the supplied model in c_api::equipment_set_locks;
+//! this workaround must not provide a fallback for those profiles.
 
 const EQUIPMENT_SET_LOCK_DEFAULTS_LUA: &str = r#"
 C_EquipmentSet = C_EquipmentSet or __wow_namespace()
@@ -14,11 +13,21 @@ end
 "#;
 
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
+    if crate::c_api::equipment_set_locks::supports_item_lock_observations() {
+        return Ok(());
+    }
     lua.exec(EQUIPMENT_SET_LOCK_DEFAULTS_LUA)?;
     Ok(())
 }
 
-#[cfg(test)]
+#[cfg(all(
+    test,
+    any(
+        feature = "client-wrath",
+        feature = "client-era",
+        feature = "client-anniversary"
+    )
+))]
 mod tests {
     use crate::lua_api::WowLuaEnv;
 

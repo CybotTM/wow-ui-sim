@@ -1,4 +1,4 @@
-//! Instance + mirror-timer probe globals backed by `SimState.world`.
+//! Instance, mirror-timer and supplied elapsed-timer globals.
 //!
 //! Migrates 3 entries off `GLOBAL_ZERO_STUBS`:
 //!
@@ -15,8 +15,9 @@
 //! - `GetMirrorTimerProgress(name)` → current progress for the timer
 //!   with the matching `name`, or nil when absent.
 //! - `GetWorldElapsedTimers()`      → no active timer IDs by default.
-//! - `GetWorldElapsedTime(id)`      → `(id, 0, 0)` so scenario / challenge
-//!   timer probes avoid nil arithmetic when no timer state is seeded.
+//! - `GetWorldElapsedTime(id)`      → supplied `(name, elapsed, type)`, or no
+//!   results when absent on the six challenge profiles. Excluded Wrath retains
+//!   its old ungrounded `(id, 0, 0)` placeholder for a separate lane.
 //! - `GetNumSavedInstances()` / `GetNumSavedWorldBosses()` → zero, because
 //!   no raid-lock backing store is seeded by default.
 //! - `GetSavedInstanceInfo(index)` / `GetSavedWorldBossInfo(index)` → no
@@ -171,16 +172,24 @@ fn get_mirror_timer_progress(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
-fn get_world_elapsed_timers(_state: &mut LuaState) -> LuaResult<u32> {
-    Ok(0)
+fn get_world_elapsed_timers(state: &mut LuaState) -> LuaResult<u32> {
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
+        return Ok(0);
+    }
+    crate::c_api::challenge_run::timers::list(state)
 }
 
 fn get_world_elapsed_time(state: &mut LuaState) -> LuaResult<u32> {
-    let timer_id = stack_i32(state, 1).unwrap_or(0);
-    state.push(Val::Num(timer_id as f64));
-    state.push(Val::Num(0.0));
-    state.push(Val::Num(0.0));
-    Ok(3)
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
+        // Excluded profile: preserve the existing ungrounded placeholder.
+        // Native elapsed-timer behavior needs its own Wrath lane.
+        let timer_id = stack_i32(state, 1).unwrap_or(0);
+        state.push(Val::Num(timer_id as f64));
+        state.push(Val::Num(0.0));
+        state.push(Val::Num(0.0));
+        return Ok(3);
+    }
+    crate::c_api::challenge_run::timers::query(state)
 }
 
 fn get_num_saved_instances(state: &mut LuaState) -> LuaResult<u32> {

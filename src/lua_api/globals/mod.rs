@@ -24,7 +24,7 @@ pub mod admin_vault;
 pub mod admin_zone_economy;
 pub mod adventure_map;
 pub mod archaeology;
-#[cfg(feature = "client-mists")]
+#[cfg(any(feature = "client-mists", feature = "client-wrath"))]
 pub mod auction_verbs;
 pub mod auras;
 pub mod bank_storage_verbs;

@@ -78,6 +78,8 @@ fn load_full_game_ui_with_prematch_ui() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_plunderstorm_prematch_ui_find_toc_resolves_bare_variant() {
     let resolved =
@@ -100,7 +102,9 @@ fn blizzard_plunderstorm_prematch_ui_find_toc_resolves_bare_variant() {
         mainline.display()
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_plunderstorm_prematch_ui_toc_declares_eager_plunderstorm_only() {
     let toc =
@@ -158,7 +162,9 @@ fn blizzard_plunderstorm_prematch_ui_toc_declares_eager_plunderstorm_only() {
          WOW_LABS_MATCH_STATE_UPDATED events; superTracking state is global"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_plunderstorm_prematch_ui_toc_declares_metadata_in_raw_bytes() {
     let raw = std::fs::read_to_string(prematch_ui_toc())
@@ -218,7 +224,9 @@ fn blizzard_plunderstorm_prematch_ui_toc_declares_metadata_in_raw_bytes() {
         "TOC must NOT declare `## Version:` — unversioned"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_plunderstorm_prematch_ui_toc_lists_two_files_in_canonical_order() {
     let toc =
@@ -236,6 +244,7 @@ fn blizzard_plunderstorm_prematch_ui_toc_lists_two_files_in_canonical_order() {
          Blizzard_PlunderstormPrematchUI.xml SECOND (materializes 2 virtual templates + \
          the named PrematchHeaderFrame)"
     );
+}
 }
 
 #[test]
@@ -264,6 +273,7 @@ fn blizzard_plunderstorm_prematch_ui_does_not_appear_in_eager_discovery_for_any_
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn blizzard_plunderstorm_prematch_ui_appears_in_full_addon_inventory() {
     let inventory = discover_all_blizzard_addons(&blizzard_ui_dir());
@@ -277,6 +287,7 @@ fn blizzard_plunderstorm_prematch_ui_appears_in_full_addon_inventory() {
          LoadOnDemand filters and lists every parseable Blizzard_* TOC, so \
          flavor-restricted addons are still visible to inventory tools"
     );
+}
 }
 
 prefork_full_ui_case! {
@@ -297,11 +308,13 @@ prefork_full_ui_case! {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn blizzard_plunderstorm_prematch_ui_is_addon_loaded_after_explicit_load() {
     let env = load_full_game_ui_with_prematch_ui();
     blizzard_plunderstorm_prematch_ui_is_addon_loaded_after_explicit_load::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -343,11 +356,13 @@ prefork_full_ui_case! {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn blizzard_plunderstorm_prematch_ui_publishes_eight_mixins() {
     let env = load_full_game_ui_with_prematch_ui();
     blizzard_plunderstorm_prematch_ui_publishes_eight_mixins::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -380,11 +395,13 @@ prefork_full_ui_case! {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn blizzard_plunderstorm_prematch_ui_creates_named_non_virtual_frame() {
     let env = load_full_game_ui_with_prematch_ui();
     blizzard_plunderstorm_prematch_ui_creates_named_non_virtual_frame::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -410,11 +427,13 @@ prefork_full_ui_case! {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn blizzard_plunderstorm_prematch_ui_does_not_leak_virtual_templates_to_globals() {
     let env = load_full_game_ui_with_prematch_ui();
     blizzard_plunderstorm_prematch_ui_does_not_leak_virtual_templates_to_globals::run(&env);
+}
 }
 
 prefork_full_ui_case! {
@@ -445,9 +464,11 @@ prefork_full_ui_case! {
 }
 }
 
+post_wrath_ui_fixture! {
 #[cfg(not(feature = "client-retail"))]
 #[test]
 fn blizzard_plunderstorm_prematch_ui_loads_without_addon_specific_lua_errors() {
     let env = load_full_game_ui_with_prematch_ui();
     blizzard_plunderstorm_prematch_ui_loads_without_addon_specific_lua_errors::run(&env);
+}
 }

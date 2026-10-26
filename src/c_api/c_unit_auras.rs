@@ -2,9 +2,7 @@
 
 use crate::lua_api::game_data::AuraInfo;
 use crate::lua_api::globals::auras::collect_filtered_unit_auras;
-#[cfg(feature = "aura-containers")]
-use crate::lua_api::methods::table_get;
-use crate::lua_api::methods::{borrow_state, create_table, table_set, table_set_num};
+use crate::lua_api::methods::{borrow_state, create_table, table_get, table_set, table_set_num};
 use crate::lua_api::state::SimState;
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
@@ -13,6 +11,12 @@ use std::cmp::Ordering;
 
 pub(crate) fn register(state: &mut LuaState) -> LuaResult<()> {
     let public = super::ensure_namespace(state, "C_UnitAuras")?;
+    if matches!(
+        crate::client_profile::ACTIVE,
+        crate::client_profile::ClientProfile::Retail | crate::client_profile::ClientProfile::Ptr
+    ) {
+        table_set_rust_fn_static(state, public, "ClearBlockedAuras", clear_blocked_auras)?;
+    }
     #[cfg(feature = "retail-12-1-5")]
     table_set_rust_fn_static(state, public, "GetAuraCasterGUID", get_aura_caster_guid)?;
     #[cfg(all(feature = "retail-12-1-0", not(feature = "retail-12-1-5")))]
@@ -37,6 +41,34 @@ pub(crate) fn register(state: &mut LuaState) -> LuaResult<()> {
     #[cfg(feature = "aura-containers")]
     register_private_enumeration(state)?;
     Ok(())
+}
+
+/// Clear the selected unit's entries in the live AddBlockedAura/enumeration model.
+fn clear_blocked_auras(state: &mut LuaState) -> LuaResult<u32> {
+    // BEST GUESS, non-native: reject nil/omitted unit before mutation.
+    // Pending Retail native evidence; the nil-policy selector is independent.
+    let unit = String::from_stack(state, 1)?;
+    let namespace = super::global_val(state, "C_UnitAuras");
+    let blocked = table_get(state, namespace, "_blockedAuras");
+    let Val::Table(blocked_table) = blocked else {
+        return Ok(0);
+    };
+    let prefix = format!("{unit}:");
+    let entries = state
+        .gc
+        .tables
+        .get(blocked_table)
+        .ok_or_else(|| runtime_error("C_UnitAuras blocked-aura table is unavailable"))?
+        .hash_entries();
+    let keys: Vec<String> = entries
+        .into_iter()
+        .filter_map(|(key, _)| crate::lua_api::methods::val_to_string(state, key))
+        .filter(|key| key.starts_with(&prefix))
+        .collect();
+    for key in keys {
+        table_set(state, blocked, &key, Val::Nil);
+    }
+    Ok(0)
 }
 
 #[cfg(feature = "aura-containers")]
@@ -149,7 +181,7 @@ pub(crate) fn register_sound_trigger_enum(state: &mut LuaState, enums: Val) {
 #[cfg(feature = "retail-12-1-5")]
 fn get_aura_caster_guid(state: &mut LuaState) -> LuaResult<u32> {
     let unit = String::from_stack(state, 1)?;
-    let instance_id = f64::from_stack(state, 2)? as i32;
+    let (instance_id, secret_selector) = read_caster_instance(state)?;
     let exists =
         crate::lua_api::globals::group_queries::unit_exists_in_state(&*borrow_state(state)?, &unit);
     let aura = if exists {
@@ -162,11 +194,31 @@ fn get_aura_caster_guid(state: &mut LuaState) -> LuaResult<u32> {
         crate::lua_api::globals::unit_misc::existing_guid_for_unit(&sim, &aura.source_unit)
     });
     drop(sim);
-    let result = guid
-        .map(|guid| crate::lua_api::methods::create_string(state, &guid))
-        .unwrap_or(Val::Nil);
+    // Approved selector policy: identity follows a numeric-secret selector.
+    // The separate unit-aura output-restriction layer remains held.
+    let result = match guid {
+        Some(guid) if secret_selector => {
+            rilua::table_security::wrap_host_secret_string(state, &guid)
+        }
+        Some(guid) => crate::lua_api::methods::create_string(state, &guid),
+        None => Val::Nil,
+    };
     state.push(result);
     Ok(1)
+}
+
+#[cfg(feature = "retail-12-1-5")]
+fn read_caster_instance(state: &LuaState) -> LuaResult<(i32, bool)> {
+    let value = crate::lua_bridge::stack_val(state, 2);
+    let secret_selector = cfg!(any(feature = "profile-retail", feature = "client-ptr"))
+        && rilua::table_security::secret_payload_kind(state, value)
+            == Some(rilua::table_security::SecretPayloadKind::Number);
+    let instance_id = if secret_selector {
+        rilua::table_security::inspect_host_secret_number(state, value, |number| Ok(number as i32))?
+    } else {
+        f64::from_stack(state, 2)? as i32
+    };
+    Ok((instance_id, secret_selector))
 }
 
 /// Removes one of the player's own helpful auras and reports it through an

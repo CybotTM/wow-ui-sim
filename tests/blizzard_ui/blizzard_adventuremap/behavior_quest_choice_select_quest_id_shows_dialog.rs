@@ -59,6 +59,8 @@ return pin.panCount,
        portraitAtlas
 "#;
 
+// Wrath has no AdventureMap vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn quest_choice_select_quest_id_shows_dialog_for_each_texture_kit() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -67,6 +69,7 @@ fn quest_choice_select_quest_id_shows_dialog_for_each_texture_kit() {
             assert_select_quest_surface(texture_kit, surface);
         }
     });
+}
 }
 
 type SelectQuestSurface = (i64, bool, bool, bool, i64, bool, bool, f64, String);

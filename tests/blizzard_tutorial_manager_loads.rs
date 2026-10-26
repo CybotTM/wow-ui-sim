@@ -8,7 +8,8 @@ use wow_ui_sim::startup::fire_startup_events_for_screen;
 use wow_ui_sim::toc::TocFile;
 
 fn blizzard_ui_dir() -> PathBuf {
-    wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available")
+    wow_ui_sim::paths::default_blizzard_ui_addons_path()
+        .expect("Blizzard UI cache should be available")
 }
 
 fn tutorial_manager_dir() -> PathBuf {
@@ -105,6 +106,8 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_bare_toc() {
     let resolved = find_toc_file(&tutorial_manager_dir()).expect("TutorialManager TOC resolves");
@@ -115,7 +118,9 @@ fn find_toc_file_resolves_bare_toc() {
          in find_toc_file at src/loader/mod.rs:65-95"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_is_eager_with_three_dependencies() {
     let toc = TocFile::from_file(&tutorial_manager_toc()).expect("TOC parses");
@@ -159,7 +164,9 @@ fn toc_is_eager_with_three_dependencies() {
     );
     assert!(toc.default_enabled());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn allow_load_absent_implies_game_only() {
     let toc = TocFile::from_file(&tutorial_manager_toc()).expect("TOC parses");
@@ -177,7 +184,9 @@ fn allow_load_absent_implies_game_only() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_raw_bytes_pin_three_directives_and_nine_body_files() {
     let raw = std::fs::read_to_string(tutorial_manager_toc()).expect("TOC reads utf-8");
@@ -223,7 +232,9 @@ fn toc_raw_bytes_pin_three_directives_and_nine_body_files() {
     assert!(!raw.contains("## Version"));
     assert!(!raw.contains("[Family]"));
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn game_discovery_loads_middleclass_before_tutorial_manager_and_other_builtin_roots() {
     let addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Game);
@@ -252,6 +263,7 @@ fn game_discovery_loads_middleclass_before_tutorial_manager_and_other_builtin_ro
          is a Game startup root despite lacking the `Blizzard_` prefix"
     );
 }
+}
 
 #[test]
 fn absent_from_glue_screens_eager_discovery() {
@@ -271,6 +283,22 @@ fn absent_from_glue_screens_eager_discovery() {
 
 #[test]
 fn dep_directories_exist_on_disk() {
+    if cfg!(feature = "client-wrath") {
+        let toc = crate::common::native_framexml_toc();
+        for file in ["UIParent.xml", "TutorialFrame.xml"] {
+            assert!(
+                toc.files
+                    .iter()
+                    .any(|path| path == std::path::Path::new(file)),
+                "native dependency absent from committed FrameXML order: {file}"
+            );
+            assert!(
+                toc.addon_dir.join(file).is_file(),
+                "native dependency missing on disk: {file}"
+            );
+        }
+        return;
+    }
     for dep in TOC_DEPENDENCIES {
         let dir = blizzard_ui_dir().join(dep);
         assert!(

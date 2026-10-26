@@ -16,6 +16,7 @@ fn forever_paper_doll_initializes_real_equipment_buttons() {
     load_source(&env, "Blizzard_ItemButton/Shared/ItemButtonTemplate.lua");
     load_source(&env, "Blizzard_ItemButton/Mainline/ItemButtonTemplate.lua");
     load_source(&env, "Blizzard_UIPanels_Game/Camelot/PaperDollFrame.lua");
+    env.state().borrow_mut().forever_startup.ammo_required = Some(true);
     env.exec(
         r#"
         CharacterFrame = CreateFrame("Frame")
@@ -34,6 +35,40 @@ fn forever_paper_doll_initializes_real_equipment_buttons() {
             assert(button.checkRelic == false)
             assert(type(button.GetItemLocationCallback) == "function")
         end
+        "#,
+    )
+    .unwrap();
+}
+
+#[test]
+fn forever_ammo_visibility_uses_character_requirement() {
+    let env = WowLuaEnv::new().unwrap();
+    env.state().borrow_mut().forever_startup.ammo_required = Some(false);
+    load_source(&env, "Blizzard_FrameXML/Camelot/EquipmentFlyout.lua");
+    load_source(&env, "Blizzard_ItemButton/Shared/ItemButtonTemplate.lua");
+    load_source(&env, "Blizzard_ItemButton/Mainline/ItemButtonTemplate.lua");
+    load_source(&env, "Blizzard_UIPanels_Game/Camelot/PaperDollFrame.lua");
+    env.exec(
+        r#"
+        CharacterFrame = CreateFrame("Frame")
+        CharacterFrame.LeftPaneHost = CreateFrame("Frame", nil, CharacterFrame)
+        local button = CreateFrame("Button", "CharacterAmmoSlot")
+        button.icon = button:CreateTexture()
+        PaperDollItemSlotButton_OnLoad(button)
+        assert(not button:IsShown(), "character without ammo requirement hides slot")
+        "#,
+    )
+    .unwrap();
+    env.state().borrow_mut().forever_startup.ammo_required = Some(true);
+    env.exec(
+        r#"
+        CharacterAmmoSlot:Show()
+        PaperDollItemSlotButton_OnLoad(CharacterAmmoSlot)
+        assert(CharacterAmmoSlot:IsShown(), "supplied ammo requirement keeps slot")
+        assert(CharacterAmmoSlot:GetID() == 0)
+        assert(CharacterAmmoSlot.icon:GetTexture() == 136510)
+        assert(select('#', C_PaperDollInfo.AmmoNeeded()) == 1)
+        assert(type(C_PaperDollInfo.AmmoNeeded()) == "boolean")
         "#,
     )
     .unwrap();

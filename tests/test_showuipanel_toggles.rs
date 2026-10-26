@@ -85,6 +85,13 @@ fn setup_env() -> WowLuaEnv {
         state.addon_base_paths = vec![blizzard_ui_dir()];
     }
 
+    if cfg!(feature = "client-wrath") {
+        common::panel_fixtures::load_wrath_panel_core(&env);
+        env.apply_post_load_workarounds();
+        fire_startup_events(&env);
+        return env;
+    }
+
     let ui = blizzard_ui_dir();
     for addon_name in PANEL_ADDONS {
         common::load_required_blizzard_addon(&env, &ui, addon_name);
@@ -184,6 +191,18 @@ fn show_ui_panel_displaces_previous_occupant() {
 fn player_spells_panel_replaces_character_frame() {
     test_timeout! {
         let env = setup_env();
+        if cfg!(feature = "client-wrath") {
+            env.exec(r#"
+                ShowUIPanel(CharacterFrame)
+                assert(CharacterFrame:IsShown())
+                ShowUIPanel(SpellBookFrame)
+                assert(SpellBookFrame:IsShown(), "legacy spellbook should open")
+                assert(CharacterFrame:IsShown(), "legacy character panel is pushable")
+                assert(GetUIPanel("left") == SpellBookFrame)
+                assert(GetUIPanel("center") == CharacterFrame)
+            "#).expect("native spellbook displaces the left slot, not the pushable character panel");
+            return;
+        }
         load_player_spells(&env);
 
         // Retail 12.1.0.69497 closes CharacterFrame when PlayerSpells opens.
@@ -207,6 +226,15 @@ fn player_spells_panel_replaces_character_frame() {
 fn toggle_spellbook_legacy_global_opens_and_closes_spellbook_panel() {
     test_timeout! {
         let env = setup_env();
+        if cfg!(feature = "client-wrath") {
+            env.exec(r#"
+                ToggleSpellBook(BOOKTYPE_SPELL)
+                assert(SpellBookFrame:IsShown() and SpellBookFrame.bookType == BOOKTYPE_SPELL)
+                ToggleSpellBook(BOOKTYPE_SPELL)
+                assert(not SpellBookFrame:IsShown())
+            "#).expect("native spellbook toggle");
+            return;
+        }
         load_player_spells(&env);
 
         let result: String = env.eval(r#"
@@ -241,6 +269,15 @@ fn toggle_spellbook_legacy_global_opens_and_closes_spellbook_panel() {
 fn toggle_player_spells_frame_opens_and_closes_talent_panel() {
     test_timeout! {
         let env = setup_env();
+        if cfg!(feature = "client-wrath") {
+            env.exec(r#"
+                ToggleTalentFrame()
+                assert(PlayerTalentFrame:IsShown(), "native talent panel should open")
+                ToggleTalentFrame()
+                assert(not PlayerTalentFrame:IsShown(), "native talent panel should close")
+            "#).expect("native talent lazy loader and toggle");
+            return;
+        }
         load_player_spells(&env);
 
         let result: String = env.eval(r#"
@@ -268,6 +305,7 @@ fn toggle_player_spells_frame_opens_and_closes_talent_panel() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn toggle_collections_journal_opens_mounts_pets_and_toys_tabs_and_accepts_search_text() {
     test_timeout! {
@@ -323,11 +361,32 @@ fn toggle_collections_journal_opens_mounts_pets_and_toys_tabs_and_accepts_search
         );
     }
 }
+}
 
 #[test]
 fn collections_mount_list_count_matches_displayed_mount_count() {
     test_timeout! {
         let env = setup_env();
+        if cfg!(feature = "client-wrath") {
+            // Legacy eligibility is explicit host input, separate from journal ownership.
+            #[cfg(feature = "client-wrath")]
+            {
+                let mut state = env.state().borrow_mut();
+                assert!(state.world.mounts.len() >= 2, "two catalog mounts for native fixture");
+                for mount in state.world.mounts.iter_mut().take(2) {
+                    mount.is_collected = true;
+                }
+                state.wrath_legacy.eligible_mounts = state.world.mounts.iter().take(2)
+                    .map(|mount| mount.mount_id as i32).collect();
+            }
+            common::panel_fixtures::clear_recorded_lua_errors(&env);
+            env.fire_event("COMPANION_LEARNED").expect("dispatch native companion availability update");
+            let errors = common::panel_fixtures::recorded_lua_errors(&env);
+            assert!(errors.is_empty(), "native companion update errors: {errors:?}");
+            env.exec(include_str!("fixtures/wrath_f03/mount_list.lua"))
+                .expect("native companion mount buttons match supplied mount count");
+            return;
+        }
 
         let result: String = env.eval(r#"
             if not ToggleCollectionsJournal then
@@ -401,6 +460,7 @@ fn toggle_achievement_frame_opens_and_closes_achievement_panel() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn toggle_encounter_journal_opens_and_closes_panel() {
     test_timeout! {
@@ -430,11 +490,28 @@ fn toggle_encounter_journal_opens_and_closes_panel() {
         );
     }
 }
+}
 
 #[test]
 fn open_trade_skill_opens_blacksmithing_panel() {
     test_timeout! {
         let env = setup_env();
+        if cfg!(feature = "client-wrath") {
+            // Proves native TRADE_SKILL_SHOW consumption after supplying profession state.
+            // OpenTradeSkill's ProfessionsFrame-only producer remains a separate finding.
+            env.exec("assert(C_TradeSkillUI.OpenTradeSkill(164))")
+                .expect("supply selected Blacksmithing model state");
+            common::panel_fixtures::clear_recorded_lua_errors(&env);
+            env.fire_event("TRADE_SKILL_SHOW")
+                .expect("dispatch native trade-skill interaction event");
+            let errors = common::panel_fixtures::recorded_lua_errors(&env);
+            assert!(errors.is_empty(), "native TRADE_SKILL_SHOW errors: {errors:?}");
+            env.exec(r#"
+                assert(TradeSkillFrame:IsShown(), "native trade-skill panel should open")
+                assert(GetTradeSkillLine() == "Blacksmithing", "selected profession identity")
+            "#).expect("native trade-skill event consumer opens Blacksmithing");
+            return;
+        }
 
         let result: String = env.eval(r#"
             if not C_TradeSkillUI or not C_TradeSkillUI.OpenTradeSkill then
@@ -464,6 +541,15 @@ fn open_trade_skill_opens_blacksmithing_panel() {
 fn toggle_guild_frame_opens_and_closes_communities_panel() {
     test_timeout! {
         let env = setup_env();
+        if cfg!(feature = "client-wrath") {
+            env.exec(r#"
+                ToggleFriendsFrame(3)
+                assert(FriendsFrame:IsShown() and GuildFrame:IsShown())
+                ToggleFriendsFrame(3)
+                assert(not FriendsFrame:IsShown())
+            "#).expect("native guild tab toggles through FriendsFrame");
+            return;
+        }
         let (loaded, reason): (bool, Option<String>) = env
             .eval(r#"return C_AddOns.LoadAddOn("Blizzard_Communities")"#)
             .expect("Blizzard_Communities load should return");
@@ -498,6 +584,15 @@ fn toggle_guild_frame_opens_and_closes_communities_panel() {
 fn toggle_lfd_parent_frame_opens_and_closes_group_finder_panel() {
     test_timeout! {
         let env = setup_env();
+        if cfg!(feature = "client-wrath") {
+            env.exec(r#"
+                ToggleLFDParentFrame()
+                assert(LFDParentFrame:IsShown())
+                ToggleLFDParentFrame()
+                assert(not LFDParentFrame:IsShown())
+            "#).expect("native dungeon finder toggles without a modular addon");
+            return;
+        }
 
         let result: String = env.eval(r#"
             local loaded, reason = C_AddOns.LoadAddOn("Blizzard_GroupFinder")
@@ -533,9 +628,12 @@ fn toggle_lfd_parent_frame_opens_and_closes_group_finder_panel() {
 fn toggle_character_reputation_frame_selects_and_toggles_reputation_panel() {
     test_timeout! {
         let env = setup_env();
+        if !cfg!(feature = "client-wrath") {
+            env.exec(r#"CHARACTERFRAME_SUBFRAMES = { "PaperDollFrame", "ReputationFrame", "TokenFrame" }"#)
+                .expect("modern character subframe fixture");
+        }
 
         let result: String = env.eval(r#"
-            CHARACTERFRAME_SUBFRAMES = { "PaperDollFrame", "ReputationFrame", "TokenFrame" }
             if not ToggleCharacter then
                 return "missing_toggle_character"
             end
@@ -573,6 +671,16 @@ fn toggle_character_reputation_frame_selects_and_toggles_reputation_panel() {
 fn character_reputation_tab_click_selects_reputation_panel() {
     test_timeout! {
         let env = setup_env();
+        if cfg!(feature = "client-wrath") {
+            env.exec(r#"
+                ToggleCharacter("PaperDollFrame")
+                local tab = CharacterFrameTab3
+                tab:GetScript("OnClick")(tab, "LeftButton")
+                assert(CharacterFrame:IsShown() and ReputationFrame:IsShown())
+                assert(not PaperDollFrame:IsShown())
+            "#).expect("native third character tab selects reputation");
+            return;
+        }
 
         let result: String = env.eval(r#"
             CHARACTERFRAME_SUBFRAMES = { "PaperDollFrame", "ReputationFrame", "TokenFrame" }
@@ -611,6 +719,17 @@ fn character_reputation_tab_click_selects_reputation_panel() {
 fn admin_open_mailbox_opens_and_closes_mail_panel() {
     test_timeout! {
         let env = setup_env();
+        if cfg!(feature = "client-wrath") {
+            env.exec(r#"
+                A_Admin.ClearInbox()
+                A_Admin.AddMail("Thrall", "Unread Orders", "Meet me in Orgrimmar.")
+                A_Admin.OpenMailbox()
+                assert(MailFrame:IsShown() and InboxFrame:IsShown())
+                A_Admin.CloseMailbox()
+                assert(not MailFrame:IsShown())
+            "#).expect("native mailbox interaction opens and closes the inbox");
+            return;
+        }
 
         let result: String = env.eval(r#"
             A_Admin.ClearInbox()
@@ -681,6 +800,7 @@ fn open_all_bags_opens_a_bag_frame() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn housing_dashboard_loads_and_opens_panel() {
     test_timeout! {
@@ -734,4 +854,5 @@ fn housing_dashboard_loads_and_opens_panel() {
             "Housing dashboard should show its empty state after the owned-house response: {result}"
         );
     }
+}
 }

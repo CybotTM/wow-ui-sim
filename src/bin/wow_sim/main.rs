@@ -1,5 +1,7 @@
 mod addon_loading;
 mod cache_texture;
+#[cfg(test)]
+mod exclusive_path_tests;
 mod exec_lua;
 #[cfg(feature = "gui")]
 mod gui_commands;
@@ -20,7 +22,7 @@ use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::saved_variables::SavedVariablesManager;
 use wow_ui_sim::screen::ScreenKind;
 
-#[derive(Parser)]
+#[derive(Parser, Clone)]
 #[command(name = "wow-sim", about = "WoW UI Simulator", version)]
 struct Args {
     /// Skip loading WTF Lua SavedVariables (EditMode cache still loads)
@@ -30,6 +32,10 @@ struct Args {
     /// Skip loading third-party addons
     #[arg(long)]
     no_addons: bool,
+
+    /// Load third-party addons only from these roots (repeatable; replaces default discovery)
+    #[arg(long, value_name = "DIR")]
+    addons_path: Vec<PathBuf>,
 
     /// Show debug borders and anchor points on all elements
     #[arg(long)]
@@ -70,7 +76,7 @@ struct Args {
     command: Option<Commands>,
 }
 
-#[derive(Subcommand)]
+#[derive(Subcommand, Clone)]
 enum Commands {
     /// Load UI and dump frame tree (no GUI needed)
     DumpTree {
@@ -174,6 +180,16 @@ impl Args {
         )
     }
 
+    fn read_addon_paths(&self) -> Vec<PathBuf> {
+        let mut paths = wow_ui_sim::paths::find_addons_paths(&self.addons_path);
+        let exclusive =
+            !self.addons_path.is_empty() || wow_ui_sim::paths::exclusive_addons_path_enabled();
+        if self.is_test_command() && !exclusive {
+            paths.push(PathBuf::from(addon_loading::TEST_ADDONS_PATH));
+        }
+        paths
+    }
+
     fn skip_addons(&self) -> bool {
         self.no_addons
             || std::env::var("WOW_SIM_NO_ADDONS")
@@ -214,7 +230,7 @@ fn run_main() -> Result<(), Box<dyn std::error::Error>> {
     #[cfg(feature = "gui")]
     let (env, font_system, saved_vars) = init;
     #[cfg(not(feature = "gui"))]
-    let (env, _font_system, _saved_vars) = init;
+    let (env, _font_system, saved_vars) = init;
 
     let dispatch = CommandDispatch {
         command: args.command,
@@ -225,7 +241,6 @@ fn run_main() -> Result<(), Box<dyn std::error::Error>> {
         exec_lua: resolve_exec_lua(&args.exec_lua),
         exec_lua_secure: args.exec_lua_secure,
         saved_stdout,
-        #[cfg(feature = "gui")]
         saved_vars,
         #[cfg(feature = "gui")]
         debug_borders: args.debug_borders,
@@ -315,10 +330,7 @@ fn init_environment(
         let mut state = env.state().borrow_mut();
         let mut addon_base_paths =
             vec![runtime_blizzard_ui_addons_path_with_setup().map_err(startup_blizzard_ui_help)?];
-        addon_base_paths.extend(wow_ui_sim::paths::default_addons_paths());
-        if args.is_test_command() {
-            addon_base_paths.push(PathBuf::from("./Interface/TestAddOns"));
-        }
+        addon_base_paths.extend(args.read_addon_paths());
         state.addon_base_paths = addon_base_paths;
     }
     wow_ui_sim::xml::register_intrinsic_templates();
@@ -468,7 +480,6 @@ struct CommandDispatch {
     exec_lua: Option<String>,
     exec_lua_secure: bool,
     saved_stdout: Option<i32>,
-    #[cfg(feature = "gui")]
     saved_vars: Option<SavedVariablesManager>,
     #[cfg(feature = "gui")]
     debug_borders: bool,
@@ -488,12 +499,12 @@ impl CommandDispatch {
     }
 }
 
-fn dispatch_command(dispatch: CommandDispatch) -> Result<(), Box<dyn std::error::Error>> {
+fn dispatch_command(mut dispatch: CommandDispatch) -> Result<(), Box<dyn std::error::Error>> {
     match dispatch.command {
         Some(Commands::DumpTree { .. }) => dispatch_dump_tree(dispatch),
         #[cfg(feature = "gui")]
         Some(Commands::Screenshot { .. }) => gui_commands::dispatch_screenshot(dispatch),
-        Some(Commands::LuaErrors) => run_lua_errors(&dispatch),
+        Some(Commands::LuaErrors) => run_lua_errors(&mut dispatch),
         Some(Commands::SelfTest {
             max_ticks,
             ref categories,
@@ -521,7 +532,7 @@ fn dispatch_command(dispatch: CommandDispatch) -> Result<(), Box<dyn std::error:
     Ok(())
 }
 
-fn dispatch_dump_tree(dispatch: CommandDispatch) {
+fn dispatch_dump_tree(mut dispatch: CommandDispatch) {
     let Some(Commands::DumpTree {
         filter,
         filter_key,
@@ -534,7 +545,8 @@ fn dispatch_dump_tree(dispatch: CommandDispatch) {
         unreachable!("dispatch_dump_tree only fires for Commands::DumpTree");
     };
     run_dump_tree(
-        &dispatch.env,
+        &mut dispatch.env,
+        &mut dispatch.saved_vars,
         DumpTreeCommand {
             filter,
             filter_key,
@@ -549,9 +561,10 @@ fn dispatch_dump_tree(dispatch: CommandDispatch) {
     );
 }
 
-fn run_lua_errors(dispatch: &CommandDispatch) {
+fn run_lua_errors(dispatch: &mut CommandDispatch) {
     let clean = wow_ui_sim::lua_errors::run_lua_errors(
-        &dispatch.env,
+        &mut dispatch.env,
+        &mut dispatch.saved_vars,
         dispatch.saved_stdout,
         dispatch.exec_lua.as_deref(),
         dispatch.exec_lua_secure,
@@ -597,17 +610,31 @@ struct DumpTreeCommand<'a> {
     exec_lua_secure: bool,
 }
 
-fn run_dump_tree(env: &WowLuaEnv, command: DumpTreeCommand<'_>) {
+fn run_dump_tree(
+    env: &mut WowLuaEnv,
+    saved_vars: &mut Option<SavedVariablesManager>,
+    command: DumpTreeCommand<'_>,
+) {
     settle_headless_startup(env);
+    env.service_headless_reload(saved_vars)
+        .expect("dump-tree startup ReloadUI failed");
     if let Some(code) = command.exec_lua {
         let code = exec_lua::wrap_headless_exec_lua(code);
         if let Err(e) = env.exec_maybe_secure(&code, command.exec_lua_secure) {
             eprintln!("[exec-lua] error: {e}");
         }
     }
+    env.service_headless_reload(saved_vars)
+        .expect("dump-tree script ReloadUI failed");
     run_extra_update_ticks(env, 3);
+    env.service_headless_reload(saved_vars)
+        .expect("dump-tree timer ReloadUI failed");
     apply_delay(command.delay);
     update_dump_layout_rects(env);
+    print_dump_tree(env, &command);
+}
+
+fn print_dump_tree(env: &WowLuaEnv, command: &DumpTreeCommand<'_>) {
     let state = env.state().borrow();
     let addon_names: Vec<String> = state.addons.iter().map(|a| a.folder_name.clone()).collect();
     wow_ui_sim::dump::print_frame_tree(
@@ -639,6 +666,49 @@ fn update_dump_layout_rects(env: &WowLuaEnv) {
 mod tests {
     use super::*;
     use clap::Parser;
+
+    #[test]
+    fn reload_ui_dump_owner_observes_fresh_environment() {
+        let mut env = WowLuaEnv::new().unwrap();
+        run_dump_tree(
+            &mut env,
+            &mut None,
+            DumpTreeCommand {
+                filter: Some("ReloadOldFrame".to_string()),
+                filter_key: None,
+                visible_only: false,
+                verbose: false,
+                width: 800,
+                height: 600,
+                delay: None,
+                exec_lua: Some(
+                    "reload_sentinel = true; CreateFrame('Frame', 'ReloadOldFrame'); ReloadUI()",
+                ),
+                exec_lua_secure: false,
+            },
+        );
+        assert!(
+            env.eval::<bool>("return reload_sentinel == nil and ReloadOldFrame == nil")
+                .unwrap(),
+            "dump-tree must service reload before observing the frame tree"
+        );
+    }
+
+    #[test]
+    fn reload_ui_lua_errors_owner_observes_fresh_environment() {
+        let mut env = WowLuaEnv::new().unwrap();
+        wow_ui_sim::lua_errors::run_lua_errors(
+            &mut env,
+            &mut None,
+            None,
+            Some("reload_sentinel = true; ReloadUI()"),
+            false,
+        );
+        assert!(
+            env.eval::<bool>("return reload_sentinel == nil").unwrap(),
+            "lua-errors must service reload before collecting output"
+        );
+    }
 
     #[cfg(feature = "gui")]
     #[test]

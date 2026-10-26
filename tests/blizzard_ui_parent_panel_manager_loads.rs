@@ -124,6 +124,8 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_mainline_variant() {
     let resolved =
@@ -139,7 +141,9 @@ fn find_toc_file_resolves_mainline_variant() {
          different addon (the legacy in-FrameXML implementation)"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_is_eager_with_two_dependencies() {
     let toc = TocFile::from_file(&ui_parent_panel_manager_toc()).expect("TOC parses");
@@ -167,7 +171,9 @@ fn toc_is_eager_with_two_dependencies() {
     assert!(!toc.is_load_first());
     assert!(toc.default_enabled());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn allow_load_game_restricts_to_in_world() {
     let toc = TocFile::from_file(&ui_parent_panel_manager_toc()).expect("TOC parses");
@@ -186,7 +192,9 @@ fn allow_load_game_restricts_to_in_world() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn allow_load_game_type_mainline_is_not_restricted() {
     let toc = TocFile::from_file(&ui_parent_panel_manager_toc()).expect("TOC parses");
@@ -197,7 +205,9 @@ fn allow_load_game_type_mainline_is_not_restricted() {
          branch at toc.rs:294-302 (standard|mainline accepted)"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_raw_bytes_pin_directives_and_body_files_with_inline_annotations() {
     let raw = std::fs::read_to_string(ui_parent_panel_manager_toc()).expect("TOC reads utf-8");
@@ -233,7 +243,9 @@ fn toc_raw_bytes_pin_directives_and_body_files_with_inline_annotations() {
     assert!(!raw.contains("## SavedVariables"));
     assert!(!raw.contains("## RequiredDep"));
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn allow_load_environment_annotations_set_global_pass_filters() {
     let toc = TocFile::from_file(&ui_parent_panel_manager_toc()).expect("TOC parses");
@@ -254,7 +266,9 @@ fn allow_load_environment_annotations_set_global_pass_filters() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn appears_in_game_eager_discovery() {
     let addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Game);
@@ -267,6 +281,7 @@ fn appears_in_game_eager_discovery() {
          discovery — it's a hard dep of every panel that calls \
          ShowUIPanel/HideUIPanel"
     );
+}
 }
 
 #[test]
@@ -288,6 +303,22 @@ fn absent_from_glue_screens_eager_discovery() {
 
 #[test]
 fn dep_directories_exist_on_disk() {
+    if cfg!(feature = "client-wrath") {
+        let toc = crate::common::native_framexml_toc();
+        for file in ["UIParent.xml", "UIPanelTemplates.xml", "GameMenuFrame.xml"] {
+            assert!(
+                toc.files
+                    .iter()
+                    .any(|path| path == std::path::Path::new(file)),
+                "native dependency absent from committed FrameXML order: {file}"
+            );
+            assert!(
+                toc.addon_dir.join(file).is_file(),
+                "native dependency missing on disk: {file}"
+            );
+        }
+        return;
+    }
     for dep in TOC_DEPENDENCIES {
         let dir = blizzard_ui_dir().join(dep);
         assert!(

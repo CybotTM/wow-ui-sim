@@ -5,6 +5,8 @@ use wow_ui_sim::lua_api::AdventureMapInset;
 
 const ROOT: &str = "Blizzard_AdventureMap";
 
+// Wrath has no AdventureMap vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn adventure_map_refresh_insets_filters_by_area_table_id() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -53,6 +55,7 @@ fn adventure_map_refresh_insets_filters_by_area_table_id() {
 
         assert_refresh_inset_filter_surface(surface);
     });
+}
 }
 
 type RefreshInsetFilterSurface = (i64, String, String);

@@ -340,7 +340,7 @@ fn test_patch_12_1_5_get_build_info_uses_pinned_ptr_identity() {
             local version, build, _, interface = GetBuildInfo()
             if version ~= "12.1.5" then return "version:" .. tostring(version) end
             if build ~= "69594" then return "build:" .. tostring(build) end
-            if interface ~= 120105 then return "interface:" .. tostring(interface) end
+            if interface ~= 120107 then return "interface:" .. tostring(interface) end
             return "ok"
             "#,
         )

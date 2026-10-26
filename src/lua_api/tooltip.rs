@@ -79,6 +79,8 @@ pub struct TooltipData {
     pub left_line_ids: Vec<u64>,
     /// Widget IDs for right-side FontString children (`{Name}TextRight{N}`).
     pub right_line_ids: Vec<u64>,
+    /// Wrath template texture slots in attachment order: zero-based row, widget ID.
+    pub wrath_texture_rows: Vec<(usize, u64)>,
 }
 
 impl Default for TooltipData {
@@ -102,8 +104,18 @@ impl Default for TooltipData {
             line_spacing: None,
             left_line_ids: Vec::new(),
             right_line_ids: Vec::new(),
+            wrath_texture_rows: Vec::new(),
         }
     }
+}
+
+/// Clean-room report wow-tooltip-units-12340-facts.md, reconstruction0e4e9fe0.
+/// Convert the raw DDC gap to local UI units; layout applies effective scale later.
+pub(crate) fn wrath_texture_gap(width: f32, height: f32) -> f32 {
+    const DDC_GAP: f32 = 0.0049999999;
+    const REFERENCE_HEIGHT: f32 = 768.0;
+    let aspect = width / height;
+    DDC_GAP * REFERENCE_HEIGHT * (aspect * aspect + 1.0).sqrt()
 }
 
 pub(crate) const DEFAULT_CURSOR_Y_OFFSET: f32 = 20.0;

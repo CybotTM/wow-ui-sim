@@ -6,6 +6,8 @@ use wow_ui_sim::lua_api::AddonInfo;
 const ROOT: &str = "Blizzard_AddOnList";
 const INVALID_GROUP_ADDON: &str = "AddonListInvalidGroupProbe";
 
+// Wrath has no AddonList vendor widget/handler input; mixed and modeled probes remain enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn addon_list_update_keeps_search_match_with_invalid_group_at_root() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -51,6 +53,7 @@ fn addon_list_update_keeps_search_match_with_invalid_group_at_root() {
 
         assert_invalid_group_probe(probe);
     });
+}
 }
 
 type InvalidGroupProbe = (bool, i64, i64, bool);

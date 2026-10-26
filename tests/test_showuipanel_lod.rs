@@ -19,6 +19,11 @@ use wow_ui_sim::loader::load_addon;
 fn show_macro_frame_loads_and_populates_selector() {
     test_timeout! {
         let env = setup_env();
+        if cfg!(feature = "client-wrath") {
+            env.exec(include_str!("fixtures/wrath_f03/macros.lua"))
+                .expect("native macro lazy loader, selection and populated rows");
+            return;
+        }
         env.exec(
             "Constants.MacroConsts = { MAX_ACCOUNT_MACROS = 120, MAX_CHARACTER_MACROS = 30 }",
         )
@@ -63,6 +68,21 @@ fn show_macro_frame_loads_and_populates_selector() {
 fn show_mail_frame_loads_and_populates_inbox_rows() {
     test_timeout! {
         let env = setup_env();
+        if cfg!(feature = "client-wrath") {
+            // Proves native MAIL_SHOW consumption, not the admin producer's event bridge.
+            env.exec(r#"
+                A_Admin.ClearInbox()
+                A_Admin.AddMail("Thrall", "Unread Orders", "Meet me in Orgrimmar.")
+                A_Admin.AddMail("Jaina", "Arcane Invoice", "The Kirin Tor still expects payment.")
+            "#).expect("supplied inbox fixture");
+            common::panel_fixtures::clear_recorded_lua_errors(&env);
+            env.fire_event("MAIL_SHOW").expect("dispatch native mail interaction event");
+            let errors = common::panel_fixtures::recorded_lua_errors(&env);
+            assert!(errors.is_empty(), "native MAIL_SHOW errors: {errors:?}");
+            env.exec(include_str!("fixtures/wrath_f03/mail.lua"))
+                .expect("native mail event consumer populates inbox rows");
+            return;
+        }
         let result: String = env.eval(r#"
             A_Admin.ClearInbox()
             A_Admin.AddMail("Thrall", "Unread Orders", "Meet me in Orgrimmar.")
@@ -118,6 +138,11 @@ fn show_mail_frame_loads_and_populates_inbox_rows() {
 fn item_socketing_frame_loads_and_populates_socket_buttons() {
     test_timeout! {
         let env = setup_env();
+        if cfg!(feature = "client-wrath") {
+            env.exec(include_str!("fixtures/wrath_f03/socketing.lua"))
+                .expect("native socket event consumer and seeded socket state");
+            return;
+        }
         let result: String = env.eval(r#"
             C_ItemSocketInfo._state.uiType = Enum.ItemSocketInfoUIType.ItemSocketingUI or 0
             C_ItemSocketInfo._state.isOpen = true
@@ -270,6 +295,7 @@ fn encounter_timeline_loads_and_populates_track_view_event_frames() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn damage_meter_loads_and_populates_primary_session_window() {
     test_timeout! {
@@ -350,6 +376,7 @@ fn damage_meter_loads_and_populates_primary_session_window() {
         assert_eq!(result, "ok", "DamageMeter should load and populate the primary session and source windows: {result}");
     }
 }
+}
 
 fn build_panel_damage_meter_input() -> DamageMeterInput {
     const SESSION_ID: i64 = 1;
@@ -370,8 +397,16 @@ fn build_panel_damage_meter_input() -> DamageMeterInput {
             duration_seconds: Some(40.0),
         }],
         session_ids_by_type: [(OVERALL, SESSION_ID), (CURRENT, SESSION_ID)].into(),
-        sessions: [((SESSION_ID, DAMAGE_DONE), build_panel_damage_meter_session(source))].into(),
-        source_details: [((SESSION_ID, DAMAGE_DONE, source_key), build_panel_damage_meter_details())].into(),
+        sessions: [(
+            (SESSION_ID, DAMAGE_DONE),
+            build_panel_damage_meter_session(source),
+        )]
+        .into(),
+        source_details: [(
+            (SESSION_ID, DAMAGE_DONE, source_key),
+            build_panel_damage_meter_details(),
+        )]
+        .into(),
     }
 }
 
@@ -431,6 +466,15 @@ fn build_panel_damage_meter_details() -> DamageMeterCombatSessionSource {
 fn audio_settings_register_seeded_output_device_dropdown_options() {
     test_timeout! {
         let env = setup_env();
+        if cfg!(feature = "client-wrath") {
+            env.exec(r#"
+                ToggleDropDownMenu(1, nil, AudioOptionsSoundPanelHardwareDropDown)
+                assert(DropDownList1.numButtons == 1, "one seeded output device")
+                assert(DropDownList1Button1.value == 0, "zero-based output driver")
+                assert(DropDownList1Button1:GetText() == "Silent Output Device")
+            "#).expect("native audio dropdown enumerates the seeded output driver");
+            return;
+        }
         let result: String = env.eval(r#"
             if not Settings or not Settings.AUDIO_CATEGORY_ID then
                 return "audio_category_missing"
@@ -485,6 +529,14 @@ fn audio_settings_register_seeded_output_device_dropdown_options() {
 fn settings_open_to_interface_category_opens_settings_panel() {
     test_timeout! {
         let env = setup_env();
+        if cfg!(feature = "client-wrath") {
+            env.exec(r#"
+                InterfaceOptionsFrame_OpenToCategory(InterfaceOptionsControlsPanel)
+                assert(InterfaceOptionsFrame:IsShown())
+                assert(InterfaceOptionsControlsPanel:IsShown(), "selected native controls category")
+            "#).expect("native interface options category opener");
+            return;
+        }
         let result: String = env.eval(r#"
             if not Settings or not Settings.OpenToCategory then
                 return "missing_settings_open_to_category"
@@ -565,6 +617,7 @@ fn professions_frame_loads_and_populates_specialization_tab() {
     }
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn professions_frame_xml_pages_are_parent_keyed() {
     test_timeout! {
@@ -601,11 +654,14 @@ fn professions_frame_xml_pages_are_parent_keyed() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn loss_of_control_frame_shows_seeded_overlay_on_added_event() {
     test_timeout! {
         let env = setup_env();
+        env.exec(include_str!("fixtures/loss_of_control.lua")).unwrap();
         let loss_of_control_enabled: bool = env
             .eval(
                 "Constants.LossOfControlConsts = { LOSS_OF_CONTROL_ACTIVE_INDEX = 1 }; \
@@ -648,4 +704,5 @@ fn loss_of_control_frame_shows_seeded_overlay_on_added_event() {
             "LossOfControlFrame should show the seeded loss-of-control overlay: {result}"
         );
     }
+}
 }

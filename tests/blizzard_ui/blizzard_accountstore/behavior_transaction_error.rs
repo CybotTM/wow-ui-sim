@@ -55,7 +55,7 @@
 //!
 //! 5. **The localized text is `ACCOUNT_STORE_INCOMPLETE_TRANSACTION`.**
 //!    Resolves to `"The transaction could not be completed."` per
-//!    `data/global_strings.rs:23806`. The string is wrapped in
+//!    `crates/sim-data-profile/data/global_strings.rs:23806`. The string is wrapped in
 //!    `NORMAL_FONT_COLOR:WrapTextInColorCode(...)` which produces a
 //!    `|cAARRGGBB...|r` color-code escape. The popup `text` field is
 //!    therefore `"|cFFFFD200The transaction could not be completed.|r"`
@@ -112,6 +112,7 @@ const ROOT: &str = "Blizzard_AccountStore";
 const POPUP_KEY: &str = "ACCOUNT_STORE_TRANSACTION_ERROR";
 const LOCALIZED_TEXT_SUBSTRING: &str = "The transaction could not be completed.";
 
+post_wrath_ui_fixture! {
 #[test]
 fn explicit_account_store_load_preserves_popup_after_static_popup_load() {
     let ui_dir = blizzard_ui_dir();
@@ -150,7 +151,9 @@ fn explicit_account_store_load_preserves_popup_after_static_popup_load() {
         "The AccountStore transaction-error popup must survive the later explicit Blizzard_StaticPopup load"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn transaction_error_popup_table_has_expected_six_fields() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -190,6 +193,7 @@ fn transaction_error_popup_table_has_expected_six_fields() {
         assert_popup_field_equals_one(env, "whileDead");
     });
 }
+}
 
 fn assert_popup_field_equals_okay(env: &WowLuaEnv) {
     let button1: String = env
@@ -205,7 +209,7 @@ fn assert_popup_field_equals_okay(env: &WowLuaEnv) {
     assert_eq!(
         button1, okay_value,
         "Expected `StaticPopupDialogs[{POPUP_KEY:?}].button1 == OKAY` (the global at \
-         `data/global_strings.rs` resolves to the localized string for \"Okay\"), got \
+         `crates/sim-data-profile/data/global_strings.rs` resolves to the localized string for \"Okay\"), got \
          `{button1}` vs OKAY=`{okay_value}`. The button1 field controls the single-button \
          acknowledgment text; a regression to `nil` would suppress the OK button entirely."
     );
@@ -260,6 +264,7 @@ fn assert_popup_field_equals_zero(env: &WowLuaEnv, field_name: &str) {
     );
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn transaction_error_popup_text_contains_localized_string() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -271,7 +276,7 @@ fn transaction_error_popup_text_contains_localized_string() {
             popup_text.contains(LOCALIZED_TEXT_SUBSTRING),
             "Expected `StaticPopupDialogs[{POPUP_KEY:?}].text` to contain the substring \
              {LOCALIZED_TEXT_SUBSTRING:?} (the resolved value of `ACCOUNT_STORE_INCOMPLETE_TRANSACTION` \
-             from `data/global_strings.rs:23806`), got {popup_text:?}. The actual string is \
+             from `crates/sim-data-profile/data/global_strings.rs:23806`), got {popup_text:?}. The actual string is \
              wrapped in `|cffXXXXXX...|r` color-code escapes by \
              `NORMAL_FONT_COLOR:WrapTextInColorCode(...)`, so a substring match is the right \
              granularity — it pins the localized message without depending on the exact RGB \
@@ -281,7 +286,9 @@ fn transaction_error_popup_text_contains_localized_string() {
         );
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn event_registry_trigger_does_not_invoke_static_popup_show() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -315,7 +322,9 @@ fn event_registry_trigger_does_not_invoke_static_popup_show() {
         teardown_static_popup_show_tracker(env);
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn account_store_item_display_on_event_dispatches_constant_popup_name() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -374,7 +383,9 @@ fn account_store_item_display_on_event_dispatches_constant_popup_name() {
         teardown_static_popup_show_tracker(env);
     });
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn account_store_item_display_on_event_does_not_propagate_result_code() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -418,6 +429,7 @@ fn account_store_item_display_on_event_does_not_propagate_result_code() {
 
         teardown_static_popup_show_tracker(env);
     });
+}
 }
 
 fn seed_static_popup_show_tracker(env: &WowLuaEnv) {

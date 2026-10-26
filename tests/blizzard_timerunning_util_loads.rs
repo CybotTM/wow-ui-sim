@@ -70,6 +70,8 @@ fn load_full_game_ui() -> WowLuaEnv {
     env
 }
 
+// Literal cached inputs absent from Wrath manifest1-382/cache; behavior cases stay enabled.
+post_wrath_ui_fixture! {
 #[test]
 fn find_toc_file_resolves_bare_toc() {
     let resolved = find_toc_file(&timerunning_util_dir()).expect("TimerunningUtil TOC resolves");
@@ -80,7 +82,9 @@ fn find_toc_file_resolves_bare_toc() {
          addon ships universally and is consumed by both glue and game"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_is_eager_with_single_shared_xml_dependency() {
     let toc = TocFile::from_file(&timerunning_util_toc()).expect("TOC parses");
@@ -112,7 +116,9 @@ fn toc_is_eager_with_single_shared_xml_dependency() {
     );
     assert!(toc.default_enabled());
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn allow_load_both_surfaces_on_all_four_screens() {
     let toc = TocFile::from_file(&timerunning_util_toc()).expect("TOC parses");
@@ -127,7 +133,9 @@ fn allow_load_both_surfaces_on_all_four_screens() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn toc_raw_bytes_pin_six_metadata_directives() {
     let raw = std::fs::read_to_string(timerunning_util_toc()).expect("TOC reads utf-8");
@@ -157,7 +165,9 @@ fn toc_raw_bytes_pin_six_metadata_directives() {
     assert!(!raw.contains("## UseSecureEnvironment"));
     assert!(!raw.contains("## LoadFirst"));
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn body_resolves_to_a_single_lua_file() {
     let toc = TocFile::from_file(&timerunning_util_toc()).expect("TOC parses");
@@ -175,7 +185,9 @@ fn body_resolves_to_a_single_lua_file() {
          helper library, no XML templates. Got: {body:?}"
     );
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn present_in_every_screen_eager_discovery() {
     for screen in ALL_FOUR_SCREENS {
@@ -191,7 +203,9 @@ fn present_in_every_screen_eager_discovery() {
         );
     }
 }
+}
 
+post_wrath_ui_fixture! {
 #[test]
 fn five_mainline_addons_declare_timerunning_util_as_dependency() {
     let mut declarers: Vec<String> = Vec::new();
@@ -236,6 +250,7 @@ fn five_mainline_addons_declare_timerunning_util_as_dependency() {
          calls TimerunningUtil.AddLargeIcon + GetTimerunningChoiceDesc \
          + GetTimerunningBannerHeaderText). Got: {declarers:?}"
     );
+}
 }
 
 prefork_full_ui_case! {

@@ -79,6 +79,15 @@ pub(super) fn set_text(state: &mut LuaState) -> LuaResult<u32> {
         return Err(rilua::runtime_error("expected text, not userdata"));
     }
     let text = read_text_arg(state, value);
+    set_frame_text_value(state, id, text, secret)
+}
+
+pub(crate) fn set_frame_text_value(
+    state: &mut LuaState,
+    id: u64,
+    text: Option<String>,
+    secret: bool,
+) -> LuaResult<u32> {
     let text = truncate_editbox_text(state, id, text)?;
     let tooltip = read_tooltip_line_values(state);
     let stripped_text = stripped_text_for_frame(state, id, text.clone())?;

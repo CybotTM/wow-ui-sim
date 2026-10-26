@@ -1,9 +1,25 @@
 use super::*;
+use wow_ui_sim::client_profile::{self, ClientProfile};
+
+fn load_profile_framexml() -> (WowLuaEnv, Vec<String>) {
+    if client_profile::ACTIVE != ClientProfile::Wrath {
+        return load_single_blizzard_addon("Blizzard_FrameXML");
+    }
+
+    // Wrath's game foundations live in the flat FrameXML TOC, not a split addon.
+    let toc_path = client_profile::blizzard_ui_framexml_toc()
+        .expect("Wrath's manifest-backed FrameXML.toc should exist");
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.set_screen_size(1024.0, 768.0);
+    env.set_screen_mode(ScreenKind::Login);
+    let warnings = load_blizzard_addon_warnings(&env, "FrameXML", &toc_path);
+    (env, warnings)
+}
 
 #[test]
 fn test_secure_action_button_template_is_protected_tuple_after_blizzard_framexml_load() {
     test_timeout! {
-        let (env, warnings) = load_single_blizzard_addon("Blizzard_FrameXML");
+        let (env, warnings) = load_profile_framexml();
         let (is_protected, is_protected_explicitly): (bool, bool) = env
             .eval(
                 r#"
@@ -23,6 +39,11 @@ fn test_secure_action_button_template_is_protected_tuple_after_blizzard_framexml
     }
 }
 
+#[cfg(any(
+    feature = "client-retail",
+    feature = "client-ptr",
+    feature = "client-wowforever"
+))]
 #[test]
 fn test_c_addons_load_addon_preserves_account_store_mixin_methods() {
     test_timeout! {
@@ -96,6 +117,11 @@ fn test_c_addons_load_addon_preserves_account_store_mixin_methods() {
     }
 }
 
+#[cfg(any(
+    feature = "client-retail",
+    feature = "client-ptr",
+    feature = "client-wowforever"
+))]
 #[test]
 fn test_rust_load_addon_after_base_load_preserves_account_store_mixin_methods() {
     test_timeout! {
@@ -154,6 +180,14 @@ fn test_rust_load_addon_after_base_load_preserves_account_store_mixin_methods() 
     }
 }
 
+#[cfg(any(
+    feature = "client-retail",
+    feature = "client-ptr",
+    feature = "client-mists",
+    feature = "client-wowforever",
+    feature = "client-era",
+    feature = "client-anniversary"
+))]
 #[test]
 fn test_low_health_frame_animation_bound_after_load() {
     test_timeout! {
@@ -178,6 +212,14 @@ fn test_low_health_frame_animation_bound_after_load() {
     }
 }
 
+#[cfg(any(
+    feature = "client-retail",
+    feature = "client-ptr",
+    feature = "client-mists",
+    feature = "client-wowforever",
+    feature = "client-era",
+    feature = "client-anniversary"
+))]
 #[test]
 fn test_low_health_frame_animation_bound_after_blizzard_framexml_load() {
     test_timeout! {
@@ -206,6 +248,11 @@ fn test_low_health_frame_animation_bound_after_blizzard_framexml_load() {
     }
 }
 
+#[cfg(any(
+    feature = "client-retail",
+    feature = "client-ptr",
+    feature = "client-wowforever"
+))]
 #[test]
 fn test_blizzard_framexml_load_registers_boss_banner_cvar_without_warning() {
     test_timeout! {
@@ -300,7 +347,7 @@ fn test_blizzard_framexml_loads_role_poll_without_role_icon_warning() {
 #[test]
 fn test_blizzard_framexml_loads_zone_text_without_fading_frame_warning() {
     test_timeout! {
-        let (env, warnings) = load_single_blizzard_addon("Blizzard_FrameXML");
+        let (env, warnings) = load_profile_framexml();
 
         let fading_warnings: Vec<String> = warnings
             .iter()
@@ -315,7 +362,7 @@ fn test_blizzard_framexml_loads_zone_text_without_fading_frame_warning() {
 
         assert!(
             fading_warnings.is_empty(),
-            "Blizzard_FrameXML should not warn on fading-frame helpers:\n  {}",
+            "Profile FrameXML should not warn on fading-frame helpers:\n  {}",
             fading_warnings.join("\n  ")
         );
 
@@ -338,6 +385,11 @@ fn test_blizzard_framexml_loads_zone_text_without_fading_frame_warning() {
     }
 }
 
+#[cfg(any(
+    feature = "client-retail",
+    feature = "client-ptr",
+    feature = "client-wowforever"
+))]
 #[test]
 fn test_blizzard_framexml_loads_without_eventutil_warning() {
     test_timeout! {
@@ -361,6 +413,14 @@ fn test_blizzard_framexml_loads_without_eventutil_warning() {
     }
 }
 
+#[cfg(any(
+    feature = "client-retail",
+    feature = "client-ptr",
+    feature = "client-mists",
+    feature = "client-wowforever",
+    feature = "client-era",
+    feature = "client-anniversary"
+))]
 #[test]
 fn test_blizzard_framexml_loads_without_setup_localization_warning() {
     test_timeout! {
@@ -384,6 +444,11 @@ fn test_blizzard_framexml_loads_without_setup_localization_warning() {
     }
 }
 
+#[cfg(any(
+    feature = "client-retail",
+    feature = "client-ptr",
+    feature = "client-wowforever"
+))]
 #[test]
 fn test_blizzard_framexml_loads_without_frameutil_warning() {
     test_timeout! {
@@ -408,6 +473,14 @@ fn test_blizzard_framexml_loads_without_frameutil_warning() {
     }
 }
 
+#[cfg(any(
+    feature = "client-retail",
+    feature = "client-ptr",
+    feature = "client-mists",
+    feature = "client-wowforever",
+    feature = "client-era",
+    feature = "client-anniversary"
+))]
 #[test]
 fn test_blizzard_commentator_loads_without_cooldown_frame_warning() {
     test_timeout! {
@@ -434,6 +507,14 @@ fn test_blizzard_commentator_loads_without_cooldown_frame_warning() {
     }
 }
 
+#[cfg(any(
+    feature = "client-retail",
+    feature = "client-ptr",
+    feature = "client-mists",
+    feature = "client-wowforever",
+    feature = "client-era",
+    feature = "client-anniversary"
+))]
 #[test]
 fn test_ui_parent_panel_manager_loads_with_minimap_cluster_stub() {
     test_timeout! {
@@ -470,6 +551,11 @@ fn test_ui_parent_panel_manager_loads_with_minimap_cluster_stub() {
     }
 }
 
+#[cfg(any(
+    feature = "client-retail",
+    feature = "client-ptr",
+    feature = "client-wowforever"
+))]
 #[test]
 fn test_housing_tutorials_load_without_cvar_bitfield_warning() {
     test_timeout! {
@@ -504,6 +590,11 @@ fn test_housing_tutorials_load_without_cvar_bitfield_warning() {
     }
 }
 
+#[cfg(any(
+    feature = "client-retail",
+    feature = "client-ptr",
+    feature = "client-wowforever"
+))]
 #[test]
 fn test_new_player_experience_loads_without_minimap_cluster_warning() {
     test_timeout! {
@@ -538,6 +629,14 @@ fn test_new_player_experience_loads_without_minimap_cluster_warning() {
     }
 }
 
+#[cfg(any(
+    feature = "client-retail",
+    feature = "client-ptr",
+    feature = "client-mists",
+    feature = "client-wowforever",
+    feature = "client-era",
+    feature = "client-anniversary"
+))]
 #[test]
 fn test_battlefield_map_startup_uses_maputil_displayable_map_helper() {
     test_timeout! {
@@ -611,6 +710,14 @@ fn test_battlefield_map_startup_uses_maputil_displayable_map_helper() {
     }
 }
 
+#[cfg(any(
+    feature = "client-retail",
+    feature = "client-ptr",
+    feature = "client-mists",
+    feature = "client-wowforever",
+    feature = "client-era",
+    feature = "client-anniversary"
+))]
 #[test]
 fn test_world_map_loads_without_maputil_warning() {
     test_timeout! {

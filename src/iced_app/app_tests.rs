@@ -2,6 +2,7 @@ use super::*;
 use crate::screen::ScreenKind;
 use crate::texture::TextureManager;
 use iced::Size;
+use std::time::Instant;
 use tokio::sync::mpsc;
 
 fn build_env() -> Rc<RefCell<WowLuaEnv>> {
@@ -45,7 +46,203 @@ pub(super) fn draw_test_canvas(app: &App, size: Size) -> crate::render::WowUiPri
     )
 }
 
-fn complete_gui_startup(app: &mut App) {
+#[test]
+fn reload_ui_shortcut_discards_lua_globals_and_old_frames() {
+    let mut app = build_test_app(ScreenKind::Game);
+    complete_gui_startup(&mut app);
+    app.env
+        .borrow()
+        .exec(
+            "reload_sentinel = true; CreateFrame('Frame', 'ReloadOldFrame'); \
+               C_Timer.After(0, function() old_timer_fired = true end)",
+        )
+        .unwrap();
+    let old_lua = Rc::downgrade(&app.env.borrow().lua);
+    let textures = Rc::clone(&app.texture_manager);
+    let fonts = Rc::clone(&app.font_system);
+    {
+        let env = app.env.borrow();
+        let mut state = env.state().borrow_mut();
+        state.player.level = 73;
+        state.party_members.pop();
+        state.world.zone_name = "Reload preservation zone".to_string();
+    }
+
+    let _ = app.update(super::super::Message::ReloadUI);
+    complete_gui_startup(&mut app);
+
+    assert!(old_lua.upgrade().is_none(), "old Lua VM must be destroyed");
+    assert!(
+        app.env
+            .borrow()
+            .eval::<bool>(
+                "return reload_sentinel == nil and ReloadOldFrame == nil and old_timer_fired == nil"
+            )
+            .unwrap(),
+        "ReloadUI must not preserve arbitrary globals, frames or timer callbacks"
+    );
+    assert!(
+        app.saved_vars.is_none(),
+        "disabled persistence must stay disabled"
+    );
+    assert!(Rc::ptr_eq(&textures, &app.texture_manager));
+    assert!(Rc::ptr_eq(&fonts, &app.font_system));
+    let env = app.env.borrow();
+    let state = env.state().borrow();
+    assert_eq!(state.player.level, 73);
+    assert_eq!(state.party_members.len(), 3);
+    assert_eq!(state.world.zone_name, "Reload preservation zone");
+}
+
+#[test]
+fn reload_ui_saves_declared_variables_before_discarding_the_vm() {
+    let directory = tempfile::tempdir().unwrap();
+    let mut app = build_test_app(ScreenKind::Game);
+    complete_gui_startup(&mut app);
+    let mut manager = SavedVariablesManager::with_storage_dir(directory.path().to_path_buf());
+    manager
+        .init_for_addon(
+            app.env.borrow().rilua_mut().state_mut(),
+            "ReloadPersistence",
+            &["ReloadDB".to_string()],
+            &[],
+        )
+        .unwrap();
+    app.saved_vars = Some(manager);
+    app.env
+        .borrow()
+        .exec("ReloadDB = { value = 73 }; reload_sentinel = true; ReloadUI()")
+        .unwrap();
+
+    let _ = app.update(super::super::Message::ProcessTimers(Instant::now()));
+    complete_gui_startup(&mut app);
+    assert!(
+        app.env
+            .borrow()
+            .eval::<bool>("return reload_sentinel == nil")
+            .unwrap(),
+        "Lua-requested reload must be serviced by the App owner"
+    );
+    let saved = std::fs::read_to_string(directory.path().join("ReloadPersistence.lua")).unwrap();
+    assert!(
+        saved.contains("73"),
+        "registered value must be written before teardown"
+    );
+    let mut reader = SavedVariablesManager::with_storage_dir(directory.path().to_path_buf());
+    reader
+        .init_for_addon(
+            app.env.borrow().rilua_mut().state_mut(),
+            "ReloadPersistence",
+            &["ReloadDB".to_string()],
+            &[],
+        )
+        .unwrap();
+    assert_eq!(
+        app.env
+            .borrow()
+            .eval::<i32>("return ReloadDB.value")
+            .unwrap(),
+        73
+    );
+}
+
+#[test]
+fn reload_ui_round_trips_scalar_and_locally_written_large_variables() {
+    let directory = tempfile::tempdir().unwrap();
+    let mut app = build_test_app(ScreenKind::Game);
+    complete_gui_startup(&mut app);
+    let mut manager = SavedVariablesManager::with_storage_dir(directory.path().to_path_buf());
+    manager.set_max_load_bytes(Some(16));
+    let variables = ["ReloadScalar".to_string(), "ReloadLarge".to_string()];
+    let per_character = ["ReloadChar".to_string()];
+    let wtf_directory = tempfile::tempdir().unwrap();
+    let config = crate::saved_variables::WtfConfig::new(
+        wtf_directory.path(),
+        "Account",
+        "Realm",
+        "Character",
+    );
+    let sources = [
+        (
+            config.account_saved_vars_file("ReloadPersistence"),
+            "ReloadScalar=3\n",
+        ),
+        (
+            config.character_saved_vars_file("ReloadPersistence"),
+            "ReloadChar=5\n",
+        ),
+    ];
+    for (path, content) in &sources {
+        std::fs::create_dir_all(path.parent().unwrap()).unwrap();
+        std::fs::write(path, content).unwrap();
+    }
+    manager.set_wtf_config(config);
+    manager
+        .init_for_addon(
+            app.env.borrow().rilua_mut().state_mut(),
+            "ReloadPersistence",
+            &variables,
+            &per_character,
+        )
+        .unwrap();
+    app.saved_vars = Some(manager);
+    app.env
+        .borrow()
+        .exec("ReloadScalar = 73; ReloadChar = 77; ReloadLarge = { message = string.rep('saved', 100) }; ReloadUI()")
+        .unwrap();
+    let _ = app.update(super::super::Message::ProcessTimers(Instant::now()));
+    complete_gui_startup(&mut app);
+    let manager = app.saved_vars.as_mut().unwrap();
+    manager
+        .load_wtf_for_addon(
+            app.env.borrow().rilua_mut().state_mut(),
+            "ReloadPersistence",
+        )
+        .unwrap();
+    manager
+        .init_for_addon(
+            app.env.borrow().rilua_mut().state_mut(),
+            "ReloadPersistence",
+            &variables,
+            &per_character,
+        )
+        .unwrap();
+    assert!(app.env.borrow().eval::<bool>(
+        "return ReloadScalar == 73 and ReloadChar == 77 and ReloadLarge ~= nil and ReloadLarge.message == string.rep('saved', 100)").unwrap(),
+        "account/character reload data must beat stale WTF, retain scalars and bypass the import cap");
+    for (path, content) in sources {
+        assert_eq!(
+            std::fs::read_to_string(path).unwrap(),
+            content,
+            "imported WTF must stay unchanged"
+        );
+    }
+}
+
+#[test]
+fn reload_ui_requested_from_timer_retires_the_callback_environment() {
+    let mut app = build_test_app(ScreenKind::Game);
+    complete_gui_startup(&mut app);
+    app.env
+        .borrow()
+        .exec("reload_sentinel = true; C_Timer.After(0, function() ReloadUI() end)")
+        .unwrap();
+    let old_lua = Rc::downgrade(&app.env.borrow().lua);
+    let _ = app.update(super::super::Message::ProcessTimers(Instant::now()));
+    complete_gui_startup(&mut app);
+    assert!(
+        old_lua.upgrade().is_none(),
+        "timer-originated reload must retire its VM"
+    );
+    assert!(
+        app.env
+            .borrow()
+            .eval::<bool>("return reload_sentinel == nil")
+            .unwrap()
+    );
+}
+
+pub(super) fn complete_gui_startup(app: &mut App) {
     app.record_canvas_size(app.screen_size.get());
     for _ in 0..200 {
         if app.gui_startup_complete.get() {

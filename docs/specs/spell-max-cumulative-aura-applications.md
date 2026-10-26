@@ -8,7 +8,7 @@ Cached retail `SpellDocumentation.lua` lines 461–475 declare nonnil `spellID: 
 
 ### Identifier and value — row 315
 
-- [x] Resolve the argument through the shared alias-first spell identifier resolver: a public non-negative integral number, or a string that matches a seeded case-normalized alias. A seeded numeric alias takes precedence over numeric identity.
+- [ ] Resolve public arguments through the shared alias-first spell identifier resolver: a non-negative integral number, or a seeded case-normalized string alias. Numeric alias precedence remains unchanged. Retail125/PTR numeric secrets use the [bounded selector extension](secret-selector-count-usability.md), not shared-reader widening.
 - [x] Return exactly one number: the explicit `spell_max_cumulative_aura_applications` entry for the resolved spell, read live, independent of any currently applied aura stacks.
 - [x] Return one zero for an undeclared spell or an unseeded string. Inferred miss policy; the map is empty by default and per environment.
 - [x] Reject missing, nil, non-string/non-number, negative, fractional and non-finite identifiers. Inferred representation policy.
@@ -31,7 +31,7 @@ Cached retail `SpellDocumentation.lua` lines 461–475 declare nonnil `spellID: 
 
 ## Tests asserting this spec
 
-- `tests/spell_max_cumulative_aura_applications.rs` — eight cases: identifiers, alias precedence, independence from applied stacks, misses and live map, invalid representations, restriction flag, tainted callers, secret identifier rejection.
+- `tests/spell_max_cumulative_aura_applications.rs` — identifiers, aliases, explicit maximum independence, misses/live map, invalid inputs, restriction transitions and numeric-secret caller controls; [selector tests](../../tests/secret_selector_counts.rs) add original viewer/API boundaries.
 
 ## Development proof and independent bounded acceptance — 2026-10-03
 
@@ -47,6 +47,6 @@ Main accepts an independent GPT-6.1-sol review: **ACCEPT WITH QUALIFICATIONS** (
 
 ## Out of scope
 
-- Native `AllowedWhenTainted`: secret identifiers are rejected for every caller, as for the other public-identifier queries; no secret is unwrapped.
+- Full native `AllowedWhenTainted` parity beyond the [numeric-secret subset](secret-selector-count-usability.md); secret string/other payloads remain rejected.
 - A `C_Secrets` predicate for unit-aura restriction: none is declared in the cached documentation, so none is added. Nothing sets `unit_auras_restricted` automatically, and other aura queries do not read it yet.
 - Native maxima, a spell catalog, link parsing and unknown-spell behavior.

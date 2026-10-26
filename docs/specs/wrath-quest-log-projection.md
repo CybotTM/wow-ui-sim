@@ -54,7 +54,7 @@ Bounded supplied-row seam verified below; native/full-profile acceptance remains
 
 ## Out of scope
 
-Headers, collapse/grouping, daily classification, tag localization, full `QuestLog_Update`, original `QuestLog_SetSelection`, full `QuestInfo_Display`, objectives/progress/readiness, acceptance/events, watches, abandon, rewards, other profiles, C_QuestLog redesign and static fallback catalogs. `GetQuestLogIndexByID`, C namespace indices and static objective/text reads remain separate downstream gaps. `IsCurrentQuestFailed` representation is not certified. Original full selection remains excluded because its `SetAbandonQuest` call currently removes membership; fixing this read seam must not imply that boundary is repaired.
+Headers, collapse/grouping, daily classification, tag localization, full `QuestLog_Update`, original `QuestLog_SetSelection`, full `QuestInfo_Display`, objectives/progress/readiness, acceptance/events, watches, abandon, rewards, other profiles, C_QuestLog redesign and static fallback catalogs. `GetQuestLogIndexByID`, C namespace indices and static objective/text reads remain separate downstream gaps. `IsCurrentQuestFailed` representation is not certified. Full selection was outside this read-seam proof. The later [Wrath abandon contract](wrath-quest-abandon.md) owns nondestructive selection, original popup confirmation, visible refresh and their bounded acceptance; this earlier receipt does not establish those behaviors.
 
 ## Bounded proof — 2026-10-18
 

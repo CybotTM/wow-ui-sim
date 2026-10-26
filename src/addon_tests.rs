@@ -8,7 +8,6 @@ use crate::startup::{fire_one_on_update_tick, process_pending_timers};
 use std::path::PathBuf;
 
 const MAX_ASYNC_TICKS: u32 = 500;
-const ADDON_BASE_PATHS: &[&str] = &["Interface/AddOns", "Interface/TestAddOns"];
 
 /// Reset test registry between files (TestFramework globals stay alive).
 const TEST_RESET: &str = r#"
@@ -21,10 +20,10 @@ __async_error = nil
 /// Run sync tests, store results. Skips async tests (marked for Rust to handle).
 const SYNC_RUNNER: &str = r#"
 __addon_test_results = {}
-for i, t in ipairs(__addon_tests) do
+for _, t in ipairs(__addon_tests) do
     if not t.async then
         local ok, err = pcall(t.fn)
-        __addon_test_results[i] = {
+        __addon_test_results[#__addon_test_results + 1] = {
             name = t.name,
             ok = ok,
             err = ok and "" or tostring(err),
@@ -58,10 +57,9 @@ end
 
 /// Load the TestFramework addon (provides test/async_test/assertions).
 fn load_test_framework(env: &WowLuaEnv) {
-    let Some(toc_path) = resolve_addon_toc_path("TestFramework") else {
+    let Some(toc_path) = crate::paths::find_bundled_test_framework_toc() else {
         eprintln!(
-            "TestFramework addon not found (checked: {})",
-            ADDON_BASE_PATHS.join(", ")
+            "Bundled TestFramework addon not found beside the executable or in the build source"
         );
         std::process::exit(1);
     };
@@ -84,25 +82,13 @@ fn load_test_framework(env: &WowLuaEnv) {
     }
 }
 
-fn resolve_addon_root(addon_name: &str) -> Option<PathBuf> {
-    // wow-sim chdir's to the executable directory at startup (for GUI asset
-    // loading), so the addon dirs are not necessarily under the current dir:
-    // in a dev build cwd is `target/<profile>/` and the addon dirs live at the
-    // repo root above it; in a deployed layout `Interface/` sits next to the
-    // binary (cwd). Walk up from cwd until a base path resolves so `run-tests`
-    // works from either location.
-    let cwd = std::env::current_dir().ok()?;
-    cwd.ancestors().find_map(|root| {
-        ADDON_BASE_PATHS
-            .iter()
-            .map(|base| root.join(base).join(addon_name))
-            .find(|path| path.exists())
-    })
-}
-
-fn resolve_addon_toc_path(addon_name: &str) -> Option<PathBuf> {
-    let root = resolve_addon_root(addon_name)?;
-    crate::loader::find_toc_file(&root)
+fn find_addon_root(env: &WowLuaEnv, addon_name: &str) -> Option<PathBuf> {
+    env.state()
+        .borrow()
+        .addon_base_paths
+        .iter()
+        .map(|base| base.join(addon_name))
+        .find(|path| path.is_dir())
 }
 
 /// Run all .lua test files from `<base>/<addon_name>/tests/`.
@@ -114,7 +100,7 @@ pub fn run_addon_tests(
 ) {
     run_exec_lua(env, exec_lua, exec_lua_secure);
     load_test_framework(env);
-    let (tests_dir, test_files) = load_test_files(addon_name);
+    let (tests_dir, test_files) = load_test_files(env, addon_name);
     eprintln!(
         "Running {} test file(s) from {}\n",
         test_files.len(),
@@ -140,12 +126,9 @@ fn run_exec_lua(env: &WowLuaEnv, exec_lua: Option<&str>, exec_lua_secure: bool) 
     }
 }
 
-fn load_test_files(addon_name: &str) -> (PathBuf, Vec<PathBuf>) {
-    let Some(addon_root) = resolve_addon_root(addon_name) else {
-        eprintln!(
-            "Addon '{addon_name}' not found (checked: {})",
-            ADDON_BASE_PATHS.join(", ")
-        );
+fn load_test_files(env: &WowLuaEnv, addon_name: &str) -> (PathBuf, Vec<PathBuf>) {
+    let Some(addon_root) = find_addon_root(env, addon_name) else {
+        eprintln!("Addon '{addon_name}' not found in the configured addon roots");
         std::process::exit(1);
     };
     let tests_dir = addon_root.join("tests");
@@ -300,29 +283,27 @@ fn run_async_test(env: &WowLuaEnv, idx: i64) -> Result<(), String> {
 
 /// Read `__addon_test_results` from Lua and print failures.
 fn read_test_results(env: &WowLuaEnv, file_name: &str) -> Result<(u32, u32), String> {
-    env.exec(&format!(
-        r#"
-        __wowsim_sync_passed = 0
-        __wowsim_sync_failed = 0
-        for _, entry in ipairs(__addon_test_results or {{{{}}}}) do
-            if entry.ok then
-                __wowsim_sync_passed = __wowsim_sync_passed + 1
-            else
-                print("  \27[31mX\27[0m {file_name} > " .. tostring(entry.name or ""))
-                print("    " .. tostring(entry.err or ""))
-                __wowsim_sync_failed = __wowsim_sync_failed + 1
-            end
-        end
-        "#,
-    ))
-    .map_err(|e| format!("failed to summarize results: {e}"))?;
-    let passed = env
-        .eval::<i32>("return __wowsim_sync_passed or 0")
-        .map_err(|e| format!("{e}"))?;
-    let failed = env
-        .eval::<i32>("return __wowsim_sync_failed or 0")
-        .map_err(|e| format!("{e}"))?;
-    Ok((passed as u32, failed as u32))
+    let count: i32 = env
+        .eval("return #__addon_test_results")
+        .map_err(|e| format!("failed to count results: {e}"))?;
+    let mut passed = 0;
+    let mut failed = 0;
+    for idx in 1..=count {
+        let (ok, name, error): (bool, String, String) = env
+            .eval(&format!(
+                "local entry = __addon_test_results[{idx}]\n\
+                 return entry.ok, tostring(entry.name or ''), tostring(entry.err or '')"
+            ))
+            .map_err(|e| format!("failed to read result {idx}: {e}"))?;
+        if ok {
+            passed += 1;
+        } else {
+            eprintln!("  \x1b[31m\u{2717}\x1b[0m {file_name} > {name}");
+            eprintln!("    {error}");
+            failed += 1;
+        }
+    }
+    Ok((passed, failed))
 }
 
 /// Flush Lua print() output from console_output to stderr.
