@@ -126,20 +126,22 @@ def confirm_terminated(unit, slot):
 def build(checkout, target, sha, profile, jobs, owner, log):
     slot = target.name.removeprefix("slot-")
     unit = f"full-suite-build-{sha[:12]}-{profile}-{time.time_ns()}"
+    try:
+        return build_unit(checkout, target, profile, jobs, owner, log, unit, slot)
+    finally:
+        confirm_terminated(unit, slot)
+
+
+def build_unit(checkout, target, profile, jobs, owner, log, unit, slot):
     features = [] if profile == "retail" else ["--no-default-features", "--features", f"sound,gui,casc,client-{profile}"]
     cmd = ["slot-build.py", "--worktree", str(checkout), "--slot", slot, "--unit", unit,
            "--owner", owner, "--capacity-id", unit, "--", "cargo", "test", "--no-run",
            "--all-targets", "--locked", "--offline", "--message-format=json", f"-j{jobs}", *features]
     env = dict(os.environ, PATH=os.environ.get("PATH", "") + os.pathsep + str(REPO / "scripts"))
-    try:
-        proc = subprocess.run(cmd, env=env, capture_output=True, text=True)
-    except OSError:
-        confirm_terminated(unit, slot)
-        raise
+    proc = subprocess.run(cmd, env=env, capture_output=True, text=True)
     log.write(f"===== build: {' '.join(cmd)} (exit {proc.returncode})\n{proc.stdout}{proc.stderr}\n")
     log.flush()
     if proc.returncode:
-        confirm_terminated(unit, slot)
         raise ValueError(f"slot-build guard rejected: {proc.stderr.strip() or proc.stdout.strip()}")
     receipt = target / "receipts" / f"{unit}.json"
     while True:
@@ -282,9 +284,9 @@ def run(ref, build_jobs, target_dir, profile="retail"):
                 result["steps"].setdefault(phase, {})["status"] = "FAILED"
                 result["status"] = "FAILED"
                 result["error"] = str(error)
-                log.write(f"FAILED: {error}\n")
                 owner = None  # Keep the live or unknown claim for reconciliation.
                 exit_code = 1
+                log.write(f"FAILED: {error}\n")
             except (OSError, ValueError, subprocess.CalledProcessError, json.JSONDecodeError) as error:
                 result["steps"].setdefault(phase, {})["status"] = "FAILED"
                 result["status"] = "FAILED"
@@ -299,6 +301,8 @@ def run(ref, build_jobs, target_dir, profile="retail"):
                         result["error"] = f"slot release failed: {error}"
         result["finished"] = time.strftime("%Y-%m-%dT%H:%M:%S%z")
         result["new_failures"] = new_failures(result)
+        if result["status"] != "PASSED" and output_path.exists() and json.loads(output_path.read_text()).get("status") == "PASSED":
+            output_path = RESULTS / f"{sha}-{profile}-attempt-{time.time_ns()}.json"
         write_result(output_path, result)
         if result["status"] == "PASSED" and ref in ("origin/master", "master"):
             write_result(RESULTS / f"master-latest-{profile}.json", result)

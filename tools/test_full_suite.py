@@ -155,6 +155,67 @@ class CertifiedSuiteTests(unittest.TestCase):
         record = json.loads((results / f'{self.sha}-ptr.json').read_text())
         self.assertEqual(record['status'], 'FAILED')
 
+    def test_failed_same_sha_rerun_preserves_pass_and_records_attempt(self):
+        results = self.home / 'Projects/wow/full-suite-results'
+        results.mkdir(parents=True)
+        prior = results / f'{self.sha}-ptr.json'
+        content = json.dumps({'sha': self.sha, 'profile': 'ptr', 'status': 'PASSED', 'failures': {}})
+        prior.write_text(content)
+        process = subprocess.run([sys.executable, str(RUNNER), 'run', self.sha, '--profile', 'ptr',
+                                  '--target-dir', str(self.slot)], env=self.env, capture_output=True, text=True, timeout=10)
+        self.assertEqual(process.returncode, 0, process.stderr)
+        self.assertEqual(prior.read_text(), content)
+        attempts = list(results.glob(f'{self.sha}-ptr-attempt-*.json'))
+        self.assertEqual(len(attempts), 1)
+        self.assertEqual(json.loads(attempts[0].read_text())['status'], 'FAILED')
+
+    def test_build_log_io_failure_checks_unit_before_releasing_owner(self):
+        write_executable(self.bin / 'slot-build.py', "print('launched')\n")
+        write_executable(self.bin / 'systemctl',
+                         "import os, pathlib, sys\n"
+                         "root = pathlib.Path(os.environ['HOME'])\n"
+                         "if 'stop' in sys.argv:\n"
+                         "    (root / 'owner-at-stop').write_text(str((root / '.cache/wow-ui-sim-targets/slot-2/.owner').exists()))\n"
+                         "    (root / 'stopped').touch()\n"
+                         "elif (root / 'stopped').exists(): print('ActiveState=inactive')\n"
+                         "else: print('ActiveState=active')\n")
+        script = self.home / 'inject.py'
+        script.write_text('''import builtins, importlib.util, sys
+spec = importlib.util.spec_from_file_location("runner", sys.argv[1])
+runner = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(runner)
+original = builtins.open
+class Log:
+    def __init__(self, stream): self.stream, self.failed = stream, False
+    def __enter__(self): return self
+    def __exit__(self, *args): return self.stream.__exit__(*args)
+    def write(self, value):
+        if sys.argv[4] == "write" and value.startswith("===== build:") and not self.failed:
+            self.failed = True
+            raise OSError("injected write failure")
+        return self.stream.write(value)
+    def flush(self):
+        if sys.argv[4] == "flush" and not self.failed:
+            self.failed = True
+            raise OSError("injected flush failure")
+        return self.stream.flush()
+def injected(path, *args, **kwargs):
+    stream = original(path, *args, **kwargs)
+    return Log(stream) if str(path).endswith(".log") else stream
+builtins.open = injected
+sys.exit(runner.run(sys.argv[2], 1, sys.argv[3], "ptr"))
+''')
+        for failure in ('write', 'flush'):
+            with self.subTest(failure=failure):
+                for name in ('stopped', 'owner-at-stop'):
+                    (self.home / name).unlink(missing_ok=True)
+                process = subprocess.run([sys.executable, str(script), str(RUNNER), self.sha, str(self.slot), failure],
+                                         env=self.env, capture_output=True, text=True, timeout=10)
+                self.assertEqual(process.returncode, 0, process.stderr)
+                self.assertTrue((self.home / 'owner-at-stop').exists(), 'unit was not stopped before release')
+                self.assertEqual((self.home / 'owner-at-stop').read_text(), 'True')
+                self.assertFalse((self.slot / '.owner').exists())
+
     def test_guard_rejection_records_failure_without_running_tests(self):
         result = subprocess.run([sys.executable, str(RUNNER), 'run', self.sha,
                                  '--profile', 'ptr', '--target-dir', str(self.slot)],
