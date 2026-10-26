@@ -35,6 +35,6 @@ Generation acceptance also compared every real DB2/CSV field, rejected a wrong p
 
 ## Out of scope
 
-- Repairing engraving or the reputation model: separate backing-state/native-evidence work.
+- Engraving is covered by the separate [supplied-input contract](mists-engraving-inputs.md); its [later constructor proof](../wiki/investigations/mists-engraving-inputs.md#merged-settings-proof-and-stock-effects) resolves the old display-settings blocker. Native engraving values and reputation-model evidence remain separate work.
 - A full SettingsRegistrar pass, visible-panel interaction, rendering parity or other profiles' full runtime localization parity: not established by this constructor boundary or compilation checks.
 - Other profiles' catalog changes or a foreign-table fallback: this feature selects Mists data only.

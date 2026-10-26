@@ -30,7 +30,7 @@ The consumers discard all results. Returning no Lua values is the bounded simula
 
 The four affected profiles pass request-history and publication tests. Their stock maps are byte-identical before/after (Mists 6/12; Era, Anniversary and Wrath 0/0). All seven all-target checks have zero compiler warnings.
 
-The unchanged old storage-flow test still exits101: the Lua body now completes all assertions, but callback/startup errors fail the process-status check. Its next newly exposed boundary is missing `C_Engraving` at original `ContainerFrame_Shared.lua:315`. That successor is outside this lane.
+The unchanged old storage-flow test still exits101: the Lua body now completes all assertions, but callback/startup errors fail the process-status check. Its next newly exposed boundary is missing `C_Engraving` at original `ContainerFrame_Shared.lua:315`. That successor is outside this lane; the later [engraving investigation](../wiki/investigations/mists-engraving-inputs.md#historical-bag-lane-proof) records its replacement by a named unsupplied-state error, not a passing storage flow.
 
 ## Out of scope
 

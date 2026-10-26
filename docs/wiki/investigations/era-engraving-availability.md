@@ -4,7 +4,7 @@ The [availability contract](../../specs/era-engraving-availability.md) replaces 
 
 ## Root cause and selection
 
-The temporary Classic startup defaults installed `IsEngravingEnabled() return false` only on Era/Anniversary. Pinned declarations on both profiles declare a bool result but establish no inactive default. The existing [Mists engraving inputs](mists-engraving-inputs.md) already represent availability as `Option<bool>`; the shared C API registrar now publishes that same reader on all three profiles through `client_profile::ACTIVE`. Only Mists continues to publish the other six modeled members.
+The temporary Classic startup defaults installed `IsEngravingEnabled() return false` only on Era/Anniversary. Pinned declarations on both profiles declare a bool result but establish no inactive default. The existing [Mists engraving inputs](mists-engraving-inputs.md) already represent availability as `Option<bool>`; the shared C API registrar now publishes that same reader on all three profiles through `client_profile::ACTIVE`. See [shared publication and Rust input supply](mists-engraving-inputs.md#shared-availability-and-input-supply) for the complete profile inventory, named unset contract and absence of a Lua admin setter. Native availability values remain unknown.
 
 Both Era and Anniversary select vanilla/classic game types (`src/toc/mod.rs`), Family Classic and Game Vanilla. Both pinned `Blizzard_CharacterFrame.toc:18,22` select Vanilla PaperDoll Lua/XML. `Vanilla/PaperDollFrame.xml:716,722` creates RuneFrameControlButton and binds original OnLoad; `PaperDollFrame.lua:950–954` reads availability and hides the control on false. Settings selects `Classic/InterfaceOverrides.lua` through its Classic TOC and reads availability at136. Both have a real conditional LoD EngravingUI entry at PaperDollFrame.lua935–948; that full system is not implemented by this slice.
 
@@ -31,5 +31,5 @@ Do not interpret the settings preservation attempt as full-settings behavior pro
 
 ## See Also
 
-- [Mists engraving](mists-engraving-inputs.md) — existing shared input model.
+- [[mists-engraving-inputs]] — shared input contract, merged Mists settings proof and stock comparison.
 - [Consumer selection and RED proof](consumer-selection-and-red-proof.md) — applicability and discriminating selectors.

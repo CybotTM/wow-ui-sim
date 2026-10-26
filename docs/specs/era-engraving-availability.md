@@ -13,6 +13,7 @@ Era and Anniversary expose supplied engraving availability through `src/c_api/c_
 ## How it works
 
 - [Selection, state and bounded evidence](../wiki/investigations/era-engraving-availability.md)
+- [Shared publication and Rust input supply; no Lua admin setter](../wiki/investigations/mists-engraving-inputs.md#shared-availability-and-input-supply)
 
 ## Implementation inventory
 
@@ -30,7 +31,7 @@ No open implementation task remains in the approved availability-only slice. Bot
 
 ## Out of scope
 
-Bags and full LoD EngravingUI are excluded. No native inactive default or complete engraving lifecycle is claimed. Mists' existing seven-member model is retained; no other profile gains publication. The other25 declared members remain outside Era/Anniversary's modeled surface:
+Bags and full LoD EngravingUI are excluded. Native availability values remain unknown; no inactive default or complete engraving lifecycle is claimed. Mists' existing seven-member model is retained; no other profile gains publication. The other25 declared members remain outside Era/Anniversary's modeled surface:
 
 | Domain | Excluded members |
 |---|---|
