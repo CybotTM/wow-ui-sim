@@ -30,6 +30,8 @@ Declarations: pinned `Blizzard_APIDocumentationGenerated/EquipmentManagerDocumen
 
 - `tests/api_shape_equipment_set.rs` — restored coverage uses real original-consumer equipment/swap transitions, saved-set changes, explicit errors and independent environments, not boolean shape alone.
 
+- `tests/c_item_api.rs` — the previous implicit-unlocked test now requires explicit missing-observation errors on supported profiles and retains the old assertion on excluded profiles.
+
 ## Known gaps (current cycle)
 
 - [ ] Record exact paired four-profile runtime, stock and zero-warning check proof before claiming completion.

@@ -20,6 +20,16 @@ use wow_ui_sim::toc::TocFile;
 // PTR re-authentication: declaration remains :56-69, TOC moved to :105.
 fn load_equipment_consumer() -> WowLuaEnv {
     let ui = blizzard_ui_dir();
+    let selected = assert_selected_equipment_toc(&ui);
+    let env = new_blizzard_addon_env(&ui);
+    let loaded = load_blizzard_addon_closure_into_env(&env, &ui, &["Blizzard_FrameXML"], &[]);
+    assert!(loaded.iter().any(|name| name == "Blizzard_FrameXML"));
+    assert_original_equipment_consumer(&env, selected);
+    seed_saved_equipment_fixture(&env);
+    env
+}
+
+fn assert_selected_equipment_toc(ui: &std::path::Path) -> &'static str {
     let toc_path = find_toc_file(&ui.join("Blizzard_FrameXML")).unwrap();
     let toc = TocFile::from_file(&toc_path).unwrap();
     assert!(toc.allows_screen(ScreenKind::Game));
@@ -31,9 +41,10 @@ fn load_equipment_consumer() -> WowLuaEnv {
     };
     assert!(toc.files.iter().any(|file| file == std::path::Path::new(selected)));
     eprintln!("Selected equipment TOC: {} -> {selected}", toc_path.display());
-    let env = new_blizzard_addon_env(&ui);
-    let loaded = load_blizzard_addon_closure_into_env(&env, &ui, &["Blizzard_FrameXML"], &[]);
-    assert!(loaded.iter().any(|name| name == "Blizzard_FrameXML"));
+    selected
+}
+
+fn assert_original_equipment_consumer(env: &WowLuaEnv, selected: &str) {
     env.exec(&format!(
         r#"
         local info = debug.getinfo(EquipmentManager_EquipSet, 'S')
@@ -47,6 +58,9 @@ fn load_equipment_consumer() -> WowLuaEnv {
         "#,
     ))
     .unwrap();
+}
+
+fn seed_saved_equipment_fixture(env: &WowLuaEnv) {
     env.state().borrow_mut().player.equipped_items.clear();
     env.exec(
         r#"
@@ -63,7 +77,6 @@ fn load_equipment_consumer() -> WowLuaEnv {
         "#,
     )
     .unwrap();
-    env
 }
 
 // The preliminary missing-admin RED is input plumbing, not consumer proof.
