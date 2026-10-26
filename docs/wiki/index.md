@@ -22,6 +22,10 @@
 
 [Environment-local input and original PVEFrame](systems/mists-lfr-availability.md) link the [contract](../specs/mists-lfr-availability.md). Byte-identical original-line RED and supplied-state GREEN cover ten observations, two environments and unset recovery. Stock remains 6/12 with exactly two missing-function→named missing-input replacements. The exact scenario successor is outside this slice. Mists/Retail/Era all-target checks have zero warnings; formatting and changed-line readability pass.
 
+## [2026-10-26] proof | Supplied query catalogs
+
+[Invented-default audit](investigations/invented-query-defaults.md) distinguishes the unresolved, unchanged transmog filter bound from supplied empty-by-default Mists bank and RAF catalogs. Original-consumer RED/GREEN, unchanged four-profile stock maps and seven zero-warning all-target checks pass. The old Mists storage flow retains all assertions and a reproduced pre-existing missing TriggerTutorial blocker; the [bank](../specs/guild-bank-tab-catalog.md) and [RAF](../specs/raf-version-catalog.md) contracts state that limit.
+
 ## [2026-10-25] implementation | PTR Edit Mode declarations
 
 [Two original boundaries](investigations/ptr-edit-mode-declarations.md) link the [contract](../specs/ptr-edit-mode-declarations.md): declaration-backed boss directions and Gamepad preset, independent exact RED/GREEN and 270/376→268/374 stock. Display-info:800 SwingTimerSetting is the traced successor, not part of this slice. The module compiles on all profiles and publishes only when ACTIVE is PTR. PTR/Retail/Era full-feature all-target checks pass with zero warnings and separate accepted source-binding receipts; formatting and readability pass.

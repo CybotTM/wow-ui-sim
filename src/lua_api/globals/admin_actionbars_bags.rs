@@ -147,6 +147,26 @@ pub(super) fn add_guild_bank_item(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+pub(super) fn add_guild_bank_tab(state: &mut LuaState) -> LuaResult<u32> {
+    use crate::lua_api::state::GuildBankTab;
+    let tab = GuildBankTab {
+        name: String::from_stack(state, 1)?,
+        icon: String::from_stack(state, 2)?,
+        is_viewable: bool::from_stack(state, 3)?,
+        can_deposit: bool::from_stack(state, 4)?,
+        withdrawal_limit: i32::from_stack(state, 5)?,
+        remaining_withdrawals: i32::from_stack(state, 6)?,
+        is_filtered: bool::from_stack(state, 7)?,
+    };
+    borrow_state_mut(state)?.guild_bank_tabs.push(tab);
+    Ok(0)
+}
+
+pub(super) fn clear_guild_bank_tabs(state: &mut LuaState) -> LuaResult<u32> {
+    borrow_state_mut(state)?.guild_bank_tabs.clear();
+    Ok(0)
+}
+
 pub(super) fn clear_guild_bank(state: &mut LuaState) -> LuaResult<u32> {
     borrow_state_mut(state)?.guild_bank_items.clear();
     Ok(0)

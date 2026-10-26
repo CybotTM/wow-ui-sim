@@ -506,6 +506,7 @@ macro_rules! build_empty_sim_state {
             guild_bank_money: 123_456,
             current_guild_bank_tab: 1,
             guild_bank_items: ::std::collections::HashMap::new(),
+            guild_bank_tabs: Vec::new(),
             merchant_frame_open: false,
             // Inferred default scenario: no configured repair service.
             #[cfg(feature = "client-wowforever")]
@@ -532,6 +533,7 @@ macro_rules! build_empty_sim_state {
             #[cfg(feature = "client-wrath")]
             refer_a_friend_linked_guids: HashSet::new(),
             summon_friend_cooldown: Default::default(),
+            raf_versions: Vec::new(),
             loot_method: LootMethodState::default(),
             loot_history: LootHistoryState::default(),
             gossip: GossipState::default(),
@@ -722,9 +724,9 @@ pub use super::state_types::{
     ChatBubble, CommodityPurchaseQuote, CommoditySearchResultInfo, CommoditySearchResults,
     CraftingState, CurrencyInfo, CursorInfo, CursorItemOrigin, DeathRecapEntry,
     EquipmentManagerState, EquipmentSet, EquippedItem, GreatVaultActivity,
-    GuildBankRankPermissions, GuildMember, GuildRank, ItemSearchKey, ItemSearchResultInfo,
-    ItemSearchResults, KillingBlowInfo, LfdDungeonInfo, LfgActivityGroupInfo, LfgActivityInfo,
-    LfgAdvancedFilter, LfgApplication, LfgCategoryInfo, LfgRoleSelection,
+    GuildBankRankPermissions, GuildBankTab, GuildMember, GuildRank, ItemSearchKey,
+    ItemSearchResultInfo, ItemSearchResults, KillingBlowInfo, LfdDungeonInfo, LfgActivityGroupInfo,
+    LfgActivityInfo, LfgAdvancedFilter, LfgApplication, LfgCategoryInfo, LfgRoleSelection,
     LoadDiagnosticAttribution, LoadDiagnostics, LootHistoryState, LootRollInfo, LuaErrorRecord,
     MacroInfo, MapChildRect, MapData, MapRect, MirrorTimer, MissingRequirement,
     MissingRequirementKind, MovementState, MythicPlusAffix, MythicPlusRatingMapSummary,

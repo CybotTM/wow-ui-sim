@@ -26,6 +26,7 @@ pub struct SimState {
     #[cfg(feature = "client-wrath")]
     pub refer_a_friend_linked_guids: HashSet<String>,
     pub summon_friend_cooldown: crate::c_api::c_recruit_a_friend::SummonFriendCooldown,
+    pub raf_versions: Vec<crate::c_api::c_recruit_a_friend::RafVersionInfo>,
     pub widgets: WidgetRegistry,
     #[cfg(feature = "retail-12-1-5")]
     pub(crate) weather: crate::c_api::c_weather::WeatherState,
@@ -614,6 +615,7 @@ pub struct SimState {
     pub guild_bank_money: i64,
     pub current_guild_bank_tab: i32,
     pub guild_bank_items: HashMap<(i32, i32), BagItem>,
+    pub guild_bank_tabs: Vec<GuildBankTab>,
     pub merchant_frame_open: bool,
     #[cfg(feature = "client-wowforever")]
     pub merchant_repair_capable: bool,

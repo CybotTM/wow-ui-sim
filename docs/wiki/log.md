@@ -18,6 +18,10 @@
 
 [Original PVEFrame and optional availability](systems/mists-lfr-availability.md): original-line missing-function RED is observed; the separate C API module publishes only on ACTIVE Mists, returns supplied booleans and raises an approved named missing-input error when unset. The revised byte-identical pair passes GREEN with ten observations and fails RED at line229. A line observer proves LFR state before the exact out-of-scope scenario error. Stock remains 6/12 with two missing-input key replacements and unchanged survivors. Mists/Retail/Era all-target checks have zero warnings; formatting and changed-line readability pass.
 
+## [2026-10-26] proof | Supplied query catalogs
+
+[Audit and contracts](investigations/invented-query-defaults.md) record pinned declarations, selected original Mists bank and Retail/PTR/Forever RAF RED/GREEN, byte-identical producer-only RED tests, unchanged stock maps, seven zero-warning all-target checks and formatting/readability. The fresh RAF assertion now expects zero and an explicit one-version sibling preserves its old checks. Transmog stays unresolved and unchanged. The old Mists storage flow still fails before the bank assertions at the same missing TriggerTutorial boundary on base and GREEN; no assertion is weakened.
+
 ## [2026-10-25] proof | Mists supplied map display
 
 [Original group-provider proof](investigations/map-display-info-model.md#mists-original-onload-consumer--2026-10-25) passes exact corrected RED and supplied-state GREEN plus return-arity preservation. Stock 10/16→8/14 has no additions. Mists/Retail/Era/Anniversary all-target checks pass with zero warnings; formatting and readability pass. The actual OnLoad boundary precedes post-load fog-pin mutation; the separate defect is recorded, not fixed.
