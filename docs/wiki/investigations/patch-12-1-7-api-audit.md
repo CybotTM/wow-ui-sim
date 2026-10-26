@@ -10,7 +10,9 @@ The lane's authenticated 70493 discovery found 169 publication gaps. This [bound
 
 The landing branch retains supplied-state tests and adds independent original-consumer transition selectors. They authenticate source bytes, load Game-selected TOC closures, and require absent/supplied/changed/removed cooldown transitions and false/true/false ghost availability. Constant nil/false producers cannot pass these selectors. Native cooldown eligibility and graveyard policy remain unknown.
 
-All aggregate 173-shape tests remain unchanged on `ptr-i4-runtime` only; they are deliberately excluded from this landing packet, not ignored or weakened. Fresh RED/GREEN, stock and check evidence remain pending until the canonical slot guard is repaired.
+All aggregate 173-shape tests remain unchanged on `ptr-i4-runtime` only; they are absent from this landing packet, not ignored or weakened.
+
+Bounded proof on 2026-10-25: both siblings integrate master `7ed5a81f0`, including the PTR-input repair. GREEN `3eb4ae215` passes all four exact selectors; producer-only RED `719a15bbb` fails the unchanged original consumers at Collections line 37 and GhostFrame line 4. Supplied-state selectors also fail RED and pass GREEN. Constant/no-op rejection follows from their transition assertions; no separate mutation execution is claimed. Stock comparison against the PTR-input baseline `120379c39` is 298→296 full raw keys and 412→410 occurrences, zero additions and unchanged common-key counts. Only the GhostFrame OnLoad missing-call error and its wrapper disappear. Retail all-target checks have zero warnings; PTR has only the three inherited late-bind dead-code warnings. Formatting passes. Native policy and aggregate I4 acceptance remain unproved.
 
 ## Empty inventory is not patch coverage
 

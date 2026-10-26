@@ -26,6 +26,14 @@ The deliberately failing aggregate I4 discovery and preservation tests stay excl
 
 Stock PTR startup compares master against this repair with identical pinned sources and guarded CVar copies. Every added error key requires an original emitter line and the predecessor failure that masked it. PTR/Retail all-target checks and formatting are separate acceptance evidence.
 
+## Accepted bounded evidence
+
+On 2026-10-25, GREEN `3eb4ae215` and producer-only RED `719a15bbb` include master `7ed5a81f0`, including PTR-input. Each of the four selectors has an exact one-test list and a single execution per sibling: RED fails, GREEN passes. The original consumers fail RED at the two Blizzard call sites specified above. Tests and all non-producer source bytes match between siblings.
+
+Stock comparison uses the PTR-input merged baseline `120379c39`: 298→296 full raw message keys, 412→410 occurrences, zero additions, and unchanged common-key counts. The removed keys are GhostFrame OnLoad's missing graveyard call and its error wrapper. The older 428-key baseline predates PTR-input and is not final acceptance evidence. Remaining Mists-only pet-display changes on master do not publish or read that model on PTR.
+
+Retail and PTR all-target checks pass with zero and exactly three inherited late-bind dead-code warnings respectively; both Cargo JSON and plain stderr were inspected. Formatting passes. Documentation-only descendants do not change this code/test proof scope. Native eligibility, capability policy, restrictions, and wider I4 acceptance remain unknown.
+
 ## Related documentation
 
 - [I4 source investigation](../wiki/investigations/patch-12-1-7-api-audit.md)
