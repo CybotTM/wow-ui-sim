@@ -14,11 +14,15 @@ pub(super) fn open_mailbox(state: &mut LuaState) -> LuaResult<u32> {
     borrow_state_mut(state)?
         .active_player_interactions
         .insert(interaction_type);
-    fire_named_event_state(
-        state,
-        "PLAYER_INTERACTION_MANAGER_FRAME_SHOW",
-        &[Val::Num(interaction_type as f64)],
-    );
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
+        fire_named_event_state(state, "MAIL_SHOW", &[]);
+    } else {
+        fire_named_event_state(
+            state,
+            "PLAYER_INTERACTION_MANAGER_FRAME_SHOW",
+            &[Val::Num(interaction_type as f64)],
+        );
+    }
     Ok(0)
 }
 
@@ -28,11 +32,15 @@ pub(super) fn close_mailbox(state: &mut LuaState) -> LuaResult<u32> {
         .active_player_interactions
         .remove(&interaction_type);
     if was_active {
-        fire_named_event_state(
-            state,
-            "PLAYER_INTERACTION_MANAGER_FRAME_HIDE",
-            &[Val::Num(interaction_type as f64)],
-        );
+        if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
+            fire_named_event_state(state, "MAIL_CLOSED", &[]);
+        } else {
+            fire_named_event_state(
+                state,
+                "PLAYER_INTERACTION_MANAGER_FRAME_HIDE",
+                &[Val::Num(interaction_type as f64)],
+            );
+        }
     }
     Ok(0)
 }
