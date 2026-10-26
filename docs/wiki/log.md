@@ -1,3 +1,7 @@
+## [2026-10-26] implementation | Mists transmog supplied input
+
+[Contract and selected display branch](systems/mists-transmog-enabled.md): byte-identical selectors fail producer-free RED at original line4 and pass GREEN for both real-control branches, isolation, transitions and unset recovery. The supplied-state query publishes only on Mists; no default is inferred. Bound stock is unchanged6/12; all seven all-target checks have zero warnings. Full settings, modern native-default policy and the Forever query remain outside this bounded proof.
+
 ## [2026-10-26] investigation | Mists engraving supplied inputs
 
 [Selected original consumers](investigations/mists-engraving-inputs.md) now have three exact corrected-input GREEN cases and producer-free RED with byte-identical tests. Seven Mists-only members project supplied state; missing input raises a named error and refresh records only a local request. Original bag slot IDs and the established GetTexture fileID contract corrected fixture assumptions without changing vendor/texture behavior. Stock stays 6/12; old storage remains a named-boundary failure. Settings is blocked at the earlier missing IsTransmogEnabled call. All seven full-feature all-target checks pass with zero JSON/plain warnings; no other-profile runtime parity is claimed.
