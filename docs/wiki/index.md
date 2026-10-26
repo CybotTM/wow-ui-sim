@@ -2,6 +2,17 @@
 
 [Original bag and targeting proof](investigations/mists-engraving-inputs.md) covers seven Mists-only supplied-state members under the [contract](../specs/mists-engraving-inputs.md). Corrected byte-identical RED/GREEN tests pass all three GREEN cases; the unchanged storage test reaches a named unsupplied-state boundary. Stock remains 6/12. Complete settings is blocked before engraving at missing IsTransmogEnabled; no settings-path proof is claimed. All seven full-feature all-target checks pass with zero JSON/plain warnings; this is compilation proof, not other-profile runtime parity.
 
+## [2026-10-26] proof | Supplied equipment-set locked items
+
+[Original equipment consumers](systems/equipment-set-locks.md#original-consumer-proof) and the [contract](../specs/equipment-set-locks.md#bounded-proof--2026-10-26) close the supplied-state slice on R/P/F/M: 24 exact GREENs, 12 intended producer-only REDs, four zero-warning all-target checks and unchanged raw stock maps. Inputs are item-ID observations, not native lock criteria; W/E/A and item upgrades remain excluded.
+
+## [2026-10-26] implementation | Equipment-set supplied lock query
+
+[Saved-set projection](systems/equipment-set-locks.md) replaces the constant-false path on R/P/F/M, with explicit native-unknown errors and strict boolean admin inputs. Original Retail equipment/membership/error REDs and the nil-observation RED were observed before the producer change. Final four-profile acceptance is pending; W/E/A and item upgrades remain excluded.
+
+## [2026-10-26] staged | Supplied equipment-set lock inputs
+
+[Item-ID observations](systems/equipment-set-locks.md) back simulator admin supply/clear methods on R/P/F/M. The missing-admin Retail RED was observed; original-consumer query RED/GREEN and four-profile gates remain pending. No native lock/default policy is claimed.
 ## [2026-10-26] implementation | Legacy tutorial request recorder
 
 [Consumer investigation](investigations/invented-query-defaults.md#legacy-tutorial-request-boundary) links the [bounded contract](../specs/legacy-tutorial-requests.md): Mists/Era/Anniversary/Wrath standalone numeric requests, no missing Lua definition, no result use, no inferred tutorial policy. Unchanged old Mists storage-flow RED reaches ContainerFrame_Shared:976; GREEN completes its Lua assertions but still fails on collected callback/startup errors, with C_Engraving:315 next. Four-profile recorder/publication tests pass, all four stock maps are byte-identical, and all seven all-target checks have zero warnings.

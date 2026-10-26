@@ -1,6 +1,6 @@
 # API shape-only contracts
 
-Documented shapes, not invented native behavior, are the acceptance contract for these native-unknown surfaces (decision 2026-10-23). Tests live in `tests/api_shape_*.rs`; original consumer selection follows [consumer selection and proof](../wiki/investigations/consumer-selection-and-red-proof.md). All execution is deferred: no PASS or semantic RED is claimed.
+Documented shapes, not invented native behavior, are the acceptance contract for these native-unknown surfaces (decision 2026-10-23). Tests live in `tests/api_shape_*.rs`; original consumer selection follows [consumer selection and proof](../wiki/investigations/consumer-selection-and-red-proof.md). The equipment-set row is superseded by the [supplied lock-state contract](equipment-set-locks.md). Other rows retain their deferred proof status.
 
 ## What it must do
 
@@ -25,10 +25,7 @@ Sources: `Blizzard_APIDocumentationGenerated/StorePublicUIDocumentation.lua:11-2
 
 ### Equipment set
 
-- [ ] Retail/PTR/Forever/Mists `C_EquipmentSet.EquipmentSetContainsLockedItems` accepts a required non-nil numeric saved-set ID and returns exactly one non-nil boolean.
-- [ ] Original `EquipmentManager_EquipSet` accepts actual results without Lua error with a normally saved set and a not-casting player; neither lock choice nor equipment mutation is prescribed.
-
-Sources: `Blizzard_APIDocumentationGenerated/EquipmentManagerDocumentation.lua:56-69` (Retail/PTR/Forever), `:53-65` (Mists); selected `Blizzard_FrameXML/Mainline/EquipmentManager.lua:260` (Retail/PTR/Forever), `Blizzard_FrameXML/Wrath/EquipmentManager.lua:308` (Mists). Retail/PTR FrameXML TOC `:99` and Forever `:105` select `[Family]/EquipmentManager.lua`; Mists TOC `:70` selects `Wrath/EquipmentManager.lua`. Request #7 now confirms the modern documented shape only; modern semantics remain native-unknown. Historical build 12340's string-name query is a separate contract and is not transferred here.
+The restored `tests/api_shape_equipment_set.rs` now asserts the [supplied lock-state contract](equipment-set-locks.md), including original equip/no-equip transitions and explicit unknown-input errors. Its old boolean-only acceptance is not producer proof. The linked contract owns declarations, current PTR TOC lines, behavior and exclusions.
 
 ## How it works
 
@@ -42,7 +39,7 @@ Sources: `Blizzard_APIDocumentationGenerated/EquipmentManagerDocumentation.lua:5
 
 - `tests/api_shape_store.rs`: six-profile numeric-group/boolean shape and original InterfaceUtil acceptance.
 
-- `tests/api_shape_equipment_set.rs`: four-profile numeric-set/boolean shape and original equip-set acceptance.
+- `tests/api_shape_equipment_set.rs`: four-profile supplied lock-state behavior through the original equip-set consumer.
 
 ## Tests asserting this spec
 
@@ -52,7 +49,7 @@ Sources: `Blizzard_APIDocumentationGenerated/EquipmentManagerDocumentation.lua:5
 
 - `api_shape_store::store_original_interface_util_contract` — expected preservation PASS on six profiles with legacy shop prerequisites, unexecuted.
 
-- `api_shape_equipment_set::equipment_set_original_equip_set_contract` — expected preservation PASS on Retail/PTR/Forever/Mists, unexecuted.
+- `api_shape_equipment_set::equipment_set_original_equip_set_contract` — locked/unlocked/relocked original-consumer transitions; see the supplied-state contract for proof status.
 
 ## Known gaps (current cycle)
 
