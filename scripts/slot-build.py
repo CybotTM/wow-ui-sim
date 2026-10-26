@@ -231,10 +231,10 @@ def repo_relative_inputs(current, inputs):
     worktree = Path(current["worktree"])
     mount = SOURCE_ROOT / Path(current["slot"]).name
     utility_mount = SOURCE_ROOT / f"ct-bins-{Path(current['slot']).name}"
-    roots = [mount, utility_mount, worktree]
+    roots = [Path(os.path.realpath(root)) for root in (mount, utility_mount, worktree)]
     relative = set()
     for name in inputs:
-        path = Path(os.path.abspath(worktree / name))
+        path = Path(os.path.realpath(worktree / name))
         for root in roots:
             if path.is_relative_to(root):
                 relative.add(str(path.relative_to(root)))
@@ -243,14 +243,11 @@ def repo_relative_inputs(current, inputs):
 
 
 def generated_input_paths(current, inputs):
-    slot = Path(current["slot"])
+    slot = Path(os.path.realpath(current["slot"]))
     generated = set()
     for name in inputs:
-        path = Path(os.path.abspath(Path(current["worktree"]) / name))
-        if not path.is_relative_to(slot):
-            continue
-        parts = path.relative_to(slot).parts
-        if len(parts) >= 5 and parts[1] == "build" and parts[3] == "out":
+        path = Path(os.path.realpath(Path(current["worktree"]) / name))
+        if path.is_relative_to(slot) and not repo_relative_inputs(current, [str(path)]):
             generated.add(str(path))
     return generated
 
@@ -332,7 +329,7 @@ def certify_record(current, record, previous, source_before, artifacts, snapshot
     hashes = read_input_hashes(Path(current["worktree"]), inputs)
     if any(hashes.get(name) is None for name in required):
         raise ValueError(f"missing compiler input content for {path}")
-    # OUT_DIR files are produced by this build; source inputs must predate it.
+    # Slot-local generated files may be produced by this build; source inputs must predate it.
     if any(name not in source_before or source_before[name] != digest
            for name, digest in hashes.items() if name not in generated):
         raise ValueError(f"compiler inputs changed during build for {path}")

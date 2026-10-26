@@ -623,6 +623,69 @@ class SourceFreshnessTests(unittest.TestCase):
         self.assertEqual(receipt["result"], "stale-artifacts")
         self.assertEqual((self.slot / ".verified-source-identity.json").read_bytes(), verified)
 
+    def assert_resolved_generated_input_is_guarded(self, spelling, generated):
+        self.build_generated_library(spelling)
+        output = self.slot / "debug/deps/libprobe-retail.rmeta"
+        original = output.read_bytes()
+        verified = (self.slot / ".verified-source-identity.json").read_bytes()
+        generated.write_text("pub const VALUE: u32 = 2;")
+        result, receipt = self.run_library_step("retail", fresh=True)
+        self.assertEqual(output.read_bytes(), original)
+        self.assertEqual(receipt["changed_paths"], [])
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(receipt["result"], "stale-artifacts")
+        self.assertEqual((self.slot / ".verified-source-identity.json").read_bytes(), verified)
+        self.build_generated_library(spelling)
+        # Changing only dep-info spelling must preserve the resolved certificate key.
+        mutation = ('binary.with_suffix(".d").write_text('
+                    f'str(binary)+": src/main.rs {generated}\\n")')
+        result, receipt = self.run_library_step("retail", fresh=True, mutation=mutation)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(receipt["result"], "success")
+        generated.unlink()
+        for fresh in [True, False]:
+            with self.subTest(fresh=fresh):
+                mutation = ('binary.with_suffix(".d").write_text('
+                            f'str(binary)+": src/main.rs {spelling}\\n")')
+                result, receipt = self.run_library_step("retail", fresh=fresh, mutation=mutation)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertEqual(receipt["result"], "stale-artifacts")
+
+    def test_target_triple_generated_input_is_guarded(self):
+        generated = self.slot / "x86_64-unknown-linux-gnu/debug/build/probe-hash/out/generated.rs"
+        generated.parent.mkdir(parents=True)
+        generated.write_text("pub const VALUE: u32 = 1;")
+        self.assert_resolved_generated_input_is_guarded(generated, generated)
+
+    def test_external_alias_to_slot_generated_input_is_guarded(self):
+        generated = self.slot / "debug/build/probe-hash/out/generated.rs"
+        generated.parent.mkdir(parents=True)
+        generated.write_text("pub const VALUE: u32 = 1;")
+        with tempfile.TemporaryDirectory() as directory:
+            alias = Path(directory) / "generated.rs"
+            alias.symlink_to(generated)
+            self.assert_resolved_generated_input_is_guarded(alias, generated)
+
+    def test_slot_generated_input_outside_build_out_layout_is_guarded(self):
+        generated = self.slot / "custom/nested/generated.rs"
+        generated.parent.mkdir(parents=True)
+        generated.write_text("pub const VALUE: u32 = 1;")
+        self.assert_resolved_generated_input_is_guarded(generated, generated)
+
+    def test_slot_alias_to_external_input_remains_external(self):
+        with tempfile.TemporaryDirectory() as directory:
+            external = Path(directory) / "slot-3/debug/build/probe-hash/out/generated.rs"
+            external.parent.mkdir(parents=True)
+            external.write_text("external v1")
+            alias = self.slot / "debug/build/probe-hash/out/generated.rs"
+            alias.parent.mkdir(parents=True)
+            alias.symlink_to(external)
+            self.build_generated_library(alias)
+            external.unlink()
+            result, receipt = self.run_library_step("retail", fresh=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(receipt["result"], "success")
+
     def test_library_requires_generated_compiler_input_to_exist(self):
         generated = self.slot / "release/build/test-harness-hash/out/prefork_full_ui_cases.rs"
         generated.parent.mkdir(parents=True)

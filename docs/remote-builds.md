@@ -151,12 +151,15 @@ artifact before retrying; changing receipt identities does not provide proof.
 The worker hashes tracked/untracked source files, known source dep-info inputs and
 package manifests before launching the child. It hashes each record's source inputs
 again afterward and rejects changed or previously unsnapshotted source inputs.
-Dep-info inputs under the slot's `<profile>/build/<package-hash>/out/` directories
-are also required to exist and are content-hashed, using their absolute slot-local
-paths as certificate keys. These generated inputs can be created or replaced by
-the child; their final hashes must match the certificate on fresh reuse. Other
-absolute paths outside the source mounts and slot OUT_DIR directories remain
-external, including toolchain and registry inputs. Missing current compiler inputs
+Every dep-info input is resolved with `os.path.realpath` before classification.
+Inputs inside the resolved source mounts keep repo-relative certificate keys.
+All other inputs anywhere inside the current slot's resolved target directory
+are required to exist and are content-hashed, using resolved absolute paths as
+certificate keys. This includes target-triple layouts, any `build/<package>/out/`
+depth, and external symlink aliases to slot-local files. These generated inputs
+can be created or replaced by the child; their final hashes must match the
+certificate on fresh reuse. Resolved paths outside the source mounts and current
+slot remain external, including other slots, toolchain and registry inputs. Missing current compiler inputs
 fail closed. Optional absent package files are represented by null hashes. Certificates advance only with an accepted
 build, alongside the verified identity. Failed or rejected attempts cannot certify
 an output. All reported filenames are hashed, including untouched `.rmeta` files,
