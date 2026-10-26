@@ -15,7 +15,6 @@ The source checkpoint is `5327a3797`. Historical seven-profile module receipts a
 | `cf2_combat_aura_controls.rs` | `a46e561bc` combat/aura lane | None |
 | `cf2_combataura_shape_contract.rs` | `b66ba6178` combat/aura shape lane | `original_group_buff_records_shape_blocker` |
 | `cf2_forever_shape_contract.rs` | `6138f4f63` Forever shape lane | `original_camelot_equipment_predicates_shape_blocker`, `original_ping_manager_shape_blocker` |
-| `cf2_gamepad_temp_cvars.rs` | `6cdd9faee` Gamepad lane | None |
 | `cf2_housing_shape_contract.rs` | `d37fd73bf` housing shape lane | `original_supertracking_pair_shape_blocker` |
 | `cf2_housing_supertracking.rs` | `b10530182` housing/supertracking lane | `original_supertracking_refresh_publishes_its_cache_to_listeners_preserves_boundary` |
 | `cf2_pvpmap_shape_contract.rs` | `f62a6b45d` PvP/map shape lane | `original_match_enter_world_shape_blocker` |
@@ -24,9 +23,13 @@ The source checkpoint is `5327a3797`. Historical seven-profile module receipts a
 
 `cf2_forever.rs` and `cf2_group_buff_preservation.rs` now pass their registered Forever cases after upstream producer integration and remain unchanged. Other retained files and both shared helpers remain unchanged.
 
+## Forever Gamepad restoration — 2026-10-26
+
+The non-nil obligations in `cf2_gamepad_temp_cvars.rs` are restored with the single-storage producer. The original lifecycle, saved-file assertions, original TargetLogic callback and explicit unsupported-nil diagnostic pass; the migrated legacy Core-removal case also passes. See [listener identity and proof](../systems/forever-temporary-cvars.md). Accepted TTS test bytes remain unchanged.
+
 ## Mixed-file exception
 
-Only `cf2_tts_shape_contract::original_gamepad_temp_cvar_shape_blocker` is removed from the mixed TTS file. Its exact source is recoverable from `5327a3797:tests/cf2_tts_shape_contract.rs`; original commit `180db46409e28ce6448c206b05d95d97eaff0f7a`. The current Forever exact run fails at the temporary-CVar boundary. The Forever startup-gaps lane owns restoration after its producer is integrated. Every TTS case remains byte-identical.
+Only `cf2_tts_shape_contract::original_gamepad_temp_cvar_shape_blocker` is removed from the mixed TTS file. Its exact source is recoverable from `5327a3797:tests/cf2_tts_shape_contract.rs`; original commit `180db46409e28ce6448c206b05d95d97eaff0f7a`. It remains deferred, unchanged: the historical case asserts a successful nil-value call, but native nil semantics are unknown. The bounded producer explicitly rejects that unmodelled case; no pinned original consumer passes nil. Every accepted TTS case remains byte-identical.
 
 ## Evidence boundaries
 

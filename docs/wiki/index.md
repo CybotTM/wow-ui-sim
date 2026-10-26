@@ -6,6 +6,10 @@
 
 [Content cache/listener preservation](systems/super-track-state.md#deferred-content-coverage-restoration) restores the two deferred supertracking obligations on Retail/PTR/Forever without producer changes. Each exact selector rejects a byte-identical producer-subtracted sibling. Stock maps remain 10/12, 216/282 and 26/26 with no raw-key/count changes; all three all-target checks have zero warnings, and fmt passes.
 
+## [2026-10-26] proof | Forever temporary CVars
+
+[Single overlay and original listener identity](systems/forever-temporary-cvars.md) links the [contract](../specs/c-factory-cf2-tts.md#forever-temporary-cvars): original Gamepad/TargetLogic RED, one effective/persisted store, original normal/secure listener discrimination, and explicit unsupported nil diagnostic. Four exact Forever GREEN cases, protected stock at 26/26→26/26 with no raw changes, formatting and all seven zero-warning all-target checks pass. Historical nil shape stays deferred.
+
 ## [2026-10-25] implementation | PTR Edit Mode declarations
 
 [Two original boundaries](investigations/ptr-edit-mode-declarations.md) link the [contract](../specs/ptr-edit-mode-declarations.md): declaration-backed boss directions and Gamepad preset, independent exact RED/GREEN and 270/376→268/374 stock. Display-info:800 SwingTimerSetting is the traced successor, not part of this slice. The module compiles on all profiles and publishes only when ACTIVE is PTR. PTR/Retail/Era full-feature all-target checks pass with zero warnings and separate accepted source-binding receipts; formatting and readability pass.
