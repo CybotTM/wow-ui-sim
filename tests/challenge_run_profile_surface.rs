@@ -13,6 +13,12 @@ fn challenge_run_members_follow_pinned_profile_declarations() {
             assert(rawget(C_ChallengeMode, 'GetDeathCount') == nil)
             assert(rawget(C_ScenarioInfo, 'GetCriteriaInfo') == nil)
             assert(rawget(C_ScenarioInfo, 'GetCriteriaInfoByStep') == nil)
+            assert(select('#', GetWorldElapsedTimers()) == 0)
+            for _, id in ipairs({1, 77}) do
+                local name, elapsed, kind = GetWorldElapsedTime(id)
+                assert(name == id and elapsed == 0 and kind == 0)
+                assert(select('#', GetWorldElapsedTime(id)) == 3)
+            end
         "#,
         )
         .unwrap();

@@ -172,10 +172,22 @@ fn get_mirror_timer_progress(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn get_world_elapsed_timers(state: &mut LuaState) -> LuaResult<u32> {
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
+        return Ok(0);
+    }
     crate::c_api::challenge_run::timers::list(state)
 }
 
 fn get_world_elapsed_time(state: &mut LuaState) -> LuaResult<u32> {
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
+        // Excluded profile: preserve the existing ungrounded placeholder.
+        // Native elapsed-timer behavior needs its own Wrath lane.
+        let timer_id = stack_i32(state, 1).unwrap_or(0);
+        state.push(Val::Num(timer_id as f64));
+        state.push(Val::Num(0.0));
+        state.push(Val::Num(0.0));
+        return Ok(3);
+    }
     crate::c_api::challenge_run::timers::query(state)
 }
 
