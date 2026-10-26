@@ -17,6 +17,11 @@
 ## [2026-10-26] staged | Supplied equipment-set lock inputs
 
 [Item-ID observations](systems/equipment-set-locks.md) back simulator admin supply/clear methods on R/P/F/M. The missing-admin Retail RED was observed; original-consumer query RED/GREEN and four-profile gates remain pending. No native lock/default policy is claimed.
+
+## [2026-10-26] proof | Supplied StorePublic eligibility
+
+[Final proof and limits](systems/store-public-eligibility.md#final-proof-2026-10-26): GREEN `23eb582af` and RED `ec6ab6a76` integrate master `17baa3e9a` with identical tests. Six original-helper/direct-input pairs, Wrath absence, preserved defaults, seven unchanged raw stock pairs and seven zero-warning all-target checks pass. All 68 protected runtime invocations preserve host CVar bytes/stat. Missing input is distinct from false; native policy and working storefront remain unclaimed.
+
 ## [2026-10-26] implementation | Legacy tutorial request recorder
 
 [Consumer investigation](investigations/invented-query-defaults.md#legacy-tutorial-request-boundary) records the four legacy profiles, the already-selected TutorialFrame listener, and the absent native global. Original Mists storage-flow RED remains unchanged; bounded state recorder adds no event/flag/UI policy. GREEN advances past976 through all Lua assertions, but the test still fails its collected-error gate (C_Engraving:315 next). Four-profile state/publication tests pass, stock maps are byte-identical, and all seven canonical all-target checks have zero warnings.

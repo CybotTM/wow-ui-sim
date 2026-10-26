@@ -534,6 +534,9 @@ pub struct SimState {
     pub crafting: CraftingState,
     pub net_stats: NetStats,
     pub store_frame_shown: bool,
+    /// Host observations; absence is not evidence of an ineligible group.
+    pub store_public_eligibility:
+        crate::c_api::store_public_eligibility::GroupEligibilityObservations,
     pub timerunning_season_id: Option<u32>,
     pub timerunning_season_seconds_remaining: u64,
     pub modifier_keys: ModifierKeys,
