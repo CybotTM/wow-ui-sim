@@ -14,6 +14,7 @@ from pathlib import Path
 import subprocess
 import sys
 import time
+import tomllib
 
 
 TARGET_ROOT = Path("/home/osso/.cache/wow-ui-sim-targets")
@@ -523,6 +524,55 @@ def snapshot_source_hashes(current, snapshot):
     return read_input_hashes(worktree, names)
 
 
+class LockClosureRejected(ValueError):
+    pass
+
+
+def lock_closure_digest(lock_bytes, package_id):
+    packages = tomllib.loads(lock_bytes.decode())["package"]
+    if "#" not in package_id:
+        raise ValueError(f"unrecognized package ID: {package_id}")
+    source, fragment = package_id.rsplit("#", 1)
+    if "@" in fragment:
+        name, version = fragment.rsplit("@", 1)
+    elif source.startswith("path+file://"):
+        name, version = Path(source.removeprefix("path+file://")).name, fragment
+    else:
+        raise ValueError(f"unrecognized package ID: {package_id}")
+    source = None if source.startswith("path+") else source
+
+    def resolve(name, version=None, source=None):
+        matches = [p for p in packages if p["name"] == name
+                   and (version is None or p["version"] == version)
+                   and (source is None or p.get("source", "").split("#", 1)[0] == source)]
+        if len(matches) != 1:
+            raise ValueError(f"ambiguous or missing lock package: {name} {version}")
+        return matches[0]
+
+    roots = [p for p in packages if p["name"] == name and p["version"] == version
+             and (p.get("source", "").split("#", 1)[0] if source else p.get("source")) == source]
+    if len(roots) != 1:
+        raise ValueError(f"ambiguous or missing lock package: {name} {version}")
+    pending = roots
+    entries = set()
+    while pending:
+        package = pending.pop()
+        key = (package["name"], package["version"], package.get("source", ""))
+        if key in entries:
+            continue
+        entries.add(key)
+        for dependency in package.get("dependencies", []):
+            match = re.fullmatch(r"([^ ]+)(?: ([^ ]+))?(?: \(([^)]+)\))?", dependency)
+            if not match:
+                raise ValueError(f"invalid lock dependency: {dependency}")
+            pending.append(resolve(*match.groups()))
+    content = [(p["name"], p["version"], p.get("source", ""),
+                p.get("checksum", ""), sorted(p.get("dependencies", [])))
+               for p in packages
+               if (p["name"], p["version"], p.get("source", "")) in entries]
+    return hashlib.sha256(json.dumps(sorted(content), separators=(",", ":")).encode()).hexdigest()
+
+
 def certify_record(current, record, previous, source_before, artifacts, snapshot):
     path = artifact_path(record)
     compiler_inputs = target_dep_inputs(record, snapshot)
@@ -556,23 +606,54 @@ def certify_record(current, record, previous, source_before, artifacts, snapshot
         if name not in artifacts:
             raise ValueError(f"missing output hash for {output}")
         certificate = {"inputs": hashes, "sha256": artifacts[name]}
-        if record.get("fresh") is not False and previous.get(name) != certificate:
-            raise ValueError(f"uncertified fresh artifact {output}; rebuild required")
+        package_id = record.get("package_id", "")
+        lock_path = Path(current["worktree"]) / "Cargo.lock"
+        try:
+            certificate["lock_closure"] = lock_closure_digest(lock_path.read_bytes(), package_id)
+        except (OSError, ValueError, KeyError) as error:
+            raise LockClosureRejected(f"unverifiable lock closure for {output}: {error}") from error
+        old = previous.get(name)
+        if record.get("fresh") is not False:
+            comparable = dict(old) if old else {}
+            if "lock_closure" in certificate and old:
+                if "lock_closure" not in comparable:
+                    revision = current.get("previous_revision")
+                    try:
+                        lock = git(Path(current["worktree"]), "show", f"{revision}:Cargo.lock") if revision else b""
+                        if hashlib.sha256(lock).hexdigest() != old.get("inputs", {}).get("Cargo.lock"):
+                            raise ValueError("legacy lock digest mismatch")
+                        comparable["lock_closure"] = lock_closure_digest(lock, package_id)
+                    except (OSError, subprocess.CalledProcessError, ValueError, KeyError):
+                        raise LockClosureRejected(f"unverifiable legacy lock for {output}") from None
+                if comparable["lock_closure"] != certificate["lock_closure"]:
+                    raise LockClosureRejected(f"lock closure changed for {output}")
+                comparable["inputs"] = dict(comparable["inputs"], **{"Cargo.lock": hashes.get("Cargo.lock")})
+            if comparable != certificate:
+                raise ValueError(f"uncertified fresh artifact {output}; rebuild required")
         certificates[name] = certificate
     return certificates
 
 
 def certify_artifacts(current, previous, source_before, artifacts, snapshot):
     certificates = dict((previous or {}).get("artifact_certificates", {}))
+    current["previous_revision"] = (previous or {}).get("identity", {}).get("head")
+    current["closure_verified"] = []
+    current["rejected_artifacts"] = []
     errors = []
     for record in current["reported_artifacts"]:
         if not is_repo_artifact(current, record):
             continue
         try:
-            certificates.update(certify_record(
-                current, record, certificates, source_before, artifacts, snapshot))
-        except (OSError, ValueError) as error:
+            certified = certify_record(
+                current, record, certificates, source_before, artifacts, snapshot)
+            certificates.update(certified)
+            if record.get("fresh") is not False and all(
+                    "lock_closure" in cert for cert in certified.values()):
+                current["closure_verified"].append(artifact_path(record))
+        except (OSError, ValueError, KeyError, tomllib.TOMLDecodeError) as error:
             errors.append(str(error))
+            if isinstance(error, LockClosureRejected):
+                current["rejected_artifacts"].append(artifact_path(record))
     return certificates, errors
 
 
@@ -593,7 +674,10 @@ def find_stale_artifacts(current, previous_artifacts, artifacts):
     for record in current["reported_artifacts"]:
         path = artifact_path(record)
         inputs = current["target_inputs"].get(path, [])
-        if not matched_input_changes(current, inputs, changed):
+        relevant_changes = matched_input_changes(current, inputs, changed)
+        if path in current.get("closure_verified", []):
+            relevant_changes.discard("Cargo.lock")
+        if not relevant_changes:
             continue
         name = os.path.relpath(path, current["slot"])
         if record.get("fresh") is not False:
@@ -630,8 +714,65 @@ def finish_build(slot, receipt, current, previous, artifacts, returncode):
     result = "success" if returncode == 0 else "failed"
     if stale:
         result = "stale-artifacts"
+    rejected = {os.path.relpath(path, slot)
+                for path in current.get("rejected_artifacts", [])}
+    evicted = []
+    eviction_errors = []
+    for record in current["reported_artifacts"]:
+        if os.path.relpath(artifact_path(record), slot) not in rejected:
+            continue
+        outputs = {Path(p) for p in [record.get("executable"), *record.get("filenames", [])] if p}
+        fingerprints = set()
+        executable = record.get("executable")
+        if executable:
+            uplift = Path(executable)
+            if uplift in outputs and uplift.parent.name not in {"deps", "build"} and uplift.is_file():
+                name = record.get("target", {}).get("name", "").replace("-", "_")
+                suffix = uplift.suffix
+                candidates = []
+                for candidate in (uplift.parent / "deps").glob(f"{name}-*{suffix}"):
+                    stem = candidate.name[:-len(suffix)] if suffix else candidate.name
+                    if (re.fullmatch(re.escape(name) + r"-[a-f0-9]+", stem)
+                            and candidate.is_file() and not candidate.is_symlink()
+                            and candidate.read_bytes() == uplift.read_bytes()):
+                        candidates.append(candidate)
+                if len(candidates) == 1:
+                    outputs.add(candidates[0])
+        identified = False
+        for output in outputs:
+            if output.parent.parent.name == "build":
+                fingerprint = output.parent.name
+                profile = output.parent.parent.parent
+            elif output.parent.name == "deps":
+                match = re.search(r"-([a-f0-9]+)(?:\.[^.]+)*$", output.name)
+                profile = output.parent.parent
+                package_id = record.get("package_id", "")
+                source, _, fragment = package_id.rpartition("#")
+                package = (fragment.split("@", 1)[0] if "@" in fragment
+                           else Path(source.removeprefix("path+file://")).name)
+                fingerprint = f"{package}-{match.group(1)}" if match and package else ""
+            else:
+                fingerprint = ""
+            if fingerprint:
+                candidate = profile / ".fingerprint" / fingerprint
+                if candidate.is_dir():
+                    fingerprints.add(candidate)
+                    identified = True
+        if not identified:
+            eviction_errors.append(f"{artifact_path(record)}: fingerprint could not be identified")
+            outputs = {Path(p) for p in [record.get("executable"), *record.get("filenames", [])] if p}
+        for path in sorted(outputs | fingerprints):
+            if not path.is_relative_to(slot):
+                continue
+            if path.is_dir() and not path.is_symlink():
+                shutil.rmtree(path)
+            elif path.exists() or path.is_symlink():
+                path.unlink()
+            else:
+                continue
+            evicted.append(str(path.relative_to(slot)))
     current = dict(current, artifacts=artifacts, returncode=returncode, result=result,
-                   unread_package_paths=unread_package_paths(current))
+                   evicted_artifacts=evicted, unread_package_paths=unread_package_paths(current))
     write_json(receipt, current)
     write_json(slot / ".source-identity.json", current)
     if result == "success":
@@ -641,6 +782,8 @@ def finish_build(slot, receipt, current, previous, artifacts, returncode):
                   if missing_evidence else f"missing fresh=false or changed SHA256: {stale_paths}")
         if dep_info_errors:
             reason = "; ".join(dep_info_errors)
+        if eviction_errors:
+            reason += "; " + "; ".join(eviction_errors)
         raise ValueError(f"stale artifacts: {reason}; see {receipt}")
 
 
