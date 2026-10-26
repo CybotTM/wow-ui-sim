@@ -1,3 +1,7 @@
+## [2026-10-26] implementation | Supplied StorePublic eligibility
+
+[Environment-local observations](systems/store-public-eligibility.md) link the [contract](../specs/store-public-eligibility.md). Retail exact original-helper RED rejects list-length eligibility with no setup diagnostics. The producer replaces only that adapter with supplied per-group observations and named missing-input errors; enabled/visibility defaults stay separate. GREEN, stock and profile checks are pending. Outbound recording sinks do not establish a working storefront; classic subscription selection remains blocked.
+
 ## [2026-10-26] proof | Complete PTR Edit Mode display-info
 
 [Complete original-file proof](investigations/ptr-edit-mode-declarations.md#complete-original-display-info-initialization) links the [contract](../specs/ptr-edit-mode-declarations.md):16 declaration-backed read members, exact producer-only RED/GREEN for the whole file and original LossOfControl OnLoad, PTR stock214/280→134/154 with four individually traced additions. The separate preset remains blocked. PTR/Retail/Era each have an accepted all-target receipt with zero warnings; formatting and readability pass.

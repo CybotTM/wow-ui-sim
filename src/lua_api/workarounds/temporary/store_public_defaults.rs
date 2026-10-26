@@ -1,7 +1,7 @@
 //! Temporary `C_StorePublic` availability defaults.
 //!
-//! The public store surface is unmodeled. Keep its enabled/visibility probes in
-//! the temporary workaround layer instead of the generic runtime bootstrap.
+//! Enabled/visibility probes remain unmodeled and live in this workaround layer.
+//! Supplied group eligibility is implemented separately under `c_api`.
 
 const STORE_PUBLIC_DEFAULTS_LUA: &str = r#"
 C_StorePublic = C_StorePublic or __wow_namespace()
@@ -15,16 +15,6 @@ end
 if rawget(C_StorePublic, "IsEnabled") == nil then
     function C_StorePublic.IsEnabled()
         return true
-    end
-end
-
-if rawget(C_StorePublic, "DoesGroupHavePurchaseableProducts") == nil then
-    function C_StorePublic.DoesGroupHavePurchaseableProducts(groupID)
-        if type(C_StoreSecure) ~= "table" or type(C_StoreSecure.GetProducts) ~= "function" then
-            return false
-        end
-        local products = C_StoreSecure.GetProducts(groupID)
-        return type(products) == "table" and #products > 0
     end
 end
 

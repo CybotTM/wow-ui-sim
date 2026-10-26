@@ -1,3 +1,7 @@
+## [2026-10-26] implementation | Supplied StorePublic eligibility
+
+[Model and limits](systems/store-public-eligibility.md): declared six-profile query reads explicit environment-local group observations instead of secure list length; missing input is distinct from false. Retail original-helper and direct-input RED are recorded. GREEN, stock and seven-profile checks remain pending; no storefront or native-policy acceptance claim.
+
 ## [2026-10-26] proof | Complete PTR Edit Mode display-info
 
 [Complete original-file proof](investigations/ptr-edit-mode-declarations.md#complete-original-display-info-initialization) links the [contract](../specs/ptr-edit-mode-declarations.md):16 declaration-backed read members, exact producer-only RED/GREEN for the whole file and original LossOfControl OnLoad, PTR stock214/280→134/154 with four individually traced additions. The separate preset remains blocked. PTR/Retail/Era each have an accepted all-target receipt with zero warnings; formatting and readability pass.
