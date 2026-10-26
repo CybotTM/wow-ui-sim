@@ -29,7 +29,7 @@ fn load_original_settings(engraving: Option<bool>, transmog: bool) -> WowLuaEnv 
     {
         let mut state = env.state().borrow_mut();
         state.engraving.enabled = engraving;
-        state.mists_transmog.enabled = Some(transmog);
+        state.transmog_availability.enabled = Some(transmog);
     }
     load_blizzard_addon_closure_into_env(
         &env,
