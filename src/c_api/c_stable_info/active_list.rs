@@ -145,24 +145,9 @@ fn decode_record(state: &mut LuaState, row: Val) -> LuaResult<PetInfo> {
             "active-pet observation must be a PetInfo table",
         ));
     }
-    let numeric_keys = NUMERIC_FIELDS.iter().chain(
-        PTR_NUMERIC_FIELDS
-            .iter()
-            .filter(|_| ACTIVE == ClientProfile::Ptr),
-    );
-    let numeric_fields = numeric_keys
-        .map(|&key| read_number(table_get(state, row, key), key).map(|value| (key, value)))
-        .collect::<LuaResult<_>>()?;
-    let text_keys = TEXT_FIELDS
-        .iter()
-        .copied()
-        .chain((ACTIVE == ClientProfile::Ptr).then_some("loyaltyName"));
-    let text_fields = text_keys
-        .map(|key| read_text(state, row, key).map(|text| (key, text)))
-        .collect::<LuaResult<_>>()?;
     Ok(PetInfo {
-        numeric_fields,
-        text_fields,
+        numeric_fields: read_numeric_fields(state, row)?,
+        text_fields: read_text_fields(state, row)?,
         is_favorite: read_boolean(table_get(state, row, "isFavorite"), "isFavorite")?,
         is_exotic: read_boolean(table_get(state, row, "isExotic"), "isExotic")?,
         abilities: [
@@ -170,6 +155,25 @@ fn decode_record(state: &mut LuaState, row: Val) -> LuaResult<PetInfo> {
             read_abilities(state, row, ABILITY_FIELDS[1])?,
         ],
     })
+}
+
+fn read_numeric_fields(state: &mut LuaState, row: Val) -> LuaResult<Vec<(&'static str, f64)>> {
+    let keys = NUMERIC_FIELDS.iter().chain(
+        PTR_NUMERIC_FIELDS
+            .iter()
+            .filter(|_| ACTIVE == ClientProfile::Ptr),
+    );
+    keys.map(|&key| read_number(table_get(state, row, key), key).map(|value| (key, value)))
+        .collect()
+}
+
+fn read_text_fields(state: &mut LuaState, row: Val) -> LuaResult<Vec<(&'static str, String)>> {
+    let keys = TEXT_FIELDS
+        .iter()
+        .copied()
+        .chain((ACTIVE == ClientProfile::Ptr).then_some("loyaltyName"));
+    keys.map(|key| read_text(state, row, key).map(|text| (key, text)))
+        .collect()
 }
 
 fn read_number(value: Val, key: &str) -> LuaResult<f64> {
@@ -183,10 +187,8 @@ fn read_number(value: Val, key: &str) -> LuaResult<f64> {
 
 fn read_text(state: &mut LuaState, row: Val, key: &str) -> LuaResult<String> {
     let value = table_get(state, row, key);
-    if !matches!(value, Val::Str(_)) {
-        return Err(runtime_error(format!("PetInfo.{key} must be a string")));
-    }
-    Ok(val_to_string(state, value))
+    val_to_string(state, value)
+        .ok_or_else(|| runtime_error(format!("PetInfo.{key} must be a UTF-8 string")))
 }
 
 fn read_boolean(value: Val, key: &str) -> LuaResult<bool> {
