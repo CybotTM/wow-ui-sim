@@ -532,6 +532,334 @@ class SourceFreshnessTests(unittest.TestCase):
                         "launcher does not invalidate older source mtimes")
         return self.module.prepare_source(self.tree, previous)
 
+    def run_library_step(self, profile, fresh=False, mutation=""):
+        """Run a separate worker against persistent outputs, without Cargo."""
+        import sys
+        (self.slot / ".owner").write_text("test-owner")
+        binary = self.slot / f"debug/deps/libprobe-{profile}.rmeta"
+        emitter = (
+            'import json,sys; from pathlib import Path\n'
+            'binary,source=map(Path,sys.argv[1:3])\n'
+            'fresh=json.loads(sys.argv[3])\n'
+            'if not fresh:\n'
+            '    binary.parent.mkdir(parents=True,exist_ok=True)\n'
+            '    binary.write_bytes(source.read_bytes())\n'
+            '    binary.with_suffix(".d").write_text(str(binary)+": src/main.rs\\n")\n'
+            'exec(sys.argv[4])\n'
+            'print(json.dumps({"reason":"compiler-artifact","filenames":[str(binary)],\n'
+            '    "executable":None,"fresh":fresh}))\n'
+        )
+        request = self.slot / "library-request.json"
+        receipt = self.slot / "library-receipt.json"
+        request.write_text(json.dumps({
+            "slot": str(self.slot), "worktree": str(self.tree), "owner": "test-owner",
+            "unit": "library-step", "receipt": str(receipt),
+            "cargo": [sys.executable, "-c", emitter, str(binary),
+                      str(self.tree / "src/main.rs"), json.dumps(fresh), mutation]}))
+        result = subprocess.run(
+            [sys.executable, "-B", str(SCRIPT), "--execute", str(request)],
+            capture_output=True)
+        return result, json.loads(receipt.read_text())
+
+    def test_profile_switch_cannot_certify_an_older_library(self):
+        result, _ = self.run_library_step("retail")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        source = self.tree / "src/main.rs"
+        source.write_text('struct PetBattlePet { display_id: u32 }')
+        self.git("commit", "-qam", "new model")
+        os.utime(source, (1, 1))
+        result, _ = self.run_library_step("forever")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        verified = (self.slot / ".verified-source-identity.json").read_bytes()
+        result, receipt = self.run_library_step("retail", fresh=True)
+        self.assertEqual(receipt["changed_paths"], [])
+        self.assertNotEqual(result.returncode, 0, result.stdout)
+        self.assertEqual(receipt["result"], "stale-artifacts")
+        self.assertEqual((self.slot / ".verified-source-identity.json").read_bytes(), verified)
+
+    def test_rebuilt_library_with_fewer_inputs_allows_immediate_fresh_reuse(self):
+        old = self.tree / "src/old.rs"
+        old.write_text("pub fn old() {}")
+        self.git("add", ".")
+        self.git("commit", "-qm", "add old module")
+        result, _ = self.run_library_step(
+            "retail", mutation='binary.with_suffix(".d").write_text('
+            'str(binary)+": src/main.rs src/old.rs\\n")')
+        self.assertEqual(result.returncode, 0, result.stderr)
+        old.unlink()
+        self.git("commit", "-qam", "remove old module")
+        result, receipt = self.run_library_step("retail")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = str(self.slot / "debug/deps/libprobe-retail.rmeta")
+        self.assertIn("src/old.rs", receipt["target_inputs"][output])
+        rebuilt = (self.slot / "debug/deps/libprobe-retail.rmeta").read_bytes()
+        result, receipt = self.run_library_step("retail", fresh=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(receipt["result"], "success")
+        self.assertEqual(Path(output).read_bytes(), rebuilt)
+
+    def build_generated_library(self, generated, prefix=""):
+        mutation = (prefix + f'generated=Path({str(generated)!r}); '
+                    'binary.write_bytes(source.read_bytes()+generated.read_bytes()); '
+                    'binary.with_suffix(".d").write_text('
+                    'str(binary)+": src/main.rs "+str(generated)+"\\n")')
+        result, receipt = self.run_library_step("retail", mutation=mutation)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(receipt["result"], "success")
+
+    def test_fresh_library_rejects_changed_generated_compiler_input(self):
+        generated = self.slot / "debug/build/test-harness-hash/out/integration_tests.rs"
+        generated.parent.mkdir(parents=True)
+        generated.write_text("pub const VALUE: u32 = 1;")
+        self.build_generated_library(generated)
+        output = self.slot / "debug/deps/libprobe-retail.rmeta"
+        original = output.read_bytes()
+        verified = (self.slot / ".verified-source-identity.json").read_bytes()
+        generated.write_text("pub const VALUE: u32 = 2;")
+        result, receipt = self.run_library_step("retail", fresh=True)
+        self.assertEqual(output.read_bytes(), original)
+        self.assertEqual(receipt["changed_paths"], [])
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(receipt["result"], "stale-artifacts")
+        self.assertEqual((self.slot / ".verified-source-identity.json").read_bytes(), verified)
+
+    def assert_resolved_generated_input_is_guarded(self, spelling, generated):
+        self.build_generated_library(spelling)
+        output = self.slot / "debug/deps/libprobe-retail.rmeta"
+        original = output.read_bytes()
+        verified = (self.slot / ".verified-source-identity.json").read_bytes()
+        generated.write_text("pub const VALUE: u32 = 2;")
+        result, receipt = self.run_library_step("retail", fresh=True)
+        self.assertEqual(output.read_bytes(), original)
+        self.assertEqual(receipt["changed_paths"], [])
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(receipt["result"], "stale-artifacts")
+        self.assertEqual((self.slot / ".verified-source-identity.json").read_bytes(), verified)
+        self.build_generated_library(spelling)
+        # Changing only dep-info spelling must preserve the resolved certificate key.
+        mutation = ('binary.with_suffix(".d").write_text('
+                    f'str(binary)+": src/main.rs {generated}\\n")')
+        result, receipt = self.run_library_step("retail", fresh=True, mutation=mutation)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(receipt["result"], "success")
+        generated.unlink()
+        for fresh in [True, False]:
+            with self.subTest(fresh=fresh):
+                mutation = ('binary.with_suffix(".d").write_text('
+                            f'str(binary)+": src/main.rs {spelling}\\n")')
+                result, receipt = self.run_library_step("retail", fresh=fresh, mutation=mutation)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertEqual(receipt["result"], "stale-artifacts")
+
+    def test_symlink_parent_input_into_source_rejects_stale_reuse(self):
+        nested = self.tree / "nested"
+        nested.mkdir()
+        actual = self.tree / "extra.rs"
+        actual.write_text("actual v1")
+        self.git("add", ".")
+        self.git("commit", "-qm", "add actual input")
+        bridge = self.slot / "bridge"
+        bridge.symlink_to(nested, target_is_directory=True)
+        spelling = bridge / ".." / "extra.rs"
+        decoy = self.slot / "extra.rs"
+        decoy.write_text("decoy unchanged")
+        self.assertEqual(spelling.read_bytes(), actual.read_bytes())
+        self.build_generated_library(spelling)
+        output = self.slot / "debug/deps/libprobe-retail.rmeta"
+        original = output.read_bytes()
+        self.assertTrue(original.endswith(b"actual v1"))
+        actual.write_text("actual v2")
+        self.git("commit", "-qam", "change actual input")
+        other, _ = self.run_library_step("forever")
+        self.assertEqual(other.returncode, 0, other.stderr)
+        verified = (self.slot / ".verified-source-identity.json").read_bytes()
+        result, receipt = self.run_library_step("retail", fresh=True)
+        self.assertEqual(output.read_bytes(), original)
+        self.assertEqual(receipt["changed_paths"], [])
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(receipt["result"], "stale-artifacts")
+        certificate = receipt["artifact_certificates"][str(output.relative_to(self.slot))]
+        self.assertIn("extra.rs", certificate["inputs"])
+        self.assertNotIn(str(decoy), certificate["inputs"])
+        self.assertEqual((self.slot / ".verified-source-identity.json").read_bytes(), verified)
+
+    def test_removed_input_ancestor_rejects_fresh_reuse(self):
+        actual = self.slot / "present.rs"
+        actual.write_text("compiler input v1")
+        ancestor = self.slot / "ancestor"
+        ancestor.mkdir()
+        spelling = ancestor / ".." / "present.rs"
+        self.assertEqual(spelling.read_bytes(), actual.read_bytes())
+        self.build_generated_library(spelling)
+        output = self.slot / "debug/deps/libprobe-retail.rmeta"
+        original = output.read_bytes()
+        self.assertTrue(original.endswith(b"compiler input v1"))
+        verified = (self.slot / ".verified-source-identity.json").read_bytes()
+        ancestor.rmdir()
+        self.assertFalse(spelling.exists())
+        with self.assertRaises(FileNotFoundError):
+            spelling.read_bytes()
+        result, receipt = self.run_library_step("retail", fresh=True)
+        self.assertEqual(output.read_bytes(), original)
+        self.assertEqual(receipt["changed_paths"], [])
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(receipt["result"], "stale-artifacts")
+        self.assertTrue(receipt["dep_info_errors"])
+        self.assertEqual((self.slot / ".verified-source-identity.json").read_bytes(), verified)
+
+    def test_target_triple_generated_input_is_guarded(self):
+        generated = self.slot / "x86_64-unknown-linux-gnu/debug/build/probe-hash/out/generated.rs"
+        generated.parent.mkdir(parents=True)
+        generated.write_text("pub const VALUE: u32 = 1;")
+        self.assert_resolved_generated_input_is_guarded(generated, generated)
+
+    def test_external_alias_to_slot_generated_input_is_guarded(self):
+        generated = self.slot / "debug/build/probe-hash/out/generated.rs"
+        generated.parent.mkdir(parents=True)
+        generated.write_text("pub const VALUE: u32 = 1;")
+        with tempfile.TemporaryDirectory() as directory:
+            alias = Path(directory) / "generated.rs"
+            alias.symlink_to(generated)
+            self.assert_resolved_generated_input_is_guarded(alias, generated)
+
+    def test_slot_generated_input_outside_build_out_layout_is_guarded(self):
+        generated = self.slot / "custom/nested/generated.rs"
+        generated.parent.mkdir(parents=True)
+        generated.write_text("pub const VALUE: u32 = 1;")
+        self.assert_resolved_generated_input_is_guarded(generated, generated)
+
+    def test_slot_alias_to_external_input_remains_external(self):
+        with tempfile.TemporaryDirectory() as directory:
+            external = Path(directory) / "slot-3/debug/build/probe-hash/out/generated.rs"
+            external.parent.mkdir(parents=True)
+            external.write_text("external v1")
+            alias = self.slot / "debug/build/probe-hash/out/generated.rs"
+            alias.parent.mkdir(parents=True)
+            alias.symlink_to(external)
+            self.build_generated_library(alias)
+            external.unlink()
+            result, receipt = self.run_library_step("retail", fresh=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(receipt["result"], "success")
+
+    def test_library_requires_generated_compiler_input_to_exist(self):
+        generated = self.slot / "release/build/test-harness-hash/out/prefork_full_ui_cases.rs"
+        generated.parent.mkdir(parents=True)
+        generated.write_text("pub fn generated() {}")
+        self.build_generated_library(generated)
+        generated.unlink()
+        for fresh in [True, False]:
+            with self.subTest(fresh=fresh):
+                mutation = ('binary.with_suffix(".d").write_text('
+                            f'str(binary)+": src/main.rs {generated}\\n")')
+                result, receipt = self.run_library_step("retail", fresh=fresh, mutation=mutation)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertEqual(receipt["result"], "stale-artifacts")
+
+    def test_newly_generated_compiler_input_can_be_certified_and_reused(self):
+        generated = self.slot / "debug/build/test-harness-hash/out/integration_tests.rs"
+        generated.parent.mkdir(parents=True)
+        self.build_generated_library(
+            generated, prefix=f'Path({str(generated)!r}).write_text("pub fn generated() {{}}"); ')
+        result, receipt = self.run_library_step("retail", fresh=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(receipt["result"], "success")
+
+    def test_absolute_compiler_input_outside_slot_and_sources_remains_external(self):
+        with tempfile.TemporaryDirectory() as directory:
+            external = Path(directory) / "registry.rs"
+            external.write_text("external v1")
+            self.build_generated_library(external)
+            external.unlink()
+            result, receipt = self.run_library_step("retail", fresh=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(receipt["result"], "success")
+
+    def test_fresh_library_without_content_certificate_fails_closed(self):
+        result, _ = self.run_library_step("retail")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        verified = self.slot / ".verified-source-identity.json"
+        previous = json.loads(verified.read_text())
+        previous.pop("artifact_certificates", None)
+        verified.write_text(json.dumps(previous))
+        result, receipt = self.run_library_step("retail", fresh=True)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(receipt["result"], "stale-artifacts")
+
+    def test_fresh_library_requires_its_certified_output_bytes(self):
+        result, _ = self.run_library_step("retail")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        result, receipt = self.run_library_step(
+            "retail", fresh=True, mutation='binary.write_bytes(b"foreign output")')
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(receipt["result"], "stale-artifacts")
+
+    def test_library_cannot_certify_source_changed_during_child(self):
+        result, receipt = self.run_library_step(
+            "retail", mutation='source.write_text("changed after compile")')
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(receipt["result"], "stale-artifacts")
+        self.assertFalse((self.slot / ".verified-source-identity.json").exists())
+
+    def test_fresh_library_certificate_survives_unrelated_profile_build(self):
+        for profile, fresh in [("retail", False), ("forever", False), ("retail", True)]:
+            result, receipt = self.run_library_step(profile, fresh=fresh)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(receipt["result"], "success")
+        self.assertEqual(len(receipt["artifact_certificates"]), 2)
+
+    def test_rebuilt_library_recovers_after_profile_reuse_rejection(self):
+        result, _ = self.run_library_step("retail")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        (self.tree / "src/main.rs").write_text("new model")
+        self.git("commit", "-qam", "new model")
+        result, _ = self.run_library_step("forever")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        result, _ = self.run_library_step("retail", fresh=True)
+        self.assertNotEqual(result.returncode, 0)
+        for fresh in [False, True]:
+            result, receipt = self.run_library_step("retail", fresh=fresh)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(receipt["result"], "success")
+
+    def test_library_certificate_compares_content_across_worktrees(self):
+        result, _ = self.run_library_step("retail")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        other = self.slot / "other-tree"
+        self.git("worktree", "add", "--detach", str(other), "HEAD")
+        self.tree = other
+        result, receipt = self.run_library_step("retail", fresh=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(receipt["changed_paths"], [])
+
+    def test_fresh_library_rejects_dep_info_input_set_replacement(self):
+        result, _ = self.run_library_step("retail")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        other = self.tree / "src/other.rs"
+        other.write_text((self.tree / "src/main.rs").read_text())
+        self.git("add", ".")
+        self.git("commit", "-qm", "other source")
+        result, _ = self.run_library_step("forever")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        (self.slot / "debug/deps/libprobe-retail.d").write_text(
+            f"{self.slot}/debug/deps/libprobe-retail.rmeta: {other}\\n")
+        result, receipt = self.run_library_step("retail", fresh=True)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(receipt["changed_paths"], [])
+        self.assertEqual(receipt["result"], "stale-artifacts")
+
+    def test_library_rejects_missing_compiler_input_even_if_previously_absent(self):
+        result, _ = self.run_library_step("retail")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        missing = self.tree / "src/missing.rs"
+        dep_info = self.slot / "debug/deps/libprobe-retail.d"
+        dep_info.write_text(f"{dep_info.with_suffix('.rmeta')}: {missing}\\n")
+        # Retain the missing input in current dep-info, just as in the before snapshot.
+        mutation = f'binary.with_suffix(".d").write_text({dep_info.read_text()!r})'
+        result, receipt = self.run_library_step("retail", mutation=mutation)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(receipt["result"], "stale-artifacts")
+
     def test_older_changed_file_is_touched_without_changing_bytes(self):
         previous = self.prepare()
         source = self.tree / "src/main.rs"
@@ -1005,6 +1333,7 @@ class SourceFreshnessTests(unittest.TestCase):
         self.assertEqual(second["result"], "stale-artifacts")
 
     def test_new_dep_info_is_unioned_with_previous_inputs(self):
+        (self.tree / "unrelated.rs").write_text("pub fn unrelated() {}")
         result, first, second = self.run_mixed_output_pair(
             "src/main.rs", {"debug/probe": "B binary"}, fresh=True,
             reported_names=["debug/probe"],

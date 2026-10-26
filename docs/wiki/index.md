@@ -6,13 +6,9 @@
 
 [Original consumer boundaries](investigations/patch-12-1-7-api-audit.md#i4-gamerules-and-recentallies-prerequisites) link the [bounded supplied-input contract](../specs/ptr-i4-game-rules.md). Original-line RED now proves five function boundaries after enum prerequisites; RecentAllies labels pass. Five supplied-state producers are implemented; their GREEN and the preset query remain pending.
 
-## [2026-10-25] implementation | PTR I4 first bounded producer repair
+## [2026-10-25] runtime proof | PTR I4 landable first batch
 
-[Two reached boundaries](investigations/patch-12-1-7-api-audit.md#i4-first-bounded-producer-repair) link the [supplied-state contract](../specs/ptr-i4-first-green.md): item cooldown records and graveyard availability, PTR-only additions, native-unknown limits and unchanged aggregate I4 obligations. Runtime acceptance is separate.
-
-## [2026-10-25] staged | PTR I4 runtime shapes
-
-[Runtime staging](investigations/patch-12-1-7-api-audit.md#i4-runtime-test-staging) links the [contract](../specs/patch-12-1-7-inherited-runtime.md): four ordinary selectors, independent profile registers, original consumer shapes and retained UNKNOWN boundaries. Runtime RED and pre-repair preservation baselines are not yet measured.
+[Bounded producer repair](investigations/patch-12-1-7-api-audit.md#i4-first-bounded-producer-repair) links the [contract](../specs/ptr-i4-first-green.md): four exact RED/GREEN pairs include the original Collections and GhostFrame transitions. Stock 298→296 raw keys has zero additions; Retail/PTR checks meet zero/known-three warning limits and formatting passes. Aggregate 173-shape tests remain on the lane only; native policy remains unknown.
 
 ## [2026-10-25] decision | PTR SharedXML executes twice
 

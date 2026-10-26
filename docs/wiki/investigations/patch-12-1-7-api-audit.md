@@ -4,15 +4,15 @@ Runtime target update: 2026-10-23. [Selected source](../../specs/ptr-blizzard-ui
 
 Verified: 2026-10-22. Slice I0 accounts for the public source for **12.1.7 / 70424 / TOC 120107** without implementing its runtime changes. The [source-accounting spec](../../specs/patch-12-1-7-source-accounting.md) owns P01–P12, inherited category counts, header discrepancies and outstanding slices. All inherited applicability and behavior remain UNKNOWN until I4; GUID work remains deferred pending the user decision.
 
-## I4 runtime test staging
-
-Staged 2026-10-25 on `489df2822`: [runtime contract](../../specs/patch-12-1-7-inherited-runtime.md) and [ordinary integration selectors](../../../tests/patch_12_1_7_inherited_i4.rs) now replace the four absent recipe selectors. The three profile registers bind separate source bytes and observations. They preserve 1,876 occurrence IDs, probe 180 runtime plus 183 declaration candidates, and retain all 214 I4c PTR UNKNOWN rows. Five PTR original-consumer cases cover documented call/nullable shapes only; no native capability/default/security/event-order parity follows. Retail/Forever pre-repair baselines and actual RED execution remain pending. RegionalTextLocale already has bounded default-US original-consumer proof on master and is preservation, not a new missing producer. Glue-only witnesses do not create Game publication assertions.
-
 ## I4 first bounded producer repair
 
-The first authenticated 70493 runtime discovery persisted all 1,876 observations and found 169 publication gaps. Only Collections `C_Spell.GetItemCooldown` and GhostFrame `CanPortGraveyard` reached their exact missing producer boundaries. SmartNavigation remained blocked by module import, and RecentAllies by missing enum publication; those are not downstream producer REDs.
+The lane's authenticated 70493 discovery found 169 publication gaps. This [bounded contract](../../specs/ptr-i4-first-green.md) lands only Collections `C_Spell.GetItemCooldown` and GhostFrame `CanPortGraveyard`, backed by existing supplied state. SmartNavigation and RecentAllies remain prerequisite-blocked, not downstream producer REDs.
 
-The [bounded contract](../../specs/ptr-i4-first-green.md) publishes these two endpoints using the existing item cooldown records and supplied graveyard availability. The item query is explicitly shape-only where native eligibility is unknown. New supplied-state tests failed at both missing calls before implementation. Aggregate I4 tests remain unchanged and cannot pass while the other 167 shapes and three blocked consumers remain. Runtime GREEN and stock/check proof are recorded separately in the lane evidence, not implied by this implementation entry.
+The landing branch retains supplied-state tests and adds independent original-consumer transition selectors. They authenticate source bytes, load Game-selected TOC closures, and require absent/supplied/changed/removed cooldown transitions and false/true/false ghost availability. Constant nil/false producers cannot pass these selectors. Native cooldown eligibility and graveyard policy remain unknown.
+
+All aggregate 173-shape tests remain unchanged on `ptr-i4-runtime` only; they are absent from this landing packet, not ignored or weakened.
+
+Bounded proof on 2026-10-25: both siblings integrate master `7ed5a81f0`, including the PTR-input repair. GREEN `3eb4ae215` passes all four exact selectors; producer-only RED `719a15bbb` fails the unchanged original consumers at Collections line 37 and GhostFrame line 4. Supplied-state selectors also fail RED and pass GREEN. Constant/no-op rejection follows from their transition assertions; no separate mutation execution is claimed. Stock comparison against the PTR-input baseline `120379c39` is 298→296 full raw keys and 412→410 occurrences, zero additions and unchanged common-key counts. Only the GhostFrame OnLoad missing-call error and its wrapper disappear. Retail all-target checks have zero warnings; PTR has only the three inherited late-bind dead-code warnings. Formatting passes. Native policy and aggregate I4 acceptance remain unproved.
 
 ## I4 GameRules and RecentAllies prerequisites
 

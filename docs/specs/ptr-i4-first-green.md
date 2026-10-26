@@ -18,15 +18,24 @@ The item documentation says "Returns nil if the item is not found or on cooldown
 
 ## Verification
 
-`tests/ptr_i4_green1.rs` checks concrete supplied records, changed/removed records, return shapes and environment isolation. A producer-only RED child must remove only the two new registrations while keeping these and the I4 test bytes unchanged.
+`tests/ptr_i4_green1.rs` retains the lane's supplied-state tests for concrete records, changed/removed records, return shapes and environment isolation. PTR per-consumer tests authenticate the original source bytes and load the selected Game TOC closure. Collections must hide for an absent record, show the supplied cooldown, track changed times, and hide after removal. GhostFrame must track false/true/false supplied availability and explicit hiding. Each selector rejects constant/no-op producers through observable transitions.
 
-The existing I4 discovery and preservation selectors remain unchanged. They still require the other 167 missing shapes and three blocked consumers; this bounded repair cannot make those aggregate selectors pass. Persist all observations and report the two original-consumer transitions separately, without an aggregate GREEN claim.
+A producer-only RED sibling keeps every landing test byte unchanged and removes only the two producers. Its per-consumer tests must fail at `Blizzard_CollectionTemplates.lua:37` and `GhostFrame.lua:4`; GREEN must pass those exact selectors.
+
+The deliberately failing aggregate I4 discovery and preservation tests stay exclusively on `ptr-i4-runtime`, with all 173 required shapes unchanged. They are not part of this landing branch or its normal suite. The wider 167 missing shapes and three blocked consumers remain separate obligations; this packet does not claim aggregate I4 acceptance.
 
 Stock PTR startup compares master against this repair with identical pinned sources and guarded CVar copies. Every added error key requires an original emitter line and the predecessor failure that masked it. PTR/Retail all-target checks and formatting are separate acceptance evidence.
 
+## Accepted bounded evidence
+
+On 2026-10-25, GREEN `3eb4ae215` and producer-only RED `719a15bbb` include master `7ed5a81f0`, including PTR-input. Each of the four selectors has an exact one-test list and a single execution per sibling: RED fails, GREEN passes. The original consumers fail RED at the two Blizzard call sites specified above. Tests and all non-producer source bytes match between siblings.
+
+Stock comparison uses the PTR-input merged baseline `120379c39`: 298→296 full raw message keys, 412→410 occurrences, zero additions, and unchanged common-key counts. The removed keys are GhostFrame OnLoad's missing graveyard call and its error wrapper. The older 428-key baseline predates PTR-input and is not final acceptance evidence. Remaining Mists-only pet-display changes on master do not publish or read that model on PTR.
+
+Retail and PTR all-target checks pass with zero and exactly three inherited late-bind dead-code warnings respectively; both Cargo JSON and plain stderr were inspected. Formatting passes. Documentation-only descendants do not change this code/test proof scope. Native eligibility, capability policy, restrictions, and wider I4 acceptance remain unknown.
+
 ## Related documentation
 
-- [I4 runtime contract](patch-12-1-7-inherited-runtime.md)
 - [I4 source investigation](../wiki/investigations/patch-12-1-7-api-audit.md)
 - [Existing item cooldown model](item-cooldowns.md)
 - [Existing graveyard query](forever-graveyard-port.md)
