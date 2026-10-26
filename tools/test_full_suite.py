@@ -264,6 +264,31 @@ class CertifiedSuiteTests(unittest.TestCase):
             fcntl.flock(lock, fcntl.LOCK_UN)
         process.communicate(timeout=10)
 
+    def test_invalid_target_and_profile_are_rejected_before_launch(self):
+        for options in (['--target-dir', str(self.slot.with_name('slot-4'))],
+                        ['--target-dir', str(self.slot), '--profile', 'unknown'],
+                        ['--target-dir', str(self.slot), '--build-jobs', '0']):
+            with self.subTest(options=options):
+                result = subprocess.run([sys.executable, str(RUNNER), 'run', self.sha, *options],
+                                        env=self.env, capture_output=True, text=True, timeout=10)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertFalse((self.home / 'slot-argv.json').exists())
+
+    def test_status_groups_profile_and_legacy_results(self):
+        results = self.home / 'Projects/wow/full-suite-results'
+        results.mkdir(parents=True)
+        profile = {'sha': self.sha, 'profile': 'ptr', 'steps': {'lib': {'exit': 7}}}
+        legacy = {'sha': self.sha, 'steps': {'lib': {'exit': 0}}}
+        (results / f'{self.sha}-ptr.json').write_text(json.dumps(profile))
+        (results / f'{self.sha}.json').write_text(json.dumps(legacy))
+        process = subprocess.run([sys.executable, str(RUNNER), 'status', self.sha],
+                                 env=self.env, capture_output=True, text=True, timeout=10)
+        self.assertEqual(process.returncode, 0, process.stderr)
+        output = json.loads(process.stdout)
+        self.assertEqual(output['profiles']['ptr'], profile)
+        self.assertIsNone(output['profiles']['retail'])
+        self.assertEqual(output['legacy_retail'], legacy)
+
     def test_submit_sets_memory_limits(self):
         write_executable(self.bin / 'systemd-run',
                          "import json, os, pathlib, sys\n"
