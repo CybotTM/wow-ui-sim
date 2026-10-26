@@ -1,6 +1,7 @@
 //! Persisted C_TTSSettings preferences, never public preference CVars.
 //! Contract/evidence and unresolved native policies: docs/specs/c-factory-cf2-tts.md.
 
+use crate::client_profile::{ACTIVE, ClientProfile};
 use crate::lua_api::methods::borrow_state;
 use crate::lua_bridge::stack_val;
 use crate::saved_variables::SavedVariablesManager;
@@ -13,6 +14,10 @@ fn storage_manager(state: &LuaState) -> LuaResult<SavedVariablesManager> {
 }
 
 pub(crate) fn register(lua: &mut rilua::Lua) -> crate::Result<()> {
+    // All 18 functions are declared on the other six pinned profiles, not Wrath.
+    if ACTIVE == ClientProfile::Wrath {
+        return Ok(());
+    }
     super::ensure_namespace(lua.state_mut(), "C_TTSSettings")?;
     let manager = storage_manager(lua.state_mut())?;
     let saved = manager.load_model(lua.state_mut(), "TTSSettings")?;

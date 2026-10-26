@@ -32,9 +32,17 @@ Only `cf2_tts_shape_contract::original_gamepad_temp_cvar_shape_blocker` is remov
 
 The five original-consumer TTS cases pass on the checkpoint's Forever build with 70532 inputs. Its exact raw stock map matches the accepted master map: 26 messages, 26 occurrences, zero additions or removals. Wrath does not register these CF-2 fixtures. The saved-marker model is user-approved, not native initial/reset evidence.
 
+## Publication gate repair
+
+The verifier rejected unconditional registration: the shared model was published on Wrath without a pinned declaration. All 18 function names occur as functions in `Blizzard_APIDocumentationGenerated/TTSSettingsDocumentation.lua` on Retail, PTR, Mists, Era, Anniversary and WowForever. Neither the sparse Wrath cache nor its fuller pinned source tree provides that declaration. Search absence does not establish native absence.
+
+Registration now checks `client_profile::ACTIVE` before namespace creation or persistence initialization and returns on Wrath. The six legacy `c_system_api` TTS tests use the same visible profile selection: each positively asserts namespace absence on Wrath; other profiles retain their original assertions. This applicability correction was explicitly approved. A separate publication regression checks Wrath absence or all 18 raw function members. The Wrath regression failed against the ungated producer after exact discovery; post-fix runtime and all-target proof are pending.
+
+The merge from `origin/master` at `05f95ab1c` preserves both parents' wiki log entries. No master branch update or rebase was performed.
+
 ## Bounded verification
 
-Code checkpoint `297b198b6` passes 37 exact cases: five original-consumer TTS cases on each of six registered profiles, plus the corrected legacy Alternate-voice test on all seven. Each case has exact-list discovery followed by one exact execution. All seven all-target checks pass. Retail/Wrath have zero warnings; PTR/Mists/Era/Anniversary/Forever have only the three inherited `fast_handler_late_bind` dead-code warnings. The parent explicitly accepted the Era/Anniversary allowance; the `i1-test-warnings` lane owns cleanup.
+Historical code checkpoint `297b198b6` passes 37 exact cases: five original-consumer TTS cases on each of six registered profiles, plus the corrected legacy Alternate-voice test on all seven. Each case has exact-list discovery followed by one exact execution. All seven all-target checks pass. Retail/Wrath have zero warnings; PTR/Mists/Era/Anniversary/Forever have only the three inherited `fast_handler_late_bind` dead-code warnings. The parent explicitly accepted the Era/Anniversary allowance; the `i1-test-warnings` lane owns cleanup.
 
 Stock results retain raw message keys and counts, without headline normalization:
 

@@ -21,6 +21,10 @@
 ## [2026-10-24] staged | Mists pet display identity
 
 [Pet identity notes](systems/pet-battle-names.md#mists-display-identity) link the [contract](../specs/mists-pet-display-id.md): supplied optional per-pet display identity, Mists-only publication and static nil receiver trace. Existing name selectors remain unchanged; constant/value projection coverage and all new runtime proof remain pending.
+## [2026-10-25] fix | TTS profile publication
+
+[Publication boundary](investigations/cf2-tts-integration.md#publication-gate-repair) records the Wrath namespace RED, six declaring profiles and approved positive-absence legacy applicability. Post-fix runtime proof is pending.
+
 ## [2026-10-25] investigation | Forever startup supplied inputs
 
 [Startup gaps](investigations/forever-startup-gaps.md) links the byte-exact 70532 baseline, 21 passing exact selectors and explicit native-unknown target/locality boundaries. Known registration/model gaps are repaired; startup retains only approved native-unknown residue. Positive housing is a tested excluded-publisher boundary, not a loader fix. All-target Forever/Retail/PTR checks pass under the clarified inherited-warning allowance; the lane report owns CPU and release receipts.
