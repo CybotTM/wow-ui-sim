@@ -1,9 +1,5 @@
-//! CF-2 party minimum: original selected XML/Lua consumer, pending slot-backed RED.
-#![cfg(any(
-    feature = "client-retail",
-    feature = "client-ptr",
-    feature = "client-mists",
-))]
+//! Supplied party minimum through the original selected XML/Lua consumer.
+#![cfg(any(feature = "client-retail", feature = "client-ptr",))]
 
 use crate::common::blizzard_addon_harness::{
     blizzard_ui_dir, load_blizzard_addon_closure_into_env, new_blizzard_addon_env,
