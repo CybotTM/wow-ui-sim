@@ -21,15 +21,25 @@ fn load_original_specialization() -> WowLuaEnv {
     } else {
         "Blizzard_StableUI.lua"
     };
-    assert!(toc.files.iter().any(|file| file == std::path::Path::new(selected)));
+    assert!(
+        toc.files
+            .iter()
+            .any(|file| file == std::path::Path::new(selected))
+    );
     eprintln!("selected StableUI {} {:?}", path.display(), toc.files);
     let env = new_blizzard_addon_env(&ui);
     wow_ui_sim::xml::register_intrinsic_templates();
     let loaded = load_blizzard_addon_closure_into_env(
-        &env, &ui, &["Blizzard_FrameXML", "Blizzard_StableUI"], &[],
+        &env,
+        &ui,
+        &["Blizzard_FrameXML", "Blizzard_StableUI"],
+        &[],
     );
     assert!(loaded.iter().any(|name| name == "Blizzard_StableUI"));
-    eprintln!("unfiltered setup diagnostics: {:?}", env.state().borrow().lua_errors);
+    eprintln!(
+        "unfiltered setup diagnostics: {:?}",
+        env.state().borrow().lua_errors
+    );
     env.exec(&format!("expectedPetSpecSource = {selected:?}"))
         .unwrap();
     env.exec(ORIGINAL_OBSERVER).unwrap();
@@ -76,7 +86,8 @@ const ORIGINAL_OBSERVER: &str = r#"
 #[test]
 fn pet_spec_admin_accepts_complete_records_and_rejects_invalid_inputs() {
     let env = WowLuaEnv::new().unwrap();
-    env.exec(r#"
+    env.exec(
+        r#"
         A_Admin.SetAvailablePetSpecInfos({{specID=917, specIndex=7, specializationName='Supplied'}})
         A_Admin.SetAvailablePetSpecInfos({})
         A_Admin.SetAvailablePetSpecInfos(nil)
@@ -89,7 +100,9 @@ fn pet_spec_admin_accepts_complete_records_and_rejects_invalid_inputs() {
             local ok, reason = pcall(A_Admin.SetAvailablePetSpecInfos, input)
             assert(not ok and tostring(reason):find('pet specialization',1,true), tostring(reason))
         end
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 }
 
 #[test]
@@ -133,30 +146,46 @@ fn original_pet_spec_onload_tracks_supplied_cardinality() {
 #[test]
 fn original_pet_spec_refresh_tracks_records_and_isolation() {
     let first = load_original_specialization();
-    first.exec(r#"
+    first
+        .exec(
+            r#"
         alpha = suppliedSpec(917,7,'Zulu observation')
         beta = suppliedSpec(811,2,'Alpha observation')
         observeRefresh({alpha,beta},811)
         observeRefresh({suppliedSpec(602,9,'Replacement observation')},602)
         observeRefresh({},602)
         observeRefresh({alpha,beta},917)
-    "#).expect("original Refresh consumes distinct catalogs and selected IDs");
+    "#,
+        )
+        .expect("original Refresh consumes distinct catalogs and selected IDs");
     let second = load_original_specialization();
-    second.exec("observeRefresh({suppliedSpec(401,4,'Independent observation')},401)").unwrap();
+    second
+        .exec("observeRefresh({suppliedSpec(401,4,'Independent observation')},401)")
+        .unwrap();
     first.exec("observeRefresh({alpha,beta},811)").unwrap();
-    second.exec(r#"
+    second
+        .exec(
+            r#"
         dropdown:Refresh()
         assert(#dropdown.options == 1 and dropdown.options[1].name == 'Independent observation')
         assert(dropdown.activeSpecIndex == 4)
-    "#).unwrap();
+    "#,
+        )
+        .unwrap();
 }
 
 #[test]
 fn original_pet_spec_unset_and_clear_raise_named_error() {
     let env = load_original_specialization();
-    let method = if ACTIVE == ClientProfile::Ptr { "OnLoad" } else { "Refresh" };
-    env.exec(&format!("originalPetSpecEntry = dropdown.{method}")).unwrap();
-    env.exec(r#"
+    let method = if ACTIVE == ClientProfile::Ptr {
+        "OnLoad"
+    } else {
+        "Refresh"
+    };
+    env.exec(&format!("originalPetSpecEntry = dropdown.{method}"))
+        .unwrap();
+    env.exec(
+        r#"
         local function assertUnknown()
             local ok, reason = pcall(originalPetSpecEntry, dropdown)
             assert(not ok and tostring(reason):find(
@@ -167,13 +196,16 @@ fn original_pet_spec_unset_and_clear_raise_named_error() {
         A_Admin.SetAvailablePetSpecInfos(nil)
         assertUnknown()
         observeRefresh({suppliedSpec(811,2,'Resupplied observation')},811)
-    "#).expect("named unknown through original entry and recovery");
+    "#,
+    )
+    .expect("named unknown through original entry and recovery");
 }
 
 #[test]
 fn pet_spec_observations_are_fresh_copies_and_invalid_supply_is_atomic() {
     let env = WowLuaEnv::new().unwrap();
-    env.exec(r#"
+    env.exec(
+        r#"
         local record = {specID=917,specIndex=7,specializationName='Original observation'}
         local input = {record}
         A_Admin.SetAvailablePetSpecInfos(input)
@@ -190,5 +222,7 @@ fn pet_spec_observations_are_fresh_copies_and_invalid_supply_is_atomic() {
         assert(again ~= output and again[1] ~= output[1] and #again == 1)
         assert(again[1].specID == 917 and again[1].specIndex == 7)
         assert(again[1].specializationName == 'Original observation')
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 }

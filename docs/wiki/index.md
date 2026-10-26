@@ -1,3 +1,7 @@
+## [2026-10-26] staged | Supplied pet specialization catalog
+
+[Selected consumer and supplied-state contract](investigations/consumer-selection-and-red-proof.md#supplied-pet-specialization-catalog) distinguish PTR OnLoad1205, Retail Refresh and unselected Forever Standard UI. The optional input/admin scaffold is staged; producer and runtime proof remain pending.
+
 ## [2026-10-26] implementation | Supplied voice settings access
 
 [Original audio polling boundary](systems/voice-settings-access.md) links the [contract](../specs/voice-settings-access.md): six declaring profiles, environment-local optional observation and named unset error; Wrath remains absent. Eighteen exact original-consumer GREEN/producer-free RED pairs pass, seven full-feature all-target checks have zero warnings, and all raw stock maps are unchanged at the supplied master baselines. All 98 final launch CVar guards are unchanged. Full device initialization, timer cancellation and unsupplied forecast readiness are not claimed.

@@ -3,6 +3,7 @@
 pub mod active_list;
 #[cfg(feature = "client-wowforever")]
 pub mod forever;
+pub mod pet_spec_infos;
 mod ptr_constants;
 
 use crate::c_api::helpers::ensure_namespace;

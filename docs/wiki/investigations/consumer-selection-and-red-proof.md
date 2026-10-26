@@ -53,6 +53,12 @@ The [squelch contract](../../specs/social-squelch.md) adds one environment-local
 
 At frozen master `9a104c448`, stock maps are Retail16/18, PTR296/410 and Mists12/18 (keys/occurrences). GREEN code `2dc0a8759` yields14/16,294/408 and10/16 respectively: only each original squelch primary/reporter pair disappears, with no added keys or changed counts. All-target checks pass: Retail zero warnings, PTR/Mists only the three permitted `fast_handler_late_bind.rs` dead-code warnings. Twenty-two payloads retain unchanged original CVar stat/hash guards. Unrelated closure errors and stock residue remain recorded; no clean-startup claim is made.
 
+## Supplied pet specialization catalog
+
+The [supplied catalog contract](../../specs/stable-pet-spec-infos.md) keeps unknown membership distinct from an observed empty list. PTR70493 selects Standard StableUI through its standard/camelot TOC and `[Game]` substitution; the specialization dropdown at XML373 inherits the menu template's OnLoad, which invokes original Lua1203 and queries the catalog at1205. Retail's original OnLoad1221 does not query it: use Refresh1227 for producer proof. Forever selects Camelot and never consumes this getter, despite its generated declaration.
+
+Initial delivery stages only environment-local optional records and the Retail/PTR admin input. Getter delivery and original-consumer runtime proof are pending. No default list or native specialization identity is inferred.
+
 ## Supplied modern stable active list
 
 The [supplied-list contract](../../specs/stable-active-list.md) separates Retail/PTR observations from Forever's Camelot `stable_reads`. Re-authenticated Retail declarations are `StableInfoDocumentation.lua:15–22,193–214`; PTR 70493 uses `:19–26,215–241` and adds five loyalty/happiness/experience fields. Retail's bare StableUI TOC selects the getter at `Blizzard_StableUI.lua:447`; PTR's `[Game]` entry selects `Standard/Blizzard_StableUI.lua:458`, not the old shared line447 citation.
