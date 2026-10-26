@@ -20,6 +20,13 @@ PTR publishes declaration-backed Edit Mode enums through `src/c_api/ptr_edit_mod
 - The unchanged whole `EditModeSettingDisplayInfo.lua` must complete and publish `GetSystemSettingDisplayInfoMap`, with the original per-system keys and setting values.
 - Do not publish unread account settings or metadata for this boundary. Stop at a non-declaration failure rather than replacing Blizzard functions or strings.
 
+## PTR MainActionBar endcap indices
+
+- Publish only `Enum.EditModeMainActionBarEndCapSystemIndices` as EndCapLeft=1 and EndCapRight=2, with `Enum.EditModeMainActionBarEndCapSystemIndicesMeta` NumValues=2, MinValue=1, MaxValue=2. The pinned PTR 12.1.7.70493 `Blizzard_APIDocumentationGenerated/EditModeManagerConstantsDocumentation.lua:560–568` declares this exact name, metadata and values. Do not publish a shortened alias.
+- Keep publication in the existing C API module and runtime `client_profile::ACTIVE` PTR gate. Preserve other profiles and unrelated members.
+- The unchanged selected Mainline preset endcap constructor at `EditModePresetLayouts.lua:630–655` must retain distinct records at indices1/2, each with Hidden=0, and its original anchors: RIGHT/MainActionBar/LEFT/(30,5) and LEFT/BagsBar/RIGHT/(-30,5).
+- This is a bounded constructor contract, not complete preset initialization. SwingTimerSystemIndices and native preset defaults remain outside this change. Record the next original boundary rather than publishing a successor family.
+
 ## How it works
 
 - [Declaration and consumer evidence](../wiki/investigations/ptr-edit-mode-declarations.md).
@@ -37,7 +44,7 @@ PTR publishes declaration-backed Edit Mode enums through `src/c_api/ptr_edit_mod
 ## Known gaps (current cycle)
 
 - [x] Complete original display-info initialization and the original LossOfControl OnLoad both pass byte-identical producer-only RED/GREEN selectors.
-- [ ] Native preset defaults and other Edit Mode lifecycle behavior remain outside this contract. The separate Mainline preset now stops at missing EditModeMainActionBarEndCapSystemIndices; display-info does not read that family.
+- [ ] Native preset defaults and other Edit Mode lifecycle behavior remain outside this contract. The separate Mainline preset is not covered as a complete initialization. Its endcap constructor has a separate bounded contract above; display-info does not read that family.
 
 ## Out of scope
 
