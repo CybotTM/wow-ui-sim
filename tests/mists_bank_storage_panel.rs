@@ -29,7 +29,6 @@ fn original_guild_bank_tabs_follow_empty_supplied_empty_catalog() {
         GuildBankFrame:UpdateTabs()
         assert(not GuildBankFrame.BankTabs[1]:IsShown(), "empty catalog must hide tab 1")
         assert(GetNumGuildBankTabs() == 0)
-        assert(select("#", GetGuildBankTabInfo(1)) == 0)
         A_Admin.AddGuildBankTab("Supplied materials", "Interface\\Icons\\INV_Misc_Bag_10", true, false, 3, 2, true)
         GuildBankFrame:UpdateTabs()
         assert(GuildBankFrame.BankTabs[1]:IsShown(), "supplied catalog must show tab 1")
@@ -41,6 +40,7 @@ fn original_guild_bank_tabs_follow_empty_supplied_empty_catalog() {
         A_Admin.ClearGuildBankTabs()
         GuildBankFrame:UpdateTabs()
         assert(not GuildBankFrame.BankTabs[1]:IsShown(), "cleared catalog must hide tab 1")
+        assert(select("#", GetGuildBankTabInfo(1)) == 0)
     "##).expect("original Mists guild-bank tab setup must project the supplied catalog");
 }
 
@@ -69,6 +69,7 @@ fn mists_bank_and_guild_bank_support_storage_flow() {
             A_Admin.AddBagItem(0, 1, 6948, 1)
             A_Admin.AddBagItem(-1, 1, 6948, 1)
             A_Admin.ClearGuildBank()
+            A_Admin.AddGuildBankTab("General", "Interface\\\\Icons\\\\INV_Misc_Bag_10", true, true, -1, -1, false)
             A_Admin.AddGuildBankItem(1, 1, 6948, 1)
 
             FireEvent("BANKFRAME_OPENED")
