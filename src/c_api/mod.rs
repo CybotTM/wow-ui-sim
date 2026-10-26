@@ -188,6 +188,7 @@ pub mod engraving_inputs;
 mod forever_outfits;
 pub mod forever_startup;
 mod lfr_availability;
+pub(crate) use lfr_availability::stock_lfr_availability;
 pub mod outfit_entry;
 mod scenario_finder_availability;
 pub mod store_public_eligibility;
