@@ -1,3 +1,7 @@
+## [2026-10-26] implementation | Supplied voice settings access
+
+[Model and original callback](systems/voice-settings-access.md) record the six-profile declaration-backed query, unknown-state error and host-supplied observation. Own Retail RED reaches original Audio.lua:565. Final acceptance is pending; no native readiness default, device catalog or full initialization is inferred.
+
 ## [2026-10-26] implementation | Mists transmog supplied input
 
 [Contract and selected display branch](systems/mists-transmog-enabled.md): byte-identical selectors fail producer-free RED at original line4 and pass GREEN for both real-control branches, isolation, transitions and unset recovery. The supplied-state query publishes only on Mists; no default is inferred. Bound stock is unchanged6/12; all seven all-target checks have zero warnings. Full settings, modern native-default policy and the Forever query remain outside this bounded proof.
