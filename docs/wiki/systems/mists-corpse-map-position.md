@@ -16,7 +16,7 @@ Positive results use the original SharedXML `CreateVector2D` factory, preserving
 
 ## Proof scope
 
-The selector alternates absent and supplied states, changes maps, removes availability, revives the player and retrieves the corpse. A constant nil/no-op cannot satisfy the supplied original pin assertions; a constant populated producer cannot satisfy initial absence or later removal. 
+The selector alternates absent and supplied states, changes maps, removes availability, revives the player and retrieves the corpse. A constant nil/no-op cannot satisfy the supplied original pin assertions; a constant populated producer cannot satisfy initial absence or later removal.
 
 ## Executed proof
 
