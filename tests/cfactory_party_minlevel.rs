@@ -70,7 +70,7 @@ fn assert_selected_toc(ui: &std::path::Path) {
     let toc_path =
         find_toc_file(&ui.join("Blizzard_GroupFinder")).expect("selected GroupFinder TOC");
     let expected = match ACTIVE {
-        ClientProfile::Mists => "Blizzard_GroupFinder_Classic.toc",
+        ClientProfile::Ptr => "Blizzard_GroupFinder.toc",
         _ => "Blizzard_GroupFinder_Mainline.toc",
     };
     assert_eq!(toc_path.file_name().unwrap(), expected);
