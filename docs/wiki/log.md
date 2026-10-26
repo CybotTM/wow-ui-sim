@@ -1,6 +1,6 @@
 ## [2026-10-25] repair | Fog pin workaround scope
 
-[Template-only refresh](investigations/world-map-fog-of-war-overlay-model.md#post-load-workaround-scope) removes the redundant provider.pin scan that copied fog callbacks onto unrelated map pins. Original WorldMap group and highlight regressions fail independently on Retail and Mists before this repair. Native SetUiMapID callback dispatch remains missing, so the fog refresh substitute stays. GREEN, stock and all-profile checks are pending.
+[Template-only refresh](investigations/world-map-fog-of-war-overlay-model.md#post-load-workaround-scope) removes the provider.pin scan that copied fog callbacks onto unrelated pins. Original WorldMap group and highlight RED/GREEN pass on Retail, Mists and Era; original Retail fog refresh preservation passes. Stock maps remain exactly 12/14, 8/14 and 0/0, with no additions. All seven all-target checks have zero warnings; formatting and readability pass. Native SetUiMapID callback dispatch remains missing, so the fog refresh substitute stays.
 
 ## [2026-10-25] proof | Supplied social squelch
 

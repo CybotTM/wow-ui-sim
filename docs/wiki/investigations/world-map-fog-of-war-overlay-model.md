@@ -102,6 +102,16 @@ profiles that publish that separate query. Mists callback identity is tested
 without replacing its independently missing query. The Retail fog case checks
 map rebinding, stale background/mask cleanup and missing-fog hiding.
 
+Verification at `96dee83ff`:
+
+- Original group and highlight selectors independently fail before the repair
+  and pass afterward on Retail, Mists and Era, with byte-identical tests.
+- Original Retail fog refresh and cleanup preservation passes.
+- Exact stock maps remain Retail 12 keys/14 occurrences, Mists 8/14 and Era 0/0,
+  with equal CVar inputs and no added, removed or changed-count keys.
+- All seven client profiles pass all-target checks with zero Cargo/plain
+  warnings; formatting and changed-Rust readability pass.
+
 ## Verification
 
 - `cargo test --test c_map_api test_c_fog_of_war_returns_nil_for_current_map_without_fog_data -- --nocapture`
