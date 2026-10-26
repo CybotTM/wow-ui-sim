@@ -86,7 +86,7 @@ fn load_original_display_settings() -> WowLuaEnv {
 fn assert_display_controls(env: &WowLuaEnv, enabled: bool) {
     env.state().borrow_mut().mists_transmog.enabled = Some(enabled);
     let errors_before = env.state().borrow().lua_errors.len();
-    let controls: usize = env
+    let controls: i32 = env
         .eval("return ObserveTransmogDisplay()")
         .expect("original AdjustDisplaySettings:4 must consume supplied availability");
     assert_eq!(controls, if enabled { 0 } else { 2 });
@@ -110,11 +110,11 @@ fn exercise_display_transitions(initial: bool) {
     // Each environment registers the false-branch variables only once, as the
     // original SettingsPanel rejects duplicate registration. No sink is replaced.
     assert_eq!(first.state().borrow().mists_transmog.enabled, Some(true));
-    let retained: usize = first.eval("return ObserveTransmogDisplay()").unwrap();
+    let retained: i32 = first.eval("return ObserveTransmogDisplay()").unwrap();
     assert_eq!(retained, 0);
     first.state().borrow_mut().mists_transmog.enabled = None;
     let error = first
-        .eval::<usize>("return ObserveTransmogDisplay()")
+        .eval::<i32>("return ObserveTransmogDisplay()")
         .expect_err("unset availability must not choose a UI branch");
     assert!(
         error.to_string().contains(
