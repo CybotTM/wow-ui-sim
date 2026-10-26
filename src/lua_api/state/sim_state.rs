@@ -362,8 +362,9 @@ pub struct SimState {
     #[cfg(feature = "base-spell-relationships")]
     pub base_spell_relationships: crate::c_api::spell_base::BaseSpellRelationships,
     pub spell_activation_overlays: HashSet<u32>,
-    #[cfg(feature = "retail-12-0-0")]
     pub challenge_completion: crate::c_api::c_challenge_mode::ChallengeCompletionInfo,
+    pub(crate) challenge_run: crate::c_api::challenge_run::ChallengeState,
+    pub(crate) manual_clock: Option<crate::lua_api::manual_clock::ManualClock>,
     pub spell_loss_of_control: HashMap<u32, LossOfControlInfo>,
     pub active_loss_of_control:
         HashMap<String, Vec<crate::c_api::c_loss_of_control::ActiveLossOfControlData>>,

@@ -518,7 +518,7 @@ fn c_spell_book_get_spell_book_item_cooldown_duration(state: &mut LuaState) -> L
     };
     let (start, seconds) = {
         let sim = borrow_state(state)?;
-        let now = sim.start_time.elapsed().as_secs_f64();
+        let now = sim.clock_elapsed().as_secs_f64();
         super::cooldown_duration::select_cooldown_duration_times(&sim, spell_id, now, ignore_gcd)
     };
     crate::lua_api::globals::lua_duration_object::push_timed_duration_object(state, start, seconds)

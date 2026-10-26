@@ -51,7 +51,7 @@ fn push_localized_labels(state: &mut LuaState, keys: &[&str]) -> LuaResult<u32> 
 fn can_send_invite(state: &mut LuaState) -> LuaResult<u32> {
     let allowed = {
         let sim = borrow_state(state)?;
-        let now_ms = sim.start_time.elapsed().as_millis() as u64;
+        let now_ms = sim.clock_elapsed().as_millis() as u64;
         sim.wrath_legacy.calendar.can_send_invite_at(now_ms)
     };
     state.push(Val::Bool(allowed));

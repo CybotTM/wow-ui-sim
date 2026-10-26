@@ -109,7 +109,7 @@ fn select_recharge_times(charge: SpellChargeState, now: f64) -> Option<(f64, f64
 pub(crate) fn push_charge_duration(state: &mut LuaState, spell_id: Option<u32>) -> LuaResult<u32> {
     let timing = {
         let sim = borrow_state(state)?;
-        let now = sim.start_time.elapsed().as_secs_f64();
+        let now = sim.clock_elapsed().as_secs_f64();
         read_charge_input(&sim, spell_id).and_then(|charge| select_recharge_times(charge, now))
     };
     let Some((start, seconds, rate)) = timing else {

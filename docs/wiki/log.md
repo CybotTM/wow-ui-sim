@@ -26,6 +26,10 @@
 
 [Original preset proof](investigations/ptr-edit-mode-declarations.md#complete-original-mainline-preset-construction) records declared EndCap/SwingTimer indices and metadata, first-read RED/unchanged whole-file GREEN, concrete settings/anchors and shared maps. Stock134/154→130/148 has no added keys; original ClearBlockedAuras remains missing, and the stateful original SetUnit replay explains why fewer event-route errors do not prove an API repair. Newer aura stock124/140 is a different production base. Seven separate all-target receipts have zero JSON/plain compiler warnings; formatting/readability and all nine current-byte CVar guards pass.
 
+## [2026-10-26] bounded proof | Challenge run clock
+
+[Final scoped evidence](systems/challenge-mode-run.md) records original timer/icon RED/GREEN, six-profile criteria query state, all seven clock/check profiles, protected stock equality and both InTimeBL modes. The two invented-default probes now use strict absence or supplied map metadata without dropping unrelated assertions. Original criteria initialization is BLOCKED at undeclared ShouldShowCriteria; no exception is swallowed. Inactive key shape remains unknown, and forecast voice/ambient errors remain visible.
+
 ## [2026-10-26] implementation | Legacy tutorial request recorder
 
 [Consumer investigation](investigations/invented-query-defaults.md#legacy-tutorial-request-boundary) records the four legacy profiles, the already-selected TutorialFrame listener, and the absent native global. Original Mists storage-flow RED remains unchanged; bounded state recorder adds no event/flag/UI policy. GREEN advances past976 through all Lua assertions, but the test still fails its collected-error gate (C_Engraving:315 next). Four-profile state/publication tests pass, stock maps are byte-identical, and all seven canonical all-target checks have zero warnings.

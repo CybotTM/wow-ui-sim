@@ -310,8 +310,9 @@ pub(super) fn set_party_member_health(state: &mut LuaState) -> LuaResult<u32> {
 pub(super) fn kill_party_member(state: &mut LuaState) -> LuaResult<u32> {
     let idx = i32::from_stack(state, 1)?;
     let mut st = borrow_state_mut(state)?;
+    let now = st.clock_now();
     if let Some(member) = st.party_members.get_mut((idx - 1) as usize) {
-        member.dead_since = Some(std::time::Instant::now());
+        member.dead_since = Some(now);
     }
     Ok(0)
 }

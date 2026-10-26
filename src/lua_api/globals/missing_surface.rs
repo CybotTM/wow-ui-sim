@@ -252,6 +252,7 @@ fn register_world_activity_surfaces(state: &mut LuaState) -> LuaResult<()> {
         quest_choice::register_quest_choice_surface(state)?;
     }
     scenario_info::register_scenario_info_surface(state)?;
+    c_api::challenge_run::register(state)?;
     warband_scene::register_warband_scene_surface(state)?;
     #[cfg(any(feature = "retail-12-1-0", feature = "client-wowforever"))]
     c_api::c_player_choice::register_c_player_choice_surface(state)?;

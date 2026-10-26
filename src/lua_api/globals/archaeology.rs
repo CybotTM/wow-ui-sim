@@ -56,7 +56,6 @@ use crate::lua_api::state::SelectedArtifact;
 use crate::lua_bridge::FromStack;
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
-use std::time::Instant;
 
 fn get_archaeology_info(state: &mut LuaState) -> LuaResult<u32> {
     let profession = borrow_state(state)?.archaeology.profession_name.clone();
@@ -385,7 +384,8 @@ fn get_artifact_info_by_race(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn close_research(state: &mut LuaState) -> LuaResult<u32> {
-    borrow_state_mut(state)?.archaeology.last_close_request = Some(Instant::now());
+    let mut sim = borrow_state_mut(state)?;
+    sim.archaeology.last_close_request = Some(sim.clock_now());
     Ok(0)
 }
 
