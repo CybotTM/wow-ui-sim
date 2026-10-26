@@ -1,6 +1,6 @@
-## [2026-10-25] implementation | PTR completed module imports
+## [2026-10-25] proof | PTR completed module imports
 
-[Shared registry](systems/addon-module-imports.md#ptr-original-consumers--2026-10-25) links the [original module contract](../specs/addon-module-imports.md#ptr-original-module-consumers). Initial RED reaches both original first-line imports; PTR publication/completion tracking now reuse Forever state without changing PTR require. Final paired runtime, stock and zero-warning profile gates remain pending.
+[Original consumers and shared registry](systems/addon-module-imports.md#ptr-original-consumers--2026-10-25) link the [module contract](../specs/addon-module-imports.md#ptr-original-module-consumers): each exact selector rejects constant/no-op imports, original Utility identity and behavior pass, Forever preservation passes, and all seven all-target checks have zero warnings. The checkpoint separates traced raw stock-key replacements, cfg-equivalent proof carry-over and unsupported-profile runtime limits.
 
 ## [2026-10-25] investigation | Mists battlefield vehicles
 

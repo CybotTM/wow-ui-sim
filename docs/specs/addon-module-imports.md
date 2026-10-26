@@ -43,9 +43,10 @@ PTR's pinned 12.1.7.70493 `Blizzard_GamepadSmartNavigation.toc:6` loads `Utility
 
 ### Profile isolation
 
-- [x] Publish `import` only on PTR and Forever. Keep completed-module `require` exclusive to Forever; retain every other profile's existing insecure/secure `require` surface.
+- [x] Publish `import` in both PTR and Forever environments; preserve their existing `require` surfaces (completed-module lookup on Forever, restricted insecure lookup on PTR).
+- [ ] Keep `import` absent and preserve `require` on the five unsupported profiles. The gate and tests exist, but their runtime absence selectors were not executed in this cycle.
 
-Path/dependency requirements have sixteen pure resolver tests; registry/value/provenance requirements have fourteen actual-rilua unit tests. Fourteen current grouped integration tests exercise the real TOC/XML loader, delayed/coroutine imports, dynamic chunks, secure environments, addon varargs and existing peer-file taint behavior. Cross-profile final verification remains pending.
+Path/dependency requirements have sixteen pure resolver tests; registry/value/provenance requirements have fourteen actual-rilua unit tests. Fourteen current grouped integration tests exercise the real TOC/XML loader, delayed/coroutine imports, dynamic chunks, secure environments, addon varargs and existing peer-file taint behavior. Current original-consumer execution and seven-profile compilation are recorded in the [PTR checkpoint](../wiki/systems/addon-module-imports.md#ptr-original-consumers--2026-10-25); unsupported-profile runtime isolation remains unverified.
 
 ## How it works
 
@@ -70,7 +71,7 @@ Path/dependency requirements have sixteen pure resolver tests; registry/value/pr
 - `src/loader/module_import.rs` — sixteen unit tests for absolute/relative resolution, addon boundary rejection, direct dependency authorization, dynamic absolute exemption, malformed requests, and exact errors.
 - `src/loader/addon_modules.rs` — fourteen actual-rilua tests for completed values/GC identity and stack restoration, load boundaries, delayed/escaped closures, direct dependencies, spoofed dynamic sources, nearest dynamic origins, failed loads/replacement, non-reexecution and VM isolation.
 
-- `tests/ptr_module_import.rs` — original selected SmartNavigation/Debug closure, Utility identity/GC and real button-group changes; original unresolved import with an on-disk non-TOC Utility file.
+- `tests/ptr_module_import.rs` — original selected SmartNavigation/Debug closure, original Utility identity/GC and real button-group changes, missing absolute lookup, and on-disk non-TOC rejection followed by completed-file success in a fresh environment. Each selector rejects constant/no-op import producers independently.
 - `tests/addon_require.rs` — fourteen current Forever loader-boundary tests, including TOC dependencies, XML files, values, failed/self/forward imports and caller provenance.
 - `tests/forever_bug_capture.rs` — absolute local TOC loading followed by real error-capture consumers; requires the local BugGrabber/BugSack sources.
 - `tests/sandbox_dangerous_globals.rs` — profile-specific global/secure-environment exposure and absence of host package loading.
@@ -83,7 +84,7 @@ Source integrated at `012df1e45`: the binding adds only `import` registration to
 ## Known gaps (current cycle)
 
 - [x] Independent bounded import/control verification and normal vendor-method probe passed at the recorded source.
-- [ ] Cross-profile isolation and clean startup remain open; the current startup smoke is captured but failing.
+- [ ] Unsupported-profile runtime isolation and clean startup remain open. Seven-profile compilation passes, but it is not whole-client runtime acceptance.
 - [ ] Native Forever execution is not part of this task; the Wiki contract and local behavioral fixtures do not establish undocumented native edge cases.
 
 ## Out of scope

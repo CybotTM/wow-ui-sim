@@ -32,7 +32,18 @@ Reused completion, dependency, identity, grammar and error behavior is **simulat
 
 The [contract](../../specs/addon-module-imports.md#ptr-original-module-consumers) cites the pinned PTR TOC, original imports and original Utility return. PTR previously executed Utility without recording its return and did not install `import`. The repair reuses `ModuleRegistry` rather than creating another model or patching SmartNavigation. Unsupported profiles keep an absent registry; no filesystem fallback is added.
 
-`tests/ptr_module_import.rs` discovers the game-screen addon and loads its original dependency closure. It compares both consumers' captured Utility table with the completed absolute import, checks identity after GC, and calls original `RefreshButtonGroups` before and after removing a real child button. The negative fixture retains byte-identical original source but leaves its on-disk Utility outside the TOC, so the original first-line import must reject it. Nil, empty-table and no-op producers cannot satisfy these assertions. Initial execution reaches both missing-import lines; final paired producer-only RED/GREEN, stock and cross-profile gates remain pending.
+`tests/ptr_module_import.rs` discovers the game-screen addon and loads its original dependency closure. It compares both consumers' captured Utility table with the completed absolute import and the table captured inside original `FindButtonGroups`, checks identity after GC, and calls original `RefreshButtonGroups` before and after removing a real child button (two entries become one). A missing absolute lookup rejects an unconditional table-return producer. The negative fixture retains byte-identical original source but leaves its on-disk Utility outside the TOC; its original first-line import must reject it. A fresh environment then loads Utility before the same original consumer and must succeed, rejecting an unconditional NoModule-error producer. Each selector independently rejects constants/no-ops.
+
+| Capability | Executed proof / limit |
+|---|---|
+| Original PTR imports and Utility behavior | Both exact GREEN selectors pass; byte-identical producer-only RED selectors fail at original SmartNavigation.lua:1 / Debug.lua:1. |
+| PTR / Forever binding policy | Both environments' import and existing require surfaces pass their exact sandbox selectors. |
+| Forever preservation | All fourteen existing loader-boundary cases pass on the private supplied 70532 source copy. |
+| Seven-profile compilation | All-target checks pass with zero warnings on Retail, PTR, Forever, Wrath, Mists, Era and Anniversary. Unsupported-profile runtime absence selectors were not run. |
+
+Stock at frozen master `8b9e4b62e` changes from **270 keys / 376 occurrences to 260 / 366** on PTR; Forever stays byte-exact **26 / 26**. The six added raw PTR keys replace existing failures, not new defects: the voice-transcription event pair has changed counter-derived anonymous names, while the CompactArenaFrame ClearBlockedAuras and FriendRequestsListTemplates pairs gain a CreateFrame-hook stack entry. Original SmartNavigation.lua:133 / :204 now installs that hook after its import succeeds. Full old/new keys and all six individual emitter/predecessor dispositions remain in the lane handoff; raw maps were not normalized. This is not clean startup.
+
+Original runtime and PTR/Forever/Retail all-target proof is from `de3754ea8^` (`610cc8e91`). `de3754ea8` removes only the internal WowLuaAppData re-export cfg: its old predicate was already true on those three profiles, so nothing they compile changes. The four classic normal-library scopes have fresh zero-warning checks. The later oracle-only test change reruns just the two changed PTR selectors on RED and GREEN; no producer changes or other runtime reruns are included.
 
 C_GamePad publication and event registration are separate gaps, not part of this loader repair. Native import grammar/error parity remains unknown.
 
