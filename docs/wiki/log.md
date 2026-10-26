@@ -1,3 +1,7 @@
+## [2026-10-26] feature | Exclusive addon test roots
+
+[CLI reference](reference/cli-commands.md#run-tests-addon) and [contract](../specs/exclusive-addon-paths.md) document repeatable CLI roots and environment-only isolation. Candidate discovery, explicit addon loading and test lookup share the selected roots; bundled TestFramework is located explicitly. Ordinary loader/CLI RED and nine targeted GREEN cases pass; profile and smoke gates are pending.
+
 ## [2026-10-26] proof | Complete PTR Edit Mode display-info
 
 [Complete original-file proof](investigations/ptr-edit-mode-declarations.md#complete-original-display-info-initialization) links the [contract](../specs/ptr-edit-mode-declarations.md):16 declaration-backed read members, exact producer-only RED/GREEN for the whole file and original LossOfControl OnLoad, PTR stock214/280→134/154 with four individually traced additions. The separate preset remains blocked. PTR/Retail/Era each have an accepted all-target receipt with zero warnings; formatting and readability pass.
