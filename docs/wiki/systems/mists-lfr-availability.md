@@ -10,7 +10,7 @@ Mists `C_LFGInfo.IsLFREnabled` reads `SimState.lfr_availability: Option<bool>`. 
 
 Pinned Mists 5.5.4.70268 `Blizzard_APIDocumentationGenerated/LFGInfoDocumentation.lua:179` declares the query. The selected `Blizzard_GroupFinder_Classic.toc` permits Mists and loads original `Classic/PVEFrame.lua` and `.xml`. The XML installs `GroupFinderFrame_OnEvent`, which calls `GroupFinderFrame_EvaluateButtonVisibility`. Its line229 reads availability; true shows the original LFR button and false hides it while closing the gap between neighboring buttons.
 
-The regression verifies the selected TOC, original XML button identity, parent and script binding, and Lua source provenance before observing availability. Runtime RED at the original line229 reports the missing function; GREEN acceptance is pending. No Blizzard source is edited or replaced.
+The regression verifies the selected TOC, original XML button identity, parent and script binding, and Lua source provenance before observing availability. Runtime RED at the original line229 reports the missing function. Initial GREEN reaches the separate missing `CanPlayerUseScenarioFinder` at line270 (declared in the same pinned documentation at line51). The parent approved bounding this slice there: a line observer checks the LFR visibility and hidden-gap anchor before line270 executes; the test then accepts only that exact named downstream error. Missing LFR at line229 is rethrown, never accepted. Revised paired acceptance is pending. No Blizzard source is edited or replaced.
 
 ## Sources
 

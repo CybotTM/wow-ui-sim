@@ -87,8 +87,7 @@ fn assert_original_visibility(env: &WowLuaEnv, available: bool, level: i32) {
         sim.player.level = level;
     }
     let errors_before = env.state().borrow().lua_errors.len();
-    env.exec("GroupFinderFrame:GetScript('OnEvent')(GroupFinderFrame, 'PLAYER_LEVEL_CHANGED')")
-        .expect("original PVEFrame.lua:229 must consume supplied LFR availability");
+    observe_original_lfr_before_successor(env, available);
     let shown: bool = env
         .eval("return GroupFinderFrame.groupButton2:IsShown()")
         .unwrap();
@@ -112,6 +111,36 @@ fn assert_original_visibility(env: &WowLuaEnv, available: bool, level: i32) {
         "no hidden callback errors"
     );
     eprintln!("original LFR observation: supplied={available}, level={level}, shown={shown}");
+}
+
+fn observe_original_lfr_before_successor(env: &WowLuaEnv, available: bool) {
+    let script = format!("local expected = {available}\n")
+        + r#"
+        local observed = false
+        debug.sethook(function(_, line)
+            local info = debug.getinfo(2, 'S')
+            local suffix = 'Blizzard_GroupFinder/Classic/PVEFrame.lua'
+            local source = info.source:gsub('\\', '/')
+            if line ~= 270 or source:sub(-#suffix) ~= suffix then return end
+            debug.sethook()
+            assert(GroupFinderFrame.groupButton2:IsShown() == expected, 'LFR state before scenario query')
+            if not expected then
+                local point, relative, relativePoint, x, y = GroupFinderFrame.groupButton3:GetPoint(1)
+                assert(point == 'TOP' and relative == GroupFinderFrame.groupButton1)
+                assert(relativePoint == 'BOTTOM' and x == 0 and y == -23, 'gap closed before scenario query')
+            end
+            observed = true
+            print('LFR observation before original scenario boundary', expected)
+        end, 'l')
+        local ok, reason = pcall(GroupFinderFrame:GetScript('OnEvent'), GroupFinderFrame, 'PLAYER_LEVEL_CHANGED')
+        debug.sethook()
+        if not observed then error(reason or 'original LFR observation not reached', 0) end
+        assert(not ok, 'named scenario successor remains outside this LFR slice')
+        local expectedError = "Interface/AddOns/Blizzard_GroupFinder/Classic/PVEFrame.lua:270: attempt to call field 'CanPlayerUseScenarioFinder' (a nil value)"
+        assert(reason == expectedError, tostring(reason))
+    "#;
+    env.exec(&script)
+        .expect("original PVEFrame.lua:229 must consume supplied LFR availability before exact scenario successor");
 }
 
 #[test]
