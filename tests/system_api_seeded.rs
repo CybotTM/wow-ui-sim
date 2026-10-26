@@ -274,6 +274,11 @@ fn test_c_friend_list_returns_seeded_wow_friends() {
 #[test]
 fn test_c_loss_of_control_returns_seeded_active_event() {
     let env = env();
+    if cfg!(feature = "client-wrath") {
+        env.exec("assert(C_LossOfControl == nil)").unwrap();
+        return;
+    }
+    env.exec(include_str!("fixtures/loss_of_control.lua")).unwrap();
     let result: String = env
         .eval(
             r#"
@@ -291,7 +296,7 @@ fn test_c_loss_of_control_returns_seeded_active_event() {
         if data.displayText ~= "Kidney Shot" then
             return "text=" .. tostring(data.displayText)
         end
-        if data.iconTexture ~= "Interface\\Icons\\Ability_Rogue_KidneyShot" then
+        if data.iconTexture ~= 132298 then
             return "icon=" .. tostring(data.iconTexture)
         end
         if data.displayType ~= 2 then
@@ -311,7 +316,7 @@ fn test_c_loss_of_control_returns_seeded_active_event() {
         if C_LossOfControl.GetActiveLossOfControlDataByUnit("player", 1) == nil then
             return "missing_player_data"
         end
-        if C_LossOfControl.GetActiveLossOfControlDuration("player", 1) ~= 4 then
+        if C_LossOfControl.GetActiveLossOfControlDuration("player", 1):GetTotalDuration() ~= 4 then
             return "duration=" .. tostring(C_LossOfControl.GetActiveLossOfControlDuration("player", 1))
         end
 

@@ -96,6 +96,15 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     let builder = register_world(builder)?;
     let builder = register_collections_pvp(builder)?;
     let builder = register_inventory_misc(builder)?;
+    let builder = builder
+        .set_function(
+            "AddLossOfControl",
+            crate::c_api::c_loss_of_control::add_supplied_entry,
+        )?
+        .set_function(
+            "ClearLossOfControl",
+            crate::c_api::c_loss_of_control::clear_supplied_entries,
+        )?;
     let builder = builder.set_function(
         "SetHousingCatalogVariantStoredCount",
         crate::c_api::c_housing::catalog::set_variant_stored_count,

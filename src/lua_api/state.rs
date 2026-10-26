@@ -275,6 +275,7 @@ macro_rules! build_empty_sim_state {
             #[cfg(feature = "base-spell-relationships")]
             base_spell_relationships: Default::default(),
             spell_loss_of_control: HashMap::new(),
+            active_loss_of_control: HashMap::new(),
             spell_flyouts: HashMap::new(),
             action_profession_quality: HashMap::new(),
             addon_base_paths: $collections.addon_base_paths,

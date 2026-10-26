@@ -22,6 +22,45 @@ fn loss_of_control_fresh_world_is_empty() {
 }
 
 #[test]
+fn loss_of_control_units_and_optional_fields_are_independent() {
+    let env = WowLuaEnv::new().unwrap();
+    if cfg!(feature = "client-wrath") {
+        env.exec("assert(C_LossOfControl == nil)").unwrap();
+        return;
+    }
+    env.exec(include_str!("fixtures/loss_of_control.lua")).unwrap();
+    env.exec(
+        r#"
+        local other = {
+            locType = 'FEAR', spellID = 5782, displayText = 'Fear',
+            iconTexture = 136183, lockoutSchool = 0, priority = 3, displayType = 1,
+        }
+        assert(A_Admin.AddLossOfControl('focus', other) == 1)
+        assert(A_Admin.AddLossOfControl('focus', other) == 2)
+        other.displayText = 'mutated caller'
+        assert(C_LossOfControl.GetActiveLossOfControlDataCount() == 1)
+        assert(C_LossOfControl.GetActiveLossOfControlDataCountByUnit('focus') == 2)
+        local data = C_LossOfControl.GetActiveLossOfControlDataByUnit('focus', 2)
+        assert(data.locType == 'FEAR' and data.spellID == 5782)
+        assert(data.displayText == 'Fear' and data.iconTexture == 136183)
+        assert(data.startTime == nil and data.timeRemaining == nil and data.duration == nil)
+        assert(data.auraInstanceID == nil and data.priority == 3 and data.displayType == 1)
+        assert(C_LossOfControl.GetActiveLossOfControlDuration('focus', 2) == nil)
+        data.displayText = 'mutated returned table'
+        assert(C_LossOfControl.GetActiveLossOfControlDataByUnit('focus', 2).displayText == 'Fear')
+        assert(C_LossOfControl.GetActiveLossOfControlDataByUnit('focus', 0) == nil)
+        assert(C_LossOfControl.GetActiveLossOfControlDataByUnit('focus', -1) == nil)
+        assert(C_LossOfControl.GetActiveLossOfControlDataByUnit('focus', 3) == nil)
+        assert(C_LossOfControl.GetActiveLossOfControlDuration('player', 1):GetTotalDuration() == 4)
+        A_Admin.ClearLossOfControl('focus')
+        assert(C_LossOfControl.GetActiveLossOfControlDataCountByUnit('focus') == 0)
+        assert(C_LossOfControl.GetActiveLossOfControlDataCount() == 1)
+        "#,
+    )
+    .unwrap();
+}
+
+#[test]
 fn loss_of_control_original_display_tracks_supplied_state() {
     if cfg!(feature = "client-wrath") {
         return;

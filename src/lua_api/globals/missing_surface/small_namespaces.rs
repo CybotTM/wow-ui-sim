@@ -8,7 +8,7 @@
 //! - `C_AssistedCombat.*` — empty rotation/action spell state by default
 //! - `C_Map.IsMapValidForNavigation(uiMapID)` — false (no nav mesh)
 //! - `C_PvP.IsMatchConsideredArena()` — false (not in arena by default)
-//! - `C_LossOfControl.*` — one seeded Kidney Shot entry for the player
+//! - `C_LossOfControl.*` — supplied per-unit active effect queries
 //! - `C_Bank.HasFullBankAccess()` — true (permissive default)
 //! - `C_NewItems.*` — permissive empty/default probes
 //! - `C_VignetteInfo.*` — empty vignette set for world-map refreshes
@@ -27,7 +27,10 @@ pub(super) fn register_small_namespaces(state: &mut LuaState) -> LuaResult<()> {
     register_flat_namespace(state, "C_AssistedCombat", C_ASSISTED_COMBAT_METHODS)?;
     register_flat_namespace(state, "C_Map", C_MAP_METHODS)?;
     register_flat_namespace(state, "C_PvP", C_PVP_METHODS)?;
-    register_flat_namespace(state, "C_LossOfControl", C_LOSS_OF_CONTROL_METHODS)?;
+    match crate::client_profile::ACTIVE {
+        crate::client_profile::ClientProfile::Wrath => {}
+        _ => register_flat_namespace(state, "C_LossOfControl", C_LOSS_OF_CONTROL_METHODS)?,
+    }
     register_flat_namespace(state, "C_Bank", C_BANK_METHODS)?;
     register_flat_namespace(state, "C_NewItems", C_NEW_ITEMS_METHODS)?;
     register_flat_namespace(state, "C_VignetteInfo", C_VIGNETTE_INFO_METHODS)?;
@@ -141,23 +144,23 @@ const C_PVP_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
 const C_LOSS_OF_CONTROL_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     (
         "GetActiveLossOfControlData",
-        c_loc_get_active_loss_of_control_data,
+        crate::c_api::c_loss_of_control::query_player_data,
     ),
     (
         "GetActiveLossOfControlDataCount",
-        c_loc_get_active_loss_of_control_data_count,
+        crate::c_api::c_loss_of_control::query_player_count,
     ),
     (
         "GetActiveLossOfControlDataCountByUnit",
-        c_loc_get_active_loss_of_control_data_count_by_unit,
+        crate::c_api::c_loss_of_control::query_unit_count,
     ),
     (
         "GetActiveLossOfControlDataByUnit",
-        c_loc_get_active_loss_of_control_data_by_unit,
+        crate::c_api::c_loss_of_control::query_unit_data,
     ),
     (
         "GetActiveLossOfControlDuration",
-        c_loc_get_active_loss_of_control_duration,
+        crate::c_api::c_loss_of_control::query_duration,
     ),
 ];
 
@@ -327,60 +330,6 @@ fn c_pvp_get_war_mode_reward_bonus_default(state: &mut LuaState) -> LuaResult<u3
 fn c_pvp_get_war_mode_reward_bonus(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Num(10.0));
     Ok(1)
-}
-
-fn c_loc_get_active_loss_of_control_data(state: &mut LuaState) -> LuaResult<u32> {
-    let index = <i32 as FromStack>::from_stack(state, 1)?;
-    if index != 1 {
-        return Ok(0);
-    }
-    push_seeded_loss_of_control_data(state);
-    Ok(1)
-}
-
-fn c_loc_get_active_loss_of_control_data_count(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Num(1.0));
-    Ok(1)
-}
-
-fn c_loc_get_active_loss_of_control_data_count_by_unit(state: &mut LuaState) -> LuaResult<u32> {
-    let unit = <String as FromStack>::from_stack(state, 1)?;
-    let count = if unit == "player" { 1.0 } else { 0.0 };
-    state.push(Val::Num(count));
-    Ok(1)
-}
-
-fn c_loc_get_active_loss_of_control_data_by_unit(state: &mut LuaState) -> LuaResult<u32> {
-    let unit = <String as FromStack>::from_stack(state, 1)?;
-    let index = <i32 as FromStack>::from_stack(state, 2)?;
-    if unit != "player" || index != 1 {
-        return Ok(0);
-    }
-    push_seeded_loss_of_control_data(state);
-    Ok(1)
-}
-
-fn c_loc_get_active_loss_of_control_duration(state: &mut LuaState) -> LuaResult<u32> {
-    let unit = <String as FromStack>::from_stack(state, 1)?;
-    let index = <i32 as FromStack>::from_stack(state, 2)?;
-    if unit != "player" || index != 1 {
-        state.push(Val::Nil);
-        return Ok(1);
-    }
-    state.push(Val::Num(4.0));
-    Ok(1)
-}
-
-fn push_seeded_loss_of_control_data(state: &mut LuaState) {
-    let data = create_table(state);
-    let display_text = create_string(state, "Kidney Shot");
-    let icon_texture = create_string(state, "Interface\\Icons\\Ability_Rogue_KidneyShot");
-    table_set(state, data, "spellID", Val::Num(408.0));
-    table_set(state, data, "displayText", display_text);
-    table_set(state, data, "iconTexture", icon_texture);
-    table_set(state, data, "displayType", Val::Num(2.0));
-    table_set(state, data, "timeRemaining", Val::Num(4.0));
-    state.push(data);
 }
 
 fn c_bank_has_full_bank_access(state: &mut LuaState) -> LuaResult<u32> {
