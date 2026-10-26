@@ -94,6 +94,10 @@ fn original_supertracking_pair_shape_restored() {
         for name, value in pairs(declared) do
             assert(Enum.ContentTrackingType[name] == value, 'declared enum member')
         end
+        local metadata = {NumValues=true, MinValue=true, MaxValue=true}
+        for name in pairs(Enum.ContentTrackingType) do
+            assert(declared[name] ~= nil or metadata[name], 'undocumented enum member '..name)
+        end
         assert(select('#', QuestSuperTracking_GetSuperTrackedContent()) == 0,
             'absent binding returns no results, not one nil')
         "#,
