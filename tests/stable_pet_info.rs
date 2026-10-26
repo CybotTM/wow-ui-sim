@@ -26,11 +26,21 @@ fn load_original_stable() -> WowLuaEnv {
     let env = new_blizzard_addon_env(&ui);
     wow_ui_sim::xml::register_intrinsic_templates();
     let loaded = load_blizzard_addon_closure_into_env(
-        &env, &ui, &["Blizzard_FrameXML", "Blizzard_StableUI"], &[],
+        &env,
+        &ui,
+        &["Blizzard_FrameXML", "Blizzard_StableUI"],
+        &[],
     );
     assert!(loaded.iter().any(|name| name == "Blizzard_StableUI"));
-    eprintln!("unfiltered setup diagnostics: {:?}", env.state().borrow().lua_errors);
-    env.exec(&format!("expectedStableSource = {:?}", format!("Blizzard_StableUI/{relative}"))).unwrap();
+    eprintln!(
+        "unfiltered setup diagnostics: {:?}",
+        env.state().borrow().lua_errors
+    );
+    env.exec(&format!(
+        "expectedStableSource = {:?}",
+        format!("Blizzard_StableUI/{relative}")
+    ))
+    .unwrap();
     env.exec(ORIGINAL_OBSERVER).unwrap();
     env
 }
@@ -106,7 +116,8 @@ const ORIGINAL_OBSERVER: &str = r#"
 #[test]
 fn original_selected_pet_refresh_tracks_slots_and_empty() {
     let env = load_original_stable();
-    env.exec(r#"
+    env.exec(
+        r#"
         assertUnknownSelection(2)
         local first=suppliedSlotPet(2,'First observation')
         local second=suppliedSlotPet(7,'Second observation')
@@ -124,14 +135,18 @@ fn original_selected_pet_refresh_tracks_slots_and_empty() {
         assertSlotRecord(refreshSelected(2),first)
         A_Admin.SetStablePetInfo(7,second)
         assertSlotRecord(refreshSelected(2,7),second)
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 }
 
 #[test]
 fn original_selected_pet_refresh_reports_unknown_after_clear() {
     let first = load_original_stable();
     let second = load_original_stable();
-    first.exec(r#"
+    first
+        .exec(
+            r#"
         assertUnknownSelection(3)
         own=suppliedSlotPet(3,'First environment')
         A_Admin.SetStablePetInfo(3,own)
@@ -141,8 +156,12 @@ fn original_selected_pet_refresh_reports_unknown_after_clear() {
         own.name='Recovered observation'
         A_Admin.SetStablePetInfo(3,own)
         assertSlotRecord(refreshSelected(3),own)
-    "#).unwrap();
-    second.exec(r#"
+    "#,
+        )
+        .unwrap();
+    second
+        .exec(
+            r#"
         assertUnknownSelection(3)
         own=suppliedSlotPet(3,'Second environment')
         A_Admin.SetStablePetInfo(3,own)
@@ -151,14 +170,19 @@ fn original_selected_pet_refresh_reports_unknown_after_clear() {
         assert(refreshSelected(3)==nil)
         A_Admin.SetStablePetInfo(3,own)
         assertSlotRecord(refreshSelected(3),own)
-    "#).unwrap();
-    first.exec("assertSlotRecord(refreshSelected(3),own)").unwrap();
+    "#,
+        )
+        .unwrap();
+    first
+        .exec("assertSlotRecord(refreshSelected(3),own)")
+        .unwrap();
 }
 
 #[test]
 fn original_active_refresh_consumes_secondary_slot_observation() {
     let env = load_original_stable();
-    env.exec(r#"
+    env.exec(
+        r#"
         A_Admin.SetActivePetList({})
         -- Establish target reachability before any new admin input exists.
         local ok, reason=pcall(StableFrame.ActivePetList.Refresh,StableFrame.ActivePetList)
@@ -176,13 +200,16 @@ fn original_active_refresh_consumes_secondary_slot_observation() {
         observeSecondary(nil)
         A_Admin.SetStablePetInfo(slot,pet)
         observeSecondary(pet)
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 }
 
 #[test]
 fn stable_slot_snapshots_validate_copy_and_profile_shape() {
     let env = load_original_stable();
-    env.exec(r#"
+    env.exec(
+        r#"
         assertUnknownSelection(2)
         local pet=suppliedSlotPet(2,'Snapshot observation')
         A_Admin.SetStablePetInfo(2,pet)
@@ -216,5 +243,7 @@ fn stable_slot_snapshots_validate_copy_and_profile_shape() {
         assert(select('#',C_StableInfo.GetStablePetInfo(2))==1)
         A_Admin.ClearStablePetInfo(2)
         assertUnknownSelection(2)
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 }
