@@ -51,7 +51,8 @@ fn get_inventory_items_for_slot(state: &mut LuaState) -> LuaResult<u32> {
         ));
     };
     let candidates = if slot == 11.0 || slot == 12.0 {
-        ring_candidates(&borrow_state(state)?)
+        let sim = borrow_state(state)?;
+        ring_candidates(&sim)
     } else {
         Vec::new()
     };
