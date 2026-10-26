@@ -66,6 +66,30 @@ const NAMED_TOP_LEVEL_FRAMES: &[&str] = &[
     "RecruitAFriendFrame",
 ];
 
+#[cfg(any(feature = "client-retail", feature = "client-ptr", feature = "client-wowforever"))]
+prefork_full_ui_case! {
+fn original_raf_enable_event_distinguishes_empty_and_supplied_versions(env: &WowLuaEnv) {
+    env.exec(r#"
+        local frame = RecruitAFriendFrame
+        local source = debug.getinfo(frame.OnEvent, "S").source:gsub("\\", "/")
+        assert(source:find("Blizzard_RecruitAFriend/RecruitAFriendFrame.lua", 1, true), source)
+        frame:OnEvent("RAF_SYSTEM_ENABLED_STATUS", true)
+        assert(frame:GetRAFInfo() == nil, "empty RAF catalog must not publish a version")
+        A_Admin.AddRAFVersion(1, 4, 1, 3, 0, 0)
+        frame:OnEvent("RAF_SYSTEM_ENABLED_STATUS", true)
+        local info = frame:GetRAFInfo()
+        assert(info and #info.versions == 1 and #info.recruits == 0 and info.claimInProgress == false)
+        local version = frame:GetLatestRAFVersionInfo()
+        assert(version.rafVersion == 1 and version.monthCount.lifetimeMonths == 4)
+        assert(version.monthCount.spentMonths == 1 and version.monthCount.availableMonths == 3)
+        assert(#version.rewards == 0 and version.nextReward == nil)
+        assert(version.numRecruits == 0 and version.numAffordableRewards == 0)
+        A_Admin.ClearRAFVersions()
+        assert(#C_RecruitAFriend.GetRAFInfo().versions == 0)
+    "#).expect("original RAF enable event must distinguish empty from supplied versions");
+}
+}
+
 const REGISTERED_EVENTS: &[&str] = &[
     "RAF_SYSTEM_ENABLED_STATUS",
     "RAF_RECRUITING_ENABLED_STATUS",
