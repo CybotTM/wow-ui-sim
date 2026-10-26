@@ -42,7 +42,12 @@ fn supplied_env(enabled: bool) -> WowLuaEnv {
             .inventory_runes
             .insert((0, 1), Some(supplied_rune()));
     }
-    load_blizzard_addon_closure_into_env(&env, &ui, &["Blizzard_UIPanels_Game"], &[]);
+    load_blizzard_addon_closure_into_env(
+        &env,
+        &ui,
+        &["Blizzard_UIParentPanelManager", "Blizzard_UIPanels_Game"],
+        &[],
+    );
     env.exec(r#"
         SetCVar("alwaysShowRuneIcons", "0")
         A_Admin.ClearBags()
@@ -206,8 +211,8 @@ fn original_settings_register_rune_checkbox_only_when_supplied_enabled() {
         env.exec(r#"
             local source = debug.getinfo(InterfaceOverrides.AdjustDisplaySettings, "S").source:gsub("\\", "/")
             assert(source:find("Blizzard_SettingsDefinitions_Frame/Classic/InterfaceOverrides.lua", 1, true), source)
-            FireEvent("VARIABLES_LOADED")
-            FireEvent("PLAYER_ENTERING_WORLD", true, false)
+            local category = Settings.RegisterVerticalLayoutCategory("Supplied engraving inputs")
+            InterfaceOverrides.AdjustDisplaySettings(category)
         "#).unwrap();
         let registered: bool = env
             .eval("return Settings.GetSetting('alwaysShowRuneIcons') ~= nil")
