@@ -1,3 +1,7 @@
+## [2026-10-25] implementation | PTR completed module imports
+
+[Shared registry](systems/addon-module-imports.md#ptr-original-consumers--2026-10-25) links the [original module contract](../specs/addon-module-imports.md#ptr-original-module-consumers). Initial RED reaches both original first-line imports; PTR publication/completion tracking now reuse Forever state without changing PTR require. Final paired runtime, stock and zero-warning profile gates remain pending.
+
 ## [2026-10-25] proof | Supplied social squelch
 
 [Original listing controls](investigations/consumer-selection-and-red-proof.md#supplied-social-squelch) pass the final three-profile false/true/false and isolation selector against byte-identical producer-only RED tests. Stock removes only the squelch pair on each profile; all-target, formatter and readability evidence is complete. Native account defaults and voice-provider policy remain excluded.

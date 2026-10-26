@@ -8,7 +8,7 @@
 
 `src/loader/module_import.rs` resolves logical `Addon.Module` and leading-dot relative paths without file lookup. Disk-file cross-addon imports need a direct `## Dep:` or `## OptionalDeps:` target, compared ASCII-case-insensitively. Same-addon imports need no dependency. Dynamic callers may use absolute imports without that dependency check, but cannot make relative imports because they have no disk-file origin. The registry returns the documented errors for no completed module, cross-addon escape, and a missing direct dependency.
 
-`src/lua_api/env_init/mod.rs` installs the Rust `require` binding before secure-environment copying only under `client-wowforever`; both Forever environments receive the same loader-bound global. Other profiles still remove `require` from the insecure sandbox. This does not add Lua `package`, `dofile`, `loadfile`, or host filesystem behavior.
+`src/lua_api/env_init/mod.rs` installs the completed-module bindings before secure-environment copying. `addon_modules::enabled()` uses ACTIVE to select PTR and Forever for both publication and TOC/XML completion tracking. Both receive `import`; only Forever replaces `require` with completed-module lookup. Non-Forever profiles still remove `require` from the insecure sandbox and retain their existing secure binding. This does not add Lua `package`, `dofile`, `loadfile`, or host filesystem behavior.
 
 Native Forever was not run. Multiple returns, module-name normalization, duplicate modules, failed-load replacement, and registration annotations remain source-unspecified and are not native-conformance claims.
 
@@ -28,6 +28,14 @@ Reused completion, dependency, identity, grammar and error behavior is **simulat
 
 [Central receipt](../../baselines/README.md#current-importevents-execution--2026-10-15) owns current evidence root, exact counts, binary inventories, probe markers, failing startup and accepted independent bounded report. Historical RED is retained under the earlier receipt linked there. The [separate enum follow-up](../../specs/forever-finite-constants.md#provider-and-experience-enums--source-checkpoint-2026-10-15) owns its pending gates; actual new gamepad root failures stay open. Baseline JSON copying remains main-owned.
 
+## PTR original consumers — 2026-10-25
+
+The [contract](../../specs/addon-module-imports.md#ptr-original-module-consumers) cites the pinned PTR TOC, original imports and original Utility return. PTR previously executed Utility without recording its return and did not install `import`. The repair reuses `ModuleRegistry` rather than creating another model or patching SmartNavigation. Unsupported profiles keep an absent registry; no filesystem fallback is added.
+
+`tests/ptr_module_import.rs` discovers the game-screen addon and loads its original dependency closure. It compares both consumers' captured Utility table with the completed absolute import, checks identity after GC, and calls original `RefreshButtonGroups` before and after removing a real child button. The negative fixture retains byte-identical original source but leaves its on-disk Utility outside the TOC, so the original first-line import must reject it. Nil, empty-table and no-op producers cannot satisfy these assertions. Initial execution reaches both missing-import lines; final paired producer-only RED/GREEN, stock and cross-profile gates remain pending.
+
+C_GamePad publication and event registration are separate gaps, not part of this loader repair. Native import grammar/error parity remains unknown.
+
 ## Sources
 
 - [Addon module imports spec](../../specs/addon-module-imports.md) — contract and explicit proof limits.
@@ -38,4 +46,4 @@ Reused completion, dependency, identity, grammar and error behavior is **simulat
 ## See Also
 
 - [[addon-loading]] — TOC/XML file execution.
-- [[client-profiles]] — Forever-only feature selection.
+- [[client-profiles]] — profile-specific publication.

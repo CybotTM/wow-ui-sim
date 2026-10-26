@@ -1,3 +1,7 @@
+## [2026-10-25] implementation | PTR completed module imports
+
+[Shared registry](systems/addon-module-imports.md#ptr-original-consumers--2026-10-25) links the [original module contract](../specs/addon-module-imports.md#ptr-original-module-consumers). Initial RED reaches both original first-line imports; PTR publication/completion tracking now reuse Forever state without changing PTR require. Final paired runtime, stock and zero-warning profile gates remain pending.
+
 ## [2026-10-25] investigation | Mists battlefield vehicles
 
 [Original vehicle consumer](investigations/mists-battlefield-vehicles.md) links the [contract](../specs/mists-battlefield-vehicles.md): pinned API declarations, selected WorldMap provider/pins and supplied per-map state. Original-consumer missing-call RED and supplied-pin GREEN pass. Both raw captures contain 12 keys / 18 occurrences; vehicle errors are replaced by individually traced existing DeathMap provider errors. Exact base reproduces the 12/18 BEFORE map, and byte-identical paired producer-only RED fails as required. Mists/Retail all-target checks pass with three inherited/zero warnings; formatting and readability pass.
