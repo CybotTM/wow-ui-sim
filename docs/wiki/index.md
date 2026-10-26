@@ -1,3 +1,7 @@
+## [2026-10-26] proof | Complete PTR Mainline preset construction
+
+[Whole original-file proof](investigations/ptr-edit-mode-declarations.md#complete-original-mainline-preset-construction) links the [two-family contract](../specs/ptr-edit-mode-declarations.md): pinned EndCap and SwingTimer indices, byte-identical first-EndCap RED/whole-preset GREEN, distinct records and exact anchors in all three maps. Paired17baa stock134/154→130/148 removes four raw keys with no additions; event-route ClearBlockedAuras disappearance is not an API repair. Native layout policy and full Edit Mode lifecycle remain outside this proof.
+
 ## [2026-10-26] implementation | Legacy tutorial request recorder
 
 [Consumer investigation](investigations/invented-query-defaults.md#legacy-tutorial-request-boundary) links the [bounded contract](../specs/legacy-tutorial-requests.md): Mists/Era/Anniversary/Wrath standalone numeric requests, no missing Lua definition, no result use, no inferred tutorial policy. Unchanged old Mists storage-flow RED reaches ContainerFrame_Shared:976; GREEN completes its Lua assertions but still fails on collected callback/startup errors, with C_Engraving:315 next. Four-profile recorder/publication tests pass, all four stock maps are byte-identical, and all seven all-target checks have zero warnings.
