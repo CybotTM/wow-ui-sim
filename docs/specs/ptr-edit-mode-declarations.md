@@ -4,10 +4,10 @@ PTR publishes two finite Edit Mode enum families through `src/c_api/ptr_edit_mod
 
 ## What it must do
 
-- [ ] Publish PTR `Enum.BossFrameGrowDirection` as Left=0, Center=1, Right=2, with NumValues=3, MinValue=0, MaxValue=2 metadata.
-- [ ] Preserve those three distinct values through the original boss-growth dropdown constructor.
-- [ ] Publish PTR `Enum.EditModePresetLayouts` as Modern=0, Classic=1, Gamepad=2, with NumValues=3, MinValue=0, MaxValue=2 metadata.
-- [ ] Let the original preset manager index supplied Modern, Classic and Gamepad maps separately, preserve Gamepad system data and return independent anchor copies.
+- [x] Publish PTR `Enum.BossFrameGrowDirection` as Left=0, Center=1, Right=2, with NumValues=3, MinValue=0, MaxValue=2 metadata.
+- [x] Preserve those three distinct values through the original boss-growth dropdown constructor.
+- [x] Publish PTR `Enum.EditModePresetLayouts` as Modern=0, Classic=1, Gamepad=2, with NumValues=3, MinValue=0, MaxValue=2 metadata.
+- [x] Let the original preset manager index supplied Modern, Classic and Gamepad maps separately, preserve Gamepad system data and return independent anchor copies.
 
 ## How it works
 
