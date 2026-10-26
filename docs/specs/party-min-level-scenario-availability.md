@@ -15,9 +15,13 @@
 - [Runtime selection and RED proof](../wiki/investigations/consumer-selection-and-red-proof.md#cf-2-party-minimum-staging).
 - [C API boundary and profile rules](../../AGENTS.md#c-api-boundary).
 
+## Pinned declarations
+
+Retail `Blizzard_APIDocumentationGenerated/PartyInfoDocumentation.lua:323` and PTR `:332` declare `GetMinLevel(category?) -> number`; an omitted category uses the active party. The bounded consumer calls it without arguments at `Blizzard_GroupFinder/Shared/ScenarioFinder_Shared.lua:58`. Retail selects `Blizzard_GroupFinder_Mainline.toc`; PTR selects the unified `Blizzard_GroupFinder.toc` with `[Family]` and `AllowLoadGameType` filtering.
+
 ## Implementation inventory
 
-- `tests/cfactory_cf2_social.rs` — staged original selected-consumer selectors; no observed RED yet.
+- `tests/cfactory_party_minlevel.rs` — isolated lane-owned original selected-consumer selectors for Retail/PTR.
 - `src/c_api/c_party_info.rs` — Retail/PTR `GetMinLevel` reads the supplied player and, when active, party roster. Registration uses `client_profile::ACTIVE`; no Mists behavior is added.
 - `src/lua_api/globals/battlefield_lfg_probes.rs` — Retail/PTR scenario projections reuse `lfd_dungeons`, retaining order and filtering subtype4 plus the supplied random flag. Specific choices exclude random rows; random count/info use random rows. Info exposes the six supplied fields read by the original availability consumer. Other profiles retain their empty surface. No new catalog or defaults.
 - `src/lua_api/state_types/collections.rs` — existing `LfdDungeonInfo` catalog records, reused without a second catalog.
@@ -25,12 +29,12 @@
 
 ## Tests asserting this spec
 
-Both selectors in `tests/cfactory_cf2_social.rs`, automatically discovered by the integration harness:
+Both selectors in `tests/cfactory_party_minlevel.rs`, automatically discovered by the integration harness:
 
-- `cfactory_cf2_social::original_scenario_specific_catalog_uses_lowest_party_level`
-- `cfactory_cf2_social::original_scenario_random_catalog_uses_lowest_party_level`
+- `cfactory_party_minlevel::original_scenario_specific_catalog_uses_lowest_party_level`
+- `cfactory_party_minlevel::original_scenario_random_catalog_uses_lowest_party_level`
 
-Each runs all roster, boundary, replacement-catalog and supplied-solo observations independently under two disjoint catalog-ID sets. The random selector also shrinks its scenario count from two to one, rejecting a constant nonzero count. Registered on Retail/PTR/Mists; no runtime success-return for unsupported profiles. Compilation and executable listing remain pending admission.
+Each runs all roster, boundary, replacement-catalog and supplied-solo observations independently under two disjoint catalog-ID sets. The random selector also shrinks its scenario count from two to one, rejecting a constant nonzero count. Registered only on Retail/PTR; no runtime success-return for unsupported profiles. Mists LFR availability is a separate deferred input boundary.
 
 ## Known gaps (current cycle)
 
