@@ -108,24 +108,54 @@ fn original_gamepad_temp_cvars_restore_persisted_values_without_touching_ordinar
         EventUtil.TriggerOnVariablesLoaded()
         -- InputUtil's original listener is forbidden, so public EnumerateFrames omits it.
         local frames = assert(debug.getregistry().__frame_refs, 'real frame cache required')
-        local count = 0
-        local diagnostics = {}
+        local function upvalue(fn, wanted)
+            for index = 1, 20 do
+                local name, value = debug.getupvalue(fn, index)
+                if name == wanted then return value end
+                if not name then break end
+            end
+            error('missing original upvalue '..wanted)
+        end
+        local count, otherCount = 0, 0
+        local registrationEnv = getfenv(InputUtil.RegisterMKBInit)
         for _, frame in pairs(frames) do
             if frame:IsEventRegistered('INPUT_DEVICE_INTERFACE_TRANSITION') then
                 local handler = frame:GetScript('OnEvent')
                 local info = handler and debug.getinfo(handler, 'S')
-                table.insert(diagnostics, tostring(frame:GetName()) .. ':' .. tostring(info and info.source))
                 if info and info.source:gsub('\\', '/'):match('Blizzard_SharedXML/InputUtil.lua$') then
-                    count = count + 1
-                    Cf2InputListener = frame
-                    print('CF-2 input listener provenance', info.source, info.linedefined, info.lastlinedefined)
+                    local callbacks = upvalue(handler, 'interfaceTransitionCallbacks')
+                    local hasGamepad = false
+                    for subscriber, scheme in pairs(callbacks) do
+                        if type(subscriber) == 'table' and subscriber[1] == 'Gamepad' then
+                            local init = scheme[Enum.InputDeviceInterfaceType.Gamepad].Init
+                            local source = debug.getinfo(init, 'S').source:gsub('\\', '/')
+                            assert(source:match('Blizzard_Gamepad/Core.lua$'))
+                            assert(getfenv(init) == registrationEnv)
+                            hasGamepad = true
+                        end
+                    end
+                    if getfenv(handler) == registrationEnv then
+                        assert(hasGamepad, 'listener must own original Gamepad registration')
+                        count = count + 1
+                        Cf2InputListener = frame
+                    else
+                        assert(not hasGamepad, 'other environment must not own Gamepad registration')
+                        otherCount = otherCount + 1
+                        Cf2OtherInputListener = frame
+                    end
                 end
             end
         end
-        assert(count == 1, 'exact original InputUtil transition listener required: '..count..' candidates='..table.concat(diagnostics, ';'))
+        assert(count == 1, 'exact original Gamepad-owning InputUtil listener required')
+        assert(otherCount == 1 and Cf2InputListener ~= Cf2OtherInputListener,
+            'normal plus secure replay must have distinct listeners')
         "#,
     )
     .expect("original Gamepad registration and original event listener must exist");
+            env.exec("local types = Enum.InputDeviceInterfaceType; Cf2OtherInputListener:GetScript('OnEvent')(Cf2OtherInputListener, 'INPUT_DEVICE_INTERFACE_TRANSITION', types.Gamepad, types.Mkb)")
+                .expect("other environment's original listener must not run Gamepad callbacks");
+            assert_live_cvars(&env, "2");
+            assert_eq!(read_persisted_cvars(), persisted);
             // Direct unchanged listener invocation exposes errors dispatch might record.
             drive_original_input_transition(&env, "Mkb", "Gamepad");
             assert_live_cvars(&env, "2");
