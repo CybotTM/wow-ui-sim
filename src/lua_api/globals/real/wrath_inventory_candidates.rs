@@ -1,6 +1,7 @@
 //! Wrath inventory candidates for the original paper-doll flyout.
 
 use crate::client_profile::{ACTIVE, ClientProfile};
+use crate::items;
 use crate::lua_api::methods::{borrow_state, table_set_num};
 use crate::lua_api::state::SimState;
 use crate::lua_bridge::stack_val;
