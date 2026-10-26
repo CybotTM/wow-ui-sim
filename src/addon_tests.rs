@@ -20,10 +20,10 @@ __async_error = nil
 /// Run sync tests, store results. Skips async tests (marked for Rust to handle).
 const SYNC_RUNNER: &str = r#"
 __addon_test_results = {}
-for i, t in ipairs(__addon_tests) do
+for _, t in ipairs(__addon_tests) do
     if not t.async then
         local ok, err = pcall(t.fn)
-        __addon_test_results[i] = {
+        __addon_test_results[#__addon_test_results + 1] = {
             name = t.name,
             ok = ok,
             err = ok and "" or tostring(err),
@@ -283,29 +283,27 @@ fn run_async_test(env: &WowLuaEnv, idx: i64) -> Result<(), String> {
 
 /// Read `__addon_test_results` from Lua and print failures.
 fn read_test_results(env: &WowLuaEnv, file_name: &str) -> Result<(u32, u32), String> {
-    env.exec(&format!(
-        r#"
-        __wowsim_sync_passed = 0
-        __wowsim_sync_failed = 0
-        for _, entry in ipairs(__addon_test_results or {{{{}}}}) do
-            if entry.ok then
-                __wowsim_sync_passed = __wowsim_sync_passed + 1
-            else
-                print("  \27[31mX\27[0m {file_name} > " .. tostring(entry.name or ""))
-                print("    " .. tostring(entry.err or ""))
-                __wowsim_sync_failed = __wowsim_sync_failed + 1
-            end
-        end
-        "#,
-    ))
-    .map_err(|e| format!("failed to summarize results: {e}"))?;
-    let passed = env
-        .eval::<i32>("return __wowsim_sync_passed or 0")
-        .map_err(|e| format!("{e}"))?;
-    let failed = env
-        .eval::<i32>("return __wowsim_sync_failed or 0")
-        .map_err(|e| format!("{e}"))?;
-    Ok((passed as u32, failed as u32))
+    let count: u32 = env
+        .eval("return #__addon_test_results")
+        .map_err(|e| format!("failed to count results: {e}"))?;
+    let mut passed = 0;
+    let mut failed = 0;
+    for idx in 1..=count {
+        let (ok, name, error): (bool, String, String) = env
+            .eval(&format!(
+                "local entry = __addon_test_results[{idx}]\n\
+                 return entry.ok, tostring(entry.name or ''), tostring(entry.err or '')"
+            ))
+            .map_err(|e| format!("failed to read result {idx}: {e}"))?;
+        if ok {
+            passed += 1;
+        } else {
+            eprintln!("  \x1b[31m\u{2717}\x1b[0m {file_name} > {name}");
+            eprintln!("    {error}");
+            failed += 1;
+        }
+    }
+    Ok((passed, failed))
 }
 
 /// Flush Lua print() output from console_output to stderr.
