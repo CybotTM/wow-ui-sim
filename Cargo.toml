@@ -208,6 +208,10 @@ name = "integration"
 path = "tests/integration.rs"
 
 [[test]]
+name = "run_tests_cli"
+path = "tests/cli/run_tests.rs"
+
+[[test]]
 name = "patch_12_1_7_toc"
 path = "tests/patch_12_1_7_toc.rs"
 
