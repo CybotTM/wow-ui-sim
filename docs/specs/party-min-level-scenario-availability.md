@@ -4,11 +4,11 @@
 
 ## What it must do
 
-- [ ] Retail and PTR normally select the GroupFinder Game TOC and its shared ScenarioFinder Lua/XML. Use the original XML-created frame, cover, label and script bindings; prove Lua source provenance before calling availability. Never execute an unselected file or replace vendor functions/widgets.
-- [ ] With supplied player60 and an active connected member49, original availability shows the cover and the original localized next-level50 label. Moving that member to50 opens the cover at the inclusive minimum without changing player level.
-- [ ] Player48/member50 yields48; player100/member71 yields71 and next80. Members80 and90 are available; member91 has no available scenario or next threshold. Each standalone selector rejects constant party getters.
-- [ ] Project supplied `lfd_dungeons` scenario rows only: specific/random ranges50–70 and80–90, plus an ordinary-dungeon distractor1–100. Replacement lower thresholds55 then65 change the original label/cover; each standalone selector rejects constant catalogs and non-scenario inclusion.
-- [ ] Clearing the supplied roster and active flag recovers supplied player60. This is a bounded simulator policy, not established native ungrouped/category/disconnected semantics.
+- [x] Retail and PTR normally select the GroupFinder Game TOC and its shared ScenarioFinder Lua/XML. Use the original XML-created frame, cover, label and script bindings; prove Lua source provenance before calling availability. Never execute an unselected file or replace vendor functions/widgets.
+- [x] With supplied player60 and an active connected member49, original availability shows the cover and the original localized next-level50 label. Moving that member to50 opens the cover at the inclusive minimum without changing player level.
+- [x] Player48/member50 yields48; player100/member71 yields71 and next80. Members80 and90 are available; member91 has no available scenario or next threshold. Each standalone selector rejects constant party getters.
+- [x] Project supplied `lfd_dungeons` scenario rows only: specific/random ranges50–70 and80–90, plus an ordinary-dungeon distractor1–100. Replacement lower thresholds55 then65 change the original label/cover; each standalone selector rejects constant catalogs and non-scenario inclusion.
+- [x] Clearing the supplied roster and active flag recovers supplied player60. This is a bounded simulator policy, not established native ungrouped/category/disconnected semantics.
 
 ## How it works
 
@@ -38,10 +38,10 @@ Each runs all roster, boundary, replacement-catalog and supplied-solo observatio
 
 ## Known gaps (current cycle)
 
-- [ ] Complete PTR original-consumer RED. Both Retail selectors independently list one case and fail at the original missing GetMinLevel boundary; preservation passes. Tests are byte-identical across the producer-only sibling pair.
-- [ ] Prove both independent selectors GREEN on Retail/PTR, with zero new warnings including test targets. Producer implementation and formatter checks alone do not establish passing behavior.
+- [x] Both Retail/PTR selectors independently list one case and fail at original `ScenarioFinder_Shared.lua:58`, after original XML bindings and Lua provenance. Tests are byte-identical across the producer-only sibling pair.
+- [ ] Finish the Era zero-warning all-target gate. Both independent selectors pass GREEN on Retail/PTR; their all-target checks have zero compiler warnings. Empty-catalog preservation passes in both phases/profiles.
 - [ ] Mists is BLOCKED on unresolved `C_LFGInfo.IsLFREnabled`. Preserve diagnostics; do not call that setup failure producer RED or add Mists behavior in this lane.
-- [ ] Compare complete own-base and producer stock message→count maps for each applicable profile, including additions and surviving count changes. Historical opportunity2 keys/2 occurrences is not a guaranteed delta or prefork pass.
+- [x] Compare complete producer-equivalent pinned-master and GREEN stock maps: Retail12/14→10/12, PTR244/312→242/310. Each removes only the original GetMinLevel primary/reporter pair; no additions or changed surviving counts. All launches use fresh current CVar copies with unchanged-original guards.
 
 ## Out of scope
 
