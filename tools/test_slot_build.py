@@ -1909,6 +1909,22 @@ version = "1.0.0"
         self.assertFalse(self.output.exists())
         self.assertFalse(self.fingerprint.exists())
 
+    def test_unidentified_fingerprint_marks_slot_and_clears_before_next_build(self):
+        self.setup_transition("middle")
+        self.fingerprint.unlink()
+        self.fingerprint.parent.rmdir()
+        self.change_lock("middle")
+        error, _ = self.execute(True)
+        self.assertIsNotNone(error)
+        self.assertFalse(self.output.exists())
+        self.assertTrue((self.slot / ".unverified-fingerprints").exists())
+        other = self.slot / "x86_64-unknown-linux-gnu/debug/.fingerprint/other/stamp"
+        other.parent.mkdir(parents=True)
+        other.write_text("unverified")
+        error, _ = self.execute(False)
+        self.assertIsNotNone(error)  # The fake compiler does not recreate its output.
+        self.assertFalse(other.exists())
+
     def test_unrelated_lock_change_accepts_certificate_and_stale_check(self):
         self.setup_transition()
         self.change_lock()
