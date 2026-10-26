@@ -4,7 +4,7 @@
 use crate::common::panel_fixtures::setup_env;
 use wow_ui_sim::lua_api::WowLuaEnv;
 
-fn load_original_consumer() -> WowLuaEnv {
+fn assert_original_consumer_selection() {
     use wow_ui_sim::loader::discover_blizzard_addon_closure_for_screen_with_overrides;
     use wow_ui_sim::screen::ScreenKind;
     use wow_ui_sim::toc::TocFile;
@@ -29,6 +29,10 @@ fn load_original_consumer() -> WowLuaEnv {
                 .any(|path| path == std::path::Path::new(relative))
         );
     }
+}
+
+fn load_original_consumer() -> WowLuaEnv {
+    assert_original_consumer_selection();
     let env = setup_env();
     env.exec(
         r#"
