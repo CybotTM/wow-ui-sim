@@ -210,3 +210,35 @@ fn original_raid_manager_initializes_divider_pools_after_arena_cleanup() {
     assert_eq!(state.player.buffs[0].aura_instance_id, 101);
     assert_eq!(state.party_members[0].buffs.len(), 2);
 }
+
+#[test]
+fn original_raid_manager_projects_supplied_ping_availability() {
+    let ui = blizzard_ui_dir();
+    let env = new_blizzard_addon_env(&ui);
+    load_blizzard_addon_closure_into_env(&env, &ui, &["Blizzard_CompactRaidFrames"], &[]);
+    env.exec(
+        r#"
+        local dropdown = CompactRaidFrameManager.displayFrame.RestrictPingsDropdown
+        local menu = dropdown:GetMenuDescription()
+        assert(not menu or not menu:HasElements())
+        "#,
+    )
+    .expect("disabled supplied fixture does not initialize the ping menu");
+    for enabled in [true, false] {
+        env.state().borrow_mut().forever_startup.ping_enabled = enabled;
+        env.exec(
+            r#"
+            CompactRaidFrameManager_OnLoad(CompactRaidFrameManager)
+            local dropdown = CompactRaidFrameManager.displayFrame.RestrictPingsDropdown
+            dropdown:GenerateMenu()
+            assert(dropdown:GetMenuDescription():HasElements())
+            "#,
+        )
+        .expect("original OnLoad initializes and retains the enabled ping menu");
+        assert_eq!(
+            env.eval::<bool>("return C_Ping.IsPingSystemEnabled()")
+                .unwrap(),
+            enabled
+        );
+    }
+}
