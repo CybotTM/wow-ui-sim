@@ -1,3 +1,7 @@
+## [2026-10-25] proof | Forever explicit gamepad capability
+
+[Capability state and wrapper proof](systems/gamepad-mapped-state.md#explicit-enabled-capability) links the [contract](../specs/forever-gamepad-enabled.md): existing GamePadEnable CVar input, independent of mapped sticks; original secure restricted wrapper RED/GREEN, unchanged26/26 Forever stock. Native device detection remains unknown; Retail/PTR controls and final checks pending.
+
 ## [2026-10-25] runtime proof | PTR I4 landable first batch
 
 [Bounded producer repair](investigations/patch-12-1-7-api-audit.md#i4-first-bounded-producer-repair) links the [contract](../specs/ptr-i4-first-green.md): four exact RED/GREEN pairs include the original Collections and GhostFrame transitions. Stock 298→296 raw keys has zero additions; Retail/PTR checks meet zero/known-three warning limits and formatting passes. Aggregate 173-shape tests remain on the lane only; native policy remains unknown.

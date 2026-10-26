@@ -1,3 +1,7 @@
+## [2026-10-25] proof | Forever explicit gamepad capability
+
+[Capability state and wrapper proof](systems/gamepad-mapped-state.md#explicit-enabled-capability) links the [contract](../specs/forever-gamepad-enabled.md): existing GamePadEnable CVar input, independent of mapped sticks; original secure restricted wrapper RED/GREEN, unchanged26/26 Forever stock. Native device detection remains unknown; Retail/PTR controls and final checks pending.
+
 ## [2026-10-25] proof | Classic defensive aura timer completion
 
 The [completion matrix](../specs/aura-spell-classification-identifiers.md#classic-completion-proof--2026-10-25) records Era/Anniversary stock-timer RED/GREEN, original AuraUtil preservation and exact stock differences with no additions. Era/Anniversary all-target checks retain only the three permitted dead-code warnings; Retail has none. Known TTS residue remains separately owned, so no baseline is changed.
