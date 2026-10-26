@@ -54,6 +54,12 @@ class MistsStringGeneratorTests(unittest.TestCase):
             self.assertIn('"FIRST" => "Line one\\n\\"quoted\\" %d",', output.read_text())
             self.assertIn('"SECOND" => "Other %s",', output.read_text())
 
+    def test_zero_relative_pointer_is_an_empty_string(self):
+        data = bytearray(two_section_db2())
+        second_offset = struct.unpack_from('<I', data, 252)[0]
+        struct.pack_into('<i', data, second_offset + 4, 0)
+        self.assertEqual(GEN.decode_db2(bytes(data))[1][2], '')
+
     def test_invalid_string_offset_rejected(self):
         data = bytearray(two_section_db2())
         struct.pack_into('<i', data, 404, -100)
