@@ -18,7 +18,7 @@ Paired stock changes6/12→8/14. All original six keys and their counts are unch
 
 The unchanged temporary [reputation seed](../../../src/lua_api/workarounds/temporary/reputation_state.rs) supplies watched faction2590 and accountWide=true on Mists. These are ungrounded Mists inputs. Its existing exclusion covers only Era/Anniversary; this lane does not change the seed or invent a label.
 
-The pinned Mists API surface explicitly declares `IsAccountWideReputation` at `ReputationInfoDocumentation.lua:49–59` and the `FactionData.isAccountWide` field at133–153. Therefore a claim that the account-wide concept is absent is not established. Native values need separate evidence. A read-only scan of all2,673 Lua/XML cache files finds exactly one literal label reference, the concatenation at148, and no Lua assignment or XML definition. Final seven-profile all-target checks remain pending at this documentation commit.
+The pinned Mists API surface explicitly declares `IsAccountWideReputation` at `ReputationInfoDocumentation.lua:49–59` and the `FactionData.isAccountWide` field at133–153. Therefore a claim that the account-wide concept is absent is not established. Native values need separate evidence. A read-only scan of all2,673 Lua/XML cache files finds exactly one literal label reference, the concatenation at148, and no Lua assignment or XML definition. All seven full-feature all-target checks pass with zero JSON/plain compiler warnings. This is compilation proof, not other profiles' full runtime localization parity.
 
 ## Sources
 

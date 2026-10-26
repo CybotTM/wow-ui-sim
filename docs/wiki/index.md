@@ -1,6 +1,6 @@
 ## [2026-10-26] bounded proof | Pinned Mists global strings
 
-[Source, selected consumer and exposure gap](investigations/mists-global-strings.md) links the [70268 contract](../specs/mists-global-strings.md):19,914 complete DB2 rows, multiline-safe generation and one original Setting34 RED→original131/138 GREEN. Stock6/12→8/14 exposes the unchanged temporary Retail reputation seed's ungrounded Mists inputs; no missing label is invented. Seven-profile all-target checks are pending.
+[Source, selected consumer and exposure gap](investigations/mists-global-strings.md) links the [70268 contract](../specs/mists-global-strings.md):19,914 complete DB2 rows, multiline-safe generation and one original Setting34 RED→original131/138 GREEN. Stock6/12→8/14 exposes the unchanged temporary Retail reputation seed's ungrounded Mists inputs; no missing label is invented. All seven full-feature all-target checks pass with zero JSON/plain compiler warnings.
 
 ## [2026-10-26] implementation | Mists transmog supplied input
 

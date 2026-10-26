@@ -1,28 +1,40 @@
 # Mists global strings
 
-## Contract
+Only Mists' catalog selection changes. It publishes the complete enUS `5.5.4.70268` GlobalStrings catalog from [the pinned snapshot](../../data/db2/mists-5.5.4.70268/global-strings-provenance.json). The [investigation](../wiki/investigations/mists-global-strings.md) describes selection, generation and the accepted stock exposure gap.
 
-- `client-mists` publishes the 19,914 unique tags from the pinned enUS build `5.5.4.70268` GlobalStrings DB2 (FDID 1394440). Other profiles retain their existing generated table.
-- Preserve source text, format tokens, empty strings, quotes and multiline CSV fields. Runtime uses the existing WoW escape resolver.
-- Absent tags remain absent: `OPTION_TOOLTIP_SHOW_ENEMY_CASTBARS` is not in this build. Do not consult another profile's table or invent localized text.
-- Both Lua string registration and XML fontstring lookup use the same selected table.
-- Existing independently registered numeric/constants behaviour is unchanged.
+## What it must do
 
-## Source and reproduction
+- [x] Generate all19,914 unique pinned tags, including both decrypted DB2 sections; preserve empty strings, multiline text, quotes and format tokens. Full DB2/CSV field agreement and byte-exact PHF regeneration passed generation acceptance; recurring generator fixtures cover the two-section/multiline/empty-pointer cases.
+- [x] Reject a non-pinned DB2 before replacing CSV/PHF output; reject duplicate CSV tags rather than choosing a winner. Duplicate output-preservation and invalid string-pointer fixtures pass; the wrong-DB2 acceptance probe preserves both outputs.
+- [x] Let selected original Mists AdjustDisplaySettings register `showTargetCastbar` with `Show Enemy Cast Bar` (ID51586), Boolean type, and both following controls; observe original131/138 without modifying or stopping the consumer.
+- [x] Keep absent `OPTION_TOOLTIP_SHOW_ENEMY_CASTBARS` nil. Do not consult a foreign table or invent text.
 
-Snapshot: `data/db2/mists-5.5.4.70268/GlobalStrings.csv`. The adjacent `global-strings-provenance.json` pins CK, EK, decrypted DB2, CSV and generator hashes.
+## How it works
 
-```text
-python3 tools/gen_mists_global_strings.py
-python3 tools/gen_mists_global_strings.py --db2 <verified-decrypted-globalstrings.db2>
-```
+- [Selection, source and generation](../wiki/investigations/mists-global-strings.md#source-and-selection)
+- [Original-consumer proof](../wiki/investigations/mists-global-strings.md#executed-bounded-consumer-proof)
+- [Accepted stock exposure and ungrounded seed](../wiki/investigations/mists-global-strings.md#stock-exposure-and-ungrounded-seed-gap)
 
-The first command regenerates the PHF from the committed multiline-safe CSV. The second first verifies the pinned DB2 SHA256 and content-key MD5, then decodes both WDC5 sections and writes the CSV. BLTE acquisition/decryption is not performed by this generator; its input must be the complete verified decrypted payload, including the second section. The generator is scoped to this build's three-field, 12-byte-record, palette-flags layout, not a general DB2 decoder.
+## Implementation inventory
 
-## Proof scope
+- `Cargo.toml`, `crates/sim-data-profile/Cargo.toml`, `crates/sim-data-profile/src/lib.rs` — forward the Mists feature and select one compiled table for both existing consumers.
+- `crates/sim-data-profile/data/global_strings_mists.rs` — generated PHF catalog.
+- `data/db2/mists-5.5.4.70268/` — multiline-safe CSV and CK/EK/DB2/CSV/generator hash manifest.
+- `tools/gen_mists_global_strings.py` — pinned decrypted DB2/CSV generation, scoped to this build's layout.
 
-`tests/mists_global_strings.rs` loads the runtime-selected original Classic Settings closure. It checks the real `showTargetCastbar` setting uses `Show Enemy Cast Bar` (ID51586), advances beyond original `InterfaceOverrides.lua:131`, and leaves the absent tooltip nil. Unsupplied engraving at original line138 is a separate boundary, not a localization repair. No full SettingsRegistrar pass or visible-panel interaction is claimed.
+## Tests asserting this spec
 
-Generator fixtures cover two decrypted sections, relative string pointers, empty-string sentinels, multiline/quoted format text, and duplicate rejection before replacing the output.
+- `tests/mists_global_strings.rs` — selected original consumer, concrete setting, absent tooltip and next engraving boundary.
+- `tools/tests/test_gen_mists_global_strings.py` — two sections, multiline/quoted tokens, empty-pointer semantics, invalid offsets and duplicate rejection.
 
-The [stock exposure investigation](../wiki/investigations/mists-global-strings.md) records the accepted6/12→8/14 delta: the unchanged temporary Retail reputation seed supplies ungrounded Mists inputs and reaches another tag absent from70268. This contract does not authorize a replacement label or infer native reputation values.
+Generation acceptance also compared every real DB2/CSV field, rejected a wrong payload and regenerated the committed PHF byte-exactly. Reproduce the PHF with `python3 tools/gen_mists_global_strings.py`; add `--db2 <verified-decrypted-globalstrings.db2>` to regenerate the CSV from the hash-pinned complete payload. BLTE acquisition/decryption is outside the generator.
+
+## Known gaps (current cycle)
+
+- [ ] Obtain native evidence for the temporary Retail reputation seed's ungrounded Mists inputs. The account-wide query is declared in the pinned Mists API surface; its native values are not established. This lane accepts the attributed6/12→8/14 stock delta without changing the seed or adding a label.
+
+## Out of scope
+
+- Repairing engraving or the reputation model: separate backing-state/native-evidence work.
+- A full SettingsRegistrar pass, visible-panel interaction, rendering parity or other profiles' full runtime localization parity: not established by this constructor boundary or compilation checks.
+- Other profiles' catalog changes or a foreign-table fallback: this feature selects Mists data only.
