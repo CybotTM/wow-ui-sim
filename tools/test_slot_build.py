@@ -510,6 +510,68 @@ class MountedDepInfoTests(unittest.TestCase):
         self.assertTrue(errors)
 
 
+class DirectoryInputDigestTests(unittest.TestCase):
+    setUp = SlotBuildTests.setUp
+
+    def digest(self, path):
+        return self.module.read_input_hashes(self.slot, [str(path)])[str(path)]
+
+    def test_tree_digest_is_relative_and_independent_of_creation_order(self):
+        left, right = self.slot / "left", self.slot / "right"
+        for root, names in [(left, ["a", "b"]), (right, ["b", "a"])]:
+            (root / "nested").mkdir(parents=True)
+            for name in names:
+                (root / "nested" / name).write_text(name)
+        self.assertEqual(self.digest(left), self.digest(right))
+        (right / "nested/a").rename(right / "nested/c")
+        self.assertNotEqual(self.digest(left), self.digest(right))
+
+    def test_tree_digest_follows_file_and_directory_symlinks(self):
+        root, target = self.slot / "tree", self.slot / "target"
+        root.mkdir()
+        target.mkdir()
+        value = target / "value"
+        value.write_text("original")
+        for name, referent in [("file", value), ("directory", target)]:
+            with self.subTest(name=name):
+                link = root / name
+                link.symlink_to(referent)
+                before = self.digest(root)
+                value.write_text("changed")
+                self.assertNotEqual(before, self.digest(root))
+                value.write_text("original")
+                link.unlink()
+
+    def test_directory_symlink_parent_traversal_preserves_real_input(self):
+        (self.slot / "actual/nested").mkdir(parents=True)
+        (self.slot / "actual/input").mkdir()
+        (self.slot / "actual/input/value").write_text("actual")
+        (self.slot / "input").mkdir()
+        (self.slot / "input/value").write_text("decoy")
+        link = self.slot / "link"
+        link.symlink_to(self.slot / "actual/nested")
+        spelling = link / "../input"
+        self.assertEqual(self.digest(spelling), self.digest(self.slot / "actual/input"))
+        self.assertNotEqual(self.digest(spelling), self.digest(self.slot / "input"))
+        link.unlink()
+        self.assertIsNone(self.digest(spelling))
+
+    def test_directory_digest_cannot_equal_file_content_digest(self):
+        root = self.slot / "tree"
+        root.mkdir()
+        directory_digest = self.digest(root)
+        root.rmdir()
+        root.write_bytes(b"directory\0")
+        self.assertNotEqual(directory_digest, self.digest(root))
+
+    def test_cyclic_directory_symlink_fails_closed(self):
+        root = self.slot / "tree"
+        root.mkdir()
+        (root / "loop").symlink_to(root)
+        with self.assertRaisesRegex(ValueError, "cyclic directory input"):
+            self.digest(root)
+
+
 class SourceFreshnessTests(unittest.TestCase):
     def setUp(self):
         SlotBuildTests.setUp(self)
@@ -532,11 +594,12 @@ class SourceFreshnessTests(unittest.TestCase):
                         "launcher does not invalidate older source mtimes")
         return self.module.prepare_source(self.tree, previous)
 
-    def run_library_step(self, profile, fresh=False, mutation=""):
+    def run_library_step(self, profile, fresh=False, mutation="", executable=False):
         """Run a separate worker against persistent outputs, without Cargo."""
         import sys
         (self.slot / ".owner").write_text("test-owner")
-        binary = self.slot / f"debug/deps/libprobe-{profile}.rmeta"
+        filename = f"probe-{profile}" if executable else f"libprobe-{profile}.rmeta"
+        binary = self.slot / "debug/deps" / filename
         emitter = (
             'import json,sys; from pathlib import Path\n'
             'binary,source=map(Path,sys.argv[1:3])\n'
@@ -547,7 +610,7 @@ class SourceFreshnessTests(unittest.TestCase):
             '    binary.with_suffix(".d").write_text(str(binary)+": src/main.rs\\n")\n'
             'exec(sys.argv[4])\n'
             'print(json.dumps({"reason":"compiler-artifact","filenames":[str(binary)],\n'
-            '    "executable":None,"fresh":fresh}))\n'
+            '    "executable":str(binary) if json.loads(sys.argv[5]) else None,"fresh":fresh}))\n'
         )
         request = self.slot / "library-request.json"
         receipt = self.slot / "library-receipt.json"
@@ -555,11 +618,92 @@ class SourceFreshnessTests(unittest.TestCase):
             "slot": str(self.slot), "worktree": str(self.tree), "owner": "test-owner",
             "unit": "library-step", "receipt": str(receipt),
             "cargo": [sys.executable, "-c", emitter, str(binary),
-                      str(self.tree / "src/main.rs"), json.dumps(fresh), mutation]}))
+                      str(self.tree / "src/main.rs"), json.dumps(fresh), mutation,
+                      json.dumps(executable)]}))
         result = subprocess.run(
             [sys.executable, "-B", str(SCRIPT), "--execute", str(request)],
             capture_output=True)
         return result, json.loads(receipt.read_text())
+
+    def build_directory_library(self, executable=False):
+        directory = self.tree / "tests/nested"
+        directory.mkdir(parents=True)
+        (directory / "case.rs").write_text("original case")
+        self.git("add", ".")
+        self.git("commit", "-qm", "directory build input")
+        mutation = ('binary.write_bytes(source.read_bytes() + '
+                    '(source.parent.parent / "tests/nested/case.rs").read_bytes()); '
+                    'binary.with_suffix(".d").write_text('
+                    'str(binary)+": src/main.rs tests\\n")')
+        result, receipt = self.run_library_step("retail", mutation=mutation,
+                                                executable=executable)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        return receipt
+
+    def test_directory_input_unchanged_tree_reuses_certificate(self):
+        first = self.build_directory_library()
+        # Content, not timestamps, determines freshness.
+        os.utime(self.tree / "tests/nested/case.rs", (1, 1))
+        result, receipt = self.run_library_step("retail", fresh=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(receipt["artifact_certificates"], first["artifact_certificates"])
+        output = self.slot / "debug/deps/libprobe-retail.rmeta"
+        self.assertTrue(output.read_bytes().endswith(b"original case"))
+
+    def assert_directory_change_rejected(self, change):
+        self.build_directory_library()
+        output = self.slot / "debug/deps/libprobe-retail.rmeta"
+        original = output.read_bytes()
+        change(self.tree / "tests/nested")
+        # Advance the slot-wide source baseline with an unrelated profile.
+        result, _ = self.run_library_step("forever")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        verified = (self.slot / ".verified-source-identity.json").read_bytes()
+        result, receipt = self.run_library_step("retail", fresh=True)
+        self.assertEqual(receipt["changed_paths"], [])
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(receipt["result"], "stale-artifacts")
+        self.assertEqual(output.read_bytes(), original)
+        self.assertEqual((self.slot / ".verified-source-identity.json").read_bytes(), verified)
+
+    def test_directory_input_changed_nested_file_rejects_reuse(self):
+        self.assert_directory_change_rejected(
+            lambda directory: (directory / "case.rs").write_text("changed case"))
+
+    def test_directory_input_added_file_rejects_reuse(self):
+        self.assert_directory_change_rejected(
+            lambda directory: (directory / "added.rs").write_text("added case"))
+
+    def test_directory_input_removed_file_rejects_reuse(self):
+        self.assert_directory_change_rejected(
+            lambda directory: (directory / "case.rs").unlink())
+
+    def test_directory_nested_edit_requires_changed_rebuilt_executable_hash(self):
+        first = self.build_directory_library(executable=True)
+        output = Path(first["reported_artifacts"][0]["executable"])
+        original = output.read_bytes()
+        verified = (self.slot / ".verified-source-identity.json").read_bytes()
+        (self.tree / "tests/nested/case.rs").write_text("changed case")
+        mutation = (f'binary.write_bytes({original!r}); '
+                    'binary.with_suffix(".d").write_text('
+                    'str(binary)+": src/main.rs tests\\n")')
+        result, receipt = self.run_library_step("retail", mutation=mutation, executable=True)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(receipt["result"], "stale-artifacts")
+        self.assertEqual(output.read_bytes(), original)
+        self.assertEqual((self.slot / ".verified-source-identity.json").read_bytes(), verified)
+        self.assertNotIn("tests/nested/case.rs", receipt["unread_package_paths"])
+
+    def test_directory_mtime_only_refresh_rejects_fresh_record(self):
+        self.build_directory_library()
+        output = str(self.slot / "debug/deps/libprobe-retail.rmeta")
+        current = {"worktree": str(self.tree), "slot": str(self.slot),
+                   "changed_paths": ["tests/nested/case.rs"],
+                   "content_changed_paths": [],
+                   "reported_artifacts": [{"filenames": [output], "fresh": True}],
+                   "target_inputs": {output: ["tests"]}}
+        self.assertEqual(self.module.find_stale_artifacts(current, {}, {}),
+                         ["debug/deps/libprobe-retail.rmeta"])
 
     def test_profile_switch_cannot_certify_an_older_library(self):
         result, _ = self.run_library_step("retail")

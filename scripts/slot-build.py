@@ -295,13 +295,33 @@ def read_target_inputs(current, before, after):
     return targets, errors
 
 
+def input_content_digest(path, cache, ancestors=frozenset()):
+    # Resolve before cache lookup: missing ancestors and symlink-sensitive /..
+    # spellings must still fail, even if the resolved input was already hashed.
+    resolved = Path(os.path.realpath(path, strict=True))
+    if resolved in ancestors:
+        raise ValueError(f"cyclic directory input: {path}")
+    if resolved in cache:
+        return cache[resolved]
+    if path.is_dir():
+        digest = hashlib.sha256(b"directory\0")
+        for child in sorted(path.iterdir(), key=lambda child: os.fsencode(child.name)):
+            name = os.fsencode(child.name)
+            content = input_content_digest(child, cache, ancestors | {resolved})
+            digest.update(len(name).to_bytes(8, "big") + name + content.encode("ascii") + b"\0")
+        value = "tree-sha256:" + digest.hexdigest()
+    else:
+        with path.open("rb") as stream:
+            value = hashlib.file_digest(stream, "sha256").hexdigest()
+    cache[resolved] = value
+    return value
+
+
 def read_input_hashes(worktree, names):
-    hashes = {}
+    hashes, cache = {}, {}
     for name in sorted(names):
-        path = worktree / name
         try:
-            with path.open("rb") as stream:
-                hashes[name] = hashlib.file_digest(stream, "sha256").hexdigest()
+            hashes[name] = input_content_digest(worktree / name, cache)
         except FileNotFoundError:
             hashes[name] = None
     return hashes
@@ -317,6 +337,10 @@ def snapshot_source_hashes(current, snapshot):
     paths.update(str(Path(root) / name) for root in roots
                  for name in ("build.rs", "Cargo.toml", "Cargo.lock"))
     names.update(repo_relative_inputs(current, paths))
+    # A newly emitted dep-info file can name a source directory for the first
+    # time. Capture source parents before the child runs, not after it.
+    names.update(str(parent) for name in list(names) if not Path(name).is_absolute()
+                 for parent in Path(name).parents if parent != Path("."))
     return read_input_hashes(worktree, names)
 
 
@@ -373,6 +397,14 @@ def certify_artifacts(current, previous, source_before, artifacts, snapshot):
     return certificates, errors
 
 
+def matched_input_changes(current, inputs, changes):
+    inputs = set(inputs)
+    worktree = Path(current["worktree"])
+    return {name for name in changes if name in inputs or any(
+        str(parent) in inputs and (worktree / parent).is_dir()
+        for parent in Path(name).parents)}
+
+
 def find_stale_artifacts(current, previous_artifacts, artifacts):
     stale = []
     changed = set(current["changed_paths"])
@@ -380,7 +412,7 @@ def find_stale_artifacts(current, previous_artifacts, artifacts):
     for record in current["reported_artifacts"]:
         path = artifact_path(record)
         inputs = current["target_inputs"].get(path, [])
-        if not changed.intersection(inputs):
+        if not matched_input_changes(current, inputs, changed):
             continue
         name = os.path.relpath(path, current["slot"])
         if record.get("fresh") is not False:
@@ -389,7 +421,7 @@ def find_stale_artifacts(current, previous_artifacts, artifacts):
         if not record.get("executable"):
             continue
         changed_hash = name in artifacts and previous_artifacts.get(name) != artifacts[name]
-        needs_changed_hash = bool(content_changed.intersection(inputs))
+        needs_changed_hash = bool(matched_input_changes(current, inputs, content_changed))
         if name not in artifacts or (needs_changed_hash and not changed_hash):
             stale.append(name)
     return sorted(set(stale))
@@ -399,7 +431,9 @@ def unread_package_paths(current):
     inputs = {name for names in current["target_inputs"].values() for name in names}
     roots = {root for paths in current["package_roots"].values() for root in paths}
     roots = repo_relative_inputs(current, roots)
-    return sorted(name for name in set(current["content_changed_paths"]) - inputs
+    changes = set(current["content_changed_paths"])
+    read_changes = matched_input_changes(current, inputs, changes)
+    return sorted(name for name in changes - read_changes
                   if any(Path(name).is_relative_to(root) for root in roots))
 
 
