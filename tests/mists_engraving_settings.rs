@@ -133,10 +133,14 @@ fn exercise_fresh_settings(initial: bool) {
     } else {
         (&second, &first)
     };
-    let disabled_cvar: String = disabled
-        .eval("return C_CVar.GetCVar('alwaysShowRuneIcons')")
-        .unwrap();
+    let disabled_cvar = if initial { "1" } else { "0" };
     assert_typed_rune_cvar(enabled);
+    if initial {
+        enabled
+            .exec("EngravingRuneSetting:SetValue(false)")
+            .unwrap();
+    }
+    // Leave the enabled setting opposite to the disabled environment's seed.
     assert_eq!(
         disabled
             .eval::<String>("return C_CVar.GetCVar('alwaysShowRuneIcons')")
