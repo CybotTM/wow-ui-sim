@@ -248,9 +248,13 @@ def run(ref, build_jobs, target_dir, profile="retail"):
         result = {"ref": ref, "sha": sha, "profile": profile, "started": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "steps": steps, "failures": failures}
         phase = "setup"
         output_path = RESULTS / f"{sha}-{profile}.json"
+        previous_pass = output_path.exists() and json.loads(output_path.read_text()).get("status") == "PASSED"
+        attempt = f"{sha}-{profile}-attempt-{time.time_ns()}"
+        log_path = RESULTS / (f"{attempt}.log" if previous_pass else f"{sha}-{profile}.log")
+        result["log"] = str(log_path)
         owner = None
         exit_code = 0
-        with open(RESULTS / f"{sha}-{profile}.log", "w") as log:
+        with open(log_path, "w") as log:
             try:
                 checkout = prepare_checkout(sha)
                 owner = claim_slot(target_dir, sha, profile)
@@ -301,8 +305,8 @@ def run(ref, build_jobs, target_dir, profile="retail"):
                         result["error"] = f"slot release failed: {error}"
         result["finished"] = time.strftime("%Y-%m-%dT%H:%M:%S%z")
         result["new_failures"] = new_failures(result)
-        if result["status"] != "PASSED" and output_path.exists() and json.loads(output_path.read_text()).get("status") == "PASSED":
-            output_path = RESULTS / f"{sha}-{profile}-attempt-{time.time_ns()}.json"
+        if result["status"] != "PASSED" and previous_pass:
+            output_path = RESULTS / f"{attempt}.json"
         write_result(output_path, result)
         if result["status"] == "PASSED" and ref in ("origin/master", "master"):
             write_result(RESULTS / f"master-latest-{profile}.json", result)

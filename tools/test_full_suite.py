@@ -161,10 +161,13 @@ class CertifiedSuiteTests(unittest.TestCase):
         prior = results / f'{self.sha}-ptr.json'
         content = json.dumps({'sha': self.sha, 'profile': 'ptr', 'status': 'PASSED', 'failures': {}})
         prior.write_text(content)
+        previous_log = results / f'{self.sha}-ptr.log'
+        previous_log.write_text('passed log\n')
         process = subprocess.run([sys.executable, str(RUNNER), 'run', self.sha, '--profile', 'ptr',
                                   '--target-dir', str(self.slot)], env=self.env, capture_output=True, text=True, timeout=10)
         self.assertEqual(process.returncode, 0, process.stderr)
         self.assertEqual(prior.read_text(), content)
+        self.assertEqual(previous_log.read_text(), 'passed log\n')
         attempts = list(results.glob(f'{self.sha}-ptr-attempt-*.json'))
         self.assertEqual(len(attempts), 1)
         self.assertEqual(json.loads(attempts[0].read_text())['status'], 'FAILED')
@@ -174,6 +177,7 @@ class CertifiedSuiteTests(unittest.TestCase):
         write_executable(self.bin / 'systemctl',
                          "import os, pathlib, sys\n"
                          "root = pathlib.Path(os.environ['HOME'])\n"
+                         "if os.environ.get('UNKNOWN_UNIT'): sys.exit(1)\n"
                          "if 'stop' in sys.argv:\n"
                          "    (root / 'owner-at-stop').write_text(str((root / '.cache/wow-ui-sim-targets/slot-2/.owner').exists()))\n"
                          "    (root / 'stopped').touch()\n"
@@ -215,6 +219,12 @@ sys.exit(runner.run(sys.argv[2], 1, sys.argv[3], "ptr"))
                 self.assertTrue((self.home / 'owner-at-stop').exists(), 'unit was not stopped before release')
                 self.assertEqual((self.home / 'owner-at-stop').read_text(), 'True')
                 self.assertFalse((self.slot / '.owner').exists())
+        process = subprocess.run([sys.executable, str(script), str(RUNNER), self.sha, str(self.slot), 'write'],
+                                 env=dict(self.env, UNKNOWN_UNIT='1'), capture_output=True, text=True, timeout=10)
+        self.assertNotEqual(process.returncode, 0)
+        self.assertTrue((self.slot / '.owner').exists())
+        record = json.loads((self.home / f'Projects/wow/full-suite-results/{self.sha}-ptr.json').read_text())
+        self.assertIn('state unknown', record['error'])
 
     def test_guard_rejection_records_failure_without_running_tests(self):
         result = subprocess.run([sys.executable, str(RUNNER), 'run', self.sha,
