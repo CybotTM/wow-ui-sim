@@ -17,12 +17,12 @@ Slice 7 covers original ChatFrame character-save and Forever Gamepad temporary-C
 
 Pinned Forever 1.60.1.70532 declares `SetTempCVar` at `Blizzard_APIDocumentationGenerated/CVarDocumentation.lua:171` and `RemoveTempCVar` at `:114`, both void-returning. Publish both once through the existing Forever `ACTIVE` gate. Other profiles are excluded.
 
-- [ ] Seed ordinary SoftTargetEnemy=2 and unrelated cameraDistanceMaxZoomFactor=1.9 through the live CVar store. Original Blizzard_Gamepad/Core.lua Mkb callback removes temporary values even without an overlay, preserving both ordinary values.
-- [ ] Original InputUtil transitions Gamepad then Mkb. Gamepad exposes SoftTargetEnemy=1 temporarily; removal restores2. Lua and Rust CVar reads agree, unrelated value remains1.9, repeated removal preserves2.
-- [ ] A second environment during the override reads persisted2, not temporary1. Reopening after removal reads2/1.9. Temporary values never overwrite ordinary persistence.
-- [ ] Temporary callbacks leave the saved CVar file byte-identical. An unrelated ordinary write during the override saves persisted values only, never effective temporary values.
-- [ ] Original `Blizzard_GamepadTargeting/TargetLogic.lua:102` publishes effective SoftTargetInteract1/0/1 from supplied combat/hostile-target state without persistence.
-- [ ] Nil temporary values fail with an explicit simulator error naming the unmodelled nil-value case; native semantics remain unknown. No pinned original consumer passes nil. The historical nil shape case remains deferred, unchanged.
+- [x] Seed ordinary SoftTargetEnemy=2 and unrelated cameraDistanceMaxZoomFactor=1.9 through the live CVar store. Original Blizzard_Gamepad/Core.lua Mkb callback removes temporary values even without an overlay, preserving both ordinary values.
+- [x] Original InputUtil transitions Gamepad then Mkb. Gamepad exposes SoftTargetEnemy=1 temporarily; removal restores2. Lua and Rust CVar reads agree, unrelated value remains1.9, repeated removal preserves2.
+- [x] A second environment during the override reads persisted2, not temporary1. Reopening after removal reads2/1.9. Temporary values never overwrite ordinary persistence.
+- [x] Temporary callbacks leave the saved CVar file byte-identical. An unrelated ordinary write during the override saves persisted values only, never effective temporary values.
+- [x] Original `Blizzard_GamepadTargeting/TargetLogic.lua:102` publishes effective SoftTargetInteract1/0/1 from supplied combat/hostile-target state without persistence.
+- [x] Nil temporary values fail with an explicit simulator error naming the unmodelled nil-value case; native semantics remain unknown. No pinned original consumer passes nil. The historical nil shape case remains deferred, unchanged.
 
 ### Fixture safety and applicability
 
@@ -67,7 +67,7 @@ Integration target selectors (exact GREEN on all six registered profiles; [bound
 | cf2_tts_shape_contract::original_tts_saved_settings_consumer_blocker | Original CheckLoad first with nondefault legacy input, then independent numerical contradiction. Constant-true/no-op Mark remains indistinguishable within this selector alone. |
 | cf2_tts_shape_contract::original_tts_documented_preference_pairs_contract | Independent numerical contradiction plus explicit voice, bool, chat and channel round trips. No default/reset/native persistence claim. |
 
-`tests/cf2_gamepad_temp_cvars.rs` restores the original Forever Gamepad lifecycle, saved-file checks, original targeting callback and explicit unsupported-nil diagnostic. Runtime proof is pending. The historical mixed-file `cf2_tts_shape_contract::original_gamepad_temp_cvar_shape_blocker` remains deferred, unchanged, because it requires a successful nil call. Accepted TTS test bytes are unchanged.
+`tests/cf2_gamepad_temp_cvars.rs` restores the original Forever Gamepad lifecycle, saved-file checks, original targeting callback and explicit unsupported-nil diagnostic. All four exact Forever cases pass at `70e4d148b`; see the [runtime proof](../wiki/systems/forever-temporary-cvars.md#proof-state). The historical mixed-file `cf2_tts_shape_contract::original_gamepad_temp_cvar_shape_blocker` remains deferred, unchanged, because it requires a successful nil call. Accepted TTS test bytes are unchanged.
 
 Original missing boundaries at the pre-producer base: MarkCharacterSettingsSaved at Retail/Forever475 and PTR/Mists/Era/Anniversary472; Gamepad RemoveTempCVar at Core.lua6. Missing pre-observation getter is a prerequisite blocker, not accepted original-consumer RED. Setup, compilation, provenance, timeout and unrelated API failures are not RED.
 
@@ -76,7 +76,7 @@ Original missing boundaries at the pre-producer base: MarkCharacterSettingsSaved
 - [x] Run admitted exact-list/exact-run final GREEN on every registered TTS profile, paired stock comparisons and seven all-target checks. Historical RED custody remains separate from native-semantic acceptance; see the integration inventory.
 - [ ] Native account/character ownership, fresh/reset marker policy, save timing, legacy migration and multi-character/account switching remain unproven. Approved persistence semantics do not establish native parity.
 - [ ] Channel-key-to-record migration and changed-metadata identity remain incomplete; no speculative aliases.
-- [ ] Gamepad invalid/read-only/secure CVar behavior, ordinary writes during overlays, event ordering and multiple-writer priority remain outside the bounded fixture.
+- [ ] Gamepad invalid/read-only/secure CVar behavior, same-key ordinary-write policy during overlays, native event ordering and multiple-writer priority remain outside the bounded fixture.
 
 ## Out of scope
 
