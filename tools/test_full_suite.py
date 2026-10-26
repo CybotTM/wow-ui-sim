@@ -170,6 +170,28 @@ class CertifiedSuiteTests(unittest.TestCase):
         self.assertEqual(subprocess.check_output(['git', '-C', str(worktree), 'rev-parse', 'HEAD'],
                                                  env=self.env, text=True).strip(), self.sha)
 
+    def test_failed_certification_never_runs_test_binaries(self):
+        write_executable(self.bin / 'slot-build.py',
+                         "import json, os, pathlib, sys\n"
+                         "root = pathlib.Path(os.environ['HOME'])\n"
+                         "unit = sys.argv[sys.argv.index('--unit') + 1]\n"
+                         "receipt = root / '.cache/wow-ui-sim-targets/slot-2/receipts' / (unit + '.json')\n"
+                         "receipt.parent.mkdir(exist_ok=True)\n"
+                         "receipt.write_text(json.dumps({'result': 'stale-artifacts', 'returncode': 0, 'dep_info_errors': ['bad input']}))\n")
+        write_executable(self.bin / 'systemctl',
+                         "print('SubState=exited\\nResult=success')\n")
+        write_executable(self.bin / 'systemctl',
+                         "print('SubState=failed\\nResult=exit-code')\n")
+        result = subprocess.run([sys.executable, str(RUNNER), 'run', self.sha,
+                                 '--profile', 'ptr', '--target-dir', str(self.slot)],
+                                env=self.env, capture_output=True, text=True, timeout=10)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        record = json.loads((self.home / f'Projects/wow/full-suite-results/{self.sha}-ptr.json').read_text())
+        self.assertEqual(record['status'], 'FAILED')
+        self.assertIn('bad input', record['error'])
+        self.assertEqual(record['steps'], {})
+        self.assertFalse((self.slot / '.owner').exists())
+
     def test_owned_slot_is_never_stolen(self):
         owner = self.slot / '.owner'
         owner.write_text('another owner')
