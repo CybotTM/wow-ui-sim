@@ -1,14 +1,13 @@
 # Supplied guild-bank tab catalog
 
-The existing Mists legacy guild-bank queries in `src/lua_api/globals/bank_storage_verbs.rs` must project an environment-local supplied tab catalog. This replaces the invented General tab, not native purchase, permission, or withdrawal policy. See [consumer evidence](../wiki/investigations/invented-query-defaults.md).
+The existing Mists legacy guild-bank queries in `src/lua_api/globals/bank_storage_verbs.rs` must project an environment-local supplied tab catalog. This replaces the invented General tab, not native purchase, permission, or withdrawal policy. The existing model-backed registration remains Mists-only. See [consumer evidence](../wiki/investigations/invented-query-defaults.md).
 
 ## What it must do
 
-- [ ] A fresh environment has zero tabs. `GetNumGuildBankTabs` returns the catalog length; `GetGuildBankTabInfo` returns no values for an absent index.
-- [ ] A supplied tab returns its name, icon, view permission, deposit permission, withdrawal limit, remaining withdrawals, and filtered flag, in that order.
-- [ ] Original Mists `GuildBankFrame:UpdateTabs` hides absent tabs and displays supplied names through empty → populated → empty transitions.
+- [x] A fresh environment has zero tabs. `GetNumGuildBankTabs` returns the catalog length; `GetGuildBankTabInfo` returns no values for an absent index.
+- [x] A supplied tab returns its name, icon, view permission, deposit permission, withdrawal limit, remaining withdrawals, and filtered flag, in that order.
+- [x] Original Mists `GuildBankFrame:UpdateTabs` hides absent tabs and displays supplied names through empty → populated → empty transitions.
 - [ ] Existing seeded storage-flow assertions keep their meaning by explicitly supplying the General tab.
-- [ ] The model-backed handlers remain Mists-only; no native publication on other profiles changes.
 
 ## How it works
 
@@ -27,7 +26,7 @@ The existing Mists legacy guild-bank queries in `src/lua_api/globals/bank_storag
 
 ## Known gaps (current cycle)
 
-- [ ] Original-consumer paired RED/GREEN and compiled-profile checks are pending.
+- [ ] The preserved storage-flow test is blocked before its guild-bank assertions by missing `TriggerTutorial` at original `ContainerFrame_Shared.lua:976`, on both base and GREEN. The General tab is now explicit and all old assertions remain unchanged. The separate original tab-setup RED/GREEN and seven zero-warning all-target checks pass.
 
 ## Out of scope
 

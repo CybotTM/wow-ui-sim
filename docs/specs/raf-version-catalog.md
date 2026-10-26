@@ -4,11 +4,11 @@
 
 ## What it must do
 
-- [ ] A fresh environment returns an empty `versions` array, with the existing empty recruits, nil recruitment info, and false claim flag.
-- [ ] Explicitly supplied versions project their version identifier, lifetime/spent/available month counts, recruit count and affordable-reward count without choosing native values.
-- [ ] Every version has a `monthCount` record, empty `rewards` array and absent `nextReward`, preserving the declared shape for this bounded no-reward input.
-- [ ] The selected original RecruitAFriend frame's system-enable event reads the API and distinguishes empty from supplied version state.
-- [ ] The prior one-row API assertions use an explicit fixture instead of a seeded default; the fresh-environment assertion expects zero versions.
+- [x] A fresh environment returns an empty `versions` array, with the existing empty recruits, nil recruitment info, and false claim flag.
+- [x] Explicitly supplied versions project their version identifier, lifetime/spent/available month counts, recruit count and affordable-reward count without choosing native values.
+- [x] Every version has a `monthCount` record, empty `rewards` array and absent `nextReward`, preserving the declared shape for this bounded no-reward input.
+- [x] The selected original RecruitAFriend frame's system-enable event reads the API and distinguishes empty from supplied version state.
+- [x] The prior one-row API assertions use an explicit fixture instead of a seeded default; the fresh-environment assertion expects zero versions.
 
 ## How it works
 
@@ -29,7 +29,7 @@
 
 ## Known gaps (current cycle)
 
-- [ ] Original-consumer RED/GREEN, profile stock and zero-warning checks pending.
+None in this bounded version-presence contract. Retail/PTR/Forever original-consumer RED/GREEN, four consumed-profile stock comparisons and all seven zero-warning all-target checks pass; this is not full RAF service coverage.
 
 ## Out of scope
 

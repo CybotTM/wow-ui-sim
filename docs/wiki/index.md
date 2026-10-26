@@ -1,6 +1,6 @@
-## [2026-10-26] implementation | Supplied query catalogs
+## [2026-10-26] proof | Supplied query catalogs
 
-[Invented-default audit](investigations/invented-query-defaults.md) distinguishes the unresolved transmog filter bound from invented Mists bank and RAF version rows. The [bank](../specs/guild-bank-tab-catalog.md) and [RAF](../specs/raf-version-catalog.md) contracts use explicit empty-by-default inputs; original-consumer RED is observed and GREEN/checks are pending.
+[Invented-default audit](investigations/invented-query-defaults.md) distinguishes the unresolved, unchanged transmog filter bound from supplied empty-by-default Mists bank and RAF catalogs. Original-consumer RED/GREEN, unchanged four-profile stock maps and seven zero-warning all-target checks pass. The old Mists storage flow retains all assertions and a reproduced pre-existing missing TriggerTutorial blocker; the [bank](../specs/guild-bank-tab-catalog.md) and [RAF](../specs/raf-version-catalog.md) contracts state that limit.
 
 ## [2026-10-25] implementation | PTR Edit Mode declarations
 

@@ -1,6 +1,6 @@
-## [2026-10-26] implementation | Supplied query catalogs
+## [2026-10-26] proof | Supplied query catalogs
 
-[Audit and contracts](investigations/invented-query-defaults.md) record pinned declarations, selected consumers, approved RAF assertion conversion and the unresolved transmog filter bound. Mists bank and RAF version rows now come from supplied catalogs. Targeted original-consumer RED is observed; GREEN/stock/check acceptance remains pending.
+[Audit and contracts](investigations/invented-query-defaults.md) record pinned declarations, selected original Mists bank and Retail/PTR/Forever RAF RED/GREEN, byte-identical producer-only RED tests, unchanged stock maps, seven zero-warning all-target checks and formatting/readability. The fresh RAF assertion now expects zero and an explicit one-version sibling preserves its old checks. Transmog stays unresolved and unchanged. The old Mists storage flow still fails before the bank assertions at the same missing TriggerTutorial boundary on base and GREEN; no assertion is weakened.
 
 ## [2026-10-25] proof | Mists supplied map display
 
