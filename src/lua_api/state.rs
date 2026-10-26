@@ -730,8 +730,8 @@ pub use super::state_types::{
     PlayerChoiceOptionRewardInfo, PlayerChoiceRewardCurrencyInfo, PlayerChoiceRewardItemInfo,
     PlayerChoiceRewardReputationInfo, PlayerChoiceState, PlayerState, PlayerXpState, PvpHonorState,
     SEEDED_LOCAL_CHARACTER_GUID, SEEDED_LOCAL_CHARACTER_NAME, ScenarioState, ScenarioStep,
-    SecondaryPowerState, SocialFriend, SummonRequestState, TokenAuctionInfo, WorldState,
-    WowTokenState,
+    SecondaryPowerState, SocialFriend, SocialRestrictionsState, SummonRequestState,
+    TokenAuctionInfo, WorldState, WowTokenState,
 };
 #[cfg(feature = "client-retail")]
 pub use super::state_types::{EffectiveAttackPower, PowerRegen, WeaponAttackPower};
