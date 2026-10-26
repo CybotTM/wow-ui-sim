@@ -1,10 +1,11 @@
 # Supplied transmog availability
 
-Retail/PTR and Mists use one explicitly supplied environment-local availability observation in `src/c_api/transmog_availability.rs`. Neither the query nor the modern pending/apply model infers a native default. [Model and proof boundary](../wiki/systems/transmog-availability.md).
+Retail/PTR, Mists and Forever use one explicitly supplied environment-local availability observation in `src/c_api/transmog_availability.rs`. Neither the query nor the modern pending/apply model infers a native default. [Model and proof boundary](../wiki/systems/transmog-availability.md).
 
 ## What it must do
 
-- [x] Publish `C_TransmogOutfitInfo.IsTransmogEnabled` for Retail, PTR and Mists through `client_profile::ACTIVE`. The guard excludes the other profiles; their absence is source-reviewed, not a four-profile runtime claim.
+- [x] Publish `C_TransmogOutfitInfo.IsTransmogEnabled` for Retail, PTR and Mists through `client_profile::ACTIVE`.
+- [ ] Extend that same observation to Forever for the [selected Camelot spellbook](forever-camelot-spellbook.md), without enabling the modern catalog. Wrath, Era and Anniversary remain excluded by the ACTIVE guard; this is not a runtime absence claim.
 - [x] Initialize availability to None; Some(true)/Some(false) return exactly one corresponding boolean; None raises `C_TransmogOutfitInfo.IsTransmogEnabled: transmog availability has not been supplied`.
 - [x] Modern pending staging, set/custom-set imports and application consume this same observation; collected pending records reflect supplied availability, while commit checks current availability, not only the staged record.
 - [x] Original selected set/custom-set mouse callbacks and popup apply callbacks discriminate both boolean values, independent environments, unset rejection and recovery; failed application preserves money/pending/saved state.
@@ -34,4 +35,4 @@ None within the approved supplied-state slice. All seven full-feature all-target
 
 ## Out of scope
 
-Native entitlement/default policy, automatic supply, account-wide semantics, persistence, inferred events, new admin methods, new other-profile publication and cached-slot invalidation redesign. Retail 70448 has no original direct query caller; PTR IsAvailable:512 exists in a selected file but its only original constructor is excluded Camelot code. Original interaction tests do not establish a live spellbook query flow or complete wardrobe acceptance.
+Native entitlement/default policy, automatic supply, account-wide semantics, persistence, inferred events, new admin methods, publication beyond these four profiles and cached-slot invalidation redesign. Retail 70448 has no original direct query caller; PTR IsAvailable:512 exists in a selected file but its only original constructor is excluded Camelot code. Original interaction tests do not establish a live spellbook query flow or complete wardrobe acceptance.

@@ -185,6 +185,7 @@ pub mod c_super_track;
 pub(crate) mod challenge_run;
 pub mod container_quest;
 pub mod engraving_inputs;
+mod forever_outfits;
 pub mod forever_startup;
 mod lfr_availability;
 pub mod outfit_entry;

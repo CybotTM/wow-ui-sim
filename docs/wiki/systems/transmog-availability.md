@@ -1,6 +1,6 @@
 # Supplied transmog availability
 
-The [contract](../../specs/transmog-availability.md) removes the guessed modern true default. `SimState.transmog_availability.enabled` is an environment-local `Option<bool>` shared by Retail, PTR and Mists. `TransmogAvailability::require_enabled` returns the supplied value or the named unsupplied-state error. The shared registrar uses `client_profile::ACTIVE`; it does not publish the query on other profiles or ungate the modern outfit module.
+The [contract](../../specs/transmog-availability.md) removes the guessed modern true default. `SimState.transmog_availability.enabled` is an environment-local `Option<bool>` shared by Retail, PTR, Mists and Forever. `TransmogAvailability::require_enabled` returns the supplied value or the named unsupplied-state error. The shared registrar uses `client_profile::ACTIVE`; it does not publish the query on Wrath, Era or Anniversary or ungate the modern outfit module. Forever's [bounded spellbook observation](forever-camelot-spellbook.md) adds only its separately supplied GetOutfitsInfo prerequisite.
 
 ## Data flow
 
