@@ -717,11 +717,27 @@ def finish_build(slot, receipt, current, previous, artifacts, returncode):
     rejected = {os.path.relpath(path, slot)
                 for path in current.get("rejected_artifacts", [])}
     evicted = []
+    eviction_errors = []
     for record in current["reported_artifacts"]:
         if os.path.relpath(artifact_path(record), slot) not in rejected:
             continue
         outputs = {Path(p) for p in [record.get("executable"), *record.get("filenames", [])] if p}
         fingerprints = set()
+        executable = record.get("executable")
+        if executable:
+            uplift = Path(executable)
+            if uplift in outputs and uplift.parent.name not in {"deps", "build"} and uplift.is_file():
+                name = record.get("target", {}).get("name", "").replace("-", "_")
+                suffix = uplift.suffix
+                candidates = []
+                for candidate in (uplift.parent / "deps").glob(f"{name}-*{suffix}"):
+                    stem = candidate.name[:-len(suffix)] if suffix else candidate.name
+                    if (re.fullmatch(re.escape(name) + r"-[a-f0-9]+", stem)
+                            and candidate.is_file() and not candidate.is_symlink()
+                            and candidate.read_bytes() == uplift.read_bytes()):
+                        candidates.append(candidate)
+                if len(candidates) == 1:
+                    outputs.add(candidates[0])
         identified = False
         for output in outputs:
             if output.parent.parent.name == "build":
@@ -743,7 +759,8 @@ def finish_build(slot, receipt, current, previous, artifacts, returncode):
                     fingerprints.add(candidate)
                     identified = True
         if not identified:
-            (slot / ".unverified-fingerprints").touch()
+            eviction_errors.append(f"{artifact_path(record)}: fingerprint could not be identified")
+            outputs = {Path(p) for p in [record.get("executable"), *record.get("filenames", [])] if p}
         for path in sorted(outputs | fingerprints):
             if not path.is_relative_to(slot):
                 continue
@@ -765,6 +782,8 @@ def finish_build(slot, receipt, current, previous, artifacts, returncode):
                   if missing_evidence else f"missing fresh=false or changed SHA256: {stale_paths}")
         if dep_info_errors:
             reason = "; ".join(dep_info_errors)
+        if eviction_errors:
+            reason += "; " + "; ".join(eviction_errors)
         raise ValueError(f"stale artifacts: {reason}; see {receipt}")
 
 
@@ -819,12 +838,6 @@ def execute_build(request_path, cap_gib=60, recent_hours=2):
     request = json.loads(request_path.read_text())
     slot = Path(request["slot"])
     check_owner(slot, request["owner"])
-    marker = slot / ".unverified-fingerprints"
-    if marker.exists():
-        for pattern in ("*/.fingerprint", "*/*/.fingerprint"):
-            for fingerprint in slot.glob(pattern):
-                shutil.rmtree(fingerprint)
-        marker.unlink()
     with redirect_stdout(sys.stderr):
         prune_slot(slot, request["owner"], cap_gib * 1024 ** 3, recent_hours)
     state = slot / ".source-identity.json"

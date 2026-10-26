@@ -188,7 +188,7 @@ SHA256 matches the certificate's lock input. A missing revision, failed Git read
 or digest mismatch rejects the fresh artifact. A changed closure also rejects it.
 For those lock-closure rejections, the worker evicts the rejected record's outputs
 and matching fingerprint entries and records them in `evicted_artifacts` in the
-receipt. If no fingerprint can be identified, the worker marks the slot; before the next build it removes all profile fingerprint directories so Cargo cannot reuse unverified outputs. Other rejection behavior is unchanged. A `fresh=false` record with valid
+receipt. For an uplifted executable, the worker identifies its matching hashed `deps` artifact and evicts it with its fingerprint. If the fingerprint cannot be identified, the worker deletes only the reported rejected outputs and fails with an explicit error; it does not wipe unrelated fingerprints. Other rejection behavior is unchanged. A `fresh=false` record with valid
 dep-info and output hashes can establish a certificate. Changing receipt identities
 does not provide proof.
 
