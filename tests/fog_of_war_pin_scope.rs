@@ -120,24 +120,34 @@ fn original_world_map_keeps_highlight_pin_callback_after_each_pass() {
 #[test]
 fn original_world_map_fog_pin_still_refreshes_and_clears_missing_fog() {
     let env = load_original_world_map();
-    env.apply_post_load_workarounds();
     env.exec(
         r#"
-        local pin = WorldMapFrame:EnumeratePinsByTemplate('FogOfWarPinTemplate')()
-        assert(pin and pin:GetMap() == WorldMapFrame, 'original fog pin')
-        for _, mapID in ipairs({84, 85, 0}) do
-            WorldMapFrame.mapID = mapID
-            pin:SetFogOfWarBackgroundAtlas('stale-background')
-            pin:SetFogOfWarMaskAtlas('stale-mask')
-            pin:Show()
-            pin:OnMapChanged()
+        FogPinUnderTest = WorldMapFrame:EnumeratePinsByTemplate('FogOfWarPinTemplate')()
+        assert(FogPinUnderTest and FogPinUnderTest:GetMap() == WorldMapFrame, 'original fog pin')
+        "#,
+    )
+    .unwrap();
+    for map in [84, 85, 0] {
+        env.exec(&format!(
+            "WorldMapFrame.mapID = {map}; \
+             FogPinUnderTest:SetFogOfWarBackgroundAtlas('stale-background'); \
+             FogPinUnderTest:SetFogOfWarMaskAtlas('stale-mask'); FogPinUnderTest:Show()"
+        ))
+        .unwrap();
+        env.apply_post_load_workarounds();
+        env.exec(
+            r#"
+            local pin = FogPinUnderTest
+            local mapID = WorldMapFrame:GetMapID()
             local expected = mapID == 0 and C_Map.GetCurrentMapID() or mapID
             assert(pin:GetUiMapID() == expected, 'fog pin follows canvas/current map')
             assert(pin:GetFogOfWarBackgroundAtlas() == nil, 'stale fog background cleared')
             assert(pin:GetFogOfWarMaskAtlas() == nil, 'stale fog mask cleared')
             assert(not pin:IsShown(), 'missing fog data stays hidden')
-        end
-        "#,
-    )
-    .expect("fog-only repair remains active on original pin");
+            pin:OnMapChanged()
+            assert(not pin:IsShown(), 'fog map callback remains callable and hidden')
+            "#,
+        )
+        .expect("fog-only repair remains active on original pin");
+    }
 }
