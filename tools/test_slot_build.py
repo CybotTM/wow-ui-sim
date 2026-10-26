@@ -544,7 +544,7 @@ class SourceFreshnessTests(unittest.TestCase):
             'if not fresh:\n'
             '    binary.parent.mkdir(parents=True,exist_ok=True)\n'
             '    binary.write_bytes(source.read_bytes())\n'
-            '    binary.with_suffix(".d").write_text(str(binary)+": "+str(source)+"\\n")\n'
+            '    binary.with_suffix(".d").write_text(str(binary)+": src/main.rs\\n")\n'
             'exec(sys.argv[4])\n'
             'print(json.dumps({"reason":"compiler-artifact","filenames":[str(binary)],\n'
             '    "executable":None,"fresh":fresh}))\n'
@@ -602,6 +602,65 @@ class SourceFreshnessTests(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertEqual(receipt["result"], "stale-artifacts")
         self.assertFalse((self.slot / ".verified-source-identity.json").exists())
+
+    def test_fresh_library_certificate_survives_unrelated_profile_build(self):
+        for profile, fresh in [("retail", False), ("forever", False), ("retail", True)]:
+            result, receipt = self.run_library_step(profile, fresh=fresh)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(receipt["result"], "success")
+        self.assertEqual(len(receipt["artifact_certificates"]), 2)
+
+    def test_rebuilt_library_recovers_after_profile_reuse_rejection(self):
+        result, _ = self.run_library_step("retail")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        (self.tree / "src/main.rs").write_text("new model")
+        self.git("commit", "-qam", "new model")
+        result, _ = self.run_library_step("forever")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        result, _ = self.run_library_step("retail", fresh=True)
+        self.assertNotEqual(result.returncode, 0)
+        for fresh in [False, True]:
+            result, receipt = self.run_library_step("retail", fresh=fresh)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(receipt["result"], "success")
+
+    def test_library_certificate_compares_content_across_worktrees(self):
+        result, _ = self.run_library_step("retail")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        other = self.slot / "other-tree"
+        self.git("worktree", "add", "--detach", str(other), "HEAD")
+        self.tree = other
+        result, receipt = self.run_library_step("retail", fresh=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(receipt["changed_paths"], [])
+
+    def test_fresh_library_rejects_dep_info_input_set_replacement(self):
+        result, _ = self.run_library_step("retail")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        other = self.tree / "src/other.rs"
+        other.write_text((self.tree / "src/main.rs").read_text())
+        self.git("add", ".")
+        self.git("commit", "-qm", "other source")
+        result, _ = self.run_library_step("forever")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        (self.slot / "debug/deps/libprobe-retail.d").write_text(
+            f"{self.slot}/debug/deps/libprobe-retail.rmeta: {other}\\n")
+        result, receipt = self.run_library_step("retail", fresh=True)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(receipt["changed_paths"], [])
+        self.assertEqual(receipt["result"], "stale-artifacts")
+
+    def test_library_rejects_missing_compiler_input_even_if_previously_absent(self):
+        result, _ = self.run_library_step("retail")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        missing = self.tree / "src/missing.rs"
+        dep_info = self.slot / "debug/deps/libprobe-retail.d"
+        dep_info.write_text(f"{dep_info.with_suffix('.rmeta')}: {missing}\\n")
+        # Retain the missing input in current dep-info, just as in the before snapshot.
+        mutation = f'binary.with_suffix(".d").write_text({dep_info.read_text()!r})'
+        result, receipt = self.run_library_step("retail", mutation=mutation)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(receipt["result"], "stale-artifacts")
 
     def test_older_changed_file_is_touched_without_changing_bytes(self):
         previous = self.prepare()

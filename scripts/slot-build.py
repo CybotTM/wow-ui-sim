@@ -305,12 +305,15 @@ def snapshot_source_hashes(current, snapshot):
     return read_input_hashes(worktree, names)
 
 
-def certify_record(current, record, previous, source_before, artifacts):
+def certify_record(current, record, previous, source_before, artifacts, snapshot):
     path = artifact_path(record)
     inputs = current["target_inputs"].get(path)
     if not inputs:
         raise ValueError(f"missing compiler inputs for {path}")
     hashes = read_input_hashes(Path(current["worktree"]), inputs)
+    required = repo_relative_inputs(current, target_dep_inputs(record, snapshot))
+    if any(hashes.get(name) is None for name in required):
+        raise ValueError(f"missing compiler input content for {path}")
     if any(name not in source_before or source_before[name] != digest
            for name, digest in hashes.items()):
         raise ValueError(f"compiler inputs changed during build for {path}")
@@ -331,7 +334,7 @@ def certify_record(current, record, previous, source_before, artifacts):
     return certificates
 
 
-def certify_artifacts(current, previous, source_before, artifacts):
+def certify_artifacts(current, previous, source_before, artifacts, snapshot):
     certificates = dict((previous or {}).get("artifact_certificates", {}))
     errors = []
     for record in current["reported_artifacts"]:
@@ -339,7 +342,7 @@ def certify_artifacts(current, previous, source_before, artifacts):
             continue
         try:
             certificates.update(certify_record(
-                current, record, certificates, source_before, artifacts))
+                current, record, certificates, source_before, artifacts, snapshot))
         except (OSError, ValueError) as error:
             errors.append(str(error))
     return certificates, errors
@@ -475,7 +478,7 @@ def execute_build(request_path):
         current, before, after)
     artifacts = collect_artifacts(slot, started_ns, previous, records)
     current["artifact_certificates"], certificate_errors = certify_artifacts(
-        current, previous, source_before, artifacts)
+        current, previous, source_before, artifacts, after)
     current["dep_info_errors"].extend(certificate_errors)
     finish_build(slot, receipt, current, previous, artifacts, returncode)
     return returncode

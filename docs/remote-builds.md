@@ -147,8 +147,8 @@ artifact before retrying; changing receipt identities does not provide proof.
 
 The worker hashes tracked/untracked source files, known dep-info inputs and package
 manifests before launching the child. It hashes each record's inputs again afterward
-and rejects changed or previously unsnapshotted inputs. Optional absent package
-files are represented by null hashes. Certificates advance only with an accepted
+and rejects changed or previously unsnapshotted inputs. Missing current compiler
+inputs also fail closed. Optional absent package files are represented by null hashes. Certificates advance only with an accepted
 build, alongside the verified identity. Failed or rejected attempts cannot certify
 an output. All reported filenames are hashed, including untouched `.rmeta` files,
 not just executables or newly modified files.
