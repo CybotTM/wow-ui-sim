@@ -7,6 +7,7 @@ PTR exposes `C_SpecializationInfo.HasPlayerEarnedATalentPoint` from `src/c_api/c
 - [ ] Under PTR, return exactly one non-null boolean without arguments, as declared in pinned 70493 `SpecializationInfoDocumentation.lua:331–337`.
 - [ ] Project `TalentState.has_earned_talent_point` without mutation or level/rank inference. False is the empty-host-history policy, not a native default claim.
 - [ ] Preserve the original talent microbutton behavior on `PLAYER_ENTERING_WORLD`: false disables it and sets its unlock-level field; true enables it and clears that field; later false disables it again.
+- [ ] Publish `Constants.LevelConstsExposed.MIN_TALENT_LEVEL = 10` on PTR, as declared by pinned 12.1.7.70493 `LevelConstantsDocumentation.lua:12`. Use the existing Lua constant-assignment mechanism. Forever 1.60.1.70532 declares the same value at line12 and already publishes it through `forever_finite_constants`; preserve that publication. Retail 12.1.5.70448 omits it, as do the inspected Mists/Era/Anniversary declarations; Wrath has no such documentation file. Do not expand publication to those profiles.
 - [ ] Keep Retail publication unchanged. Its pinned microbutton does not call this endpoint.
 
 ## How it works
@@ -17,6 +18,7 @@ PTR exposes `C_SpecializationInfo.HasPlayerEarnedATalentPoint` from `src/c_api/c
 
 - `src/c_api/c_spec.rs` — PTR ACTIVE gate and boolean projection.
 - `src/lua_api/talent_state.rs` — supplied lifetime-history input alongside existing talent state.
+- `src/lua_api/env_init/enums.rs` — PTR-only documented unlock-level constant, loaded beside `constants_values.lua`.
 
 ## Tests asserting this spec
 
