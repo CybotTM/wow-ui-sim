@@ -607,5 +607,71 @@ class FullSuiteWorkerTests(unittest.TestCase):
         self.assertFalse(list(self.root.glob("*.git")))
 
 
+class CertifiedSuiteTests(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.home = Path(self.temp.name)
+        self.bin = self.home / 'bin'
+        self.bin.mkdir()
+        self.repo = self.home / 'Projects/wow/wow-ui-sim'
+        self.repo.mkdir(parents=True)
+        self.slot = self.home / '.cache/wow-ui-sim-targets/slot-2'
+        self.slot.mkdir(parents=True)
+        self.env = dict(os.environ, HOME=str(self.home),
+                        PATH=f"{self.bin}{os.pathsep}{os.environ['PATH']}",
+                        GIT_CONFIG_NOSYSTEM='1')
+        def git(*args):
+            return subprocess.run(['git', *args], cwd=self.repo, env=self.env,
+                                  check=True, capture_output=True, text=True).stdout.strip()
+        git('init', '-q')
+        git('config', 'user.name', 'Test')
+        git('config', 'user.email', 'test@example.invalid')
+        (self.repo / 'source').write_text('frozen source\n')
+        git('add', 'source')
+        git('commit', '-qm', 'fixture')
+        self.sha = git('rev-parse', 'HEAD')
+        git('remote', 'add', 'origin', str(self.repo))
+        write_executable(self.bin / 'cargo',
+                         "import sys\nsys.exit('unexpected cargo invocation')\n")
+        write_executable(self.bin / 'slot-build.py',
+                         "import json, os, pathlib, sys\n"
+                         "root = pathlib.Path(os.environ['HOME'])\n"
+                         "(root / 'slot-argv.json').write_text(json.dumps(sys.argv[1:]))\n"
+                         "print('guard rejected: owner mismatch', file=sys.stderr)\n"
+                         "sys.exit(1)\n")
+
+    def test_guard_rejection_records_failure_without_running_tests(self):
+        result = subprocess.run([sys.executable, str(RUNNER), 'run', self.sha,
+                                 '--profile', 'ptr', '--target-dir', str(self.slot)],
+                                env=self.env, capture_output=True, text=True, timeout=10)
+        path = self.home / f'Projects/wow/full-suite-results/{self.sha}-ptr.json'
+        self.assertTrue(path.exists(), result.stderr)
+        receipt = json.loads(path.read_text())
+        self.assertIn('FAILED', json.dumps(receipt).upper())
+        self.assertIn('guard', json.dumps(receipt).lower())
+        self.assertFalse(any(step.get('exit') == 0 for step in receipt['steps'].values()))
+        argv = json.loads((self.home / 'slot-argv.json').read_text())
+        self.assertIn('--owner', argv)
+        self.assertEqual(argv[argv.index('--slot') + 1], '2')
+        self.assertIn('sound,gui,casc,client-ptr', argv)
+        worktree = Path(argv[argv.index('--worktree') + 1])
+        self.assertEqual(subprocess.check_output(['git', '-C', str(worktree), 'rev-parse', 'HEAD'],
+                                                 env=self.env, text=True).strip(), self.sha)
+        self.assertEqual((worktree / 'source').read_text(), 'frozen source\n')
+
+    def test_submit_sets_memory_limits(self):
+        write_executable(self.bin / 'systemd-run',
+                         "import json, os, pathlib, sys\n"
+                         "(pathlib.Path(os.environ['HOME']) / 'unit.json').write_text(json.dumps(sys.argv[1:]))\n")
+        result = subprocess.run([sys.executable, str(RUNNER), 'submit', self.sha,
+                                 '--target-dir', str(self.slot)], env=self.env,
+                                capture_output=True, text=True, timeout=10)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        argv = json.loads((self.home / 'unit.json').read_text())
+        self.assertIn('MemoryMax=9G', argv)
+        self.assertIn('MemorySwapMax=0', argv)
+
+
 if __name__ == "__main__":
     unittest.main()
