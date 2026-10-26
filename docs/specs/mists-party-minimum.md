@@ -21,6 +21,8 @@ Mists `C_PartyInfo.GetMinLevel()` returns an environment-local supplied number. 
 
 ## Tests asserting this spec
 
+The publication/unchanged-other-profile requirement has Mists runtime and seven-profile compile proof; other-profile runtime parity is not claimed.
+
 `tests/mists_scenario_minlevel.rs` covers selected TOC/Lua/XML identity, unsupplied original58 boundary, empty-catalog preservation at85/90, exact direct-query values and count, explicit-category rejection, clearing and environment isolation.
 
 ## Known gaps (current cycle)
