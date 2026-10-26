@@ -3064,3 +3064,7 @@ Updated the [active-effect model](systems/lua-api.md#restored-ptr-original-consu
 ## 2026-10-26 — Mists supplied scenario finder eligibility
 
 Added the [supplied bool/string contract](../specs/mists-scenario-finder.md) and [environment-local model](systems/mists-scenario-finder.md). Pinned Mists declaration and selected original PVEFrame270 support a separate optional input, not party-level/catalog inference. Both original entry selectors and the advanced LFR callback regression reject the missing producer at270 and pass byte-identical full-callback GREEN. Supplied tuples, reasons, level independence, two-environment isolation and unset recovery pass. The LFR successor advance retains every visibility/gap assertion. Mists stock stays6/12 without additions, removals or count changes. All seven full-feature all-target checks have zero JSON/plain warnings; formatting and manual Rust readability pass. Native policy, catalog production and broader startup cleanup remain outside scope.
+
+## [2026-10-26] implementation | Mists supplied party minimum
+
+[Supplied minimum](systems/mists-scenario-finder.md#supplied-active-party-minimum) links the [bounded contract](../specs/mists-party-minimum.md). Original58 producer-subtracted RED is observed; empty-catalog preservation and direct85/90/isolation GREEN remain pending. Catalog discrimination is blocked.

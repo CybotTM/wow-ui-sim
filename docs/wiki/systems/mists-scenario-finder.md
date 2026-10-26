@@ -31,6 +31,12 @@ All seven profiles have separate full-feature all-target checks with zero Cargo 
 - `src/c_api/scenario_finder_availability.rs` — supplied tuple query and explicit unset error.
 - `src/c_api/c_lfg_info.rs` — profile publication boundary.
 
+## Supplied active-party minimum
+
+The [Mists minimum contract](../../specs/mists-party-minimum.md) adds `SimState.mists_party_min_level: Option<f64>`, initially None. The Mists-only `C_PartyInfo.GetMinLevel()` producer returns that observation exactly. It rejects explicit arguments and raises a named native-unknown error for None; it does not infer from player levels, roster or eligibility. Retail/PTR keep their existing producer.
+
+Pinned Mists 5.5.4.70268 `PartyInfoDocumentation.lua:125–135` declares the query; line130 specifies the active party when category is omitted. The selected original `ScenarioFinder_Shared.lua:58` fails without the producer. Tests supply85/90 and exercise the original empty-catalog cover and label, plus direct value/count/isolation and clearing. Empty-catalog output is preservation, not minimum-sensitive presentation. Catalog discrimination remains blocked pending native contracts for the four legacy catalog queries. Runtime GREEN and profile checks are pending.
+
 ## See Also
 
 - [Mists LFR availability](mists-lfr-availability.md)

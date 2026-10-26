@@ -4367,3 +4367,7 @@ is reused; original-consumer runtime RED/GREEN remains unexecuted.
 ## [2026-10-25] verification | TTS bounded integration
 
 [Bounded proof matrix](investigations/cf2-tts-integration.md#bounded-verification) records37 passing exact cases, seven all-target checks with the clarified inherited-warning allowance, seven raw stock comparisons and source-backed Mists additions. Fresh library reuse has dep-info content identity; native parity and full-suite acceptance remain excluded.
+
+## [2026-10-26] implementation | Mists supplied party minimum
+
+[Supplied minimum](systems/mists-scenario-finder.md#supplied-active-party-minimum) links the [bounded contract](../specs/mists-party-minimum.md). Original58 producer-subtracted RED is observed; empty-catalog preservation and direct85/90/isolation GREEN remain pending. Catalog discrimination is blocked.
