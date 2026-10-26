@@ -1,3 +1,7 @@
+## [2026-10-26] implementation | Shared transmog supplied input
+
+[Model and bounded proof](systems/transmog-availability.md) link the [contract](../specs/transmog-availability.md): the Mists Option<bool> is shared with Retail/PTR and replaces all three modern scalar reads. All eight exact Retail/PTR producer-only RED/shared-producer GREEN pairs pass with byte-identical tests; seventeen legacy cases and both original Mists selectors pass. Paired raw stock stays Retail0/0 and PTR122/138; all74 launch CVar guards are unchanged. All seven full-feature all-target checks pass with zero Cargo JSON/plain compiler warnings; later proof documentation does not change executable inputs. A pre-existing transmog bootstrap nil call is disclosed, not repaired by this lane.
+
 ## [2026-10-26] implementation | Supplied voice settings access
 
 [Model and original callback](systems/voice-settings-access.md) record the six-profile declaration-backed query, unknown-state error and host-supplied observation. All 18 exact original-consumer GREEN/producer-free RED pairs pass with byte-identical tests; Wrath preserves absence. Seven all-target checks have zero warnings, all seven paired raw stock maps equal the supplied master baselines, and 98 final launch CVar guards are unchanged. No native readiness default, device catalog, complete initialization, timer cancellation or unsupplied forecast readiness is inferred.

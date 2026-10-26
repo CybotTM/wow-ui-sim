@@ -1,6 +1,6 @@
 # Mists supplied transmog availability
 
-The [contract](../../specs/mists-transmog-enabled.md) adds no inferred native default. Mists owns a separate environment-local `Option<bool>` in `c_api`; the modern default-true field remains unchanged. Registration uses `client_profile::ACTIVE`; a supplied value returns one boolean, and absent input raises the named error instead of choosing a display branch. Both exact original-consumer RED cases fail at `InterfaceOverrides.lua:4` without the producer. Both exact GREEN cases pass. Bound Mists stock is unchanged at 6 keys/12 occurrences; all seven full-feature all-target checks pass with zero warnings. These checks are compilation evidence, not other-profile runtime acceptance.
+The [contract](../../specs/mists-transmog-enabled.md) adds no inferred native default. Mists uses an environment-local `Option<bool>` in `c_api`, now shared with the [Retail/PTR availability model](transmog-availability.md). No modern default-true field remains. Registration uses `client_profile::ACTIVE`; a supplied value returns one boolean, and absent input raises the named error instead of choosing a display branch. Both exact original-consumer RED cases fail at `InterfaceOverrides.lua:4` without the producer. Both exact GREEN cases pass. Bound Mists stock is unchanged at 6 keys/12 occurrences; all seven full-feature all-target checks pass with zero warnings. These checks are compilation evidence, not other-profile runtime acceptance.
 
 ## Declaration and selected consumer
 
@@ -26,7 +26,7 @@ All runtime payloads use fresh child-only copies of current persisted CVars and 
 
 ## Separate gaps
 
-Retail/PTR's existing `SimState.transmog_enabled` starts true; no native default evidence is established here. Forever's selected Camelot spellbook path also declares/uses this query but remains without this Mists-only producer. Era/Anniversary's generated documentation lacks this member; Wrath lacks the documentation file.
+Retail/PTR now reuse the [shared supplied observation](transmog-availability.md); the former invented true default is removed. Forever's selected Camelot spellbook path also declares/uses this query but remains without this Mists-only producer. Era/Anniversary's generated documentation lacks this member; Wrath lacks the documentation file.
 
 ## Sources
 
