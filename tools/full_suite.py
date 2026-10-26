@@ -273,6 +273,8 @@ def run(ref, build_jobs, target_dir, profile="retail"):
                             result["steps"][name], output = run_step(name, command, checkout, log, env)
                         finally:
                             confirm_terminated(unit, target_dir.name.removeprefix("slot-"))
+                        if result["steps"][name]["exit"]:
+                            result["steps"][name]["status"] = "FAILED"
                         result["failures"][name] = sorted(set(FAILED.findall(output)))
                 phase = "setup"
                 result["status"] = "FAILED" if any(step.get("exit", 0) for step in result["steps"].values()) else "PASSED"
