@@ -45,6 +45,12 @@ The selected Vanilla WorldMap group-pin consumer calls `C_Map.GetMapDisplayInfo`
 
 The [contract](../../specs/map-display-info.md#cf-2-d--static-classic-producer-2026-10-24) records the unchanged selected XML pin selectors and static constant/no-op contradictions. Runtime loader selection, call114 RED, GREEN and Retail/PTR preservation still require admitted execution. Existing receipts above apply only to their saved revisions. Classic malformed-input/native coercion and authenticated native secret semantics remain unknown; this work preserves the existing simulator parser rather than asserting new parity.
 
+## Mists original OnLoad consumer — 2026-10-25
+
+The [Mists contract](../../specs/map-display-info.md#mists-original-group-provider-contract) reuses the existing ACTIVE registration selection and per-environment supplied input. Its pinned declaration is the same scalar boolean/optional-return shape as Era and Anniversary. Corrected original-provider RED at `f12339876` reaches GroupMembersDataProvider.lua:114; GREEN at `29b030439` passes map revisits, live visibility changes, opposing environments and separate return-arity preservation. The retained RED sibling has identical test bytes. Stock improves from the current base 10 keys/16 occurrences to 8/14, removing only the query/ScriptErrors pair, with no added keys or common-count changes. The older 12/18 baseline predates social-squelch.
+
+Proof stops before the later stock post-load workaround pass. `temporary/fog_of_war_pin.rs:106–110` applies fog methods to every provider's table-valued pin, not only fog pins; on Mists this overwrites WorldMap QuestBlob, MapExploration, MapHighlight and GroupMembers OnMapChanged. The stock CLI runs this pass after Blizzard OnLoad and again after third-party addons. This separate defect remains unfixed; post-workaround group-pin parity and other-profile exposure are not claimed.
+
 ## Sources
 
 - [Map contract](../../specs/map-display-info.md) — default86 PASS, current P8011 PASS and independently audited PTR84 PASS.
