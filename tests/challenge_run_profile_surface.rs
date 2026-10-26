@@ -22,7 +22,7 @@ fn challenge_run_members_follow_pinned_profile_declarations() {
         r#"
         assert(C_ChallengeMode.GetActiveChallengeMapID() == nil)
         assert(not C_ChallengeMode.IsChallengeModeActive())
-        A_Admin.StartChallengeRun({mapChallengeModeID=9011, level=3,
+        A_Admin.StartChallengeRun({mapChallengeModeID=9011, eventMapID=7011, level=3,
             affixIDs={9}, wasActiveKeystoneCharged=false, numDeaths=1, timeLost=8})
         assert(C_ChallengeMode.GetActiveChallengeMapID() == 9011)
         assert(C_ChallengeMode.IsChallengeModeActive())

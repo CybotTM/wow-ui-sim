@@ -2,7 +2,7 @@
 
 ## Contract
 
-The environment owns at most one active challenge run. Admin input supplies its challenge-map ID, key level, affix IDs, charged flag, deaths and time lost. No catalogue or difficulty policy is inferred. Starting stores the snapshot before `CHALLENGE_MODE_START`. Clearing removes the active run and its timers before `WORLD_STATE_TIMER_STOP(timerID)` and `CHALLENGE_MODE_RESET`. Completion first stores the supplied completion snapshot, removes the run/timers, then emits `CHALLENGE_MODE_COMPLETED`.
+The environment owns at most one active challenge run. Admin input supplies its challenge-map ID, event map ID, key level, affix IDs, charged flag, deaths and time lost. The event map ID is explicit input; its identity is not inferred from the challenge-map ID or UI-map ID. No catalogue or difficulty policy is inferred. Starting stores the snapshot before `CHALLENGE_MODE_START(eventMapID)`. Clearing removes the active run and its timers before `WORLD_STATE_TIMER_STOP(timerID)` and `CHALLENGE_MODE_RESET(eventMapID)`. Completion first stores the supplied completion snapshot, removes the run/timers, then emits `CHALLENGE_MODE_COMPLETED`.
 
 Map metadata is an environment-local supplied catalogue. Existing metadata is not expanded with invented entries. A missing supplied map has no result on the modeled profiles. Ordered criteria belong to a supplied scenario step. Updates replace that step's ordered rows before one `SCENARIO_CRITERIA_UPDATE(criteriaID)` per changed supplied row. Returned records and affix arrays are detached copies. The modern namespace is used; retired `C_Scenario.GetCriteriaInfo*` members remain retired.
 
@@ -14,8 +14,8 @@ Paths below are relative to each profile's pinned `AddOns/Blizzard_APIDocumentat
 
 | Profiles | File and lines | Members |
 |---|---|---|
-| Retail, PTR, Forever | `ChallengeModeInfoDocumentation.lua:34,43,81,172,273` | `GetActiveChallengeMapID`, `GetActiveKeystoneInfo`, `GetDeathCount`, `GetMapUIInfo`, `IsChallengeModeActive` |
-| Mists, Era, Anniversary | `ChallengeModeInfoDocumentation.lua:11,202` | `GetActiveChallengeMapID`, `IsChallengeModeActive`; no key-info or death-count additions |
+| Retail, PTR, Forever | `ChallengeModeInfoDocumentation.lua:34,43,81,154,163,273` | `GetActiveChallengeMapID`, `GetActiveKeystoneInfo`, `GetDeathCount`, `GetMapTable`, `GetMapUIInfo`, `IsChallengeModeActive` |
+| Mists, Era, Anniversary | `ChallengeModeInfoDocumentation.lua:11,129,138,202` | `GetActiveChallengeMapID`, `GetMapTable`, `GetMapUIInfo`, `IsChallengeModeActive`; no key-info or death-count additions |
 | Retail, PTR, Forever | `ScenarioInfoDocumentation.lua:11-41,263-284` | modern criteria readers and 14-field record |
 | Mists, Era, Anniversary | `ScenarioInfoDocumentation.lua:11-39,256-277` | same modern criteria readers and record |
 | Wrath | No corresponding pinned files | No new namespace members |

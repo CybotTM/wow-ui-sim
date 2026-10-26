@@ -35,7 +35,7 @@ const START: &str = r#"
         name='Supplied forecast dungeon', id=9001, timeLimit=1500,
         texture=123, backgroundTexture=456, mapID=789,
     })
-    A_Admin.StartChallengeRun({mapChallengeModeID=9001, level=12, affixIDs={},
+    A_Admin.StartChallengeRun({mapChallengeModeID=9001, eventMapID=7001, level=12, affixIDs={},
         wasActiveKeystoneCharged=true, numDeaths=2, timeLost=30})
     A_Admin.StartWorldElapsedTimer(1, 'Supplied timer', 1, 120)
 "#;
@@ -68,7 +68,7 @@ fn original_challenge_timer_reads_supplied_run_and_reset() {
         r#"
         A_Admin.SetChallengeModeMapInfo(9002, {name='Second supplied dungeon', id=9002,
             timeLimit=1800, texture=321, backgroundTexture=654, mapID=987})
-        A_Admin.StartChallengeRun({mapChallengeModeID=9002, level=5, affixIDs={9},
+        A_Admin.StartChallengeRun({mapChallengeModeID=9002, eventMapID=7002, level=5, affixIDs={9},
             wasActiveKeystoneCharged=false, numDeaths=1, timeLost=8})
         A_Admin.StartWorldElapsedTimer(2, 'Second timer', 1, 330)
         local block = ScenarioObjectiveTracker.ChallengeModeBlock
@@ -164,15 +164,15 @@ fn challenge_admin_events_observe_updated_state_and_reject_invalid_input() {
         for _, event in ipairs({'CHALLENGE_MODE_START', 'WORLD_STATE_TIMER_START', 'SCENARIO_CRITERIA_UPDATE', 'CHALLENGE_MODE_RESET', 'CHALLENGE_MODE_COMPLETED'}) do f:RegisterEvent(event) end
         f:SetScript('OnEvent', function(_, event, id)
             events[#events+1] = event
-            if event == 'CHALLENGE_MODE_START' then assert(C_ChallengeMode.GetActiveChallengeMapID() == 9001)
+            if event == 'CHALLENGE_MODE_START' then assert(id == 7001 and C_ChallengeMode.GetActiveChallengeMapID() == 9001)
             elseif event == 'WORLD_STATE_TIMER_START' then
                 assert(id == 1 and GetWorldElapsedTimers() == 1)
                 local name, elapsed, kind = GetWorldElapsedTime(id)
                 assert(name == 'Supplied timer' and elapsed == 120 and kind == 1)
             elseif event == 'SCENARIO_CRITERIA_UPDATE' then assert(id == 901 and C_ScenarioInfo.GetCriteriaInfo(1).quantity == 7)
-            else assert(not C_ChallengeMode.IsChallengeModeActive()) end
+            else assert(id == 7001 and not C_ChallengeMode.IsChallengeModeActive()) end
         end)
-        A_Admin.StartChallengeRun({mapChallengeModeID=9001, level=2, affixIDs={9,10}, wasActiveKeystoneCharged=false, numDeaths=0, timeLost=0})
+        A_Admin.StartChallengeRun({mapChallengeModeID=9001, eventMapID=7001, level=2, affixIDs={9,10}, wasActiveKeystoneCharged=false, numDeaths=0, timeLost=0})
         local level, affixes, charged = C_ChallengeMode.GetActiveKeystoneInfo()
         assert(level == 2 and #affixes == 2 and affixes[2] == 10 and charged == false)
         affixes[1] = 999

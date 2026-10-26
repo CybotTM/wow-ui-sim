@@ -17,11 +17,11 @@ A_Admin.SetWorldElapsedTime(timerID, elapsedSeconds)
 A_Admin.AdvanceWorldElapsedTime(timerID, deltaSeconds)
 ```
 
-`mapInfo` supplies `name`, `id`, `timeLimit`, optional `texture`, `backgroundTexture`, and `mapID`. `run` supplies `mapChallengeModeID`, `level`, `affixIDs`, `wasActiveKeystoneCharged`, `numDeaths`, and `timeLost`. A run must be clear before another start. Completion uses the documented `ChallengeCompletionInfo` fields, including milliseconds in `time`; it does not calculate a score or upgrade.
+`mapInfo` supplies `name`, `id`, `timeLimit`, optional `texture`, `backgroundTexture`, and `mapID`. `run` supplies `mapChallengeModeID`, `eventMapID`, `level`, `affixIDs`, `wasActiveKeystoneCharged`, `numDeaths`, and `timeLost`. A run must be clear before another start. Completion uses the documented `ChallengeCompletionInfo` fields, including milliseconds in `time`; it does not calculate a score or upgrade.
 
 `stepInfo` supplies `stepID`, `title`, and `description`. Its ordered rows replace the previous rows for that step and select that step as current. Each criterion requires `criteriaID`, `description`, and `quantityString`; the other declared fields have the documented defaults: zero for numbers and false for booleans. Fields are `criteriaType`, `completed`, `quantity`, `totalQuantity`, `flags`, `assetID`, `duration`, `elapsed`, `failed`, `isWeightedProgress`, and `isFormatted`. Quantity text is supplied, not derived from quantity or locale.
 
-Start publishes state before `CHALLENGE_MODE_START`. A timer requires an active run and is published before `WORLD_STATE_TIMER_START(timerID)`. Criteria are replaced before `SCENARIO_CRITERIA_UPDATE(criteriaID)` for each supplied row. Clear/completion removes timers before their stop events and the reset/completed event. Elapsed setters require an existing timer and finite nonnegative seconds. Advance requires a finite nonnegative delta. Neither operation changes `GetTime()`.
+Start publishes state before `CHALLENGE_MODE_START(eventMapID)`. Reset reuses the run's supplied event map ID. The native relationship between this event payload and catalogue IDs is not inferred. A timer requires an active run and is published before `WORLD_STATE_TIMER_START(timerID)`. Criteria are replaced before `SCENARIO_CRITERIA_UPDATE(criteriaID)` for each supplied row. Clear/completion removes timers before their stop events and the reset/completed event. Elapsed setters require an existing timer and finite nonnegative seconds. Advance requires a finite nonnegative delta. Neither operation changes `GetTime()`.
 
 ## Example: two progress samples
 
@@ -33,7 +33,7 @@ A_Admin.SetChallengeModeMapInfo(9001, {
     backgroundTexture = 456, mapID = 789,
 })
 A_Admin.StartChallengeRun({
-    mapChallengeModeID = 9001, level = 12, affixIDs = {},
+    mapChallengeModeID = 9001, eventMapID = 789, level = 12, affixIDs = {},
     wasActiveKeystoneCharged = true, numDeaths = 0, timeLost = 0,
 })
 -- ChallengeMode=1 is declared in Enum.WorldElapsedTimerTypes.
@@ -65,4 +65,4 @@ A_Admin.SetManualClock(0)  -- explicit opt-in; do this before starting the run
 A_Admin.AdvanceTime(300) -- GetTime, OnUpdate(delta), and due C_Timer callbacks
 ```
 
-Real time remains the default. Manual seconds and deltas must be finite and nonnegative. `AdvanceTime` requires manual mode, advances the clock first, dispatches OnUpdate once with the delta, and drains due callbacks in deadline order. A ticker can fire several times during one large advance. Callback-created timers use the already-advanced clock. Independently created duration-object manual clocks do not advance. World elapsed timers remain explicit supplied values; advance them separately when the fixture needs both clocks to agree.
+Real time remains the default. Opt in once, before supplying timed fixture state. Manual seconds and deltas must be finite and nonnegative. Pending C_Timer callbacks keep their remaining delay when the clock is enabled. `AdvanceTime` requires manual mode, advances the clock first, dispatches OnUpdate once with the delta, and drains due callbacks in deadline order. A ticker can fire several times during one large advance. Callback-created timers use the already-advanced clock. Independently created duration-object manual clocks do not advance. World elapsed timers remain explicit supplied values; advance them separately when the fixture needs both clocks to agree.
