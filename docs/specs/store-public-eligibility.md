@@ -24,6 +24,7 @@
 ## Tests asserting this spec
 
 - `tests/store_public_eligibility.rs`: selected original helper, supplied state, shape, updates, missing input, isolation and Wrath absence. Recording sinks prove helper control flow only.
+- `src/lua_api/workarounds/temporary/store_public_defaults.rs::tests`: unchanged enabled/visibility assertions and the legacy group-501 assertion with explicit supplied eligibility; Wrath asserts query absence.
 
 ## Known gaps (current cycle)
 

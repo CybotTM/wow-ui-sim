@@ -20,7 +20,7 @@ Fixed secure lists contradict the supplied eligibility observations through subs
 
 Retail RED at `6c5d12610` has an accepted slot-build receipt. Both exact selector lists contain one case. The selected original SharedXML helper has no setup diagnostics and fails because the old adapter chooses `gametime,toggle` for supplied `(true,false)` against fixed contradictory lists. The separate direct input test fails on the supplied-observation assertion. This is producer RED, not a missing storefront dependency.
 
-The input/default-test-only RED sibling is `cf6c807c4`; its integration test bytes are unchanged from the executed RED. GREEN execution, other profiles, paired stock and all-target checks are pending. No native eligibility policy, coercion, secrecy parity, storefront or purchase completion is implied.
+The producer-subtracted RED sibling is `312f2fc17`, with byte-identical integration and inline default tests. The follow-up logging change emits original query lines before the outcome assertions; the historical Retail executable predates that logging change. The legacy group-501 assertion is retained with explicit supplied eligibility, not inferred from its seeded product list. GREEN execution, fresh current-byte RED, other profiles, paired stock and all-target checks are pending. No native eligibility policy, coercion, secrecy parity, storefront or purchase completion is implied.
 
 ## Sources
 
