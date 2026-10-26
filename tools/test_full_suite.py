@@ -230,6 +230,27 @@ class CertifiedSuiteTests(unittest.TestCase):
         self.assertEqual(record['steps'], {})
         self.assertFalse((self.slot / '.owner').exists())
 
+    def test_unknown_build_unit_state_retains_slot_and_fails(self):
+        write_executable(self.bin / 'slot-build.py',
+                         "import json, os, pathlib, sys\n"
+                         "(pathlib.Path(os.environ['HOME']) / 'slot-argv.json').write_text(json.dumps(sys.argv[1:]))\n")
+        write_executable(self.bin / 'systemctl',
+                         "import os, pathlib, sys\n"
+                         "p = pathlib.Path(os.environ['HOME']) / 'systemctl-calls'\n"
+                         "with p.open('a') as f: f.write('call\\n')\n"
+                         "sys.exit(1)\n")
+        process = subprocess.run([sys.executable, str(RUNNER), 'run', self.sha,
+                                  '--profile', 'ptr', '--target-dir', str(self.slot)],
+                                 env=self.env, capture_output=True, text=True, timeout=10)
+        self.assertNotEqual(process.returncode, 0)
+        self.assertEqual((self.home / 'systemctl-calls').read_text().splitlines(), ['call'] * 3)
+        self.assertEqual((self.slot / '.owner').read_text(), f'full-suite {self.sha[:12]} ptr')
+        argv = json.loads((self.home / 'slot-argv.json').read_text())
+        unit = argv[argv.index('--unit') + 1]
+        result = json.loads((self.home / f'Projects/wow/full-suite-results/{self.sha}-ptr.json').read_text())
+        self.assertEqual(result['status'], 'FAILED')
+        self.assertIn(f'slot 2 retained: unit {unit} state unknown', result['error'])
+
     def test_owned_slot_is_never_stolen(self):
         owner = self.slot / '.owner'
         owner.write_text('another owner')
