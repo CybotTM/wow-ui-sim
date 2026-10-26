@@ -36,7 +36,8 @@ fn ptr_vc_init_original_consumer_initializes_reset_state() {
         assert(Enum.VcInitState.VcIsReset == 0)
         assert(Enum.VcInitState.VcIsInitializing == 1)
         assert(Enum.VcInitState.VcIsInitialized == 2)
-        assert(CatalogShopVCFrameMixin.vcInitState == Enum.VcInitState.VcIsReset)
+        local mixin = assert(rawget(__secureenv, 'CatalogShopVCFrameMixin'))
+        assert(mixin.vcInitState == Enum.VcInitState.VcIsReset)
     "#,
     )
     .expect("original catalog consumer must initialize reset state");
