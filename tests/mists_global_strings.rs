@@ -28,7 +28,7 @@ fn original_mists_display_settings_reads_70268_enemy_castbar_name() {
     let env = new_blizzard_addon_env(&ui);
     // Supply only the preceding availability branch. Engraving remains unset so
     // its original line 138 is the next boundary, not part of this localization fix.
-    env.state().borrow_mut().mists_transmog.enabled = Some(true);
+    env.state().borrow_mut().transmog_availability.enabled = Some(true);
     load_blizzard_addon_closure_into_env(
         &env,
         &ui,
