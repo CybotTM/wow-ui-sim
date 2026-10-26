@@ -135,3 +135,45 @@ fn original_wrath_equipment_location_reads_socketed_gems() {
         "##).expect("Wrath equipment location consumes modeled socketed gems");
     }
 }
+
+fn seed_bag_observations(env: &WowLuaEnv) {
+    load_wrath_inventory(env);
+    let mut state = env.state().borrow_mut();
+    let item = state.bag_items.get_mut(&(0, 1)).expect("carried ring");
+    item.hyperlink = Some("|Hitem:49803:0:40111:40112:0:0|h[Ring]|h".into());
+    item.durability = Some((27, 83));
+    state.item_cooldowns.insert(
+        49803,
+        wow_ui_sim::lua_api::state::SpellCooldownState {
+            start: 11.0,
+            duration: 31.0,
+        },
+    );
+}
+
+#[test]
+fn wrath_carried_cooldown_projects_supplied_item_state() {
+    test_timeout! {
+        let env = WowLuaEnv::new().unwrap();
+        seed_bag_observations(&env);
+        env.exec("local start, duration = GetContainerItemCooldown(0, 1); assert(start == 11 and duration == 31)").unwrap();
+    }
+}
+
+#[test]
+fn wrath_carried_durability_projects_supplied_item_state() {
+    test_timeout! {
+        let env = WowLuaEnv::new().unwrap();
+        seed_bag_observations(&env);
+        env.exec("local current, maximum = GetContainerItemDurability(0, 1); assert(current == 27 and maximum == 83)").unwrap();
+    }
+}
+
+#[test]
+fn wrath_carried_gems_project_supplied_item_link() {
+    test_timeout! {
+        let env = WowLuaEnv::new().unwrap();
+        seed_bag_observations(&env);
+        env.exec("local first, second = GetContainerItemGems(0, 1); assert(first == 40111 and second == 40112)").unwrap();
+    }
+}
