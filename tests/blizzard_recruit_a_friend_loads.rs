@@ -66,9 +66,14 @@ const NAMED_TOP_LEVEL_FRAMES: &[&str] = &[
     "RecruitAFriendFrame",
 ];
 
-#[cfg(any(feature = "client-retail", feature = "client-ptr", feature = "client-wowforever"))]
-prefork_full_ui_case! {
-fn original_raf_enable_event_distinguishes_empty_and_supplied_versions(env: &WowLuaEnv) {
+#[cfg(any(
+    feature = "client-retail",
+    feature = "client-ptr",
+    feature = "client-wowforever"
+))]
+#[test]
+fn original_raf_enable_event_distinguishes_empty_and_supplied_versions() {
+    let env = load_full_game_ui();
     env.exec(r#"
         local frame = RecruitAFriendFrame
         local source = debug.getinfo(frame.OnEvent, "S").source:gsub("\\", "/")
@@ -87,7 +92,6 @@ fn original_raf_enable_event_distinguishes_empty_and_supplied_versions(env: &Wow
         A_Admin.ClearRAFVersions()
         assert(#C_RecruitAFriend.GetRAFInfo().versions == 0)
     "#).expect("original RAF enable event must distinguish empty from supplied versions");
-}
 }
 
 const REGISTERED_EVENTS: &[&str] = &[

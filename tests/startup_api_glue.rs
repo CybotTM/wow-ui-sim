@@ -200,10 +200,15 @@ fn c_lfg_info_can_player_use_premade_group_can_be_disabled() {
 fn recruit_a_friend_surface_preserves_explicitly_supplied_version_fields() {
     let env = env();
     env.exec("A_Admin.AddRAFVersion(1, 4, 1, 3, 0, 0)").unwrap();
-    let expected_enabled = if cfg!(feature = "retail-12-1-0") { "absent" } else { "false" };
+    let expected_enabled = if cfg!(feature = "retail-12-1-0") {
+        "absent"
+    } else {
+        "false"
+    };
     let enabled_probe: String = env.eval("local enabled = C_RecruitAFriend.IsEnabled; return enabled and tostring(enabled()) or 'absent'").unwrap();
     assert_eq!(enabled_probe, expected_enabled);
-    env.exec(r#"
+    env.exec(
+        r#"
         local info = C_RecruitAFriend.GetRAFInfo()
         local active, faction = C_RecruitAFriend.GetRecruitInfo()
         assert(C_RecruitAFriend.IsRecruitingEnabled() == false)
@@ -214,7 +219,9 @@ fn recruit_a_friend_surface_preserves_explicitly_supplied_version_fields() {
         assert(version.monthCount.spentMonths == 1 and version.monthCount.availableMonths == 3)
         assert(#version.rewards == 0 and version.nextReward == nil)
         assert(version.numRecruits == 0 and version.numAffordableRewards == 0)
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 }
 
 #[test]

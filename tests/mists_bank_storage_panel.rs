@@ -14,7 +14,7 @@ fn original_guild_bank_tabs_follow_empty_supplied_empty_catalog() {
     env.state().borrow_mut().world.guild_name = None;
     let loaded = load_blizzard_addon_closure_into_env(&env, &ui, &["Blizzard_GuildBankUI"], &[]);
     assert!(loaded.iter().any(|name| name == "Blizzard_GuildBankUI"));
-    env.exec(r#"
+    env.exec(r##"
         local source = debug.getinfo(GuildBankFrame.UpdateTabs, "S").source:gsub("\\", "/")
         assert(source:find("Blizzard_GuildBankUI/TBC/Blizzard_GuildBankUI.lua", 1, true), source)
         assert(not IsGuildLeader(), "exclude the buy-new-tab branch")
@@ -34,7 +34,7 @@ fn original_guild_bank_tabs_follow_empty_supplied_empty_catalog() {
         A_Admin.ClearGuildBankTabs()
         GuildBankFrame:UpdateTabs()
         assert(not GuildBankFrame.BankTabs[1]:IsShown(), "cleared catalog must hide tab 1")
-    "#).expect("original Mists guild-bank tab setup must project the supplied catalog");
+    "##).expect("original Mists guild-bank tab setup must project the supplied catalog");
 }
 
 fn wow_sim_binary() -> PathBuf {
