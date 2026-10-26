@@ -43,27 +43,39 @@ fn binding_source_lines(contents: &str) -> Result<Vec<usize>, quick_xml::DeError
     let mut lines = Vec::new();
     let mut offset = 0;
     let mut line = 1;
+    let mut active = None;
     loop {
         let event = reader
             .read_event()
             .map_err(quick_xml::DeError::InvalidXml)?;
         let end = reader.buffer_position() as usize;
+        let event_line = line;
         line += contents.as_bytes()[offset..end]
             .iter()
             .filter(|byte| **byte == b'\n')
             .count();
         offset = end;
         match event {
-            Event::Start(element) | Event::Empty(element)
-                if element.name().as_ref() == b"Binding" =>
-            {
-                let leading_lines = contents[end..]
-                    .bytes()
-                    .take_while(|byte| byte.is_ascii_whitespace())
-                    .filter(|byte| *byte == b'\n')
-                    .count();
-                lines.push(line + leading_lines);
+            Event::Start(element) if element.name().as_ref() == b"Binding" => {
+                active = Some(lines.len());
+                lines.push(line);
             }
+            Event::Empty(element) if element.name().as_ref() == b"Binding" => lines.push(line),
+            Event::Text(text) if active.is_some() => {
+                let bytes = text.as_ref();
+                let leading = bytes
+                    .iter()
+                    .take_while(|byte| byte.is_ascii_whitespace())
+                    .count();
+                if leading < bytes.len() {
+                    let leading_lines = bytes[..leading]
+                        .iter()
+                        .filter(|byte| **byte == b'\n')
+                        .count();
+                    lines[active.take().expect("active binding")] = event_line + leading_lines;
+                }
+            }
+            Event::End(element) if element.name().as_ref() == b"Binding" => active = None,
             Event::Eof => break,
             _ => {}
         }
