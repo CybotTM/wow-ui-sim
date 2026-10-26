@@ -361,6 +361,8 @@ pub struct SimState {
     #[cfg(feature = "retail-12-0-0")]
     pub challenge_completion: crate::c_api::c_challenge_mode::ChallengeCompletionInfo,
     pub spell_loss_of_control: HashMap<u32, LossOfControlInfo>,
+    pub active_loss_of_control:
+        HashMap<String, Vec<crate::c_api::c_loss_of_control::ActiveLossOfControlData>>,
     pub spell_flyouts: HashMap<u32, SpellFlyoutInfo>,
     pub action_profession_quality: HashMap<i32, ProfessionQualityInfo>,
     pub addon_base_paths: Vec<PathBuf>,

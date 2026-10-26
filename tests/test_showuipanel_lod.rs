@@ -661,6 +661,7 @@ post_wrath_ui_fixture! {
 fn loss_of_control_frame_shows_seeded_overlay_on_added_event() {
     test_timeout! {
         let env = setup_env();
+        env.exec(include_str!("fixtures/loss_of_control.lua")).unwrap();
         let loss_of_control_enabled: bool = env
             .eval(
                 "Constants.LossOfControlConsts = { LOSS_OF_CONTROL_ACTIVE_INDEX = 1 }; \

@@ -10,6 +10,10 @@
 
 [Single overlay and original listener identity](systems/forever-temporary-cvars.md) links the [contract](../specs/c-factory-cf2-tts.md#forever-temporary-cvars): original Gamepad/TargetLogic RED, one effective/persisted store, original normal/secure listener discrimination, and explicit unsupported nil diagnostic. Four exact Forever GREEN cases, protected stock at 26/26→26/26 with no raw changes, formatting and all seven zero-warning all-target checks pass. Historical nil shape stays deferred.
 
+## [2026-10-26] implementation | Supplied active loss-of-control state
+
+[Active-effect model and proof](systems/lua-api.md#active-loss-of-control-state) link the [contract](../specs/active-loss-of-control.md): empty per-unit state, declared record shapes, explicit admin input and executed Wrath absence. Byte-identical Retail original-consumer RED/GREEN and the existing event overlay pass. All seven raw stock maps are unchanged, and all seven separate all-target checks have zero compiler warnings. PTR consumer proof remains explicitly deferred to the upstream display-info initialization chain; no failed OnLoad step is replaced.
+
 ## [2026-10-25] implementation | PTR Edit Mode declarations
 
 [Two original boundaries](investigations/ptr-edit-mode-declarations.md) link the [contract](../specs/ptr-edit-mode-declarations.md): declaration-backed boss directions and Gamepad preset, independent exact RED/GREEN and 270/376→268/374 stock. Display-info:800 SwingTimerSetting is the traced successor, not part of this slice. The module compiles on all profiles and publishes only when ACTIVE is PTR. PTR/Retail/Era full-feature all-target checks pass with zero warnings and separate accepted source-binding receipts; formatting and readability pass.

@@ -14,6 +14,7 @@ The `A_Admin` namespace provides administrative functions for controlling simula
 - [Movement](movement.md) — SetMoving, SetMounted, SetFlying, SetFalling, SetSwimming
 - [Talents](talents.md) — SetSpec, SetTalentRank, SetTalentSelection, ResetTalents
 - [Buffs](buffs.md) — AddBuff, RemoveBuff, ClearBuffs
+- [Loss of Control](../specs/active-loss-of-control.md) — AddLossOfControl, ClearLossOfControl
 - [Zone](zone.md) — SetZone, SetSubZone, SetInstanceInfo, SetInInstance
 - [Economy](economy.md) — SetMoney, SetItemLevel, AddBagItem, RemoveBagItem
 - [Collections](collections.md) — AddTransmog, RemoveTransmog, CollectMount, UncollectMount, CollectPet, UncollectPet, CollectToy, UncollectToy, CollectCampsite, UncollectCampsite, SetAchievementEarned, EarnAchievement

@@ -6,6 +6,10 @@
 
 [Single overlay and original listener identity](systems/forever-temporary-cvars.md) records original Gamepad/TargetLogic RED, persisted-file protection, authenticated normal/secure replay listeners, and the explicit unmodelled nil diagnostic. Four exact Forever GREEN cases pass at 70e4d148b. Stock remains byte-identical at 26/26→26/26, formatting passes and all seven canonical all-target checks have zero warnings at 6f50f3002. Accepted TTS bytes and historical nil deferral are unchanged.
 
+## [2026-10-26] implementation | Supplied active loss of control
+
+[Model and final proof](systems/lua-api.md#active-loss-of-control-state) link the [contract](../specs/active-loss-of-control.md). Byte-identical Retail original-display RED/GREEN, explicit overlay fixture, and positive Wrath absence pass. All seven raw stock maps are unchanged; all seven separate all-target checks pass with zero compiler warnings. PTR consumer proof is deferred to its original display-info initialization chain without fixture replacement.
+
 ## [2026-10-25] proof | Mists supplied map display
 
 [Original group-provider proof](investigations/map-display-info-model.md#mists-original-onload-consumer--2026-10-25) passes exact corrected RED and supplied-state GREEN plus return-arity preservation. Stock 10/16→8/14 has no additions. Mists/Retail/Era/Anniversary all-target checks pass with zero warnings; formatting and readability pass. The actual OnLoad boundary precedes post-load fog-pin mutation; the separate defect is recorded, not fixed.
