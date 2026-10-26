@@ -30,7 +30,7 @@ fn assert_selected_group_finder(ui: &std::path::Path) {
     );
 }
 
-fn load_original_pve_frame() -> WowLuaEnv {
+pub(super) fn load_original_pve_frame() -> WowLuaEnv {
     let ui = blizzard_ui_dir();
     assert_selected_group_finder(&ui);
     let env = new_blizzard_addon_env(&ui);
@@ -84,6 +84,7 @@ fn assert_original_visibility(env: &WowLuaEnv, available: bool, level: i32) {
     {
         let mut sim = env.state().borrow_mut();
         sim.lfr_availability = Some(available);
+        sim.scenario_finder_availability = Some((true, String::new()));
         sim.player.level = level;
     }
     let errors_before = env.state().borrow().lua_errors.len();
@@ -135,12 +136,11 @@ fn observe_original_lfr_before_successor(env: &WowLuaEnv, available: bool) {
         local ok, reason = pcall(GroupFinderFrame:GetScript('OnEvent'), GroupFinderFrame, 'PLAYER_LEVEL_CHANGED')
         debug.sethook()
         if not observed then error(reason or 'original LFR observation not reached', 0) end
-        assert(not ok, 'named scenario successor remains outside this LFR slice')
-        local expectedError = "Interface/AddOns/Blizzard_GroupFinder/Classic/PVEFrame.lua:270: attempt to call field 'CanPlayerUseScenarioFinder' (a nil value)"
-        assert(reason == expectedError, tostring(reason))
+        assert(ok, tostring(reason))
+        assert(not GroupFinderFrame.groupButton4:IsShown(), 'empty catalog remains hidden after scenario query')
     "#;
     env.exec(&script)
-        .expect("original PVEFrame.lua:229 must consume supplied LFR availability before exact scenario successor");
+        .expect("original PVEFrame.lua:229 must consume supplied LFR availability and complete past scenario query");
 }
 
 #[test]

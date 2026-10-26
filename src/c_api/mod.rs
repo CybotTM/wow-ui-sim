@@ -185,6 +185,7 @@ pub(crate) mod challenge_run;
 pub mod container_quest;
 pub mod forever_startup;
 mod lfr_availability;
+mod scenario_finder_availability;
 #[cfg(feature = "client-wowforever")]
 pub use c_quest_log_watches::QuestWatchType;
 #[cfg(feature = "client-wowforever")]
@@ -316,6 +317,7 @@ pub mod intl_native;
 pub mod item_spell;
 #[cfg(feature = "retail-12-0-0")]
 mod item_stats;
+pub mod item_upgrade_eligibility;
 #[cfg(feature = "retail-12-0-0")]
 pub use item_stats::ItemStatsState;
 #[cfg(feature = "retail-12-0-0")]

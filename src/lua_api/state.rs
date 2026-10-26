@@ -60,6 +60,7 @@ macro_rules! build_empty_sim_state {
             #[cfg(feature = "client-wrath")]
             who_routing: Default::default(),
             console_output: $collections.console_output,
+            tutorial_requests: ::std::vec::Vec::new(),
             timers: $collections.timers,
             rilua_timers: ::std::collections::VecDeque::new(),
             timer_callback_sources: ::std::collections::HashMap::new(),
@@ -390,6 +391,7 @@ macro_rules! build_empty_sim_state {
             action_ui_buttons: $collections.action_ui_buttons,
             cursor_item: $runtime.cursor_item,
             container_actions: Default::default(),
+            item_upgrade_eligibility: Default::default(),
             loading_addon_index: $runtime.loading_addon_index,
             loading_addon_stack: $runtime.loading_addon_stack,
             executing_addon_index: $runtime.executing_addon_index,
@@ -450,6 +452,7 @@ macro_rules! build_empty_sim_state {
             lfg_active_entry: None,
             can_use_premade_group: true,
             lfr_availability: None,
+            scenario_finder_availability: None,
             lfg_category_info: default_lfg_category_info(),
             lfg_active_categories: ::std::collections::HashSet::new(),
             lfg_queued_dungeons: ::std::collections::HashMap::new(),
@@ -517,6 +520,7 @@ macro_rules! build_empty_sim_state {
             loot_frame_open: false,
             guild_registrar_open: false,
             pet_stables_open: false,
+            stable_active_pets: None,
             #[cfg(any(feature = "retail-12-0-0", feature = "client-wowforever"))]
             allow_recent_allies_see_location: true,
             #[cfg(feature = "client-wowforever")]

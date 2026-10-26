@@ -8,7 +8,6 @@ use crate::startup::{fire_one_on_update_tick, process_pending_timers};
 use std::path::PathBuf;
 
 const MAX_ASYNC_TICKS: u32 = 500;
-const ADDON_BASE_PATHS: &[&str] = &["Interface/AddOns", "Interface/TestAddOns"];
 
 /// Reset test registry between files (TestFramework globals stay alive).
 const TEST_RESET: &str = r#"
@@ -58,10 +57,9 @@ end
 
 /// Load the TestFramework addon (provides test/async_test/assertions).
 fn load_test_framework(env: &WowLuaEnv) {
-    let Some(toc_path) = resolve_addon_toc_path("TestFramework") else {
+    let Some(toc_path) = crate::paths::find_bundled_test_framework_toc() else {
         eprintln!(
-            "TestFramework addon not found (checked: {})",
-            ADDON_BASE_PATHS.join(", ")
+            "Bundled TestFramework addon not found beside the executable or in the build source"
         );
         std::process::exit(1);
     };
@@ -84,25 +82,13 @@ fn load_test_framework(env: &WowLuaEnv) {
     }
 }
 
-fn resolve_addon_root(addon_name: &str) -> Option<PathBuf> {
-    // wow-sim chdir's to the executable directory at startup (for GUI asset
-    // loading), so the addon dirs are not necessarily under the current dir:
-    // in a dev build cwd is `target/<profile>/` and the addon dirs live at the
-    // repo root above it; in a deployed layout `Interface/` sits next to the
-    // binary (cwd). Walk up from cwd until a base path resolves so `run-tests`
-    // works from either location.
-    let cwd = std::env::current_dir().ok()?;
-    cwd.ancestors().find_map(|root| {
-        ADDON_BASE_PATHS
-            .iter()
-            .map(|base| root.join(base).join(addon_name))
-            .find(|path| path.exists())
-    })
-}
-
-fn resolve_addon_toc_path(addon_name: &str) -> Option<PathBuf> {
-    let root = resolve_addon_root(addon_name)?;
-    crate::loader::find_toc_file(&root)
+fn find_addon_root(env: &WowLuaEnv, addon_name: &str) -> Option<PathBuf> {
+    env.state()
+        .borrow()
+        .addon_base_paths
+        .iter()
+        .map(|base| base.join(addon_name))
+        .find(|path| path.is_dir())
 }
 
 /// Run all .lua test files from `<base>/<addon_name>/tests/`.
@@ -114,7 +100,7 @@ pub fn run_addon_tests(
 ) {
     run_exec_lua(env, exec_lua, exec_lua_secure);
     load_test_framework(env);
-    let (tests_dir, test_files) = load_test_files(addon_name);
+    let (tests_dir, test_files) = load_test_files(env, addon_name);
     eprintln!(
         "Running {} test file(s) from {}\n",
         test_files.len(),
@@ -140,12 +126,9 @@ fn run_exec_lua(env: &WowLuaEnv, exec_lua: Option<&str>, exec_lua_secure: bool) 
     }
 }
 
-fn load_test_files(addon_name: &str) -> (PathBuf, Vec<PathBuf>) {
-    let Some(addon_root) = resolve_addon_root(addon_name) else {
-        eprintln!(
-            "Addon '{addon_name}' not found (checked: {})",
-            ADDON_BASE_PATHS.join(", ")
-        );
+fn load_test_files(env: &WowLuaEnv, addon_name: &str) -> (PathBuf, Vec<PathBuf>) {
+    let Some(addon_root) = find_addon_root(env, addon_name) else {
+        eprintln!("Addon '{addon_name}' not found in the configured addon roots");
         std::process::exit(1);
     };
     let tests_dir = addon_root.join("tests");

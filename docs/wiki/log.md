@@ -2,9 +2,25 @@
 
 [Environment-local snapshots and nested dispatch](systems/challenge-mode-run.md) describe supplied lifecycle state and opt-in shared time. Own feature RED is observed; four Phase A Retail cases pass. The criteria fixture now invokes original InitModule. Clock and final acceptance evidence remain pending; inactive key shape awaits native evidence.
 
+## [2026-10-26] implementation | Legacy tutorial request recorder
+
+[Consumer investigation](investigations/invented-query-defaults.md#legacy-tutorial-request-boundary) records the four legacy profiles, the already-selected TutorialFrame listener, and the absent native global. Original Mists storage-flow RED remains unchanged; bounded state recorder adds no event/flag/UI policy. GREEN advances past976 through all Lua assertions, but the test still fails its collected-error gate (C_Engraving:315 next). Four-profile state/publication tests pass, stock maps are byte-identical, and all seven canonical all-target checks have zero warnings.
+
+## [2026-10-26] proof | Modern stable active-list observations
+
+[Original active-slot RED/GREEN](investigations/consumer-selection-and-red-proof.md#supplied-modern-stable-active-list) proves Retail/PTR supplied transitions, isolation and snapshots through original XML slots. The [contract](../specs/stable-active-list.md) records finite PTR prerequisite chains and the explicit historical deferral. PTR stock remains 134/154 with a traced two-key replacement; Retail remains 8/10 without raw changes. All seven canonical all-target checks have zero compiler warnings, formatting/readability pass, and all 29 runtime payloads retain unchanged original CVar guards.
+
+## [2026-10-26] feature | Exclusive addon test roots
+
+[CLI reference](reference/cli-commands.md#run-tests-addon) and [contract](../specs/exclusive-addon-paths.md) document repeatable CLI roots and environment-only isolation. Candidate discovery, explicit addon loading and test lookup share the selected roots; bundled TestFramework is located explicitly. Ordinary loader/CLI RED, nine targeted GREEN cases, three full CLI acceptance assertions and all seven zero-warning canonical all-target checks pass. Retail stock remains exactly 8 raw keys / 10 occurrences. Both InTimeBL runs pass 10 unit, 4 generator and 4 simulator assertions; exclusive discovery loads only InTimeBL rather than 66 candidates. The observed missing C_ChallengeMode.GetActiveChallengeMapID remains report-only, outside the CLI feature.
+
 ## [2026-10-26] proof | Complete PTR Edit Mode display-info
 
 [Complete original-file proof](investigations/ptr-edit-mode-declarations.md#complete-original-display-info-initialization) links the [contract](../specs/ptr-edit-mode-declarations.md):16 declaration-backed read members, exact producer-only RED/GREEN for the whole file and original LossOfControl OnLoad, PTR stock214/280→134/154 with four individually traced additions. The separate preset remains blocked. PTR/Retail/Era each have an accepted all-target receipt with zero warnings; formatting and readability pass.
+
+## [2026-10-26] proof | Supplied item-upgrade eligibility
+
+[Final six-profile proof](systems/item-upgrade-eligibility.md#final-proof--2026-10-26) closes the [supplied-location contract](../specs/item-upgrade-eligibility.md): original generic ItemUtil RED/GREEN, independent inputs, movement/removal, diagnostics, isolation and the reproduced SetReagentCount recreation regression. All seven all-target checks have zero JSON/plain warnings; six raw stock maps are unchanged. The three Mists/Era/Anniversary bag-helper preservation cases remain explicitly BLOCKED at the existing incompatible Blizzard_POIButton TOC, before the seed/query. The fixture supplies a shown-frame context, not an original upgrade window.
 
 ## [2026-10-26] implementation | PTR SwingTimer declarations
 
@@ -3022,3 +3038,7 @@ Recorded [declarations and original consumers](investigations/ptr-edit-mode-decl
 ## 2026-10-26 — Restored PTR loss-of-control consumer proof
 
 Updated the [active-effect model](systems/lua-api.md#restored-ptr-original-consumer-proof-2026-10-26) and [contract](../specs/active-loss-of-control.md#consumer-proof): reauthenticated pinned PTR declarations/selection, original OnLoad prerequisite, two exact byte-identical subtraction RED/GREEN cases, empty/supplied/clear display behavior and two-environment isolation. No producer change; bound PTR stock remains134/154 with no raw-key/count deltas. All seven separate full-feature canonical all-target checks have zero JSON/plain compiler warnings; formatting and changed-line readability pass.
+
+## 2026-10-26 — Mists supplied scenario finder eligibility
+
+Added the [supplied bool/string contract](../specs/mists-scenario-finder.md) and [environment-local model](systems/mists-scenario-finder.md). Pinned Mists declaration and selected original PVEFrame270 support a separate optional input, not party-level/catalog inference. Both original entry selectors and the advanced LFR callback regression reject the missing producer at270 and pass byte-identical full-callback GREEN. Supplied tuples, reasons, level independence, two-environment isolation and unset recovery pass. The LFR successor advance retains every visibility/gap assertion. Mists stock stays6/12 without additions, removals or count changes. All seven full-feature all-target checks have zero JSON/plain warnings; formatting and manual Rust readability pass. Native policy, catalog production and broader startup cleanup remain outside scope.

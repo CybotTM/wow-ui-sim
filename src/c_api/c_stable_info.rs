@@ -1,7 +1,9 @@
 //! State-backed stable APIs; Camelot read data is isolated from other profiles.
 
+pub mod active_list;
 #[cfg(feature = "client-wowforever")]
 pub mod forever;
+mod ptr_constants;
 
 use crate::c_api::helpers::ensure_namespace;
 use crate::event::Event;
@@ -11,6 +13,8 @@ use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
 pub(crate) fn register_c_stable_info_surface(state: &mut LuaState) -> LuaResult<()> {
+    ptr_constants::register(state)?;
+    active_list::register(state)?;
     let stable_info = ensure_namespace(state, "C_StableInfo")?;
     table_set_rust_fn_static(
         state,
