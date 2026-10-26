@@ -128,6 +128,25 @@ fn assert_world_branch(env: &WowLuaEnv, expected: bool) {
 }
 
 #[test]
+fn ptr_original_microbutton_keeps_texture_for_unresolved_atlas() {
+    if wow_ui_sim::client_profile::ACTIVE != wow_ui_sim::client_profile::ClientProfile::Ptr {
+        return;
+    }
+    let env = load_original_world_handler();
+    env.exec(
+        r#"
+        local source = debug.getinfo(LegacyMicroButton.SetNormal, 'S').source:gsub('\\', '/')
+        assert(source:find('Blizzard_MicroMenu/Mainline/MainMenuBarMicroButtons.lua', 1, true))
+        LegacyMicroButton:SetNormal()
+        local highlight = LegacyMicroButton:GetHighlightTexture()
+        assert(highlight and highlight:GetObjectType() == 'Texture')
+        assert(highlight:GetAlpha() == 1)
+        "#,
+    )
+    .expect("original PTR template must retain its highlight region even without atlas pixels");
+}
+
+#[test]
 fn ptr_talent_button_reaches_original_world_event() {
     if wow_ui_sim::client_profile::ACTIVE != wow_ui_sim::client_profile::ClientProfile::Ptr {
         return;
