@@ -24,3 +24,5 @@ The first command regenerates the PHF from the committed multiline-safe CSV. The
 `tests/mists_global_strings.rs` loads the runtime-selected original Classic Settings closure. It checks the real `showTargetCastbar` setting uses `Show Enemy Cast Bar` (ID51586), advances beyond original `InterfaceOverrides.lua:131`, and leaves the absent tooltip nil. Unsupplied engraving at original line138 is a separate boundary, not a localization repair. No full SettingsRegistrar pass or visible-panel interaction is claimed.
 
 Generator fixtures cover two decrypted sections, relative string pointers, empty-string sentinels, multiline/quoted format text, and duplicate rejection before replacing the output.
+
+The [stock exposure investigation](../wiki/investigations/mists-global-strings.md) records the accepted6/12→8/14 delta: the unchanged temporary Retail reputation seed supplies ungrounded Mists inputs and reaches another tag absent from70268. This contract does not authorize a replacement label or infer native reputation values.
