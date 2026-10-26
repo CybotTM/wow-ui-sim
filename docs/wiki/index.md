@@ -2,6 +2,10 @@
 
 [Consumer investigation](investigations/invented-query-defaults.md#legacy-tutorial-request-boundary) links the [bounded contract](../specs/legacy-tutorial-requests.md): Mists/Era/Anniversary/Wrath standalone numeric requests, no missing Lua definition, no result use, no inferred tutorial policy. Unchanged old Mists storage-flow RED reaches ContainerFrame_Shared:976; GREEN completes its Lua assertions but still fails on collected callback/startup errors, with C_Engraving:315 next. Four-profile recorder/publication tests pass, all four stock maps are byte-identical, and all seven all-target checks have zero warnings.
 
+## [2026-10-26] implementation | Mists supplied scenario eligibility
+
+[Environment-local bool/string input](systems/mists-scenario-finder.md) links the [contract](../specs/mists-scenario-finder.md). Allowed-first and denied-first original270 RED/GREEN prove supplied tuples, two-environment transitions and unset recovery. The LFR successor-boundary advance retains all assertions and now completes past270. Mists stock remains6/12 without raw changes; all seven all-target checks have zero warnings. No native eligibility/default policy is inferred.
+
 ## [2026-10-26] proof | Complete PTR Edit Mode display-info
 
 [Complete original-file proof](investigations/ptr-edit-mode-declarations.md#complete-original-display-info-initialization) links the [contract](../specs/ptr-edit-mode-declarations.md):16 declaration-backed read members, exact producer-only RED/GREEN for the whole file and original LossOfControl OnLoad, PTR stock214/280→134/154 with four individually traced additions. The separate preset remains blocked. PTR/Retail/Era each have an accepted all-target receipt with zero warnings; formatting and readability pass.
@@ -24,7 +28,7 @@
 
 ## [2026-10-26] implementation | Mists supplied LFR availability
 
-[Environment-local input and original PVEFrame](systems/mists-lfr-availability.md) link the [contract](../specs/mists-lfr-availability.md). Byte-identical original-line RED and supplied-state GREEN cover ten observations, two environments and unset recovery. Stock remains 6/12 with exactly two missing-function→named missing-input replacements. The exact scenario successor is outside this slice. Mists/Retail/Era all-target checks have zero warnings; formatting and changed-line readability pass.
+[Environment-local input and original PVEFrame](systems/mists-lfr-availability.md) link the [contract](../specs/mists-lfr-availability.md). Byte-identical original-line RED and supplied-state GREEN cover ten observations, two environments and unset recovery. Stock remains 6/12 with exactly two missing-function→named missing-input replacements. The [scenario successor](systems/mists-scenario-finder.md) is now supplied separately, and the current LFR regression completes past it. The initial LFR-only Mists/Retail/Era all-target checks have zero warnings; formatting and changed-line readability pass.
 
 ## [2026-10-26] proof | Supplied query catalogs
 
