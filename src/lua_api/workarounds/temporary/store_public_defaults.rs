@@ -69,5 +69,20 @@ mod tests {
             .expect("C_StorePublic defaults should run");
 
         assert_eq!(result, (true, true, "services".to_string()));
+        if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
+            env.exec("assert(rawget(C_StorePublic, 'DoesGroupHavePurchaseableProducts') == nil)")
+                .expect("no declaration-backed Wrath query");
+            return;
+        }
+        // Preserve the old group-501 assertion with an explicit observation,
+        // not an invented reduction from its seeded secure-product membership.
+        env.state()
+            .borrow_mut()
+            .store_public_eligibility
+            .insert(501, true);
+        let eligibility: bool = env
+            .eval("return C_StorePublic.DoesGroupHavePurchaseableProducts(501)")
+            .expect("supplied group observation should be queryable");
+        assert!(eligibility);
     }
 }
