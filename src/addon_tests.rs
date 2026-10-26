@@ -283,7 +283,7 @@ fn run_async_test(env: &WowLuaEnv, idx: i64) -> Result<(), String> {
 
 /// Read `__addon_test_results` from Lua and print failures.
 fn read_test_results(env: &WowLuaEnv, file_name: &str) -> Result<(u32, u32), String> {
-    let count: u32 = env
+    let count: i32 = env
         .eval("return #__addon_test_results")
         .map_err(|e| format!("failed to count results: {e}"))?;
     let mut passed = 0;
