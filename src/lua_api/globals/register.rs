@@ -319,6 +319,7 @@ fn register_action_state_probes(lua: &mut rilua::Lua) -> crate::Result<()> {
 }
 
 fn register_progression_state_probes(lua: &mut rilua::Lua) -> crate::Result<()> {
+    super::real::tutorial_requests::register_all(lua)?;
     if matches!(
         crate::client_profile::ACTIVE,
         crate::client_profile::ClientProfile::Era
