@@ -80,10 +80,16 @@ fn pvp_is_match_considered_arena_false() {
 #[test]
 fn loss_of_control_get_active_data_returns_seeded_entry() {
     let env = env();
+    if cfg!(feature = "client-wrath") {
+        env.exec("assert(C_LossOfControl == nil)").unwrap();
+        return;
+    }
+    env.exec(include_str!("fixtures/loss_of_control.lua"))
+        .unwrap();
     let (spell_id, display_text, icon_texture, display_type, time_remaining): (
         i32,
         String,
-        String,
+        i32,
         i32,
         i32,
     ) = env
@@ -99,7 +105,8 @@ fn loss_of_control_get_active_data_returns_seeded_entry() {
         "GetActiveLossOfControlData() should expose seeded spell data"
     );
     assert_eq!(display_text, "Kidney Shot");
-    assert_eq!(icon_texture, "Interface\\Icons\\Ability_Rogue_KidneyShot");
+    // All pinned active-effect declarations require a numeric icon; see active-loss-of-control spec.
+    assert_eq!(icon_texture, 132298);
     assert_eq!(display_type, 2);
     assert_eq!(time_remaining, 4);
 }
@@ -107,6 +114,12 @@ fn loss_of_control_get_active_data_returns_seeded_entry() {
 #[test]
 fn loss_of_control_get_active_data_count_is_one() {
     let env = env();
+    if cfg!(feature = "client-wrath") {
+        env.exec("assert(C_LossOfControl == nil)").unwrap();
+        return;
+    }
+    env.exec(include_str!("fixtures/loss_of_control.lua"))
+        .unwrap();
     let count: i32 = env
         .eval("return C_LossOfControl.GetActiveLossOfControlDataCount()")
         .unwrap();

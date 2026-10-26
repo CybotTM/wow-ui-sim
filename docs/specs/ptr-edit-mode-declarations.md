@@ -1,6 +1,6 @@
 # PTR Edit Mode declaration families
 
-PTR publishes four finite Edit Mode enum families through `src/c_api/ptr_edit_mode_enums.rs`. The [investigation](../wiki/investigations/ptr-edit-mode-declarations.md) explains the original consumer boundaries and initialization limits.
+PTR publishes declaration-backed Edit Mode enums through `src/c_api/ptr_edit_mode_enums.rs`. The [investigation](../wiki/investigations/ptr-edit-mode-declarations.md) explains the original consumer boundaries and initialization limits.
 
 ## What it must do
 
@@ -12,6 +12,13 @@ PTR publishes four finite Edit Mode enum families through `src/c_api/ptr_edit_mo
 - [x] Publish PTR `Enum.EditModeSwingTimerSetting` as Scale=0, Opacity=1, Visibility=2, Width=3, Height=4, ShowBarTitle=5, ShowTime=6, with NumValues=7, MinValue=0, MaxValue=6 metadata.
 - [x] Publish PTR `Enum.EditModeSwingTimerVisibility` as Always=0, InCombat=1, Hidden=2, with NumValues=3, MinValue=0, MaxValue=2 metadata.
 - [x] Preserve all seven setting identifiers and three visibility choices through the complete original SwingTimer constructor.
+
+## Complete PTR display-info initialization
+
+- Extend existing enum tables without replacing their earlier members, only when the active profile is PTR.
+- Publish the pinned members read by the complete original display-info file: system MainActionBarEndCap=26, GroupFinder=27, LossOfControl=28, SwingTimer=29 and GamepadMainActionBar=30; Gamepad settings Compact=0, ShowEmptyBars=1, ShowButtonPrompts=2, ShowHighlight=3 and ShouldExpand=4; GroupFinder Size=0; EndCap Hidden=0; PersonalResourceDisplay AllowMouseoverThrough=15; UnitFrame DebuffIconSize=19, UseHorizontalLayout=23 and GrowDirection=24.
+- The unchanged whole `EditModeSettingDisplayInfo.lua` must complete and publish `GetSystemSettingDisplayInfoMap`, with the original per-system keys and setting values.
+- Do not publish unread account settings or metadata for this boundary. Stop at a non-declaration failure rather than replacing Blizzard functions or strings.
 
 ## How it works
 
@@ -25,11 +32,12 @@ PTR publishes four finite Edit Mode enum families through `src/c_api/ptr_edit_mo
 
 ## Tests asserting this spec
 
-- `tests/ptr_edit_mode_enums.rs`: original selected dropdowns, complete SwingTimer settings constructor and independently reached original preset manager.
+- `tests/ptr_edit_mode_enums.rs`: original selected dropdowns, complete SwingTimer settings constructor, independently reached original preset manager, unchanged whole-file display-info initialization and original LossOfControl XML OnLoad completion.
 
 ## Known gaps (current cycle)
 
-- [ ] Complete Edit Mode initialization remains blocked by other declaration families. This slice does not establish availability of `GetSystemSettingDisplayInfoMap`.
+- [x] Complete original display-info initialization and the original LossOfControl OnLoad both pass byte-identical producer-only RED/GREEN selectors.
+- [ ] Native preset defaults and other Edit Mode lifecycle behavior remain outside this contract. The separate Mainline preset now stops at missing EditModeMainActionBarEndCapSystemIndices; display-info does not read that family.
 
 ## Out of scope
 

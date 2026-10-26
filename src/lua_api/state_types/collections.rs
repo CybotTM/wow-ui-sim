@@ -619,6 +619,18 @@ pub struct MailMessage {
     pub stationery_icon: u32,
 }
 
+/// Explicit guild-bank tab snapshot; no tab is supplied by default.
+#[derive(Debug, Clone)]
+pub struct GuildBankTab {
+    pub name: String,
+    pub icon: String,
+    pub is_viewable: bool,
+    pub can_deposit: bool,
+    pub withdrawal_limit: i32,
+    pub remaining_withdrawals: i32,
+    pub is_filtered: bool,
+}
+
 /// An item in a bag slot.
 #[derive(Debug, Clone)]
 pub struct BagItem {

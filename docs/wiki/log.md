@@ -9,10 +9,33 @@
 ## [2026-10-26] staged | Supplied equipment-set lock inputs
 
 [Item-ID observations](systems/equipment-set-locks.md) back simulator admin supply/clear methods on R/P/F/M. The missing-admin Retail RED was observed; original-consumer query RED/GREEN and four-profile gates remain pending. No native lock/default policy is claimed.
+## [2026-10-26] implementation | Legacy tutorial request recorder
+
+[Consumer investigation](investigations/invented-query-defaults.md#legacy-tutorial-request-boundary) records the four legacy profiles, the already-selected TutorialFrame listener, and the absent native global. Original Mists storage-flow RED remains unchanged; bounded state recorder adds no event/flag/UI policy. GREEN advances past976 through all Lua assertions, but the test still fails its collected-error gate (C_Engraving:315 next). Four-profile state/publication tests pass, stock maps are byte-identical, and all seven canonical all-target checks have zero warnings.
+
+## [2026-10-26] proof | Complete PTR Edit Mode display-info
+
+[Complete original-file proof](investigations/ptr-edit-mode-declarations.md#complete-original-display-info-initialization) links the [contract](../specs/ptr-edit-mode-declarations.md):16 declaration-backed read members, exact producer-only RED/GREEN for the whole file and original LossOfControl OnLoad, PTR stock214/280→134/154 with four individually traced additions. The separate preset remains blocked. PTR/Retail/Era each have an accepted all-target receipt with zero warnings; formatting and readability pass.
 
 ## [2026-10-26] implementation | PTR SwingTimer declarations
 
 [Original SwingTimer constructor](investigations/ptr-edit-mode-declarations.md#swingtimer-declaration-boundary) reaches the exact Scale RED at800/801. Both pinned declaration families and metadata pass unchanged full-constructor GREEN through the existing runtime-only PTR gate. Exact master/GREEN stock stays216/282, with both new raw keys traced to the absent SwingTimer system map key at797. That next boundary remains unfixed. PTR/Retail/Era all-target checks have separate accepted receipts and zero warnings; formatting/readability pass.
+
+## [2026-10-26] proof | Forever temporary CVars
+
+[Single overlay and original listener identity](systems/forever-temporary-cvars.md) records original Gamepad/TargetLogic RED, persisted-file protection, authenticated normal/secure replay listeners, and the explicit unmodelled nil diagnostic. Four exact Forever GREEN cases pass at 70e4d148b. Stock remains byte-identical at 26/26→26/26, formatting passes and all seven canonical all-target checks have zero warnings at 6f50f3002. Accepted TTS bytes and historical nil deferral are unchanged.
+
+## [2026-10-26] implementation | Supplied active loss of control
+
+[Model and final proof](systems/lua-api.md#active-loss-of-control-state) link the [contract](../specs/active-loss-of-control.md). Byte-identical Retail original-display RED/GREEN, explicit overlay fixture, and positive Wrath absence pass. All seven raw stock maps are unchanged; all seven separate all-target checks pass with zero compiler warnings. PTR consumer proof was deferred at this checkpoint; the [later restored proof](systems/lua-api.md#restored-ptr-original-consumer-proof-2026-10-26) follows the merged display-info repair without fixture replacement.
+
+## [2026-10-26] implementation | Mists supplied LFR availability
+
+[Original PVEFrame and optional availability](systems/mists-lfr-availability.md): original-line missing-function RED is observed; the separate C API module publishes only on ACTIVE Mists, returns supplied booleans and raises an approved named missing-input error when unset. The revised byte-identical pair passes GREEN with ten observations and fails RED at line229. A line observer proves LFR state before the exact out-of-scope scenario error. Stock remains 6/12 with two missing-input key replacements and unchanged survivors. Mists/Retail/Era all-target checks have zero warnings; formatting and changed-line readability pass.
+
+## [2026-10-26] proof | Supplied query catalogs
+
+[Audit and contracts](investigations/invented-query-defaults.md) record pinned declarations, selected original Mists bank and Retail/PTR/Forever RAF RED/GREEN, byte-identical producer-only RED tests, unchanged stock maps, seven zero-warning all-target checks and formatting/readability. The fresh RAF assertion now expects zero and an explicit one-version sibling preserves its old checks. Transmog stays unresolved and unchanged. The old Mists storage flow still fails before the bank assertions at the same missing TriggerTutorial boundary on base and GREEN; no assertion is weakened.
 
 ## [2026-10-25] proof | Mists supplied map display
 
@@ -3006,3 +3029,7 @@ Recorded [declarations and original consumers](investigations/ptr-edit-mode-decl
 ## [2026-10-26] proof | Supplied supertracking restoration
 
 [Restored content obligations](systems/super-track-state.md#deferred-content-coverage-restoration) pass two exact original-consumer selectors on Retail/PTR/Forever. Each rejects the producer-subtracted sibling with identical test bytes. Existing supplied pairs, clear/re-entry and listener-time cache state need no producer changes. Fresh base/restoration stock maps are identical at 10/12, 216/282 and 26/26; zero-warning all-target checks, fmt and manual Rust readability pass. Broader quest/highlight and native-policy obligations remain unverified by this lane.
+
+## 2026-10-26 — Restored PTR loss-of-control consumer proof
+
+Updated the [active-effect model](systems/lua-api.md#restored-ptr-original-consumer-proof-2026-10-26) and [contract](../specs/active-loss-of-control.md#consumer-proof): reauthenticated pinned PTR declarations/selection, original OnLoad prerequisite, two exact byte-identical subtraction RED/GREEN cases, empty/supplied/clear display behavior and two-environment isolation. No producer change; bound PTR stock remains134/154 with no raw-key/count deltas. All seven separate full-feature canonical all-target checks have zero JSON/plain compiler warnings; formatting and changed-line readability pass.

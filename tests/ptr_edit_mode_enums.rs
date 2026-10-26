@@ -44,6 +44,97 @@ fn load_edit_mode() -> (WowLuaEnv, PathBuf) {
 }
 
 #[test]
+fn complete_display_info_initializes_original_system_maps() {
+    let (env, root) = load_edit_mode();
+    let source =
+        std::fs::read_to_string(root.join("Shared/EditModeSettingDisplayInfo.lua")).unwrap();
+    env.exec_named(
+        &source,
+        "@Interface/AddOns/Blizzard_EditMode/Shared/EditModeSettingDisplayInfo.lua",
+    )
+    .expect("complete unchanged original PTR display-info initialization");
+    env.exec(
+        r#"
+        local manager = EditModeSettingDisplayInfoManager
+        assert(type(manager.GetSystemSettingDisplayInfoMap) == 'function')
+        assert(Enum.EditModeSystem.SwingTimer == 29)
+        local swing = manager:GetSystemSettingDisplayInfoMap(29)
+        assert(swing[0].setting == 0 and swing[0].minValue == 50)
+        assert(swing[0].maxValue == 200 and swing[0].stepSize == 10)
+        assert(swing[0]:ConvertValueForDisplay(3) == 80)
+        assert(swing[1].minValue == 50 and swing[1].maxValue == 100)
+        assert(swing[3].minValue == 213 and swing[3].maxValue == 852)
+        assert(swing[4].minValue == 15 and swing[4].maxValue == 60)
+        assert(swing[5].type == Enum.EditModeSettingDisplayType.Checkbox)
+        assert(swing[6].type == Enum.EditModeSettingDisplayType.Checkbox)
+        local visibility = swing[2].options
+        assert(#visibility == 3)
+        assert(visibility[1].value == 0 and visibility[2].value == 1)
+        assert(visibility[3].value == 2)
+        local loss = manager:GetSystemSettingDisplayInfoMap(28)
+        assert(loss[0].minValue == 50 and loss[0].maxValue == 200)
+        assert(loss[0].stepSize == 10)
+        local group = manager:GetSystemSettingDisplayInfoMap(27)
+        assert(group[0].minValue == 50 and group[0].maxValue == 150)
+        assert(group[0].stepSize == 5)
+        local cap = manager:GetSystemSettingDisplayInfoMap(26)
+        assert(cap[0].type == Enum.EditModeSettingDisplayType.Checkbox)
+        local gamepad = manager:GetSystemSettingDisplayInfoMap(30)
+        for setting = 0, 4 do
+            assert(gamepad[setting].setting == setting)
+            assert(gamepad[setting].type == Enum.EditModeSettingDisplayType.Checkbox)
+        end
+        assert(manager:GetSystemSettingDisplayInfoMap(2) ~= nil)
+    "#,
+    )
+    .unwrap();
+}
+
+#[test]
+fn loss_of_control_original_onload_completes_with_display_info_map() {
+    let (env, edit_mode_root) = load_edit_mode();
+    let root = edit_mode_root.parent().unwrap();
+    let addons = discover_blizzard_addon_closure_for_screen_with_overrides(
+        root,
+        ScreenKind::Game,
+        &["Blizzard_FrameXML"],
+        &[],
+    );
+    let (_, toc_path) = addons
+        .iter()
+        .find(|(name, _)| name == "Blizzard_FrameXML")
+        .unwrap();
+    let toc = TocFile::from_file(toc_path).unwrap();
+    for relative in ["LossOfControlFrame.lua", "LossOfControlFrame.xml"] {
+        assert!(
+            toc.files
+                .iter()
+                .any(|path| path == std::path::Path::new(relative)),
+            "selected original {relative}"
+        );
+    }
+    for (_, toc) in addons {
+        load_addon(&env.loader_env(), &toc).unwrap();
+    }
+    env.exec(
+        r#"
+        local frame = LossOfControlFrame
+        assert(frame.system == 28)
+        local map = EditModeSettingDisplayInfoManager:GetSystemSettingDisplayInfoMap(28)
+        assert(frame.settingDisplayInfoMap == map and map[0].maxValue == 200)
+        assert(frame.Selection.system == frame)
+        assert(frame:IsEventRegistered('CVAR_UPDATE'))
+        assert(frame:IsEventRegistered('VARIABLES_LOADED'))
+        assert(frame.TimeLeft.baseNumberWidth ==
+            frame.TimeLeft.NumberText:GetStringWidth() + 6)
+        assert(frame.TimeLeft.secondsWidth == frame.TimeLeft.SecondsText:GetStringWidth())
+        assert(type(frame.Anim:GetScript('OnFinished')) == 'function')
+    "#,
+    )
+    .expect("original LossOfControlFrame OnLoad completes past system map assignment");
+}
+
+#[test]
 fn boss_growth_dropdown_consumes_three_declared_directions() {
     let (env, root) = load_edit_mode();
     // The complete selected file has other declaration gaps. Exercise its unchanged

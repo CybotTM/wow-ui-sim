@@ -26,6 +26,7 @@ pub struct SimState {
     #[cfg(feature = "client-wrath")]
     pub refer_a_friend_linked_guids: HashSet<String>,
     pub summon_friend_cooldown: crate::c_api::c_recruit_a_friend::SummonFriendCooldown,
+    pub raf_versions: Vec<crate::c_api::c_recruit_a_friend::RafVersionInfo>,
     pub widgets: WidgetRegistry,
     #[cfg(feature = "retail-12-1-5")]
     pub(crate) weather: crate::c_api::c_weather::WeatherState,
@@ -34,6 +35,8 @@ pub struct SimState {
     pub events: EventQueue,
     pub scripts: ScriptRegistry,
     pub console_output: Vec<String>,
+    /// Requested legacy tutorial IDs in call order; no flag, event or display policy.
+    pub tutorial_requests: Vec<i32>,
     pub timers: VecDeque<PendingTimer>,
     pub rilua_timers: VecDeque<crate::lua_api::timer_layout::RiluaPendingTimer>,
     /// Diagnostic strings only; remains empty without handler timing opt-in.
@@ -361,6 +364,8 @@ pub struct SimState {
     #[cfg(feature = "retail-12-0-0")]
     pub challenge_completion: crate::c_api::c_challenge_mode::ChallengeCompletionInfo,
     pub spell_loss_of_control: HashMap<u32, LossOfControlInfo>,
+    pub active_loss_of_control:
+        HashMap<String, Vec<crate::c_api::c_loss_of_control::ActiveLossOfControlData>>,
     pub spell_flyouts: HashMap<u32, SpellFlyoutInfo>,
     pub action_profession_quality: HashMap<i32, ProfessionQualityInfo>,
     pub addon_base_paths: Vec<PathBuf>,
@@ -550,6 +555,8 @@ pub struct SimState {
     pub lfg_list_counts: LfgListCounts,
     pub lfg_active_entry: Option<crate::lua_api::state_types::LfgActiveEntry>,
     pub can_use_premade_group: bool,
+    /// Supplied Mists LFR service availability; None leaves native policy unknown.
+    pub lfr_availability: Option<bool>,
     pub lfg_category_info: std::collections::HashMap<i32, LfgCategoryInfo>,
     pub lfg_active_categories: std::collections::HashSet<i32>,
     pub lfg_queued_dungeons: std::collections::HashMap<i32, std::collections::BTreeSet<i32>>,
@@ -610,6 +617,7 @@ pub struct SimState {
     pub guild_bank_money: i64,
     pub current_guild_bank_tab: i32,
     pub guild_bank_items: HashMap<(i32, i32), BagItem>,
+    pub guild_bank_tabs: Vec<GuildBankTab>,
     pub merchant_frame_open: bool,
     #[cfg(feature = "client-wowforever")]
     pub merchant_repair_capable: bool,

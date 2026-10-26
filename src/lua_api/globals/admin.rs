@@ -25,8 +25,9 @@ use rilua::{LuaResult, Val};
 // Focused sub-modules — each holds one A_Admin section and keeps the
 // entry-point file small. The parent TableBuilder chain wires these up.
 use super::admin_actionbars_bags::{
-    add_bag_item, add_guild_bank_item, clear_action_bars, clear_action_slot, clear_bags,
-    clear_guild_bank, remove_bag_item, set_action_slot, set_merchant_items, set_pet_action_slot,
+    add_bag_item, add_guild_bank_item, add_guild_bank_tab, clear_action_bars, clear_action_slot,
+    clear_bags, clear_guild_bank, clear_guild_bank_tabs, remove_bag_item, set_action_slot,
+    set_merchant_items, set_pet_action_slot,
 };
 use super::admin_addons::register_test_addon;
 use super::admin_auction_house::{
@@ -96,6 +97,15 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     let builder = register_world(builder)?;
     let builder = register_collections_pvp(builder)?;
     let builder = register_inventory_misc(builder)?;
+    let builder = builder
+        .set_function(
+            "AddLossOfControl",
+            crate::c_api::c_loss_of_control::add_supplied_entry,
+        )?
+        .set_function(
+            "ClearLossOfControl",
+            crate::c_api::c_loss_of_control::clear_supplied_entries,
+        )?;
     let builder = crate::c_api::equipment_set_locks::register_admin(builder)?;
     let builder = builder.set_function(
         "SetHousingCatalogVariantStoredCount",
@@ -187,6 +197,7 @@ fn register_world(b: TableBuilder) -> LuaResult<TableBuilder> {
     let b = register_modifier_keys(b)?;
     let b = register_guild_and_game_rules(b)?;
     let b = register_services(b)?;
+    let b = register_query_catalog_inputs(b)?;
     let b = register_inventory_and_mail(b)?;
     register_vault_and_premade(b)
 }
@@ -322,6 +333,19 @@ fn register_photo_sharing(b: TableBuilder) -> LuaResult<TableBuilder> {
         "SetPhotoSharingEnabled",
         crate::c_api::c_photo_sharing::admin_set_photo_sharing_enabled,
     )
+}
+
+fn register_query_catalog_inputs(b: TableBuilder) -> LuaResult<TableBuilder> {
+    b.set_function("AddGuildBankTab", add_guild_bank_tab)?
+        .set_function("ClearGuildBankTabs", clear_guild_bank_tabs)?
+        .set_function(
+            "AddRAFVersion",
+            crate::c_api::c_recruit_a_friend::add_version_input,
+        )?
+        .set_function(
+            "ClearRAFVersions",
+            crate::c_api::c_recruit_a_friend::clear_version_inputs,
+        )
 }
 
 fn register_inventory_and_mail(b: TableBuilder) -> LuaResult<TableBuilder> {

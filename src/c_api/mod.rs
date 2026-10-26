@@ -184,6 +184,7 @@ pub mod c_quest_offer;
 pub mod c_super_track;
 pub mod container_quest;
 pub mod forever_startup;
+mod lfr_availability;
 #[cfg(feature = "client-wowforever")]
 pub use c_quest_log_watches::QuestWatchType;
 #[cfg(feature = "client-wowforever")]
@@ -332,6 +333,7 @@ mod c_ping_texture_kits;
 pub use c_ping_texture_kits::PingTextureKits;
 #[cfg(any(feature = "retail-12-1-0", feature = "client-wowforever"))]
 mod c_cvar_readiness;
+pub mod c_loss_of_control;
 #[cfg(not(feature = "client-wrath"))]
 mod combat_audio_throttle;
 #[cfg(feature = "client-mists")]
