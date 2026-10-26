@@ -86,6 +86,43 @@ fn assert_loader_candidates(root: &Path) {
 }
 
 #[test]
+fn exclusive_run_tests_finds_selected_tests_and_bundled_framework() {
+    if let Some(root) = std::env::var_os("WOW_SIM_FRAMEWORK_TEST_ROOT") {
+        let env = WowLuaEnv::new().unwrap();
+        env.state().borrow_mut().addon_base_paths = vec![PathBuf::from(root).join("selected")];
+        wow_ui_sim::addon_tests::run_addon_tests(&env, "FrameworkFixture", None, false);
+        return;
+    }
+    let temp = tempfile::tempdir().unwrap();
+    let tests = temp.path().join("selected/FrameworkFixture/tests");
+    std::fs::create_dir_all(&tests).unwrap();
+    std::fs::write(
+        tests.join("probe.lua"),
+        "test('bundled assertions', function() assertEquals(42, 6 * 7) end)",
+    )
+    .unwrap();
+    let output = Command::new(std::env::current_exe().unwrap())
+        .args([
+            "--exact",
+            "exclusive_path_tests::exclusive_run_tests_finds_selected_tests_and_bundled_framework",
+            "--nocapture",
+        ])
+        .current_dir(temp.path())
+        .env("WOW_SIM_FRAMEWORK_TEST_ROOT", temp.path())
+        .env("WOW_SIM_ADDONS_PATH_EXCLUSIVE", "1")
+        .env("WOW_SIM_ADDONS_PATH", temp.path().join("selected"))
+        .output()
+        .unwrap();
+    assert!(
+        output.status.success(),
+        "{}\n{}",
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr)
+    );
+    assert!(String::from_utf8_lossy(&output.stderr).contains("1 passed"));
+}
+
+#[test]
 fn repeated_cli_addon_paths_are_accepted() {
     let args = Args::try_parse_from([
         "wow-sim",
