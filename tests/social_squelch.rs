@@ -33,6 +33,7 @@ fn original_lfg_listing_controls_follow_supplied_squelch_transitions() {
         env.exec(r#"
             local panel = LFGListFrame.CategorySelection
             LFGListCategorySelection_UpdateNavButtons(panel)
+            assert(C_SocialRestrictions.IsSquelched() == expectedSquelched, "non-nil boolean projection")
             assert(panel.FindGroupButton:IsEnabled() == not expectedSquelched, "find enabled state")
             assert(panel.StartGroupButton:IsEnabled() == not expectedSquelched, "start enabled state")
             local tooltip = expectedSquelched and RED_FONT_COLOR:WrapTextInColorCode(ERR_USER_SQUELCHED) or nil
