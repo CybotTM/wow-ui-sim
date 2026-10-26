@@ -43,6 +43,8 @@ fn assert_selected_consumer(toc: &std::path::Path, name: &str) {
         "Blizzard_CharacterCreate" => "Mainline/Blizzard_CharacterCreate.lua",
         "Blizzard_Settings_Shared" => "Mainline/GraphicsOverrides.lua",
         "Blizzard_RecentAllies" => "Blizzard_RecentAlliesUtil.lua",
+        "Blizzard_MicroMenu" => "Shared/MicroMenuContainer.lua",
+        "Blizzard_UIErrorsFrame" => "Mainline/UIErrorsFrame.lua",
         _ => panic!("unexpected consumer root: {name}"),
     };
     let parsed = wow_ui_sim::toc::TocFile::from_file(toc).unwrap();
@@ -220,6 +222,82 @@ fn recent_allies_original_labels_consume_documented_enum() {
 }
 
 #[test]
+fn micro_menu_onload_consumes_supplied_wowhack_mode() {
+    if ACTIVE != ClientProfile::Ptr {
+        return;
+    }
+    let env = load_consumers("Blizzard_MicroMenu", ScreenKind::Game, false);
+    for mode in ["Standard", "WoWHack", "Plunderstorm", "WoWHack"] {
+        let mode_id = env
+            .eval::<i32>(&format!("return Enum.GameMode.{mode}"))
+            .unwrap();
+        env.state().borrow_mut().game_rules.active_game_mode = mode_id;
+        // Original OnLoad -> InitializeButtons -> GameRulesUtil.lua:207.
+        env.exec("MicroMenu:OnLoad()").unwrap();
+        assert_boolean_query_shape(&env, "IsWoWHack");
+        let separated = mode == "WoWHack";
+        assert_eq!(
+            env.eval::<bool>("return tContains(MicroMenu.addedButtons, PlayerSpellsMicroButton)")
+                .unwrap(),
+            !separated
+        );
+        for button in [
+            "SpellbookMicroButton",
+            "TalentMicroButton",
+            "ScribeMicroButton",
+        ] {
+            assert_eq!(
+                env.eval::<bool>(&format!(
+                    "return tContains(MicroMenu.addedButtons, {button})"
+                ))
+                .unwrap(),
+                separated,
+                "{mode}: {button}"
+            );
+        }
+    }
+    let other = WowLuaEnv::new().unwrap();
+    assert!(
+        !other
+            .eval::<bool>("return C_GameRules.IsWoWHack()")
+            .unwrap()
+    );
+}
+
+#[test]
+fn ui_errors_onload_consumes_supplied_wowhack_mode() {
+    if ACTIVE != ClientProfile::Ptr {
+        return;
+    }
+    let env = load_consumers("Blizzard_UIErrorsFrame", ScreenKind::Game, false);
+    for mode in ["Standard", "WoWHack", "Plunderstorm", "WoWHack"] {
+        let mode_id = env
+            .eval::<i32>(&format!("return Enum.GameMode.{mode}"))
+            .unwrap();
+        env.state().borrow_mut().game_rules.active_game_mode = mode_id;
+        env.exec("UIErrorsFrame:ClearAllPoints(); UIErrorsFrame:SetPoint('TOP', UIParent, 'TOP', 0, -122); UIErrorsFrame:SetMessageTypeEnabled(LE_GAME_ERR_OUT_OF_ENERGY, false)").unwrap();
+        // Original UIErrorsFrame.lua:12 must run before the assertions.
+        env.exec("UIErrorsFrame:OnLoad()").unwrap();
+        assert_boolean_query_shape(&env, "IsWoWHack");
+        let wowhack = mode == "WoWHack";
+        assert_eq!(
+            env.eval::<bool>("return UIErrorsFrame:ShouldDisplayMessageType(LE_GAME_ERR_OUT_OF_ENERGY, 'I4 energy')")
+                .unwrap(),
+            wowhack
+        );
+        assert_eq!(
+            env.eval::<f64>("local _, _, _, _, y = UIErrorsFrame:GetPoint(1); return y")
+                .unwrap(),
+            if wowhack { -250.0 } else { -122.0 }
+        );
+        assert!(
+            env.eval::<bool>("return type(UIErrorsFrame.flashingFontStrings) == 'table'")
+                .unwrap()
+        );
+    }
+}
+
+#[test]
 fn non_ptr_publication_is_unchanged() {
     if ACTIVE == ClientProfile::Ptr {
         return;
@@ -229,7 +307,7 @@ fn non_ptr_publication_is_unchanged() {
         env.exec(
             r#"
             for _, name in ipairs({'IsHardcoreActive', 'IsSDHDToggleEnabled', 'AccountHasSDEnabled',
-                'SetSDHDToggleValue', 'IsSelfFoundAllowed', 'GetForeverExperiencePreset'}) do
+                'SetSDHDToggleValue', 'IsSelfFoundAllowed', 'GetForeverExperiencePreset', 'IsWoWHack'}) do
                 assert(rawget(C_GameRules, name) == nil, name)
             end
             assert(rawget(Enum, 'RecentAlliesInteractionCategoryFilter') == nil)

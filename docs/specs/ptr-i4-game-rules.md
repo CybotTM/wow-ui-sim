@@ -5,6 +5,7 @@ PTR 12.1.7.70493 exposes six GameRules queries/mutations from supplied state, pl
 ## What it must do
 
 - [ ] Publish `IsHardcoreActive`, `IsSelfFoundAllowed`, `IsSDHDToggleEnabled` and `AccountHasSDEnabled` only on PTR in this packet. Each returns one boolean from its distinct supplied capability field. Initial false values mean no positive input was supplied, not that native accounts lack the capability.
+- [ ] PTR `IsWoWHack` returns exactly one non-nil boolean: true only when the existing supplied `active_game_mode` equals `Enum.GameMode.WoWHack`. Original MicroMenu OnLoad must initialize `addedButtons` with mode-specific spell/talent buttons; original UIErrorsFrame OnLoad must enable energy errors and use its WoWHack anchor only in that mode. Independent environments and Retail publication remain unchanged.
 - [ ] `GetForeverExperiencePreset` returns the supplied nullable enum integer. No preset is inferred from the active profile or game mode. The pinned documentation declares Classic=0 and Modern=1.
 - [ ] `SetSDHDToggleValue(setToSD, usageLocation)` updates supplied account SD selection and records the supplied documented origin. It returns no values. This contract does not simulate native telemetry or reload behavior.
 - [ ] Original selected Blizzard consumers react to changed supplied inputs. Other profiles and independent environments retain their state and surfaces.
@@ -29,6 +30,7 @@ PTR 12.1.7.70493 exposes six GameRules queries/mutations from supplied state, pl
 
 - [ ] Capability queries and SD mutation are implemented after original-line RED; their GREEN and the preset query remain pending. Enum-only replay proves setter RED at Barbershop line273 and hardcore RED at popup line3512. The RecentAllies labels selector passes with the documented enum.
 - [ ] Runtime GREEN, stock error comparison and profile warning/format gates remain pending.
+- [ ] `IsWoWHack` original-consumer tests are staged without its producer; RED/GREEN are pending. The pinned declaration is `GameRulesDocumentation.lua:349–354`.
 
 ## Out of scope
 
