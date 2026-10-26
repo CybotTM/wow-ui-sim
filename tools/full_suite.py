@@ -108,7 +108,11 @@ def build(checkout, target, sha, profile, jobs, owner, log):
         fields = dict(line.split("=", 1) for line in state.stdout.splitlines() if "=" in line)
         if fields.get("SubState") in ("exited", "failed", "dead"):
             if fields.get("Result") != "success":
-                raise ValueError(f"slot-build unit failed: {fields.get('Result')}")
+                detail = ""
+                if receipt.exists():
+                    failed_receipt = json.loads(receipt.read_text())
+                    detail = f": {failed_receipt.get('result')}: {failed_receipt.get('dep_info_errors')}"
+                raise ValueError(f"slot-build unit failed: {fields.get('Result')}{detail}")
             break
         time.sleep(1)
     if not receipt.exists():
