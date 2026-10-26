@@ -574,6 +574,7 @@ macro_rules! build_empty_sim_state {
             #[cfg(feature = "retail-12-0-0")]
             bnet_custom_message: String::new(),
             social_friends: default_social_friends(),
+            social_restrictions: SocialRestrictionsState::default(),
             #[cfg(feature = "client-wrath")]
             selected_friend_guid: None,
             auction_browse_results: default_auction_browse_results(),
