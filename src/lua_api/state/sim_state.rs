@@ -725,6 +725,11 @@ pub struct SimState {
     pub factions: Vec<FactionEntry>,
     pub selected_faction_index: i32,
     pub watched_faction_index: i32,
+    /// Explicit map observations, visible only while is_active_battlefield is true.
+    pub battlefield_vehicles: ::std::collections::HashMap<
+        i32,
+        Vec<crate::c_api::c_pvp::battlefield_vehicles::BattlefieldVehicle>,
+    >,
     pub battlefield_queue: BattlefieldQueue,
     pub battlefield_minimap_visible: bool,
     pub chat_channels: Vec<ChatChannel>,

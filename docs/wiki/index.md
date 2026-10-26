@@ -1,3 +1,7 @@
+## [2026-10-25] investigation | Mists battlefield vehicles
+
+[Original vehicle consumer](investigations/mists-battlefield-vehicles.md) links the [contract](../specs/mists-battlefield-vehicles.md): pinned API declarations, selected WorldMap provider/pins and supplied per-map state. Original-consumer missing-call RED and supplied-pin GREEN pass. Both raw captures contain 12 keys / 18 occurrences; vehicle errors are replaced by individually traced existing DeathMap provider errors. Exact base reproduces the 12/18 BEFORE map, and byte-identical paired producer-only RED fails as required. Mists/Retail all-target checks pass with three inherited/zero warnings; formatting and readability pass.
+
 ## [2026-10-25] runtime proof | PTR I4 landable first batch
 
 [Bounded producer repair](investigations/patch-12-1-7-api-audit.md#i4-first-bounded-producer-repair) links the [contract](../specs/ptr-i4-first-green.md): four exact RED/GREEN pairs include the original Collections and GhostFrame transitions. Stock 298→296 raw keys has zero additions; Retail/PTR checks meet zero/known-three warning limits and formatting passes. Aggregate 173-shape tests remain on the lane only; native policy remains unknown.

@@ -6,6 +6,10 @@ The [completion matrix](../specs/aura-spell-classification-identifiers.md#classi
 
 [Original callback attribution](investigations/classic-startup-producer-cascades.md#opaque-private-aura-timers) resolves four erased nil calls to the declared defensive query. Existing-model Era/Anniversary capability repair is staged; runtime GREEN and checks remain pending. TTS is separately owned.
 
+## [2026-10-25] investigation | Mists battlefield vehicles
+
+[Vehicle provider boundary](investigations/mists-battlefield-vehicles.md): confirmed pinned plural/singular signatures, selected Mists TOCs, original WorldMap provider and XML pin path. Committed supplied-state schema and original-consumer fixture before publication. Corrected implicit startup dependencies, observed missing-call RED, then passed supplied-pin GREEN. Raw captures replace two vehicle errors with two traced existing DeathMap errors; exact base `05f95ab1c` reproduces BEFORE 12/18, paired producer-only RED fails with identical tests, and Mists all-target checking passes with three inherited warnings. Retail all-target checking passes with zero warnings; formatting and readability pass. Native vehicle population remains intentionally unmodeled.
+
 ## [2026-10-25] decision | PTR SharedXML executes twice
 
 [User decision](investigations/ptr-input-interface-style.md#user-decision-two-environments-2026-10-25) corrects only the PTR listener expectation to two, one per normal/secure environment. Native modern count remains unproven; Retail decompilation is the revisit boundary. [Final proof](investigations/ptr-input-interface-style.md#approved-twice-final-proof-2026-10-25): exact PTR GREEN passes, producer-only RED rejects the original event, PTR/Retail all-target checks pass with allowed-three/zero warnings. Forever case 1 is a documented missing API without capability state; report-only. Slot 2 released.
