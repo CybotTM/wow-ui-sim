@@ -47,6 +47,7 @@ fn original_smart_navigation_and_debug_share_completed_utility_and_find_buttons(
             error("original consumer must capture Utility")
         end
         local Utility = utilityUpvalue(SmartNavigationMixin.RefreshButtonGroups)
+        assert(rawequal(Utility, utilityUpvalue(Utility.FindButtonGroups)))
         assert(rawequal(Utility, utilityUpvalue(SmartNavigationDebug.OnUpdate)))
         assert(rawequal(Utility, import("Blizzard_GamepadSmartNavigation.Utility")))
         collectgarbage("collect")
