@@ -7,7 +7,6 @@ use crate::common::blizzard_addon_harness::{
 use wow_ui_sim::client_profile::{ACTIVE, ClientProfile};
 use wow_ui_sim::loader::find_toc_file;
 use wow_ui_sim::lua_api::WowLuaEnv;
-use wow_ui_sim::lua_api::game_data::default_party;
 use wow_ui_sim::lua_api::state::LfdDungeonInfo;
 use wow_ui_sim::screen::ScreenKind;
 use wow_ui_sim::toc::TocFile;
@@ -51,10 +50,13 @@ fn supply_catalog(env: &WowLuaEnv, random: bool, lower_bound: i32, id_offset: i3
 }
 
 fn supply_party(env: &WowLuaEnv, random: bool, id_offset: i32) {
-    let mut member = default_party()
-        .into_iter()
-        .next()
-        .expect("supplied party row");
+    let mut member = env
+        .state()
+        .borrow()
+        .party_members
+        .first()
+        .cloned()
+        .expect("existing supplied party row");
     member.level = 49;
     member.connected = true;
     {
