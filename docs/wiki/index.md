@@ -22,9 +22,9 @@
 
 [Contract and selected display branch](systems/mists-transmog-enabled.md): both exact original-line4 RED/GREEN cases prove supplied true/false control branches, isolation, transitions and named unset recovery. Mists stock remains6/12 with identical raw keys/counts; all seven full-feature all-target checks have zero warnings. Retail/PTR now share the [supplied observation](systems/transmog-availability.md); the Forever gap and later settings branches remain separate.
 
-## [2026-10-26] investigation | Mists engraving supplied inputs
+## [2026-10-26] reconciliation | Merged engraving supplied inputs
 
-[Original bag and targeting proof](investigations/mists-engraving-inputs.md) covers seven Mists-only supplied-state members under the [contract](../specs/mists-engraving-inputs.md). Corrected byte-identical RED/GREEN tests pass all three GREEN cases; the unchanged storage test reaches a named unsupplied-state boundary. Stock remains 6/12. Complete settings is blocked before engraving at missing IsTransmogEnabled; no settings-path proof is claimed. All seven full-feature all-target checks pass with zero JSON/plain warnings; this is compilation proof, not other-profile runtime parity.
+[Shared availability and original consumer proof](investigations/mists-engraving-inputs.md) is the source of truth for profile publication, Rust input supply (no Lua admin setter), named unset errors and the merged stock comparison. The [contract](../specs/mists-engraving-inputs.md) now includes original Mists settings construction; the earlier display-settings blocker is resolved. Native availability values remain unknown; full SettingsRegistrar and visible-panel acceptance remain unproved.
 
 ## [2026-10-26] proof | Supplied equipment-set locked items
 

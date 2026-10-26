@@ -7,12 +7,13 @@ The normal Mists bag and settings consumers read explicit environment-local engr
 - [x] Publish the seven members reached by the normal Mists bag/settings flow, gated by `client_profile::ACTIVE`. The six non-availability members remain Mists-only; [Era/Anniversary availability](era-engraving-availability.md) has a separate contract.
 - [x] Project supplied availability, engraving mode, optional current rune, per-inventory-slot eligibility, optional per-slot rune, and current-cast per-slot eligibility. An unsupplied input must raise an explicit error naming the query; supplied false/nil is not missing input.
 - [x] Return the pinned `EngravingData` fields and independent Lua tables. `RefreshRunesList` records an observable simulator refresh request with no Lua results; it does not invent native catalog refresh effects.
-- [x] Drive the original selected `ContainerFrame_Shared.lua` overlay and desaturation functions, with input supplied before addon loading. Cover true/false, present/nil, slot discrimination, repeated refresh requests and environment isolation. The complete original settings consumer remains blocked before engraving; no settings-path proof is claimed.
+- [x] Drive the original selected `ContainerFrame_Shared.lua` overlay and desaturation functions, with input supplied before addon loading. Cover true/false, present/nil, slot discrimination, repeated refresh requests and environment isolation. The later settings lane proves complete original `AdjustDisplaySettings` construction with supplied true/false, typed CVar behavior, unset recovery and isolation.
 - [x] Keep the old storage-flow test unchanged. Without supplied input its named unsupplied-state error is boundary advancement, not a passing storage-flow claim.
 
 ## How it works
 
 - [Consumer and declaration inventory](../wiki/investigations/mists-engraving-inputs.md)
+- [Shared publication and Rust input supply; no Lua admin setter](../wiki/investigations/mists-engraving-inputs.md#shared-availability-and-input-supply)
 
 ## Implementation inventory
 
@@ -23,13 +24,15 @@ The normal Mists bag and settings consumers read explicit environment-local engr
 ## Tests asserting this spec
 
 - `tests/mists_engraving.rs` — supplied original consumers, direct projections, missing inputs and isolation.
+- `tests/mists_engraving_settings.rs` — original settings line138, both availability branches, typed CVar behavior and named unset recovery.
 - `tests/mists_bank_storage_panel.rs` — unchanged historical storage-flow boundary.
 
 ## Known gaps (current cycle)
 
 - [x] Execute producer-subtracted RED and supplied GREEN with byte-identical tests: corrected RED `e97b841e7`, GREEN `eb3dca9dc`; all three exact GREEN cases pass.
-- [ ] The complete original `InterfaceOverrides.AdjustDisplaySettings` stops at line4 because `C_TransmogOutfitInfo.IsTransmogEnabled` is absent. That separate producer is outside this scope. Do not substitute copied vendor excerpts or claim settings-path GREEN.
-- [x] Compare bound stock maps: scaffold/no-producer `c50e6386a` and producer `f7a9227b8` both have 6 raw keys/12 occurrences, with no raw-key/count changes.
+- [x] Resolve the earlier display-settings blocker through the [merged original-consumer settings proof](../wiki/investigations/mists-engraving-inputs.md#merged-settings-proof-and-stock-effects). Full SettingsRegistrar and visible-panel interaction remain unproved.
+- [ ] Establish native availability values; supplied observations do not establish defaults or seasonal policy.
+- [x] Compare bound stock maps: the historical bag checkpoint `c50e6386a`/`f7a9227b8` had unchanged6/12. See the [current merged stock comparison](../wiki/investigations/mists-engraving-inputs.md#merged-settings-proof-and-stock-effects) for the later checkpoint.
 - [x] All seven full-feature all-target checks pass with zero JSON/plain warnings. Mists checks `eb3dca9dc`; the other six check documentation-only successor `81d59b62c`, with identical Rust/test inputs.
 
 ## Out of scope
