@@ -22,6 +22,10 @@
 
 [Original callback attribution](investigations/classic-startup-producer-cascades.md#opaque-private-aura-timers) resolves four erased nil calls to the declared defensive query. The [completion matrix](../specs/aura-spell-classification-identifiers.md#classic-completion-proof--2026-10-25) records both-profile RED/GREEN and AuraUtil preservation, exact stock improvement with no additions, and Era/Anniversary/Retail all-target checks. TTS remains separately owned.
 
+## [2026-10-25] proof | Supplied social squelch
+
+[Original LFG controls](investigations/consumer-selection-and-red-proof.md#supplied-social-squelch) link the [contract](../specs/social-squelch.md): environment-local input on Retail/PTR/Mists. Final exact RED/GREEN proves both original buttons and tooltips across false/true/false, exact bool and isolation. Each stock squelch pair is removed with no added keys; all-target checks pass under the zero/allowed-three warning contract.
+
 ## [2026-10-25] decision | PTR SharedXML executes twice
 
 [User decision](investigations/ptr-input-interface-style.md#user-decision-two-environments-2026-10-25) corrects only the PTR listener expectation to two, one per normal/secure environment. Native modern count remains unproven; Retail decompilation is the revisit boundary. [Final proof](investigations/ptr-input-interface-style.md#approved-twice-final-proof-2026-10-25): exact PTR GREEN passes, producer-only RED rejects the original event, PTR/Retail all-target checks pass with allowed-three/zero warnings. Forever case 1 is a documented missing API without capability state; report-only. Slot 2 released.

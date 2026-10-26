@@ -692,6 +692,7 @@ pub struct SimState {
     #[cfg(feature = "retail-12-0-0")]
     pub bnet_custom_message: String,
     pub social_friends: Vec<SocialFriend>,
+    pub social_restrictions: SocialRestrictionsState,
     /// Wrath selection retains identity when the display projection changes.
     #[cfg(feature = "client-wrath")]
     pub selected_friend_guid: Option<String>,

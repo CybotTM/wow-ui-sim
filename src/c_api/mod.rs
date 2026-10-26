@@ -196,6 +196,7 @@ pub mod c_scenario_info;
 pub mod c_secrets;
 pub mod c_settings_util;
 pub mod c_social;
+mod c_social_restrictions;
 pub mod c_sound;
 pub mod c_spec;
 pub mod c_spell;
@@ -401,6 +402,7 @@ fn supports_super_tracking() -> bool {
 }
 
 pub(crate) fn register_utility_bootstrap_tables(state: &mut LuaState) -> LuaResult<()> {
+    c_social_restrictions::register(state)?;
     c_loot_history::register_c_loot_history(state)?;
     c_date_and_time::register(state)?;
     #[cfg(feature = "retail-12-0-5")]

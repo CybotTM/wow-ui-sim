@@ -574,6 +574,7 @@ macro_rules! build_empty_sim_state {
             #[cfg(feature = "retail-12-0-0")]
             bnet_custom_message: String::new(),
             social_friends: default_social_friends(),
+            social_restrictions: SocialRestrictionsState::default(),
             #[cfg(feature = "client-wrath")]
             selected_friend_guid: None,
             auction_browse_results: default_auction_browse_results(),
@@ -730,8 +731,8 @@ pub use super::state_types::{
     PlayerChoiceOptionRewardInfo, PlayerChoiceRewardCurrencyInfo, PlayerChoiceRewardItemInfo,
     PlayerChoiceRewardReputationInfo, PlayerChoiceState, PlayerState, PlayerXpState, PvpHonorState,
     SEEDED_LOCAL_CHARACTER_GUID, SEEDED_LOCAL_CHARACTER_NAME, ScenarioState, ScenarioStep,
-    SecondaryPowerState, SocialFriend, SummonRequestState, TokenAuctionInfo, WorldState,
-    WowTokenState,
+    SecondaryPowerState, SocialFriend, SocialRestrictionsState, SummonRequestState,
+    TokenAuctionInfo, WorldState, WowTokenState,
 };
 #[cfg(feature = "client-retail")]
 pub use super::state_types::{EffectiveAttackPower, PowerRegen, WeaponAttackPower};
