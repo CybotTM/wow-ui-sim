@@ -1,4 +1,4 @@
-//! Original consumer behind Forever's erased securecallfunction callee.
+//! Original consumer behind the erased securecallfunction defensive-query callee.
 #![cfg(feature = "aura-spell-classifications")]
 
 use wow_ui_sim::c_api::c_unit_aura_classification::AuraSpellClassification;
@@ -53,11 +53,11 @@ fn original_aura_util_reads_declared_defensive_classification() {
         "#,
     )
     .unwrap();
-    if ACTIVE == ClientProfile::WowForever {
-        env.exec("assert(rawget(C_UnitAuras, 'AuraIsPrivate') == nil)")
+    if matches!(ACTIVE, ClientProfile::Retail | ClientProfile::Ptr) {
+        env.exec("assert(C_UnitAuras.AuraIsPrivate(101) == false)")
             .unwrap();
     } else {
-        env.exec("assert(C_UnitAuras.AuraIsPrivate(101) == false)")
+        env.exec("assert(rawget(C_UnitAuras, 'AuraIsPrivate') == nil)")
             .unwrap();
     }
 }

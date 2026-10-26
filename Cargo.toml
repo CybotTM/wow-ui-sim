@@ -147,7 +147,7 @@ retail-12-1-5 = ["retail-12-1-0", "timed-signal-maps", "forbidden-animation-aspe
 native-duration-formatting = ["dep:cc", "dep:pkg-config", "dep:vcpkg"]
 # Existing specialization relationship model shared by Retail 12.0.5+ and Forever.
 base-spell-relationships = []
-# Existing explicit defensive spell classification shared with Forever.
+# Explicit defensive spell classification shared by Retail, Forever and vanilla profiles.
 aura-spell-classifications = []
 # Shared keyed timer capability used by PTR and Forever.
 timed-signal-maps = []
@@ -177,8 +177,8 @@ client-retail = ["profile-retail", "retail-12-1-5", "prefork-full-ui"]
 client-ptr = ["retail-12-1-5"]
 client-wrath = []
 client-mists = ["prefork-full-ui"]
-client-era = ["sim-data-profile/client-era"]
-client-anniversary = ["sim-data-profile/client-anniversary"]
+client-era = ["aura-spell-classifications", "sim-data-profile/client-era"]
+client-anniversary = ["aura-spell-classifications", "sim-data-profile/client-anniversary"]
 client-wowforever = ["timed-signal-maps", "aura-xml-widgets", "on-update-modes", "player-cast-durations", "forbidden-animation-aspects", "numeric-rule-formatters", "aura-containers", "native-duration-formatting", "base-spell-relationships", "aura-spell-classifications", "sim-data-profile/client-wowforever"]
 
 [profile.release]
