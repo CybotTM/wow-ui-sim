@@ -1,6 +1,6 @@
 ## [2026-10-26] implementation | Mists transmog supplied input
 
-[Contract and selected display branch](systems/mists-transmog-enabled.md): both producer-free RED cases fail at original line4 after a clean addon closure load. The producer now reads an environment-local supplied boolean, raises a named error when unset, and publishes only on Mists. GREEN and final checks are pending; BEFORE stock is6/12.
+[Contract and selected display branch](systems/mists-transmog-enabled.md): byte-identical selectors fail producer-free RED at original line4 and pass GREEN for both real-control branches, isolation, transitions and unset recovery. The supplied-state query publishes only on Mists; no default is inferred. Bound stock is unchanged6/12; all seven all-target checks have zero warnings. Full settings, modern native-default policy and the Forever query remain outside this bounded proof.
 
 ## [2026-10-26] investigation | Mists engraving supplied inputs
 

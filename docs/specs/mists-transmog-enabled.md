@@ -4,11 +4,11 @@ Mists `C_TransmogOutfitInfo.IsTransmogEnabled()` reads an explicitly supplied en
 
 ## What it must do
 
-- [ ] Publish only on Mists through `client_profile::ACTIVE`, without changing modern registration.
-- [ ] Initialize the Mists input to `None`; supplied `Some(true)` and `Some(false)` return exactly one corresponding boolean.
-- [ ] Raise `C_TransmogOutfitInfo.IsTransmogEnabled: transmog availability has not been supplied` for `None`.
-- [ ] The original selected Mists `InterfaceOverrides.AdjustDisplaySettings` omits helm/cloak controls for true and creates both boolean proxy checkboxes for false.
-- [ ] Preserve independent environments, transitions and unset recovery through that original caller.
+- [x] Publish only on Mists through `client_profile::ACTIVE`, without changing modern registration.
+- [x] Initialize the Mists input to `None`; supplied `Some(true)` and `Some(false)` return exactly one corresponding boolean.
+- [x] Raise `C_TransmogOutfitInfo.IsTransmogEnabled: transmog availability has not been supplied` for `None`.
+- [x] The original selected Mists `InterfaceOverrides.AdjustDisplaySettings` omits helm/cloak controls for true and creates both boolean proxy checkboxes for false.
+- [x] Preserve independent environments, transitions and unset recovery through that original caller.
 
 ## How it works
 
@@ -23,11 +23,11 @@ Mists `C_TransmogOutfitInfo.IsTransmogEnabled()` reads an explicitly supplied en
 
 ## Tests asserting this spec
 
-`tests/mists_transmog_enabled.rs`: enabled-first and disabled-first selectors each observe both branches, transitions, independent environments and named unset recovery. Both exact producer-free RED cases reach the missing original query at `InterfaceOverrides.lua:4`. GREEN execution is pending.
+`tests/mists_transmog_enabled.rs`: enabled-first and disabled-first selectors each observe both branches, transitions, independent environments and named unset recovery. Both exact producer-free RED cases reach the missing original query at `InterfaceOverrides.lua:4`. Both exact GREEN cases pass both real-control branches, transitions, environment isolation, one-result boolean arity and named unset recovery.
 
 ## Known gaps (current cycle)
 
-- [ ] Observe producer-subtracted RED and producer GREEN; complete bound stock and seven-profile warning checks.
+- [x] Observe producer-subtracted RED and producer GREEN; bound Mists stock remains 6 keys/12 occurrences without any raw-key/count change, and all seven full-feature all-target checks have zero warnings.
 
 ## Out of scope
 

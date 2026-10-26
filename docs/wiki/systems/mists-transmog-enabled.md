@@ -1,6 +1,6 @@
 # Mists supplied transmog availability
 
-The [contract](../../specs/mists-transmog-enabled.md) adds no inferred native default. Mists owns a separate environment-local `Option<bool>` in `c_api`; the modern default-true field remains unchanged. Registration uses `client_profile::ACTIVE`; a supplied value returns one boolean, and absent input raises the named error instead of choosing a display branch. Both exact original-consumer RED cases fail at `InterfaceOverrides.lua:4` without the producer. GREEN execution is pending.
+The [contract](../../specs/mists-transmog-enabled.md) adds no inferred native default. Mists owns a separate environment-local `Option<bool>` in `c_api`; the modern default-true field remains unchanged. Registration uses `client_profile::ACTIVE`; a supplied value returns one boolean, and absent input raises the named error instead of choosing a display branch. Both exact original-consumer RED cases fail at `InterfaceOverrides.lua:4` without the producer. Both exact GREEN cases pass. Bound Mists stock is unchanged at 6 keys/12 occurrences; all seven full-feature all-target checks pass with zero warnings. These checks are compilation evidence, not other-profile runtime acceptance.
 
 ## Declaration and selected consumer
 
@@ -13,6 +13,16 @@ Pinned Mists 5.5.4.70268 declares `IsTransmogEnabled` with no arguments and one 
 Both tests load the original selected addon closure without overrides and assert consumer provenance. A line hook stops at38, after the query's complete branch and before unrelated Hardcore/settings branches. It does not replace the query, registration or control factories. Tests count real layout initializers and inspect their setting names/types.
 
 Original SettingsPanel rejects duplicate variable registration. Each environment therefore enters false once, while true can repeat; the two selectors reverse initial ordering and both discriminate constant true and constant false. Unset recovery supplies true after the named error. This is query/branch acceptance, not full settings registration or startup cleanliness.
+
+## Executed proof
+
+The producer-free and producer-bearing siblings use byte-identical tests. Each exact selector lists one case, fails RED at the original missing query on line4, and passes GREEN. Both load the original selected addon closure without load diagnostics. An initial scaffold compilation error used unsupported `usize` result extraction; both siblings now use `i32`, without changing assertions.
+
+Each selector observes both control counts, two environments, supplied transitions, retained input, one-result boolean arity, and unset recovery. No vendor/query/control factory is replaced. Constant true and constant false each contradict a concrete control-count observation within either selector; no separately compiled constant-mutant result is claimed.
+
+BEFORE is master plus the supplied-state scaffold without the producer, not an exact rebuilt master. BEFORE and AFTER stock maps have identical raw keys and counts. Existing GroupFinder errors remain at Classic/PVEFrame.lua:229 and ScenarioFinder_Shared.lua:58, with their ScriptErrors reporters. The generic `(string):1` pair is attributed to Blizzard_CompactRaidFrames by errors-by-addon diagnostics; its exact upstream function remains unknown. No new key or masking predecessor is introduced. The test's named unset error is not a claimed stock replacement.
+
+All runtime payloads use fresh child-only copies of current persisted CVars and preserve the original stat/hash. No clean-startup or full settings-flow acceptance is claimed.
 
 ## Separate gaps
 
