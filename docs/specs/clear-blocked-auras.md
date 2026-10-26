@@ -2,13 +2,14 @@
 
 ## Scope
 
-Retail/PTR original `ArenaUnitFrameDebuffMixin.Update` and the original CompactRaidFrameManager initialization interrupted by that cleanup. Excludes combat filters, group-buff configuration, other profiles, layout/XML changes and vendor patches.
+Retail/PTR original `ArenaUnitFrameDebuffMixin.Update` and the original CompactRaidFrameManager initialization interrupted by that cleanup. The manager also requires `C_Ping.IsPingSystemEnabled`, backed by the existing supplied flag described in [startup inputs](forever-startup-inputs.md). Preserve Forever behavior and stock counts. Excludes combat filters, group-buff configuration, other publication, layout/XML changes and vendor patches.
 
 ## Required behavior
 
 - `C_UnitAuras.ClearBlockedAuras(unit)` removes display blocks for the selected unit from the same effective block set used by `AddBlockedAura` and visible enumeration. Existing backing is `C_UnitAuras._blockedAuras`; do not clear the unused `SimState.blocked_auras_by_unit` field or introduce a second store.
 - Clearing party1 restores supplied aura instance IDs201/202; player101 remains blocked. Each selector must independently re-block both units, then clear player101 while party201/202 stay blocked. Repeated clears and re-block/re-clear preserve aura DTOs and other units.
 - All selectors use the existing `CompactArenaFrame.memberUnitFrames[1].DebuffFrame` from the normal CompactRaidFrames dependency closure, with original parent, methods and installed OnEvent handler. No substitute parent/child or private-aura mixin replacement; assigned transitions use original SetUnit/Update.
+- The original raid-manager Ping branch must project supplied enabled then disabled state without an invented native default. Its enabled menu must contain real elements; a later disabled OnLoad retains that menu, as the original consumer does.
 - Original raid-manager OnLoad must continue through both divider-pool assignments. Original GROUP_ROSTER_UPDATE then PLAYER_ENTERING_WORLD, options-flow updates, pool acquire/release/reacquire must complete. Tests must retain initial OnLoad errors; no manually supplied pools.
 - Place the endpoint under `src/c_api/`, with only the narrow existing-state sharing changes necessary. No invented native defaults or ambient inputs.
 

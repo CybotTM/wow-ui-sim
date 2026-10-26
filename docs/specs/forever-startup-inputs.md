@@ -2,9 +2,11 @@
 
 ## Scope
 
-Only `client_profile::ACTIVE == WowForever` publishes this additional surface.
-Other profiles retain their existing registrations and behavior. Contracts come
-from the copied 1.60.1.70532 `Blizzard_APIDocumentationGenerated` cache.
+`client_profile::ACTIVE == WowForever` publishes this additional surface, except
+`C_Ping.IsPingSystemEnabled`, which Retail and PTR also publish. Other profiles
+retain their existing registrations and behavior. Forever contracts come from
+the copied 1.60.1.70532 `Blizzard_APIDocumentationGenerated` cache. Retail/PTR
+`PingManagerDocumentation.lua:44` declares the same non-null boolean result.
 
 ## Supplied state, not native policy
 
@@ -33,8 +35,13 @@ unknown.
   Camelot first-slot consumer is covered for absent and paid offers. Free-offer
   purchase actions and native pricing/affordability policy are not modeled.
 - Discord enablement reads the existing `discordClientEnabled` CVar. Ping
-  availability and `RestrictPingsTo` are explicit Forever host inputs; Retail's
-  feature-gated restriction model is unchanged. TTS bool settings are supplied as
+  availability is the same supplied `forever_startup.ping_enabled` flag on
+  Retail, PTR and Forever. Its derived false default describes the empty
+  simulator world, not native policy. True/false transitions must project
+  through the original raid manager. The original OnLoad initializes its ping
+  menu when true and does not remove that menu on a later false input.
+  `RestrictPingsTo` remains a Forever host input; Retail's feature-gated
+  restriction model is unchanged. TTS bool settings are supplied as
   enabled `TtsBoolSetting` values. Save marking sets a local saved flag, and its
   getter reads that same flag; no persistence policy is inferred.
 - `C_CVar.RemoveTempCVar(name)` removes the host's lower-case temporary scalar
