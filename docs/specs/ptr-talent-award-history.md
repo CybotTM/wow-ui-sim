@@ -4,11 +4,11 @@ PTR exposes `C_SpecializationInfo.HasPlayerEarnedATalentPoint` from `src/c_api/c
 
 ## What it must do
 
-- [ ] Under PTR, return exactly one non-null boolean without arguments, as declared in pinned 70493 `SpecializationInfoDocumentation.lua:331–337`.
-- [ ] Project `TalentState.has_earned_talent_point` without mutation or level/rank inference. False is the empty-host-history policy, not a native default claim.
-- [ ] Preserve the original talent microbutton behavior on `PLAYER_ENTERING_WORLD`: false disables it and sets its unlock-level field; true enables it and clears that field; later false disables it again.
-- [ ] Publish `Constants.LevelConstsExposed.MIN_TALENT_LEVEL = 10` on PTR, as declared by pinned 12.1.7.70493 `LevelConstantsDocumentation.lua:12`. Use the existing Lua constant-assignment mechanism. Forever 1.60.1.70532 declares the same value at line12 and already publishes it through `forever_finite_constants`; preserve that publication. Retail 12.1.5.70448 omits it, as do the inspected Mists/Era/Anniversary declarations; Wrath has no such documentation file. Do not expand publication to those profiles.
-- [ ] Keep Retail publication unchanged. Its pinned microbutton does not call this endpoint.
+- [x] Under PTR, return exactly one non-null boolean without arguments, as declared in pinned 70493 `SpecializationInfoDocumentation.lua:331–337`.
+- [x] Project `TalentState.has_earned_talent_point` without mutation or level/rank inference. False is the empty-host-history policy, not a native default claim.
+- [x] Preserve the original talent microbutton behavior on `PLAYER_ENTERING_WORLD`: false disables it and sets its unlock-level field; true enables it and clears that field; later false disables it again.
+- [x] Publish `Constants.LevelConstsExposed.MIN_TALENT_LEVEL = 10` on PTR, as declared by pinned 12.1.7.70493 `LevelConstantsDocumentation.lua:12`. Use the existing Lua constant-assignment mechanism. Forever 1.60.1.70532 declares the same value at line12 and already publishes it through `forever_finite_constants`; preserve that publication. Retail 12.1.5.70448 omits it, as do the inspected Mists/Era/Anniversary declarations; Wrath has no such documentation file. Do not expand publication to those profiles.
+- [x] Keep Retail publication unchanged. Its pinned microbutton does not call this endpoint.
 
 ## How it works
 
@@ -27,8 +27,8 @@ PTR exposes `C_SpecializationInfo.HasPlayerEarnedATalentPoint` from `src/c_api/c
 
 ## Known gaps (current cycle)
 
-- [ ] Execute the producer GREEN and renewed housing gates after the separate implementation commit.
+- [x] Original PTR false→true→false talent selector and housing eight-state selector pass after the separately committed documented constant. The missing housing producer sibling fails at pinned PTR `EventImplementation.lua:851`. Retail eight-state preservation and both zero-warning all-target checks pass.
 
 ## Out of scope
 
-Native history acquisition, award rules, level thresholds, reset semantics and reconciliation with current talent ranks are unknown. No `C_ClassTalents` alias, Forever shim change or Retail expansion is part of this contract.
+Native history acquisition, award rules, unlock eligibility, reset semantics and reconciliation with current talent ranks are unknown. The documented unlock-level constant does not establish those policies. No `C_ClassTalents` alias, Forever shim change or Retail expansion is part of this contract.

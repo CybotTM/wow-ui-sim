@@ -1,5 +1,7 @@
 # Housing spatial presence
 
+The sections below retain earlier checkpoints. See [final PTR/Retail acceptance](#final-ptrretail-acceptance) for current proof.
+
 The existing `HousingArea` enum has `HouseInterior` and `PlotExterior`. `HousingState.current_housing_area` is optional supplied world state, independent of `inside_owned_house` / `inside_owned_plot`. The existing `IsInsideHouse` getter matches only the interior. The broader query uses that same area without adding another plot flag. See the [house-or-plot contract](../../specs/house-or-plot-presence.md) and [interior contract](../../specs/house-interior-presence.md).
 
 ## Profile selection (static, 2026-10-24)
@@ -17,7 +19,7 @@ Retail/PTR original Mainline handler lines769–848 include query at843. Forever
 
 ## Producer
 
-`src/c_api/c_housing/presence.rs` registers both spatial getters under one shared Retail/PTR/Forever module gate. The existing interior predicate is unchanged. The broader query returns `current_housing_area.is_some()` because the existing enum has exactly interior and plot-exterior variants. It returns one `Val::Bool`; no mutation, default fabrication or ownership fallback occurs. `location.inside_plot` remains an older independent input and is not silently reconciled by a getter. Retail original-consumer proof is complete; PTR acceptance depends on the separately owned input-interface-style lane (see the accepted-proof section).
+`src/c_api/c_housing/presence.rs` registers both spatial getters under one shared Retail/PTR/Forever module gate. The existing interior predicate is unchanged. The broader query returns `current_housing_area.is_some()` because the existing enum has exactly interior and plot-exterior variants. It returns one `Val::Bool`; no mutation, default fabrication or ownership fallback occurs. `location.inside_plot` remains an older independent input and is not silently reconciled by a getter. Retail and PTR original-consumer proof is complete; see the final acceptance section. Native spatial policy remains unproved.
 
 ## State and original-consumer selectors
 
@@ -109,3 +111,19 @@ Executed c029ad36c: original PTR template GREEN follows the 4c6e7ae04 RED at Set
 PTR housing/talent acceptance remains blocked before the housing branch. Original MicroMenu OnLoad aborts on missing C_GameRules.IsWoWHack at GameRulesUtil:207; InitializeButtons/RefreshButtons therefore never writes addedButtons (MicroMenuContainer:139), and UpdateMicroButtons:230 later rejects nil. This producer is separately owned. No local workaround or assertion change is authorized.
 
 Raw stock comparison preserves every full-message key: Retail exact master f4387c7bf has 16 keys/18 occurrences; the lane has 14/16. Its two additions are existing dividerVerticalPool messages with only Game frame identity changed. PTR's requested 298/412 reference becomes 286/408, with 10 individually traced additions and 22 removals. Four additions are identity-only churn; the remaining six expose original MicroMenu/raid startup gaps after earlier boundaries are removed. The separately merged green1-adjusted reference is 296/410 and contributes two known GhostFrame keys retained on this lane's unmerged f438 base. No clean-stock or complete PTR GREEN claim is made. Full per-key traces, source/runtime receipts and CPU/release evidence live in the local ptr-final handoff REPORT.
+
+## Final PTR/Retail acceptance
+
+Verified 2026-10-25 after the authorized merge of master a5b7a0527, including IsWoWHack and warning cleanup. The unchanged selectors use selected original consumers, exact listings and single executions.
+
+| Boundary | Final evidence |
+|---|---|
+| PTR housing eight states | GREEN b234ad404 passes all loader counts 0,1,1,0,1,1,0,1 |
+| PTR producer-only RED | 39b159fc1 fails on missing IsInsideHouseOrPlot at pinned 70493 Mainline/EventImplementation.lua:851; Retail's consumer is line843 |
+| PTR TalentMicroButton | False→true→false enabled state and unlock-level field pass on b234ad404 |
+| Retail housing preservation | All eight states pass on b234ad404 |
+| PTR/Retail all-target checks and fmt | Pass, zero warnings in both Cargo JSON and plain stderr |
+
+After IsWoWHack, the talent selector reached its final false state but failed the unlock-level assertion. Original MainMenuBarMicroButtons.lua:1017 calls GetTalentUnlockLevel:808; the missing MIN_TALENT_LEVEL made that field nil. Approved commit b234ad404 publishes the documented value10 on PTR beside the existing Lua constant assignments. Pinned PTR 12.1.7.70493 LevelConstantsDocumentation.lua:12 declares it. Retail 12.1.5.70448 omits it; Forever 1.60.1.70532 declares it at line12 and already publishes10. Other profiles gain no publication. See the [talent contract](../../specs/ptr-talent-award-history.md).
+
+Fresh raw stock maps: PTR 272 keys/378 occurrences →256/360; Retail 16/18 →14/16. PTR has four additions: two Communities anonymous-identity changes and two Game roster callbacks newly reaching the existing dividerVerticalPool failure after SHARD_TRANSFER admission. The existing manager OnLoad ClearBlockedAuras failure masks pool creation. Retail's two additions change only the Game frame ID. Every addition retains its full key and predecessor trace; no normalization or clean-startup claim. Final evidence is in the local cf2-housing-plot REPORT-land and land receipts. Forever true-branch fixture and native-policy parity remain outside this acceptance.
