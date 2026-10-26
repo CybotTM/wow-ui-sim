@@ -340,6 +340,8 @@ pub struct VoiceChannel {
 /// headset-check confirmation dialog has been accepted.
 #[derive(Debug, Clone)]
 pub struct VoiceChatState {
+    /// Host-supplied settings-access observation; None is unknown, not denied.
+    pub can_access_settings: Option<bool>,
     pub microphone_volume: f32,
     pub output_volume: f32,
     pub muted: bool,
@@ -380,6 +382,7 @@ pub struct VoiceChatState {
 impl Default for VoiceChatState {
     fn default() -> Self {
         Self {
+            can_access_settings: None,
             microphone_volume: 1.0,
             output_volume: 1.0,
             muted: false,
