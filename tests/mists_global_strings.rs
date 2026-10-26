@@ -59,6 +59,14 @@ fn original_mists_display_settings_reads_70268_enemy_castbar_name() {
             'Blizzard_Settings_Shared/Blizzard_Setting.lua', 273)
         MistsStringsCategory, MistsStringsLayout =
             Settings.RegisterVerticalLayoutCategory('70268 global strings probe')
+        MistsDisplayLines = {}
+        local display = InterfaceOverrides.AdjustDisplaySettings
+        -- Observe, but never replace or stop, the original consumer.
+        debug.sethook(function(_, line)
+            if debug.getinfo(2, 'f').func == display then
+                MistsDisplayLines[line] = true
+            end
+        end, 'l')
         "#,
     )
     .unwrap();
@@ -66,14 +74,15 @@ fn original_mists_display_settings_reads_70268_enemy_castbar_name() {
         .exec("InterfaceOverrides.AdjustDisplaySettings(MistsStringsCategory)")
         .expect_err("unsupplied engraving remains the next original-consumer boundary")
         .to_string();
+    env.exec("debug.sethook()").unwrap();
     eprintln!("next original-consumer boundary: {boundary}");
     assert!(
-        boundary.contains("InterfaceOverrides.lua:138:")
-            && boundary.contains("C_Engraving.IsEngravingEnabled: unsupplied input"),
+        boundary.contains("C_Engraving.IsEngravingEnabled: unsupplied input"),
         "{boundary}"
     );
     env.exec(
         r#"
+        assert(MistsDisplayLines[131] and MistsDisplayLines[138])
         assert(SHOW_ENEMY_CASTBARS == 'Show Enemy Cast Bar') -- GlobalStrings ID 51586
         assert(OPTION_TOOLTIP_SHOW_ENEMY_CASTBARS == nil)
         local setting = Settings.GetSetting('showTargetCastbar')
