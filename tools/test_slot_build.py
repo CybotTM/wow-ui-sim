@@ -618,6 +618,7 @@ class SourceFreshnessTests(unittest.TestCase):
         (self.tree / "src").mkdir()
         (self.tree / "src/main.rs").write_text('fn main() { println!("A"); }')
         (self.tree / "Cargo.toml").write_text('[package]\nname="probe"\nversion="0.1.0"\n')
+        (self.tree / "Cargo.lock").write_text('version = 3\n[[package]]\nname = "probe"\nversion = "0.1.0"\n')
         self.git("add", ".")
         self.git("commit", "-qm", "A")
 
@@ -644,7 +645,7 @@ class SourceFreshnessTests(unittest.TestCase):
             '    binary.write_bytes(source.read_bytes())\n'
             '    binary.with_suffix(".d").write_text(str(binary)+": src/main.rs\\n")\n'
             'exec(sys.argv[4])\n'
-            'print(json.dumps({"reason":"compiler-artifact","filenames":[str(binary)],\n'
+            f'print(json.dumps({{"reason":"compiler-artifact","package_id":{f"path+file://{self.tree}#probe@0.1.0"!r},"filenames":[str(binary)],\n'
             '    "executable":str(binary) if json.loads(sys.argv[5]) else None,"fresh":fresh}))\n'
         )
         request = self.slot / "library-request.json"
@@ -1650,6 +1651,8 @@ class SourceFreshnessTests(unittest.TestCase):
         (self.tree / "tests/Cargo.toml").write_text(
             '[package]\nname="tests"\nversion="0.1.0"\n'
             '[[test]]\nname="foo"\npath="foo.rs"\n')
+        with (self.tree / "Cargo.lock").open("a") as lock:
+            lock.write('[[package]]\nname = "tests"\nversion = "0.1.0"\n')
         self.git("add", ".")
         self.git("commit", "-qm", "test A")
         metadata = json.loads(subprocess.check_output(
