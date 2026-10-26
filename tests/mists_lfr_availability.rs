@@ -132,7 +132,9 @@ fn observe_original_lfr_before_successor(env: &WowLuaEnv, available: bool) {
             observed = true
             print('LFR observation before original scenario boundary', expected)
         end, 'l')
-        local ok, reason = pcall(GroupFinderFrame:GetScript('OnEvent'), GroupFinderFrame, 'PLAYER_LEVEL_CHANGED')
+        local ok, reason = xpcall(function()
+            GroupFinderFrame:GetScript('OnEvent')(GroupFinderFrame, 'PLAYER_LEVEL_CHANGED')
+        end, debug.traceback)
         debug.sethook()
         if not observed then error(reason or 'original LFR observation not reached', 0) end
         assert(ok, tostring(reason))
