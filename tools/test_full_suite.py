@@ -259,6 +259,73 @@ sys.exit(runner.run(sys.argv[2], 1, sys.argv[3], "ptr"))
                 self.assertIn(f'injected log {failure} failure', json.dumps(record))
                 self.assertFalse((self.slot / '.owner').exists())
 
+    def run_commit_point_fixture(self, fault):
+        results = self.home / 'Projects/wow/full-suite-results'
+        results.mkdir(parents=True, exist_ok=True)
+        canonical = results / f'{self.sha}-ptr.json'
+        baseline = results / 'master-latest-ptr.json'
+        canonical.write_bytes(json.dumps({'sha': self.sha, 'status': 'PASSED', 'failures': {}}).encode())
+        baseline.write_bytes(b'{"status":"PASSED","failures":{"integration":["prior"]}}\n')
+        if fault == 'baseline-read':
+            baseline.write_bytes(b'{malformed')
+        before = canonical.read_bytes(), baseline.read_bytes()
+        script = self.home / 'commit-point-fault.py'
+        script.write_text('''import importlib.util, sys
+spec = importlib.util.spec_from_file_location("runner", sys.argv[1])
+runner = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(runner)
+runner.build = lambda *args: {"reported_artifacts": [{"executable": "/unused", "profile": {"test": True}, "target": {"name": name, "kind": [kind]}} for name, kind in [("integration", "test"), ("wow_ui_sim", "lib")]]}
+runner.run_step = lambda *args: ({"exit": 0}, "")
+runner.confirm_terminated = lambda *args: None
+original = runner.write_result
+def injected(path, result):
+    fault = sys.argv[4]
+    if fault == "baseline-write" and path.name == "master-latest-ptr.json":
+        raise OSError("injected baseline promotion failure")
+    if fault == "canonical-write" and path.name == sys.argv[2] + "-ptr.json":
+        raise OSError("injected canonical promotion failure")
+    return original(path, result)
+runner.write_result = injected
+sys.exit(runner.run("master", 1, sys.argv[3], "ptr"))
+''')
+        process = subprocess.run([sys.executable, str(script), str(RUNNER), self.sha, str(self.slot), fault],
+                                 env=self.env, capture_output=True, text=True, timeout=10)
+        attempts = list(results.glob(f'{self.sha}-ptr-attempt-*.json'))
+        return process, canonical, baseline, before, attempts
+
+    def test_guard_rejection_exits_nonzero_with_failed_attempt(self):
+        results = self.home / 'Projects/wow/full-suite-results'
+        results.mkdir(parents=True)
+        (results / f'{self.sha}-ptr.json').write_text(json.dumps({'status': 'PASSED', 'failures': {}}))
+        process = subprocess.run([sys.executable, str(RUNNER), 'run', self.sha, '--profile', 'ptr',
+                                  '--target-dir', str(self.slot)], env=self.env, capture_output=True, text=True, timeout=10)
+        attempts = list(results.glob(f'{self.sha}-ptr-attempt-*.json'))
+        self.assertEqual(len(attempts), 1, process.stderr)
+        self.assertEqual(json.loads(attempts[0].read_text())['status'], 'FAILED')
+        self.assertNotEqual(process.returncode, 0)
+
+    def test_baseline_promotion_failure_preserves_both_prior_results(self):
+        process, canonical, baseline, before, attempts = self.run_commit_point_fixture('baseline-write')
+        self.assertNotEqual(process.returncode, 0)
+        self.assertEqual(canonical.read_bytes(), before[0])
+        self.assertEqual(baseline.read_bytes(), before[1])
+        self.assertEqual(len(attempts), 1)
+        self.assertEqual(json.loads(attempts[0].read_text())['status'], 'FAILED')
+
+    def test_malformed_baseline_after_claim_records_failed_attempt(self):
+        process, canonical, baseline, before, attempts = self.run_commit_point_fixture('baseline-read')
+        self.assertNotEqual(process.returncode, 0)
+        self.assertEqual(len(attempts), 1, process.stderr)
+        self.assertEqual(json.loads(attempts[0].read_text())['status'], 'FAILED')
+
+    def test_canonical_promotion_failure_records_failed_attempt(self):
+        process, canonical, baseline, before, attempts = self.run_commit_point_fixture('canonical-write')
+        self.assertNotEqual(process.returncode, 0)
+        self.assertEqual(canonical.read_bytes(), before[0])
+        self.assertEqual(baseline.read_bytes(), before[1])
+        self.assertEqual(len(attempts), 1, process.stderr)
+        self.assertEqual(json.loads(attempts[0].read_text())['status'], 'FAILED')
+
     def test_release_failure_preserves_previous_pass(self):
         results = self.home / 'Projects/wow/full-suite-results'
         results.mkdir(parents=True)
@@ -308,6 +375,36 @@ sys.exit(runner.run(sys.argv[2], 1, sys.argv[3], "ptr"))
 ''')
         process = subprocess.run([sys.executable, str(script), str(RUNNER), self.sha, str(self.slot)],
                                  env=self.env, capture_output=True, text=True, timeout=10)
+        path = self.home / f'Projects/wow/full-suite-results/{self.sha}-ptr.json'
+        self.assertTrue(path.exists(), process.stderr)
+        record = json.loads(path.read_text())
+        self.assertEqual(record['status'], 'FAILED')
+        self.assertIn('persistent log failure', record['error'])
+        self.assertIn('persistent log failure', record['log_error'])
+        self.assertFalse((self.slot / '.owner').exists())
+
+    def test_persistent_log_failure_exits_nonzero_with_failed_attempt(self):
+        script = self.home / 'persistent-log.py'
+        script.write_text('''import builtins, importlib.util, sys
+spec = importlib.util.spec_from_file_location("runner", sys.argv[1])
+runner = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(runner)
+original = builtins.open
+class Log:
+    def __init__(self, stream): self.stream = stream
+    def __enter__(self): return self
+    def __exit__(self, *args): return self.stream.__exit__(*args)
+    def write(self, value): raise OSError("persistent log failure")
+    def flush(self): return self.stream.flush()
+def injected(path, *args, **kwargs):
+    stream = original(path, *args, **kwargs)
+    return Log(stream) if str(path).endswith(".log") else stream
+builtins.open = injected
+sys.exit(runner.run(sys.argv[2], 1, sys.argv[3], "ptr"))
+''')
+        process = subprocess.run([sys.executable, str(script), str(RUNNER), self.sha, str(self.slot)],
+                                 env=self.env, capture_output=True, text=True, timeout=10)
+        self.assertNotEqual(process.returncode, 0, process.stderr)
         path = self.home / f'Projects/wow/full-suite-results/{self.sha}-ptr.json'
         self.assertTrue(path.exists(), process.stderr)
         record = json.loads(path.read_text())
