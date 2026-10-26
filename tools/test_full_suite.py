@@ -81,6 +81,68 @@ class CertifiedSuiteTests(unittest.TestCase):
                          "print('guard rejected: owner mismatch', file=sys.stderr)\n"
                          "sys.exit(1)\n")
 
+    def status_output(self, ref=None):
+        command = [sys.executable, str(RUNNER), 'status']
+        if ref:
+            command.append(ref)
+        return subprocess.run(command, env=self.env, capture_output=True,
+                              text=True, check=True).stdout
+
+    def status_record(self, sha, name, status, phase, timestamp, mtime):
+        results = self.home / 'Projects/wow/full-suite-results'
+        results.mkdir(parents=True, exist_ok=True)
+        record = {'sha': sha, 'profile': 'ptr', 'status': status,
+                  'finished': timestamp, 'steps': {phase: {'status': status}}}
+        path = results / name
+        path.write_text(json.dumps(record))
+        os.utime(path, (mtime, mtime))
+
+    def test_status_newer_failure_and_different_canonical(self):
+        old = 'a' * 40
+        self.status_record(old, f'{old}-ptr.json', 'PASSED', 'lib', 'old-time', 100)
+        self.status_record(self.sha, f'{self.sha}-ptr-attempt-200.json',
+                           'FAILED', 'build', 'new-time', 200)
+        output = self.status_output()
+        self.assertIn('"status": "FAILED"', output)
+        self.assertIn('"phase": "build"', output)
+        self.assertIn('"finished": "new-time"', output)
+        self.assertIn(old, output)
+        self.assertIn('"status": "PASSED"', output)
+        self.assertNotIn('no result yet', output)
+
+    def test_status_failed_attempt_only_with_and_without_ref(self):
+        self.status_record(self.sha, f'{self.sha}-ptr-attempt-200.json',
+                           'FAILED', 'build', 'new-time', 200)
+        for ref in (None, self.sha):
+            with self.subTest(ref=ref):
+                output = self.status_output(ref)
+                self.assertIn('"status": "FAILED"', output)
+                self.assertIn('"phase": "build"', output)
+                self.assertIn('"finished": "new-time"', output)
+                self.assertNotIn('no result yet', output)
+
+    def test_status_canonical_only(self):
+        self.status_record(self.sha, f'{self.sha}-ptr.json',
+                           'PASSED', 'lib', 'old-time', 100)
+        for ref in (None, self.sha):
+            with self.subTest(ref=ref):
+                output = self.status_output(ref)
+                self.assertIn('"status": "PASSED"', output)
+                self.assertIn('"finished": "old-time"', output)
+                self.assertNotIn('no result yet', output)
+
+    def test_status_failed_rerun_shows_same_sha_canonical(self):
+        self.status_record(self.sha, f'{self.sha}-ptr.json', 'PASSED', 'lib', 'old-time', 100)
+        self.status_record(self.sha, f'{self.sha}-ptr-attempt-200.json',
+                           'FAILED', 'build', 'new-time', 200)
+        for ref in (None, self.sha):
+            with self.subTest(ref=ref):
+                output = self.status_output(ref)
+                self.assertIn('"status": "FAILED"', output)
+                self.assertIn('"phase": "build"', output)
+                self.assertIn('"status": "PASSED"', output)
+                self.assertIn('"finished": "old-time"', output)
+
     def latest_attempt(self):
         results = self.home / "Projects/wow/full-suite-results"
         return max(results.glob(f"{self.sha}-ptr-attempt-*.json"), key=lambda p: p.stat().st_mtime_ns)
