@@ -101,6 +101,7 @@ pub mod table_freeze;
 pub mod template_queries;
 pub mod timerunning;
 pub mod totems;
+pub(crate) mod tutorial_requests;
 pub mod ui_widget_container;
 #[cfg(any(feature = "client-era", feature = "client-anniversary"))]
 pub(crate) mod unit_health_knowledge;

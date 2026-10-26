@@ -35,6 +35,8 @@ pub struct SimState {
     pub events: EventQueue,
     pub scripts: ScriptRegistry,
     pub console_output: Vec<String>,
+    /// Requested legacy tutorial IDs in call order; no flag, event or display policy.
+    pub tutorial_requests: Vec<i32>,
     pub timers: VecDeque<PendingTimer>,
     pub rilua_timers: VecDeque<crate::lua_api::timer_layout::RiluaPendingTimer>,
     /// Diagnostic strings only; remains empty without handler timing opt-in.
@@ -481,6 +483,7 @@ pub struct SimState {
     pub action_ui_buttons: Vec<(u64, u32)>,
     pub cursor_item: Option<CursorInfo>,
     pub container_actions: crate::c_api::container_actions::ContainerActions,
+    pub item_upgrade_eligibility: crate::c_api::item_upgrade_eligibility::ItemUpgradeEligibility,
     pub loading_addon_index: Option<u16>,
     pub loading_addon_stack: Vec<u16>,
     pub executing_addon_index: Option<u16>,
@@ -558,6 +561,8 @@ pub struct SimState {
     pub can_use_premade_group: bool,
     /// Supplied Mists LFR service availability; None leaves native policy unknown.
     pub lfr_availability: Option<bool>,
+    /// Supplied Mists scenario eligibility and failure reason; None leaves policy unknown.
+    pub scenario_finder_availability: Option<(bool, String)>,
     pub lfg_category_info: std::collections::HashMap<i32, LfgCategoryInfo>,
     pub lfg_active_categories: std::collections::HashSet<i32>,
     pub lfg_queued_dungeons: std::collections::HashMap<i32, std::collections::BTreeSet<i32>>,
@@ -628,6 +633,8 @@ pub struct SimState {
     pub loot_frame_open: bool,
     pub guild_registrar_open: bool,
     pub pet_stables_open: bool,
+    /// Supplied modern observations; None does not invent native initial membership.
+    pub stable_active_pets: Option<Vec<crate::c_api::c_stable_info::active_list::PetInfo>>,
     #[cfg(any(feature = "retail-12-0-0", feature = "client-wowforever"))]
     pub allow_recent_allies_see_location: bool,
     #[cfg(feature = "client-wowforever")]

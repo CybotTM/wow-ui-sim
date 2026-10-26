@@ -247,6 +247,7 @@ fn print_blizzard_summary(elapsed: std::time::Duration, t: &LoadTiming) {
 
 /// Scan, load, and register third-party addons; print summary.
 pub fn load_third_party_addons(
+    addon_paths: &[PathBuf],
     skip_addons: bool,
     is_test: bool,
     env: &WowLuaEnv,
@@ -259,12 +260,7 @@ pub fn load_third_party_addons(
     }
 
     let exclude = if is_test { &[][..] } else { TEST_ADDONS };
-    let addon_paths = wow_ui_sim::paths::default_addons_paths();
-    let mut addons = scan_addon_paths(&addon_paths, exclude, screen);
-    if is_test {
-        let test_addons_path = PathBuf::from(TEST_ADDONS_PATH);
-        addons.extend(scan_addons(&test_addons_path, &[], screen));
-    }
+    let mut addons = scan_addon_paths(addon_paths, exclude, screen);
     wow_ui_sim::loader::sort_addons_by_dependencies(&mut addons);
     if skip_addons {
         addons.retain(|(name, _)| TEST_ADDONS.iter().any(|t| t == name));

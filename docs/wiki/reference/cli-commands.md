@@ -25,7 +25,13 @@ Run Lua-level tests from `Interface/AddOns/<addon>/tests/`. For internal logic, 
 
 ```bash
 wow-sim --no-addons --no-saved-vars run-tests MyAddon
+wow-sim --addons-path /tmp/test-addons run-tests MyAddon
 ```
+
+Use [exclusive addon roots](../../../README.md#exclusive-addon-test-runs) to
+prevent live addons from entering a test run. The guide covers repeated CLI
+roots, the environment-only mode for existing scripts, bundled TestFramework,
+and Docker/Action usage. See the [selection contract](../../specs/exclusive-addon-paths.md).
 
 ### `self-test`
 
@@ -127,6 +133,7 @@ Host noise: this machine mixes Zen 5 (CPUs 0-3, 12-15, 5.16 GHz) and Zen 5c (3.2
 | Flag | Effect |
 |------|--------|
 | `--no-addons` | Skip third-party addons |
+| `--addons-path DIR` | Exclusive third-party root; repeat for multiple roots |
 | `--no-saved-vars` | Skip WTF SavedVariables (~18% of load time) |
 | `--delay <ms>` | Delay after startup events (dump-tree/screenshot) |
 | `--exec-lua "code"` | Execute Lua after startup; prefix with `@` to load file |

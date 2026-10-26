@@ -82,7 +82,12 @@ pub(super) fn add_bag_item(state: &mut LuaState) -> LuaResult<u32> {
     let slot = i32::from_stack(state, 2)?;
     let item_id = u32::from_stack(state, 3)?;
     let stack = Option::<i32>::from_stack(state, 4)?;
-    borrow_state_mut(state)?.bag_items.insert(
+    let mut sim = borrow_state_mut(state)?;
+    crate::c_api::item_upgrade_eligibility::discard_location(
+        &mut sim,
+        crate::c_api::item_upgrade_eligibility::ItemSlot::Bag(bag, slot),
+    );
+    sim.bag_items.insert(
         (bag, slot),
         BagItem {
             item_id,
@@ -96,12 +101,19 @@ pub(super) fn add_bag_item(state: &mut LuaState) -> LuaResult<u32> {
 pub(super) fn remove_bag_item(state: &mut LuaState) -> LuaResult<u32> {
     let bag = i32::from_stack(state, 1)?;
     let slot = i32::from_stack(state, 2)?;
-    borrow_state_mut(state)?.bag_items.remove(&(bag, slot));
+    let mut sim = borrow_state_mut(state)?;
+    crate::c_api::item_upgrade_eligibility::discard_location(
+        &mut sim,
+        crate::c_api::item_upgrade_eligibility::ItemSlot::Bag(bag, slot),
+    );
+    sim.bag_items.remove(&(bag, slot));
     Ok(0)
 }
 
 pub(super) fn clear_bags(state: &mut LuaState) -> LuaResult<u32> {
-    borrow_state_mut(state)?.bag_items.clear();
+    let mut sim = borrow_state_mut(state)?;
+    crate::c_api::item_upgrade_eligibility::discard_bags(&mut sim);
+    sim.bag_items.clear();
     Ok(0)
 }
 

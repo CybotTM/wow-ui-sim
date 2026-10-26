@@ -97,6 +97,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     let builder = register_world(builder)?;
     let builder = register_collections_pvp(builder)?;
     let builder = register_inventory_misc(builder)?;
+    let builder = crate::c_api::item_upgrade_eligibility::register_admin(builder)?;
     let builder = builder
         .set_function(
             "AddLossOfControl",
@@ -110,6 +111,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
         "SetHousingCatalogVariantStoredCount",
         crate::c_api::c_housing::catalog::set_variant_stored_count,
     )?;
+    let builder = crate::c_api::c_stable_info::active_list::register_admin(builder)?;
     let admin_val = builder.build();
 
     LuaApiMut::set_global_val(lua, "A_Admin", admin_val)?;

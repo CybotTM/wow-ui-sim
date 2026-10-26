@@ -1,5 +1,7 @@
 mod addon_loading;
 mod cache_texture;
+#[cfg(test)]
+mod exclusive_path_tests;
 mod exec_lua;
 #[cfg(feature = "gui")]
 mod gui_commands;
@@ -30,6 +32,10 @@ struct Args {
     /// Skip loading third-party addons
     #[arg(long)]
     no_addons: bool,
+
+    /// Load third-party addons only from these roots (repeatable; replaces default discovery)
+    #[arg(long, value_name = "DIR")]
+    addons_path: Vec<PathBuf>,
 
     /// Show debug borders and anchor points on all elements
     #[arg(long)]
@@ -174,6 +180,16 @@ impl Args {
         )
     }
 
+    fn read_addon_paths(&self) -> Vec<PathBuf> {
+        let mut paths = wow_ui_sim::paths::find_addons_paths(&self.addons_path);
+        let exclusive =
+            !self.addons_path.is_empty() || wow_ui_sim::paths::exclusive_addons_path_enabled();
+        if self.is_test_command() && !exclusive {
+            paths.push(PathBuf::from(addon_loading::TEST_ADDONS_PATH));
+        }
+        paths
+    }
+
     fn skip_addons(&self) -> bool {
         self.no_addons
             || std::env::var("WOW_SIM_NO_ADDONS")
@@ -314,10 +330,7 @@ fn init_environment(
         let mut state = env.state().borrow_mut();
         let mut addon_base_paths =
             vec![runtime_blizzard_ui_addons_path_with_setup().map_err(startup_blizzard_ui_help)?];
-        addon_base_paths.extend(wow_ui_sim::paths::default_addons_paths());
-        if args.is_test_command() {
-            addon_base_paths.push(PathBuf::from("./Interface/TestAddOns"));
-        }
+        addon_base_paths.extend(args.read_addon_paths());
         state.addon_base_paths = addon_base_paths;
     }
     wow_ui_sim::xml::register_intrinsic_templates();

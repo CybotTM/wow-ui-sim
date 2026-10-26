@@ -92,6 +92,54 @@ docker run --rm \
   ghcr.io/osso/wow-ui-sim --no-saved-vars run-tests MyAddon
 ```
 
+## Exclusive addon test runs
+
+Default discovery combines `WOW_SIM_ADDONS_PATH`, local and bundled addon
+folders, and the selected WoW installation. Setting `WOW_SIM_ADDONS_PATH`
+alone does **not** isolate a test run.
+
+Use repeatable CLI roots to replace those candidates:
+
+```sh
+wow-sim --addons-path /tmp/test/AddOns --addons-path /tmp/dependencies/AddOns run-tests MyAddon
+```
+
+For scripts that already set `WOW_SIM_ADDONS_PATH`, use the environment-only
+mode. No script change is needed:
+
+```sh
+WOW_SIM_ADDONS_PATH_EXCLUSIVE=1 WOW_SIM_ADDONS_PATH=/tmp/test/AddOns wow-sim run-tests MyAddon
+# A script that sets WOW_SIM_ADDONS_PATH internally:
+WOW_SIM_ADDONS_PATH_EXCLUSIVE=1 WOW_SIM_BIN=/path/to/wow-sim ./run-tests.sh
+```
+
+`true` also enables exclusive mode; `0`/`false` leave default discovery active.
+CLI roots take precedence over environment selection. Each CLI value is one
+addon root, not an individual addon folder. Use absolute paths: the simulator
+changes its working directory to the executable directory before loading.
+Missing roots are omitted; an empty exclusive selection does not restore the
+default candidates.
+
+Blizzard UI still loads from its profile cache. `run-tests` finds the bundled
+TestFramework explicitly, without loading other bundled addons. Exclusive mode
+also restricts test-file lookup and `C_AddOns.LoadAddOn`; it does not search
+ambient `Interface/TestAddOns`. It is not a filesystem or Lua sandbox.
+
+### GitHub Action and Docker
+
+The [composite action](action.yml) retains its existing default discovery.
+For an exclusive Docker run, mount the addon and its dependencies under a
+dedicated root, then pass that root to the image:
+
+```sh
+docker run --rm -v ./test-addons:/test-addons \
+  ghcr.io/osso/wow-ui-sim --addons-path /test-addons run-tests MyAddon
+```
+
+The root must contain `MyAddon/MyAddon.toc` and all required addon dependencies.
+TestFramework does not need to be copied into that root. See the
+[selection contract](docs/specs/exclusive-addon-paths.md).
+
 ## Utility binary builds
 
 Integration tests build `wow-sim` only unless utility features are requested.

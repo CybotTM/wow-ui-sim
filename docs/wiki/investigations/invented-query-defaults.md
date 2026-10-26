@@ -1,6 +1,20 @@
 # Invented query defaults
 
-The first audit batch separates finite filter bounds from environment-local inventories. A callable query or a seeded demonstration row is not evidence of a native default. The Mists tab and RAF version producers now use empty-by-default supplied catalogs. Original-consumer producer-only RED/GREEN, four stock comparisons, formatting and all seven zero-warning all-target checks pass. The preserved old Mists storage flow has a separately reproduced pre-existing tutorial failure.
+The first audit batch separates finite filter bounds from environment-local inventories. A callable query or a seeded demonstration row is not evidence of a native default. The Mists tab and RAF version producers now use empty-by-default supplied catalogs. Original-consumer producer-only RED/GREEN, four stock comparisons, formatting and all seven zero-warning all-target checks pass. The preserved old Mists storage flow now advances beyond the tutorial call after the bounded recorder follow-up below; its collected-error gate still fails at a separate engraving boundary.
+
+## Legacy tutorial request boundary
+
+Follow-up contract: [legacy tutorial requests](../../specs/legacy-tutorial-requests.md). The old Mists storage-flow test is preserved byte-for-byte. Producer-absent scaffold c906cd025 fails at original `Blizzard_UIPanels_Game/Classic/ContainerFrame_Shared.lua:976`, before its guild-bank assertions.
+
+Pinned Mists/Era/Anniversary selected consumers are Classic ContainerFrame_Shared:976 (authenticator ID51, defined at line32), Classic QuestFrame:441/445 (2/10), Classic WorldFrame:68/76 (4/57), Classic MainMenuBarBagButtons:220/223 (59/58) and Classic MainMenuBar:74 (50). Wrath QuestMapFrame:204/326/330 (11/2/10) is additionally selected on Mists, but excluded on Era/Anniversary. Mainline MainMenuBarBagButtons:283/285 exists in those caches but is not selected. The old Wrath cache instead calls from FrameXML/MainMenuBarBagButtons:162/165 (59/58) and InterfaceOptionsPanels.xml:3683–3686 (42/2/3/1).
+
+Every call is a standalone statement with one numeric identifier. None uses results. No pinned tree defines the global. Mists `Blizzard_FrameXML_Mists.toc:36–37` already selects Classic TutorialFrame Lua/XML; it defines the event listener, not TriggerTutorial. Generated TutorialDocumentation has an empty Functions table and separately declares TUTORIAL_TRIGGER with tutorialIndex/forceShow. This does not establish native event admission or flag/display policy.
+
+Native commit 447c7600d records requests in environment-local state and publishes only on those four profiles. It does not infer event, flag, UI or persistence behavior. Ordered repeated requests, independent environments and raw publication pass on all four affected profiles; their producer-absent siblings fail. Publication alone is a surface check, not semantic proof.
+
+The byte-identical original Mists storage-flow test advances beyond line976 and its whole Lua body completes the bank/guild-bank assertions. It still exits101 because callback/startup errors fail its original process-status assertion. The next newly exposed callback boundary is missing `C_Engraving` at ContainerFrame_Shared:315 (five raw/five wrapped occurrences), not a tutorial defect. `src/lua_errors.rs:71–72` reports every exec-lua body error; GREEN has none. This is original-boundary advancement, not a passing full-flow claim.
+
+Exact raw stock maps remain byte-identical: Mists 6/12, Era 0/0, Anniversary 0/0, Wrath 0/0; no added keys or masking predecessors. All seven full-feature all-target checks on 447c7600d have zero JSON/plain compiler warnings. Formatting and changed-line readability pass. Retail/PTR/Forever publication is excluded by the inspected runtime match and compiled by those checks; no runtime absence-test execution is claimed for them.
 
 ## Transmog: unresolved filter bound, unchanged
 
@@ -49,7 +63,7 @@ Native producer code is `1b37aed01`; Mists fixture `85871611f` preserves the pri
 | Forever | Same selected original event with profile-pinned UI | 26/26 → 26/26 | All-target, zero warnings |
 | Wrath, Era, Anniversary | No selected RAF addon and no changed bank-handler registration; no forced original-consumer claim | Not recaptured for these unconsumed queries | Each profile all-target, zero warnings |
 
-Every completed stock comparison has zero added/removed keys and zero occurrence-count changes; startup is not clean. The original Mists storage-flow test fails at missing `TriggerTutorial`, `Blizzard_UIPanels_Game/Classic/ContainerFrame_Shared.lua:976`, before the guild-bank assertions, on both base and GREEN. Its General tab is explicitly supplied and no old assertion is weakened. Fixing that separate producer is outside this batch.
+Every completed stock comparison has zero added/removed keys and zero occurrence-count changes; startup is not clean. In the original audit batch, the Mists storage-flow test fails at missing `TriggerTutorial`, `Blizzard_UIPanels_Game/Classic/ContainerFrame_Shared.lua:976`, before the guild-bank assertions, on both base and GREEN. Its General tab is explicitly supplied and no old assertion is weakened. The [bounded recorder follow-up](#legacy-tutorial-request-boundary) addresses that separate producer without changing this batch's assertions.
 
 The approved fresh RAF assertion changes `versions_len` from 1 to 0. Its explicit one-version sibling retains the old scalar/shape checks and adds supplied month/count assertions. No other old assertion changes. Empty defaults are simulator policy, not a claim about native server defaults; nonempty reward/recruit catalogs and enablement remain out of scope.
 
