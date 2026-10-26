@@ -30,10 +30,10 @@ fn load_original(enabled: bool) -> WowLuaEnv {
     let ui = blizzard_ui_dir();
     let env = new_blizzard_addon_env(&ui);
     env.state().borrow_mut().transmog_availability.enabled = Some(enabled);
-    env.state().borrow_mut().set_input_interface_style(InputInterfaceStyle::Gamepad);
     supply(&env, Some(&[23, 81]));
     crate::common::panel_fixtures::load_panel_addons(&env);
     load_blizzard_addon_closure_into_env(&env, &ui, &["Blizzard_PlayerSpells"], &[]);
+    env.state().borrow_mut().set_input_interface_style(InputInterfaceStyle::Gamepad);
     eprintln!("unfiltered load diagnostics: {:?}", env.state().borrow().lua_errors);
     env.exec(r#"
         local function original(fn, suffix, line)
