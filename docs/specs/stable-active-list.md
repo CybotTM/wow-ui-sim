@@ -44,7 +44,7 @@ The historical deferred `api_shape_stable_active_list.rs` is not restored. Its b
 
 ## Known gaps (current cycle)
 
-- [ ] Final Retail stock and seven-profile zero-warning checks remain pending. Retail/PTR lane selectors have producer-free RED and supplied-record GREEN; PTR stock is 134/154 before and after, with two prerequisite-only raw-key replacements individually traced.
+No open gates within the supplied active-list scope. Retail/PTR exact lane selectors have producer-free RED and supplied-record GREEN. Retail stock remains 8/10 without raw changes; PTR remains 134/154 with only the two individually traced prerequisite replacements. All seven canonical all-target checks pass with zero compiler warnings; formatting and changed-line readability pass.
 
 ## Out of scope
 

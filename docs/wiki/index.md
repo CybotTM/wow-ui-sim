@@ -1,6 +1,6 @@
 ## [2026-10-26] proof | Modern stable active-list observations
 
-[Original active-slot proof](investigations/consumer-selection-and-red-proof.md#supplied-modern-stable-active-list) links the [supplied-record contract](../specs/stable-active-list.md): Retail/PTR exact RED/GREEN, isolated supplied records and fresh snapshots. Five finite PTR constants replace two raw stock keys at unchanged134/154, with both additions traced. Historical whole-closure/full-Refresh obligations stay deferred; final Retail stock and seven-profile checks remain pending.
+[Original active-slot proof](investigations/consumer-selection-and-red-proof.md#supplied-modern-stable-active-list) links the [supplied-record contract](../specs/stable-active-list.md): Retail/PTR exact RED/GREEN, isolated supplied records and fresh snapshots. Five finite PTR constants replace two raw stock keys at unchanged 134/154, with both additions traced. Retail stock remains 8/10 without raw changes; all seven all-target checks have zero compiler warnings. Historical whole-closure/full-Refresh obligations stay deferred; PTR specialization OnLoad and secondary-pet queries are out of scope.
 
 ## [2026-10-26] proof | Complete PTR Edit Mode display-info
 

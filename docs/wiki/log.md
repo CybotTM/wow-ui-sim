@@ -1,6 +1,6 @@
 ## [2026-10-26] proof | Modern stable active-list observations
 
-[Original active-slot RED/GREEN](investigations/consumer-selection-and-red-proof.md#supplied-modern-stable-active-list) proves Retail/PTR supplied transitions, isolation and snapshots through original XML slots. The [contract](../specs/stable-active-list.md) records finite PTR prerequisite chains and the explicit historical deferral. PTR stock remains134/154 with a traced two-key replacement; final Retail stock and seven-profile checks remain pending.
+[Original active-slot RED/GREEN](investigations/consumer-selection-and-red-proof.md#supplied-modern-stable-active-list) proves Retail/PTR supplied transitions, isolation and snapshots through original XML slots. The [contract](../specs/stable-active-list.md) records finite PTR prerequisite chains and the explicit historical deferral. PTR stock remains 134/154 with a traced two-key replacement; Retail remains 8/10 without raw changes. All seven canonical all-target checks have zero compiler warnings, formatting/readability pass, and all 29 runtime payloads retain unchanged original CVar guards.
 
 ## [2026-10-26] proof | Complete PTR Edit Mode display-info
 
