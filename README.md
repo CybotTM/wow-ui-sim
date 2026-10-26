@@ -79,6 +79,13 @@ Use local while gaming on desktop. Raw Cargo stays local. See [native workflow, 
 ## Docker
 
 Published addon-test images and CI/release workflows remain separate from native development.
+Docker builds use `.cargo/config.ci.toml` for the default x86-64 CPU target;
+local builds keep `target-cpu=native` in `.cargo/config.toml`.
+Before publication, `.github/scripts/verify_docker_image.py IMAGE` checks
+`--version` and addon tests under QEMU's Nehalem CPU model as well as natively.
+It requires `qemu-user-static` (Ubuntu package); use `--qemu PATH` to select
+another static `qemu-x86_64` executable. Emulation runs offline with a read-only
+fixture and does not require privileged containers or host binfmt changes.
 
 ```bash
 # Run addon tests
