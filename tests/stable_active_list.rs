@@ -12,8 +12,7 @@ use wow_ui_sim::toc::TocFile;
 
 // Retail StableInfoDocumentation.lua:15–22,193–214; PTR 70493:19–26,215–241.
 // Neither declaration specifies native ordering, initial membership or an empty default.
-fn load_original_stable() -> WowLuaEnv {
-    let ui = blizzard_ui_dir();
+fn selected_stable_source(ui: &std::path::Path) -> &'static str {
     let path = find_toc_file(&ui.join("Blizzard_StableUI")).unwrap();
     let toc = TocFile::from_file(&path).unwrap();
     assert!(toc.allows_screen(ScreenKind::Game));
@@ -29,6 +28,12 @@ fn load_original_stable() -> WowLuaEnv {
             .any(|file| file.ends_with(suffix.split_once('/').unwrap().1))
     );
     eprintln!("selected StableUI: {} {:?}", path.display(), toc.files);
+    suffix
+}
+
+fn load_original_stable() -> WowLuaEnv {
+    let ui = blizzard_ui_dir();
+    let suffix = selected_stable_source(&ui);
     let env = new_blizzard_addon_env(&ui);
     wow_ui_sim::xml::register_intrinsic_templates();
     let loaded = load_blizzard_addon_closure_into_env(
@@ -44,7 +49,12 @@ fn load_original_stable() -> WowLuaEnv {
     );
     env.exec(&format!("expectedStableSource = {suffix:?}"))
         .unwrap();
-    env.exec(r#"
+    env.exec(ORIGINAL_SLOT_OBSERVER)
+        .expect("original selected StableUI XML and Lua identity");
+    env
+}
+
+const ORIGINAL_SLOT_OBSERVER: &str = r#"
         assert(StableFrame and StableFrame.ActivePetList, 'original XML list')
         local list = StableFrame.ActivePetList
         assert(list.Refresh == StableActivePetListMixin.Refresh, 'original Refresh identity')
@@ -115,9 +125,7 @@ fn load_original_stable() -> WowLuaEnv {
             -- The separate secondary-pet query is not implemented by this lane.
             assert(not ok and tostring(reason):find("GetStablePetInfo", 1, true), tostring(reason))
         end
-    "#).expect("original selected StableUI XML and Lua identity");
-    env
-}
+    "#;
 
 #[test]
 fn original_active_list_tracks_supplied_records_and_isolation() {
