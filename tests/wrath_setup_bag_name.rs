@@ -22,7 +22,8 @@ fn original_container_frame_displays_changing_bag_name() {
         ToggleBag(1)
         local frame = _G["ContainerFrame" .. IsBagOpen(1)]
         assert(_G[frame:GetName() .. "Name"]:GetText() == "Travel Pack")
-        assert(_G[frame:GetName() .. "Portrait"]:GetTexture() == 134414)
+        assert(_G[frame:GetName() .. "Portrait"]:GetTexture():lower() ==
+            "interface\\icons\\inv_misc_rune_01", "first supplied item icon")
         CloseAllBags()
         "#,
     )
@@ -33,7 +34,8 @@ fn original_container_frame_displays_changing_bag_name() {
         ToggleBag(2)
         local frame = _G["ContainerFrame" .. IsBagOpen(2)]
         assert(_G[frame:GetName() .. "Name"]:GetText() == "Herb Satchel")
-        assert(_G[frame:GetName() .. "Portrait"]:GetTexture() == 960145)
+        assert(_G[frame:GetName() .. "Portrait"]:GetTexture():lower() ==
+            "interface\\icons\\inv_leather_draenordungeon_c_01boot", "second supplied item icon")
         "#,
     )
     .expect("original Wrath container must display the changed bag name");
