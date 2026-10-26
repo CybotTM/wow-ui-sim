@@ -12,6 +12,13 @@ fn original_guild_bank_tabs_follow_empty_supplied_empty_catalog() {
     let ui = blizzard_ui_dir();
     let env = new_blizzard_addon_env(&ui);
     env.state().borrow_mut().world.guild_name = None;
+    for (name, toc) in wow_ui_sim::loader::discover_blizzard_addons_for_screen(
+        &ui,
+        wow_ui_sim::screen::ScreenKind::Game,
+    ) {
+        wow_ui_sim::loader::load_addon(&env.loader_env(), &toc)
+            .unwrap_or_else(|error| panic!("load {name}: {error}"));
+    }
     let loaded = load_blizzard_addon_closure_into_env(&env, &ui, &["Blizzard_GuildBankUI"], &[]);
     assert!(loaded.iter().any(|name| name == "Blizzard_GuildBankUI"));
     env.exec(r##"
