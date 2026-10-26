@@ -1,3 +1,7 @@
+## [2026-10-25] proof | PTR I4 batch2 landing
+
+[Eight exact consumer pairs](investigations/patch-12-1-7-api-audit.md#batch2-landing-proof) pass GREEN and fail producer-only RED at original Blizzard lines. Stock296/410→272/378 retains ten individually traced successor keys. Retail/PTR all-target checks meet zero/known-three warning limits; formatting and Retail absence pass. Preset and aggregate tests remain outside the normal suite. Slot1 is released; the current merge-tree has only a wiki-log conflict for main.
+
 ## [2026-10-25] implementation | PTR supplied WoWHack mode
 
 [Original consumer REDs](investigations/patch-12-1-7-api-audit.md#supplied-wowhack-mode) reach MicroMenu207 and UIErrorsFrame12. The [contract](../specs/ptr-i4-game-rules.md) uses existing active-mode state and enum data; both exact consumer GREENs pass. Final merged stock/check acceptance remains pending.

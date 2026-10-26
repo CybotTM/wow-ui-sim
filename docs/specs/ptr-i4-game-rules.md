@@ -4,10 +4,10 @@ This bounded PTR 12.1.7.70493 packet exposes six GameRules queries/mutations fro
 
 ## What it must do
 
-- [ ] Publish `IsHardcoreActive`, `IsSelfFoundAllowed`, `IsSDHDToggleEnabled` and `AccountHasSDEnabled` only on PTR in this packet. Each returns exactly one boolean from its distinct supplied field. Initial false means no positive input was supplied, not a native account default.
+- [x] Publish `IsHardcoreActive`, `IsSelfFoundAllowed`, `IsSDHDToggleEnabled` and `AccountHasSDEnabled` only on PTR in this packet. Each returns exactly one boolean from its distinct supplied field. Initial false means no positive input was supplied, not a native account default.
 - [x] PTR `IsWoWHack` returns exactly one boolean, true only when existing supplied `active_game_mode` equals the existing `GameMode.WoWHack` enum declaration. Original MicroMenu OnLoad initializes mode-specific `addedButtons`; original UIErrorsFrame OnLoad enables energy errors and adjusts its anchor only in that mode. Independent environments do not share state.
 - [x] `SetSDHDToggleValue(setToSD, usageLocation)` updates supplied account SD selection and records the supplied origin, returning no values. The original Barbershop click mutates state before the additional return-arity assertion.
-- [ ] Original selected Barbershop, CharacterCreate and popup consumers react to changed supplied inputs. Retail publication remains unchanged.
+- [x] Original selected Barbershop, CharacterCreate and popup consumers react to changed supplied inputs. Retail publication remains unchanged.
 - [x] Publish RecentAlliesInteractionCategoryFilter and metadata exactly as pinned documentation declares. The original six labels and unknown-value result remain reachable. Publish the documented SdToggleUsageLocationUI argument enum and metadata without extrapolating values.
 
 ## How it works
@@ -27,7 +27,8 @@ This bounded PTR 12.1.7.70493 packet exposes six GameRules queries/mutations fro
 
 ## Known gaps (current cycle)
 
-- [ ] Final merged-source GREEN, producer-only RED sibling, stock comparison and Retail/PTR warning/format gates remain pending.
+- [x] Final merged-source GREEN and producer-only RED pass their respective exact eight-consumer boundaries with identical test bytes. Retail absence passes. The fresh stock comparison is 296→272 raw keys and 410→378 occurrences, with all ten added keys traced individually. Retail/PTR all-target checks meet zero/known-three warning limits; formatting passes.
+- [ ] Native capability, eligibility, restrictions and mode-selection policy remain unknown. Existing RecentAllies support-query, Edit Mode initialization and chat-docking gaps remain visible in stock startup.
 
 ## Out of scope
 
