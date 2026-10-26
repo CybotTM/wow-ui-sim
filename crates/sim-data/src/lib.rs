@@ -1,0 +1,31 @@
+//! Profile-independent generated catalogs, shared by all client builds.
+
+#[path = "../data/currencies.rs"]
+pub mod currencies;
+#[path = "../data/encounter_journal.rs"]
+pub mod encounter_journal_data;
+#[path = "../data/items.rs"]
+pub mod items;
+#[path = "../data/manifest_interface_data.rs"]
+pub mod manifest_interface_data;
+#[path = "../data/map_art.rs"]
+pub mod map_art;
+pub mod profession_item_overrides;
+#[path = "../data/quest_poi_blobs.rs"]
+pub mod quest_poi_blobs;
+#[path = "../data/quest_ui_map.rs"]
+pub mod quest_ui_map;
+#[path = "../data/spec_display_spells.rs"]
+pub mod spec_display_spells;
+#[path = "../data/specializations.rs"]
+pub mod specializations;
+#[path = "../data/spell_descriptions.rs"]
+pub mod spell_descriptions;
+#[path = "../data/spell_power.rs"]
+pub mod spell_power;
+#[path = "../data/spells.rs"]
+pub mod spells;
+#[path = "../data/traits.rs"]
+pub mod traits;
+#[path = "../data/zones.rs"]
+pub mod zones;

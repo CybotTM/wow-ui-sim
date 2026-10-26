@@ -1,7 +1,8 @@
 use super::csv_util::parse_csv_line;
+use super::csv_util::read_csv_records;
 use std::collections::HashMap;
 use std::fs::File;
-use std::io::{BufRead, BufReader, Write};
+use std::io::{BufReader, Write};
 use std::path::Path;
 
 const POWER_TYPE_NAMES: &[(&'static str, &str)] = &[
@@ -79,8 +80,7 @@ pub(super) fn load_spell_power(
     let reader = BufReader::new(file);
     let mut map: HashMap<u32, Vec<SpellPowerRow>> = HashMap::new();
 
-    for (i, line) in reader.lines().enumerate() {
-        let line = line?;
+    for (i, line) in read_csv_records(reader)?.into_iter().enumerate() {
         if i == 0 {
             continue;
         }
@@ -111,7 +111,7 @@ pub(super) fn load_spell_power(
     Ok(map)
 }
 
-/// Generate data/spell_power.rs with static arrays + phf map.
+/// Generate crates/sim-data/data/spell_power.rs with static arrays + phf map.
 pub(super) fn write_spell_power(
     out: &mut File,
     spell_power: &HashMap<u32, Vec<SpellPowerRow>>,

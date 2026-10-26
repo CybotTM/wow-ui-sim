@@ -77,14 +77,12 @@ fn unit_class_from_guid(state: &mut LuaState) -> LuaResult<u32> {
     Ok(3)
 }
 
-#[cfg(feature = "client-wowforever")]
 fn regional_unique_names_enabled(state: &mut LuaState) -> LuaResult<u32> {
     let enabled = borrow_state(state)?.player.regional_unique_names_enabled;
     state.push(Val::Bool(enabled));
     Ok(1)
 }
 
-#[cfg(feature = "client-wowforever")]
 fn can_port_graveyard(state: &mut LuaState) -> LuaResult<u32> {
     let available = borrow_state(state)?.player.can_port_graveyard;
     state.push(Val::Bool(available));
@@ -92,14 +90,18 @@ fn can_port_graveyard(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
-    #[cfg(feature = "client-wowforever")]
-    LuaApiMut::register_function(lua, "CanPortGraveyard", can_port_graveyard)?;
-    #[cfg(feature = "client-wowforever")]
-    LuaApiMut::register_function(
-        lua,
-        "RegionalUniqueNamesEnabled",
-        regional_unique_names_enabled,
-    )?;
+    if matches!(
+        crate::client_profile::ACTIVE,
+        crate::client_profile::ClientProfile::Ptr
+            | crate::client_profile::ClientProfile::WowForever
+    ) {
+        LuaApiMut::register_function(lua, "CanPortGraveyard", can_port_graveyard)?;
+        LuaApiMut::register_function(
+            lua,
+            "RegionalUniqueNamesEnabled",
+            regional_unique_names_enabled,
+        )?;
+    }
     LuaApiMut::register_function(lua, "GetPlayerInfoByGUID", get_player_info_by_guid)?;
     #[cfg(feature = "player-cast-durations")]
     LuaApiMut::register_function(lua, "UnitNameFromGUID", unit_name_from_guid)?;

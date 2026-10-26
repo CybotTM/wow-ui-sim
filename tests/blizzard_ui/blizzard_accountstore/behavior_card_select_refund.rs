@@ -68,7 +68,7 @@
 //! 4. **Confirmation format mismatch (refund-specific).** The format
 //!    selected at line 177 is `ACCOUNT_STORE_REFUND_CONFIRMATION_FORMAT`
 //!    when isRefundable is true (the `and` branch of the ternary). The
-//!    actual format string at `data/global_strings.rs:22797` is
+//!    actual format string at `crates/sim-data-profile/data/global_strings.rs:22797` is
 //!    `"Are you sure you want to refund %s for %s?"`. The substring
 //!    "want to refund" is unique to the refund format (the purchase
 //!    format at line 22780 is "Are you sure you want to purchase %s for
@@ -190,7 +190,7 @@ fn select_card_refund_path_invokes_static_popup_show_generic_confirmation_with_r
             captured_text_contains_refund_keyword,
             "Expected the captured confirmation text to contain \"want to refund\" — the unique \
              substring of `ACCOUNT_STORE_REFUND_CONFIRMATION_FORMAT` (\"Are you sure you want to \
-             refund %s for %s?\" per `data/global_strings.rs:22797`). The body at line 177 selects \
+             refund %s for %s?\" per `crates/sim-data-profile/data/global_strings.rs:22797`). The body at line 177 selects \
              the refund format only when `isRefundable` is true (line 176: \
              `itemInfo.status == Enum.AccountStoreItemStatus.Refundable`). A reading without \
              \"want to refund\" means either (a) the format-selection logic took the purchase arm \

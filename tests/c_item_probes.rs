@@ -1,5 +1,5 @@
 //! Tests for `C_Item` probe methods backed by the static `ITEM_DB`
-//! (seeded item-db table in `data/items.rs`):
+//! (seeded item-db table in `crates/sim-data/data/items.rs`):
 //!
 //! - `C_Item.GetItemIconByID(itemID)` — returns the icon fileDataID
 //!   or the generic-placeholder `134400` when unknown.
@@ -18,7 +18,7 @@ fn env() -> WowLuaEnv {
     WowLuaEnv::new().expect("Failed to create Lua environment")
 }
 
-/// An item id known to be present in `data/items.rs` (Aqirite, seeded
+/// An item id known to be present in `crates/sim-data/data/items.rs` (Aqirite, seeded
 /// at the top of the db).
 const KNOWN_ITEM_ID: u32 = 210935;
 

@@ -3,7 +3,7 @@
 //! Reads from ~/Projects/wow/data/:
 //!   - CurrencyTypes.csv
 //!
-//! Generates: data/currencies.rs
+//! Generates: crates/sim-data/data/currencies.rs
 
 use super::csv_util::{escape_str, parse_csv_line, read_csv_records, wow_data_dir};
 use std::fs::File;
@@ -19,7 +19,7 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     let records = read_csv_records(BufReader::new(file))?;
 
     std::fs::create_dir_all("data")?;
-    let output_path = Path::new("data/currencies.rs");
+    let output_path = Path::new("crates/sim-data/data/currencies.rs");
     let mut out = File::create(output_path)?;
 
     write_header(&mut out)?;

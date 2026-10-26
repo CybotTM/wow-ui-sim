@@ -333,6 +333,7 @@ fn custom_seeded_pet_reflects_in_get_pet_info() {
         let mut sim = env.state().borrow_mut();
         sim.pet_battles.player_pets = vec![PetBattlePet {
             name: "Lil' Ragnaros".into(),
+            display_id: None,
             species_id: 117,
             level: 25,
             max_health: 1725,

@@ -46412,7 +46412,7 @@
         },
         {
           "path": "tests/panel_harness_runtime.rs",
-          "line": 580,
+          "line": 584,
           "symbol": "EncounterJournal_DisplayInstance",
           "proof": "LEXICAL_ONLY"
         }
@@ -101394,7 +101394,7 @@
         },
         {
           "path": "tests/panel_harness_runtime.rs",
-          "line": 525,
+          "line": 527,
           "symbol": "ToggleEncounterJournal",
           "proof": "LEXICAL_ONLY"
         },

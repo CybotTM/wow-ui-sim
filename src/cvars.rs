@@ -81,6 +81,14 @@ impl CVarStorage {
         }
     }
 
+    /// Isolate persisted subsystem models by this store's identity and client profile.
+    pub(crate) fn model_storage_dir(&self) -> PathBuf {
+        self.storage_path
+            .with_extension("")
+            .join(crate::client_profile::ACTIVE.cache_subdir())
+            .join("SavedVariables")
+    }
+
     /// Get a CVar value (override takes precedence over default).
     pub fn get(&self, name: &str) -> Option<String> {
         let key = name.to_lowercase();

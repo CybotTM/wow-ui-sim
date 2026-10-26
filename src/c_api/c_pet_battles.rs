@@ -1,7 +1,7 @@
 //! State-backed `C_PetBattles` identity and pet-type probes.
 
 use crate::c_api::ensure_namespace;
-use crate::lua_api::methods::borrow_state;
+use crate::lua_api::methods::{borrow_state, create_string};
 use crate::lua_bridge::{FromStack, IntoStack, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -18,8 +18,71 @@ pub(crate) fn register_c_pet_battles_surface(state: &mut LuaState) -> LuaResult<
             | crate::client_profile::ClientProfile::WowForever
     ) {
         table_set_rust_fn_static(state, namespace, "GetIcon", get_icon)?;
+        table_set_rust_fn_static(state, namespace, "GetName", get_name)?;
+    }
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Mists {
+        table_set_rust_fn_static(state, namespace, "GetDisplayID", get_display_id)?;
     }
     Ok(())
+}
+
+fn get_display_id(state: &mut LuaState) -> LuaResult<u32> {
+    let owner = i32::from_stack(state, 1)?;
+    let slot = i32::from_stack(state, 2)?;
+    let index = slot
+        .checked_sub(1)
+        .and_then(|slot| usize::try_from(slot).ok());
+    let display_id = {
+        let sim = borrow_state(state)?;
+        let pets = match owner {
+            1 => Some(&sim.pet_battles.player_pets),
+            2 => Some(&sim.pet_battles.enemy_pets),
+            _ => None,
+        };
+        pets.and_then(|pets| index.and_then(|index| pets.get(index)))
+            .and_then(|pet| pet.display_id)
+    };
+    // One nil represents unknown simulator input, not verified native return arity.
+    state.push(display_id.map_or(Val::Nil, |id| Val::Num(f64::from(id))));
+    Ok(1)
+}
+
+fn get_name(state: &mut LuaState) -> LuaResult<u32> {
+    let owner = i32::from_stack(state, 1)?;
+    let slot = i32::from_stack(state, 2)?;
+    let Some((name, species_name)) = lookup_names(state, owner, slot)? else {
+        // Documented MayReturnNothing representation, not native invalid-input parity.
+        return Ok(0);
+    };
+    let name = create_string(state, &name);
+    let species_name = create_string(state, &species_name);
+    state.push(name);
+    state.push(species_name);
+    Ok(2)
+}
+
+fn lookup_names(state: &LuaState, owner: i32, slot: i32) -> LuaResult<Option<(String, String)>> {
+    let index = slot
+        .checked_sub(1)
+        .and_then(|slot| usize::try_from(slot).ok());
+    let sim = borrow_state(state)?;
+    let pets = match owner {
+        1 => Some(&sim.pet_battles.player_pets),
+        2 => Some(&sim.pet_battles.enemy_pets),
+        _ => None,
+    };
+    let Some(pet) = pets.and_then(|pets| index.and_then(|index| pets.get(index))) else {
+        return Ok(None);
+    };
+    // Battle names are already effective display names, independent of journal aliases.
+    // Missing species metadata is a simulator input gap; never synthesize a species name.
+    let species = u32::try_from(pet.species_id).ok();
+    Ok(sim
+        .world
+        .pets
+        .iter()
+        .find(|entry| Some(entry.species_id) == species)
+        .map(|entry| (pet.name.clone(), entry.name.clone())))
 }
 
 fn get_icon(state: &mut LuaState) -> LuaResult<u32> {

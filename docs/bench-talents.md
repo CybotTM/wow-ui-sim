@@ -15,10 +15,10 @@ planned regression gate for Phase 33; the gated path should use ordinary
 
 ```bash
 # Build with frame pointers for profiling
-RUSTFLAGS="-C force-frame-pointers=yes" cargo build --release --bin bench_talents
+RUSTFLAGS="-C force-frame-pointers=yes" cargo build --release --bin bench_talents --features tools
 
 # Quick timing
-cargo run --release --bin bench_talents
+cargo run --release --bin bench_talents --features tools
 
 # Flamegraph (frame pointers, not DWARF — DWARF chokes addr2line on this binary)
 perf record -F 997 --call-graph fp -g -o /tmp/perf.data -- target/release/bench_talents

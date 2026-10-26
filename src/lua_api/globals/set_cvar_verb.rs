@@ -214,7 +214,9 @@ fn push_cvar_string(state: &mut LuaState, source: CvarStringSource) -> LuaResult
         return Ok(1);
     };
     let value = match source {
-        CvarStringSource::Current => borrow_state(state)?.cvars.get(&name),
+        CvarStringSource::Current => {
+            crate::c_api::forever_startup::read_current_cvar(state, &name)?
+        }
         CvarStringSource::Default => borrow_state(state)?.cvars.get_default(&name),
     };
     push_optional_string(state, value);
@@ -227,7 +229,8 @@ fn get_cvar_bool(state: &mut LuaState) -> LuaResult<u32> {
         state.push(Val::Bool(false));
         return Ok(1);
     };
-    let value = borrow_state(state)?.cvars.get_bool(&name);
+    let current = crate::c_api::forever_startup::read_current_cvar(state, &name)?;
+    let value = current.as_deref() == Some("1");
     state.push(Val::Bool(value));
     Ok(1)
 }

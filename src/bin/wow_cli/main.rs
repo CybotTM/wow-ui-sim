@@ -11,7 +11,7 @@
 //!   wow-cli screenshot -o out.webp   # Render screenshot via running server
 //!   wow-cli extract-textures         # Extract textures to WebP (standalone)
 //!   wow-cli convert-texture foo.BLP  # Convert single BLP to WebP (standalone)
-//!   wow-cli generate spells          # Regenerate data/spells.rs from CSVs
+//!   wow-cli generate spells          # Regenerate crates/sim-data/data/spells.rs from CSVs
 //!   wow-cli startup-intern-stats      # Measure startup intern-string churn
 //!   wow-cli global-slot-coverage      # Report Track 3 slot coverage after bootstrap
 
@@ -262,27 +262,27 @@ struct AuditApiArgs {
 enum GenerateTarget {
     /// Compare pinned generated Blizzard API documentation snapshots
     PatchApiDocs(gen_patch_api_docs::Options),
-    /// Generate data/spells.rs from SpellName/Spell/SpellMisc CSVs
+    /// Generate crates/sim-data/data/spells.rs from SpellName/Spell/SpellMisc CSVs
     Spells,
-    /// Generate data/items.rs from ItemSparse CSV
+    /// Generate crates/sim-data/data/items.rs from ItemSparse CSV
     Items,
-    /// Generate data/atlas.rs from UiTextureAtlas CSVs
+    /// Generate crates/sim-data-profile/data/atlas.rs from UiTextureAtlas CSVs
     Atlas(gen_atlas::Options),
-    /// Generate data/currencies.rs from CurrencyTypes CSV
+    /// Generate crates/sim-data/data/currencies.rs from CurrencyTypes CSV
     Currencies,
-    /// Generate data/global_strings.rs from GlobalStrings CSV
+    /// Generate crates/sim-data-profile/data/global_strings.rs from GlobalStrings CSV
     GlobalStrings,
-    /// Generate data/manifest_interface_data.rs from ManifestInterfaceData CSV
+    /// Generate crates/sim-data/data/manifest_interface_data.rs from ManifestInterfaceData CSV
     Manifest,
-    /// Generate data/traits.rs from Trait* CSVs
+    /// Generate crates/sim-data/data/traits.rs from Trait* CSVs
     Traits,
-    /// Generate data/zones.rs from AreaTable CSV
+    /// Generate crates/sim-data/data/zones.rs from AreaTable CSV
     Zones,
-    /// Generate data/map_art.rs from UiMap* DB2 CSVs
+    /// Generate crates/sim-data/data/map_art.rs from UiMap* DB2 CSVs
     MapArt,
-    /// Generate data/quest_ui_map.rs from QuestPOIBlob CSV
+    /// Generate crates/sim-data/data/quest_ui_map.rs from QuestPOIBlob CSV
     QuestPoi,
-    /// Generate data/encounter_journal.rs from Journal* CSVs
+    /// Generate crates/sim-data/data/encounter_journal.rs from Journal* CSVs
     EncounterJournal,
 }
 

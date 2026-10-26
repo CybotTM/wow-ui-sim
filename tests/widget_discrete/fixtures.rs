@@ -14,7 +14,7 @@ pub(super) fn supplied_record() -> DiscreteProgressStepsRecord {
         num_steps: 4.0,
         tooltip_loc: 3,
         widget_size_setting: 140.0,
-        // Catalog metadata in data/atlas.rs; runtime application still unreached.
+        // Catalog metadata in crates/sim-data-profile/data/atlas.rs; runtime application still unreached.
         texture_kit: "eyeofthejailer".into(),
         frame_texture_kit: String::new(),
         has_timer: false,

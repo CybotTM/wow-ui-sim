@@ -1,0 +1,37 @@
+//! Profile-selected generated catalogs. Selection is forwarded by wow-ui-sim.
+
+#[cfg_attr(feature = "client-wowforever", path = "../data/atlas_wowforever.rs")]
+#[cfg_attr(not(feature = "client-wowforever"), path = "../data/atlas.rs")]
+pub mod atlas_data;
+#[cfg_attr(
+    feature = "client-wowforever",
+    path = "../data/atlas_elements_wowforever.rs"
+)]
+#[cfg_attr(not(feature = "client-wowforever"), path = "../data/atlas_elements.rs")]
+pub mod atlas_elements;
+#[cfg_attr(
+    feature = "client-wowforever",
+    path = "../data/global_strings_wowforever.rs"
+)]
+#[cfg_attr(
+    all(feature = "profile-retail", feature = "retail-12-1-5"),
+    path = "../data/global_strings_retail.rs"
+)]
+#[cfg_attr(
+    any(feature = "client-era", feature = "client-anniversary"),
+    path = "../data/global_strings_classic.rs"
+)]
+#[cfg_attr(
+    not(any(
+        feature = "client-wowforever",
+        all(feature = "profile-retail", feature = "retail-12-1-5"),
+        feature = "client-era",
+        feature = "client-anniversary"
+    )),
+    path = "../data/global_strings.rs"
+)]
+pub mod global_strings;
+
+#[cfg(feature = "aura-containers")]
+#[path = "../data/spell_aura_secrecy.rs"]
+pub mod spell_aura_secrecy;

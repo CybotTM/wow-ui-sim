@@ -105,7 +105,7 @@ cleanup() {
 }
 
 build_binaries() {
-    cargo build --bin wow-sim --bin wow-cli --no-default-features --features "sound,gui,casc,client-mists"
+    cargo build --bin wow-sim --bin wow-cli --no-default-features --features "sound,gui,casc,client-mists,tools"
 }
 
 start_gui() {
