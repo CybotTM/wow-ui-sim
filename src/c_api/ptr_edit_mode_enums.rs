@@ -1,7 +1,7 @@
 //! PTR 12.1.7.70493 Edit Mode declarations, not Lua initialization replacements.
 
 use crate::client_profile::{ACTIVE, ClientProfile};
-use crate::lua_api::methods::{create_table, table_set};
+use crate::lua_api::methods::{create_table, table_get, table_set};
 use rilua::Val;
 use rilua::vm::state::LuaState;
 
@@ -11,11 +11,17 @@ pub(crate) fn register(state: &mut LuaState) {
     }
     let enums = super::helpers::ensure_global_table(state, "Enum");
     for &(name, fields) in DECLARATIONS {
-        let values = create_table(state);
+        let values = match table_get(state, enums, name) {
+            values @ Val::Table(_) => values,
+            _ => {
+                let values = create_table(state);
+                table_set(state, enums, name, values);
+                values
+            }
+        };
         for &(field, value) in fields {
             table_set(state, values, field, Val::Num(f64::from(value)));
         }
-        table_set(state, enums, name, values);
     }
 }
 
@@ -26,6 +32,43 @@ const THREE_VALUES_META: &[(&str, i32)] = &[("NumValues", 3), ("MinValue", 0), (
 // BossFrameGrowDirection at 111–122; EditModePresetLayouts at 639–650;
 // EditModeSwingTimerSetting at 702–717; EditModeSwingTimerVisibility at 732–743.
 const DECLARATIONS: &[EnumFields] = &[
+    // Same pinned document: individual system declarations at 778–782.
+    (
+        "EditModeSystem",
+        &[
+            ("MainActionBarEndCap", 26),
+            ("GroupFinder", 27),
+            ("LossOfControl", 28),
+            ("SwingTimer", 29),
+            ("GamepadMainActionBar", 30),
+        ],
+    ),
+    // Individual setting declarations at 505–509, 520, 556 and 635.
+    (
+        "EditModeGamepadMainActionBarSetting",
+        &[
+            ("Compact", 0),
+            ("ShowEmptyBars", 1),
+            ("ShowButtonPrompts", 2),
+            ("ShowHighlight", 3),
+            ("ShouldExpand", 4),
+        ],
+    ),
+    ("EditModeGroupFinderSetting", &[("Size", 0)]),
+    ("EditModeMainActionBarEndCapSetting", &[("Hidden", 0)]),
+    (
+        "EditModePersonalResourceDisplaySetting",
+        &[("AllowMouseoverThrough", 15)],
+    ),
+    // Individual unit-frame declarations at 823 and 827–828.
+    (
+        "EditModeUnitFrameSetting",
+        &[
+            ("DebuffIconSize", 19),
+            ("UseHorizontalLayout", 23),
+            ("GrowDirection", 24),
+        ],
+    ),
     (
         "BossFrameGrowDirection",
         &[("Left", 0), ("Center", 1), ("Right", 2)],
