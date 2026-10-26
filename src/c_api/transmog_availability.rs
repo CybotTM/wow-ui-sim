@@ -1,6 +1,6 @@
 //! Supplied transmog availability; no native default is inferred.
 //! Declarations: TransmogOutfitInfoDocumentation.lua, Retail 70448 / PTR 70493
-//! lines 631–638; Mists 70268 lines 586–593.
+//! lines 631–638; Mists 70268 lines 586–593; Forever 70532 lines 631–638.
 
 use crate::client_profile::{ACTIVE, ClientProfile};
 use crate::lua_api::methods::borrow_state;
@@ -27,7 +27,10 @@ impl TransmogAvailability {
 pub(crate) fn register(state: &mut LuaState) -> LuaResult<()> {
     if !matches!(
         ACTIVE,
-        ClientProfile::Retail | ClientProfile::Ptr | ClientProfile::Mists
+        ClientProfile::Retail
+            | ClientProfile::Ptr
+            | ClientProfile::Mists
+            | ClientProfile::WowForever
     ) {
         return Ok(());
     }

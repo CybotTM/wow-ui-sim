@@ -126,6 +126,7 @@ pub(crate) fn register_interaction_tables(state: &mut LuaState) -> LuaResult<()>
     #[cfg(feature = "retail-12-0-0")]
     super::c_transmog_outfit_info::register(state)?;
     super::transmog_availability::register(state)?;
+    super::forever_outfits::register(state)?;
     c_ardenweald_gardening::register_c_ardenweald_gardening_surface(state)?;
     c_arrow_callout_manager::register_c_arrow_callout_manager_surface(state)?;
     #[cfg(feature = "retail-12-1-0")]

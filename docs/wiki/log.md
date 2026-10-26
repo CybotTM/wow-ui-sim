@@ -3113,3 +3113,7 @@ Added the [70268 contract](../specs/mists-global-strings.md) and [source/consume
 ## [2026-10-26] reconciliation | Merged engraving availability and settings
 
 Reconciled tracked specs and wiki against merged master `35dedb8b6` and the two lane reports. [Shared engraving availability](investigations/mists-engraving-inputs.md#shared-availability-and-input-supply) is the source of truth for profile publication, literal Rust input supply, the absent Lua admin setter and native-unknown values. [Merged settings proof and stock effects](investigations/mists-engraving-inputs.md#merged-settings-proof-and-stock-effects) replaces the obsolete Mists display-settings blocker and links Era/Anniversary error attribution. Historical receipts remain labeled historical. Documentation only; no new build or runtime proof is claimed.
+
+## 2026-10-26 — Forever Camelot spellbook
+
+Recorded [supplied observations](systems/forever-camelot-spellbook.md), selected-constructor ordering, three exact RED/GREEN pairs, unchanged 26/26 stock and seven zero-warning all-target checks. Linked the shared availability model and retained the item-browsing/device-startup limits.
