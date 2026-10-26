@@ -6,6 +6,7 @@ use wow_ui_sim::lua_api::{
 
 fn env() -> WowLuaEnv {
     let env = WowLuaEnv::new().unwrap();
+    env.state().borrow_mut().transmog_availability.enabled = Some(true);
     let state = env.state();
     let mut sim = state.borrow_mut();
     sim.player.equipped_items.insert(

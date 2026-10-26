@@ -1,6 +1,6 @@
 # SuperTrack state
 
-CF-2 stages environment-owned tracked targets and quest-log-owned highlight rows for the original Blizzard_QuestSuperTracking consumer. Source edited only; runtime acceptance is pending. [Contract](../../specs/super-track-state.md).
+CF-2 stages environment-owned tracked targets and quest-log-owned highlight rows for the original Blizzard_QuestSuperTracking consumer. Content cache/listener restoration is verified below; broader quest/highlight acceptance remains pending. [Contract](../../specs/super-track-state.md).
 
 ## Ownership and publication
 
@@ -14,15 +14,35 @@ Mutators commit state, release the borrow, then synchronously dispatch SUPER_TRA
 
 Retail/PTR select the generic Blizzard_FrameXMLUtil TOC, Family=Mainline/Game=Standard; Forever selects Family=Mainline/Game=Camelot. All permit the mainline-gated QuestSuperTracking entry. Mists/Era/Anniversary reject this entry; no Wrath chain is established. Tests resolve the profile-selected TOC, check the selected consumer entry, retain its source hash in output, load dependencies and the complete original chunk through the loader, and observe manager notifications. They never replace producer closures or rewrite vendor Lua.
 
-The stock selector also exercises content transitions: startup absence alone cannot reject constant nil. Active-quest selectors supply two different highlight tuples, assert all cached fields and map helpers, then clear stale outputs. Matching/nonmatching quest events and offer auto-tracking use the original event handlers. Task-only classification cannot be varied independently of the static world catalog and is explicitly held.
+The earlier staged stock selector also exercises content transitions: startup absence alone cannot reject constant nil. Active-quest selectors supply two different highlight tuples, assert all cached fields and map helpers, then clear stale outputs. Matching/nonmatching quest events and offer auto-tracking use the original event handlers. Task-only classification cannot be varied independently of the static world catalog and is explicitly held. These broader selectors are not established by the content-only proof below.
 
 ## Evidence bounds
 
 Untracked quest nil is a **documented-optional representation**, not native sentinel parity. Unknown/0 highlight output is a **native evidence gap**: an absent supplied row raises an explicit simulator error, never an invented tuple. No native timing, deduplication, exclusivity or priority assertion is made.
 
-Frozen Retail stock receipt: 36 unique messages / 42 occurrences. Only the QuestSuperTracking :52 error and its ScriptErrors wrapper (count 2 each) are attributed here. Conditional expected remainder: 34 unique / 38 occurrences, with those exact two messages removed and every other message/count unchanged. :56 is latent, not part of the 36; any new :56 error fails acceptance. This is an expectation, not an executed result.
+Historical staging expectation, not the current baseline: frozen Retail stock receipt: 36 unique messages / 42 occurrences. Only the QuestSuperTracking :52 error and its ScriptErrors wrapper (count 2 each) are attributed here. Conditional expected remainder: 34 unique / 38 occurrences, with those exact two messages removed and every other message/count unchanged. :56 is latent, not part of the 36; any new :56 error fails acceptance. This is an expectation, not an executed result.
+
+## Deferred content coverage restoration
+
+On base `7576b25e1`, the existing `SuperTrackState.content: Option<(i32, i32)>` already satisfies the restored content obligations. No producer change was needed. `tests/cf2_supertracking_restored.rs` recovers only the supertracking cases from the deferred housing shape/boundary files, not their failing housing siblings or the accepted house-or-plot tests.
+
+Both exact selectors pass at `15f338b2f` on Retail, PTR and Forever. Producer-subtracted sibling `b6e8274a2` projects no content results; each selector independently fails at the original listener snapshot with byte-identical tests (SHA256 `c42711b377c55a63980dd6b6322350e5dc08c221e75872dc2c7d796aa6750953`). This is preservation with a demonstrated RED counterexample, not a new producer-defect claim.
+
+The selected original `Blizzard_QuestSuperTracking.lua:52` reads `(0,101)` then `(2,202)`, clear and re-entry. Its `:59` notification exposes the refreshed tracker; an external listener records the pair during notification through the original helper at `:107–108`. The shape selector also preserves the closed documented enum and distinguishes the zero-result absent binding from the cache helper's two nil fields after clear. No consumer/API replacement or direct mutation of the original manager's cache is used.
+
+Per-profile declarations were authenticated at `Blizzard_APIDocumentationGenerated/SuperTrackManagerDocumentation.lua:32–40` and `ContentTrackingTypesDocumentation.lua:60–70`. Forever runtime evidence uses a private copy of the supplied profile cache.
+
+| Profile / pinned version | Base → restored stock, unique/occurrences | Exact selectors | All-target warnings |
+|---|---|---|---|
+| Retail 12.1.5.70448 | 10/12 → 10/12 | 2 GREEN / 2 counterexample RED | 0 |
+| PTR 12.1.7.70493 | 216/282 → 216/282 | 2 GREEN / 2 counterexample RED | 0 |
+| Forever 1.60.1.70532 | 26/26 → 26/26 | 2 GREEN / 2 counterexample RED | 0 |
+
+Raw full-message keys and counts have no additions, removals or changes; these are not clean-startup claims. Retail stock ran at `9e53bbfe3` and carries over because `15f338b2f` changes only a test assertion. Formatting and manual Rust readability checks pass. Quest/highlight branches and native sentinel/timing/deduplication/arbitration policy remain outside this proof.
 
 ## Sources
+
+- [Restored original-consumer tests](../../../tests/cf2_supertracking_restored.rs) — exact selectors and supplied transitions.
 
 - [Contract and staged tests](../../specs/super-track-state.md)
 - [M4 world inputs](../../specs/c-factory-m4-world-inputs.md) — historical absent-service policy, superseded for these targets.

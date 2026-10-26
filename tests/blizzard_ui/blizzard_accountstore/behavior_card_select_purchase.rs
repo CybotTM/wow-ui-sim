@@ -267,7 +267,7 @@ fn select_card_purchase_path_invokes_static_popup_show_generic_confirmation_with
             captured_text_starts_with_format_prefix,
             "Expected the captured confirmation text to contain \"Are you sure\" — the prefix of \
              `PLUNDERSTORE_PURCHASE_CONFIRMATION_FORMAT` (\"Are you sure you want to purchase \
-             %s for %s?\" per `data/global_strings.rs:22780`). The body at line 178 formats the \
+             %s for %s?\" per `crates/sim-data-profile/data/global_strings.rs:22780`). The body at line 178 formats the \
              selected confirmationFormat with itemInfo.name and the formatted price; for a \
              non-refundable status the format selected at line 177 is \
              PLUNDERSTORE_PURCHASE_CONFIRMATION_FORMAT (the `or` branch). A different prefix \

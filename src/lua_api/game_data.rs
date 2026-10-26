@@ -172,7 +172,7 @@ fn is_paladin_aura_spell(spell_id: u32) -> bool {
 }
 
 /// Classify a spell by its target type using the `implicit_target` field
-/// from SpellEffect.db2 (auto-generated into `data/spells.rs`).
+/// from SpellEffect.db2 (auto-generated into `crates/sim-data/data/spells.rs`).
 ///
 /// ImplicitTarget_0 values (from first effect, DifficultyID=0):
 ///   1=CASTER, 6=TARGET_ENEMY, 18=DEST_CASTER, 21=TARGET_ALLY,
@@ -551,11 +551,14 @@ fn default_party_auras(i: usize) -> (Vec<AuraInfo>, Vec<AuraInfo>) {
 ///
 /// `damage_pct` controls the intensity (fraction of max HP per tick).
 /// Returns the 1-based indices of members whose health changed (for firing UNIT_HEALTH).
-pub fn tick_party_health(members: &mut [PartyMember], damage_pct: f64) -> Vec<usize> {
+pub fn tick_party_health(
+    members: &mut [PartyMember],
+    damage_pct: f64,
+    now: std::time::Instant,
+) -> Vec<usize> {
     use std::collections::hash_map::DefaultHasher;
     use std::hash::{Hash, Hasher};
 
-    let now = std::time::Instant::now();
     let nanos = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
         .unwrap_or_default()

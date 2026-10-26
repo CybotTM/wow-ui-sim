@@ -30,7 +30,7 @@ fn read_totem(state: &LuaState) -> LuaResult<Option<Totem>> {
         .checked_sub(1)
         .and_then(|slot| sim.totem_slots.get(slot))
         .and_then(|slot| slot.as_ref());
-    let now = sim.start_time.elapsed().as_secs_f64();
+    let now = sim.clock_elapsed().as_secs_f64();
     Ok(totem
         .filter(|totem| totem.duration > 0.0 && now < totem.start_time + totem.duration)
         .cloned())

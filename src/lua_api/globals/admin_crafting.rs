@@ -7,13 +7,14 @@
 //! the generic `A_Admin.AddBagItem` requires — the Professions crafting
 //! page just needs "the player has N of item X", not a specific slot.
 
+use crate::c_api::item_upgrade_eligibility::{ItemSlot, discard_location};
 use crate::lua_api::globals::missing_surface::professions::{
     abandon_profession_impl, relearn_profession_impl,
 };
 use crate::lua_api::globals::profession_data;
 use crate::lua_api::methods::{borrow_state, borrow_state_mut};
 use crate::lua_api::script_helpers::fire_named_event_state;
-use crate::lua_api::state::BagItem;
+use crate::lua_api::state::{BagItem, SimState};
 use crate::lua_bridge::FromStack;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -124,23 +125,34 @@ fn apply_reagent_count(state: &mut LuaState, item_id: u32, qty: i32) {
     };
     if qty <= 0 {
         for key in existing_slots {
-            sim.bag_items.remove(&key);
+            remove_reagent_slot(&mut sim, key);
         }
         return;
     }
     if let Some(first_key) = existing_slots.first() {
         // Collapse extras, then set the primary stack to the new total.
         for key in existing_slots.iter().skip(1) {
-            sim.bag_items.remove(key);
+            remove_reagent_slot(&mut sim, *key);
         }
         if let Some(slot) = sim.bag_items.get_mut(first_key) {
             slot.stack_count = qty;
         }
         return;
     }
-    let next_slot = next_free_slot_in_bag(&sim, 0);
+    insert_reagent_stack(&mut sim, item_id, qty);
+}
+
+fn remove_reagent_slot(sim: &mut SimState, key: (i32, i32)) {
+    discard_location(sim, ItemSlot::Bag(key.0, key.1));
+    sim.bag_items.remove(&key);
+}
+
+fn insert_reagent_stack(sim: &mut SimState, item_id: u32, qty: i32) {
+    let next_slot = next_free_slot_in_bag(sim, 0);
+    let key = (0, next_slot);
+    discard_location(sim, ItemSlot::Bag(key.0, key.1));
     sim.bag_items.insert(
-        (0, next_slot),
+        key,
         BagItem {
             item_id,
             stack_count: qty,

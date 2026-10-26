@@ -516,7 +516,7 @@ fn read_cast_subtext(
     if crate::client_profile::ACTIVE != crate::client_profile::ClientProfile::Wrath {
         return Some("");
     }
-    if sim.start_time.elapsed().as_secs_f64() >= cast.end_time() {
+    if sim.clock_elapsed().as_secs_f64() >= cast.end_time() {
         return None;
     }
     crate::spells::get_spell(cast.spell_id).map(|spell| spell.subtext)

@@ -217,6 +217,7 @@ fn texture_path(env: &WowLuaEnv, texture_expr: &str) -> String {
     env.eval::<String>(&code).unwrap_or_default()
 }
 
+post_wrath_ui_fixture! {
 fn professions_primary_frame_expr() -> &'static str {
     "PrimaryProfession1 or (ProfessionsContentFrame and ProfessionsContentFrame.PrimaryProfession1)"
 }
@@ -280,6 +281,7 @@ fn professions_primary_spell_button_nameframe_texture(
         "#
     );
     env.eval::<String>(&code).unwrap_or_default()
+}
 }
 
 prefork_full_ui_case! {
@@ -535,6 +537,7 @@ fn micro_menu_layout_stays_locked() {
     );
 }
 
+post_wrath_ui_fixture! {
 #[test]
 fn micro_menu_professions_button_loads_and_opens_panel() {
     let env = setup_env();
@@ -583,6 +586,7 @@ fn micro_menu_professions_button_loads_and_opens_panel() {
         second_nameframe, "Interface\\Spellbook\\ProfessionsBook",
         "SpellButton2 name frame should keep its textured parchment background"
     );
+}
 }
 
 #[test]

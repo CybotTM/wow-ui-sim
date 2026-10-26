@@ -81,7 +81,7 @@ fn input_cast(
     }
     let spell_name = String::from_stack(state, 2)?;
     let icon_path = String::from_stack(state, 3)?;
-    let start_time = borrow_state(state)?.start_time.elapsed().as_secs_f64();
+    let start_time = borrow_state(state)?.clock_elapsed().as_secs_f64();
     let hold = empower.as_ref().map_or(0.0, |timing| timing.hold_at_max);
     validate_deadline(start_time, duration, hold)?;
     Ok(CastingState {

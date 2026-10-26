@@ -1,14 +1,36 @@
 # Regional unique names
 
-## Contract
+Regional name policy projects explicit player inputs. The [consumer investigation](../wiki/investigations/ptr-regional-names.md) records source selection and sequential failure boundaries.
 
-- Forever publishes `RegionalUniqueNamesEnabled()` returning one boolean from `PlayerState.regional_unique_names_enabled`.
-- The flag defaults to `false` as an explicit simulator policy, not a native-client default inference.
-- Changing the flag affects subsequent calls without reinitializing Lua; separate environments retain independent policy.
-- Other profiles do not gain this global. No Admin API or character-creation coupling is added.
+## What it must do
 
-## Evidence and verification
+- [x] Forever and PTR publish `RegionalUniqueNamesEnabled()` with one boolean from `PlayerState.regional_unique_names_enabled`; other profiles do not gain the global.
+- [x] The regional flag defaults to false as explicit simulator policy, not an inferred native default. Changes apply immediately and environments remain independent.
+- [x] PTR publishes `C_PlayerInfo.ShouldDisplaySurname()` with one boolean from supplied `PlayerState.should_display_surname`. Unsupplied input raises an explicit error; it does not guess native policy.
+- [x] The selected original PTR `UnitFrame_Update` displays the whole local name when regional names are disabled or surnames are enabled, and the first name when regional names are enabled and surnames are disabled. Both policy transitions and nonplayer full names are preserved.
+- [x] Forever naming and PTR/Forever graveyard-port behavior remain unchanged.
 
-Forever 1.60.1.69913 `Blizzard_APIDocumentationGenerated/UnitDocumentation.lua` documents the zero-argument boolean global. `Blizzard_FrameXMLUtil/Camelot/NameUtil.lua` uses it to choose whole-name versus first-name display.
+## How it works
 
-`tests/wowforever_name_policy.rs` covers default/arity, false→true→false behavior through the unmodified naming consumer, environment isolation, and other-profile absence. Its explicit surname-separator fixture isolates naming policy from constants publication. Native naming rules and native default policy remain unverified.
+- [Original consumer and declaration evidence](../wiki/investigations/ptr-regional-names.md).
+
+## Implementation inventory
+
+- `src/lua_api/state_types/character_world.rs`: player policy inputs.
+- `src/lua_api/globals/real/player_identity.rs`: regional-name global and independent graveyard query.
+- `src/c_api/c_player_info_name_policy.rs`: supplied surname query.
+- `src/c_api/registration.rs`: PTR-only surname publication.
+
+## Tests asserting this spec
+
+- `tests/ptr_regional_names.rs`: runtime-selected original UnitFrame, actual names, both policy transitions, unknown-policy errors, and environment isolation.
+- `tests/wowforever_name_policy.rs`: default/arity, original Forever NameUtil transitions, isolation, and excluded-profile publication.
+- `tests/ptr_i4_green1.rs`: supplied graveyard-port projection and original PTR GhostFrame.
+
+## Known gaps (current cycle)
+
+The bounded contract passes sequential RED/GREEN and preservation. PTR stock improves from 296/410 to 272/348; Forever 70532 remains exactly 26/26. Retail/PTR/Forever all-target checks pass within their zero/known-three warning limits. Native policy remains outside this supplied-input contract.
+
+## Out of scope
+
+Native default policy, native surname separators, Admin inputs, character creation, and unrelated GameRules, RecentAllies and housing behavior are not inferred or modified. The tests supply a separator fixture; they do not claim native separator publication. Forever's earlier declaration evidence is 1.60.1.69913 UnitDocumentation.lua; preservation runs on the pinned 70532 cache.

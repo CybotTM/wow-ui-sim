@@ -63,7 +63,7 @@ pub(crate) fn stop(state: &mut LuaState, complete: bool) -> LuaResult<bool> {
 pub(crate) fn tick(state: &mut LuaState) -> LuaResult<()> {
     let old = {
         let mut sim = borrow_state_mut(state)?;
-        let now = sim.start_time.elapsed().as_secs_f64();
+        let now = sim.clock_elapsed().as_secs_f64();
         let due = sim
             .channeling
             .as_ref()

@@ -18,29 +18,20 @@ pub mod addon_tests;
 pub mod app_icon_render;
 pub mod asset_resolver_config;
 pub mod atlas;
-#[cfg_attr(feature = "client-wowforever", path = "../data/atlas_wowforever.rs")]
-#[cfg_attr(not(feature = "client-wowforever"), path = "../data/atlas.rs")]
-mod atlas_data;
-#[cfg_attr(
-    feature = "client-wowforever",
-    path = "../data/atlas_elements_wowforever.rs"
-)]
-#[cfg_attr(not(feature = "client-wowforever"), path = "../data/atlas_elements.rs")]
-mod atlas_elements;
+pub(crate) use sim_data_profile::atlas_data;
+pub(crate) use sim_data_profile::atlas_elements;
 pub mod blizzard_ui_sync;
 pub mod c_api;
 pub mod casc_asset_fallback;
 pub mod client_profile;
 pub mod config;
-#[path = "../data/currencies.rs"]
-pub mod currencies;
+pub use sim_data::currencies;
 pub mod cvars;
 pub mod debug_helpers;
 pub mod dump;
 #[cfg(feature = "gui")]
 pub mod dump_texture;
-#[path = "../data/encounter_journal.rs"]
-pub mod encounter_journal_data;
+pub use sim_data::encounter_journal_data;
 #[cfg(any(feature = "client-era", feature = "client-anniversary"))]
 pub mod era;
 pub mod error;
@@ -49,33 +40,11 @@ pub mod extract_textures;
 #[path = "render/font.rs"]
 pub mod font;
 pub mod global_slot_coverage;
-#[cfg_attr(
-    feature = "client-wowforever",
-    path = "../data/global_strings_wowforever.rs"
-)]
-#[cfg_attr(
-    all(feature = "profile-retail", feature = "retail-12-1-5"),
-    path = "../data/global_strings_retail.rs"
-)]
-#[cfg_attr(
-    any(feature = "client-era", feature = "client-anniversary"),
-    path = "../data/global_strings_classic.rs"
-)]
-#[cfg_attr(
-    not(any(
-        feature = "client-wowforever",
-        all(feature = "profile-retail", feature = "retail-12-1-5"),
-        feature = "client-era",
-        feature = "client-anniversary"
-    )),
-    path = "../data/global_strings.rs"
-)]
-pub mod global_strings;
+pub use sim_data_profile::global_strings;
 pub mod iced_app;
 #[cfg(not(target_os = "linux"))]
 pub mod inspector_server_stub;
-#[path = "../data/items.rs"]
-pub mod items;
+pub use sim_data::items;
 mod key_names;
 pub mod keybinding_cache;
 pub mod layout;
@@ -83,28 +52,28 @@ pub mod limited_listfile;
 pub mod loader;
 pub mod logging;
 pub mod lua_api;
-pub mod lua_bridge;
+pub use sim_lua_bridge as lua_bridge;
+pub use sim_lua_bridge::{
+    __lua_bridge_define_function_entries, __lua_bridge_extract_args,
+    __lua_bridge_extract_method_args, define_functions, define_methods,
+};
 pub mod lua_errors;
 #[cfg(unix)]
 pub mod lua_server;
 #[cfg(not(unix))]
 #[path = "lua_server_windows.rs"]
 pub mod lua_server;
-#[path = "../data/manifest_interface_data.rs"]
-pub mod manifest_interface_data;
-#[path = "../data/map_art.rs"]
-pub mod map_art;
+pub use sim_data::manifest_interface_data;
+pub use sim_data::map_art;
 pub mod map_exploration;
 #[cfg(feature = "client-mists")]
 pub mod mists;
 pub mod paths;
-pub mod profession_item_overrides;
+pub use sim_data::profession_item_overrides;
 #[cfg(feature = "retail-12-1-0")]
 pub mod ptr;
-#[path = "../data/quest_poi_blobs.rs"]
-pub mod quest_poi_blobs;
-#[path = "../data/quest_ui_map.rs"]
-pub mod quest_ui_map;
+pub use sim_data::quest_poi_blobs;
+pub use sim_data::quest_ui_map;
 pub mod render;
 pub mod saved_variables;
 pub mod screen;
@@ -113,24 +82,18 @@ pub mod screenshot_output;
 pub mod self_test;
 pub mod server_snapshot_import;
 pub mod sound;
-#[path = "../data/spec_display_spells.rs"]
-pub mod spec_display_spells;
-#[path = "../data/specializations.rs"]
-pub mod specializations;
+pub use sim_data::spec_display_spells;
+pub use sim_data::specializations;
 pub mod spell_description_resolver;
-#[path = "../data/spell_descriptions.rs"]
-pub mod spell_descriptions;
+pub use sim_data::spell_descriptions;
 pub mod spell_lookup;
-#[path = "../data/spell_power.rs"]
-pub mod spell_power;
-#[path = "../data/spells.rs"]
-pub mod spells;
+pub use sim_data::spell_power;
+pub use sim_data::spells;
 pub mod stack;
 pub mod startup;
 pub mod texture;
 pub mod toc;
-#[path = "../data/traits.rs"]
-pub mod traits;
+pub use sim_data::traits;
 pub mod widget;
 #[cfg(any(
     feature = "client-wrath",
@@ -140,8 +103,7 @@ pub mod widget;
 ))]
 pub mod wrath;
 pub mod xml;
-#[path = "../data/zones.rs"]
-pub mod zones;
+pub use sim_data::zones;
 
 pub use error::{Error, Result};
 #[cfg(feature = "gui")]

@@ -20,7 +20,10 @@ mod textures;
 pub(crate) use buttons::refresh_button_font;
 pub(crate) use hierarchy::apply_parent_change;
 
-pub(crate) use animations::{advance_animation_groups, stop_animation_groups_for_hidden_subtree};
+pub(crate) use animations::{
+    advance_animation_groups, advance_animation_groups_state,
+    stop_animation_groups_for_hidden_subtree,
+};
 pub(crate) use font_strings::{
     apply_font_object_snapshot, ensure_button_text_child, font_object_snapshot_changes_frame,
     read_font_object_fields,

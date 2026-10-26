@@ -100,6 +100,19 @@ fn register_c_map_methods(state: &mut LuaState, table_ref: LuaTableRef) -> LuaRe
     for (name, rust_fn) in C_MAP_METHODS {
         table_set_rust_fn_static(state, table_ref, name, *rust_fn)?;
     }
+    if matches!(
+        crate::client_profile::ACTIVE,
+        crate::client_profile::ClientProfile::Mists
+            | crate::client_profile::ClientProfile::Era
+            | crate::client_profile::ClientProfile::Anniversary
+    ) {
+        table_set_rust_fn_static(
+            state,
+            table_ref,
+            "GetMapDisplayInfo",
+            c_map_get_map_display_info,
+        )?;
+    }
     Ok(())
 }
 
@@ -204,7 +217,6 @@ fn c_map_get_map_art_layer_textures(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
-#[cfg(feature = "retail-12-1-0")]
 fn read_map_display_id(state: &LuaState) -> LuaResult<i32> {
     let value = rilua::table_security::unwrap_secret(state, stack_val(state, 1))?;
     let Val::Num(number) = value else {
@@ -222,7 +234,6 @@ fn read_map_display_id(state: &LuaState) -> LuaResult<i32> {
     Ok(number as i32)
 }
 
-#[cfg(feature = "retail-12-1-0")]
 fn c_map_get_map_display_info(state: &mut LuaState) -> LuaResult<u32> {
     let ui_map_id = read_map_display_id(state)?;
     let hide_icons = borrow_state(state)?

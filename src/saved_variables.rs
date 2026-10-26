@@ -14,6 +14,9 @@
 #[cfg(test)]
 #[path = "saved_variables_details_tests.rs"]
 mod saved_variables_details_tests;
+#[cfg(test)]
+#[path = "saved_variables_model_tests.rs"]
+mod saved_variables_model_tests;
 #[path = "saved_variables_parse.rs"]
 mod saved_variables_parse;
 #[path = "saved_variables_serialize.rs"]
@@ -155,6 +158,45 @@ impl SavedVariablesManager {
             reload_saved_addons: std::collections::HashSet::new(),
             max_load_bytes: max_load_bytes_from_env(),
         }
+    }
+
+    /// Restore a simulator-owned model using the SavedVariables data parser only.
+    pub(crate) fn load_model(&self, state: &mut LuaState, name: &str) -> crate::Result<Val> {
+        let path = self.storage_path(name, false);
+        let content = match fs::read_to_string(&path) {
+            Ok(content) => content,
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(Val::Nil),
+            Err(error) => {
+                return Err(crate::Error::Other(format!(
+                    "read model {}: {error}",
+                    path.display()
+                )));
+            }
+        };
+        saved_variables_parse::parse_model_value(state, &content).map_err(|error| {
+            crate::Error::Other(format!("parse model {}: {error}", path.display()))
+        })
+    }
+
+    /// Persist a private model table in the existing SavedVariables format/directory.
+    pub(crate) fn save_model(
+        &self,
+        state: &mut LuaState,
+        name: &str,
+        value: Val,
+    ) -> crate::Result<()> {
+        let path = self.storage_path(name, false);
+        let mut output = String::new();
+        serialize_assignment(&mut output, state, "preferences", value);
+        fs::create_dir_all(&self.storage_dir).map_err(|error| {
+            crate::Error::Other(format!(
+                "create model directory {}: {error}",
+                self.storage_dir.display()
+            ))
+        })?;
+        fs::write(&path, output).map_err(|error| {
+            crate::Error::Other(format!("write model {}: {error}", path.display()))
+        })
     }
 
     /// Forget VM handles and declarations; the fresh addon graph registers them again.

@@ -4,7 +4,9 @@ use wow_ui_sim::lua_api::WowLuaEnv;
 #[test]
 fn transmog_outfit_world_sources_existing_collection_can_be_applied() {
     let env = WowLuaEnv::new().unwrap();
-    env.eval::<()>(r#"
+    env.state().borrow_mut().transmog_availability.enabled = Some(true);
+    env.eval::<()>(
+        r#"
         local source = C_TransmogCollection.GetAppearanceSources(1)[1]
         assert(source and source.isCollected)
         local info = C_TransmogCollection.GetAppearanceSourceInfo(source.sourceID)
@@ -18,5 +20,7 @@ fn transmog_outfit_world_sources_existing_collection_can_be_applied() {
         assert(api.GetItemModifiedAppearanceEffectiveCategory(source.sourceID) == source.categoryID)
         api.CommitAndApplyAllPending(false)
         assert(api.GetViewedOutfitSlotInfo(0,0,0).isTransmogrified)
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 }

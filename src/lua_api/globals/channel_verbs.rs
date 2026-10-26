@@ -1,7 +1,7 @@
 //! SimState-backed chat channel globals and channel metadata probes.
 //!
 //! Round-trips the player's joined chat channels through the global channel
-//! verb family, `C_ChatInfo`, and TTS channel settings:
+//! verb family and `C_ChatInfo` (TTS preferences live in `c_api`):
 //!
 //! - `GetChannelList()` — returns `(id, name, disabled)` triples.
 //! - `GetChannelName(channel)` — resolves local channel IDs / names.
@@ -235,15 +235,6 @@ fn is_regional_service_available(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
-fn get_tts_channel_enabled(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Bool(true));
-    Ok(1)
-}
-
-fn set_tts_channel_enabled(_state: &mut LuaState) -> LuaResult<u32> {
-    Ok(0)
-}
-
 /// `JoinTemporaryChannel(name)` — alias. Retail expires these on logout;
 /// sim does not model session boundaries so the entry is permanent.
 fn join_temporary_channel(state: &mut LuaState) -> LuaResult<u32> {
@@ -424,26 +415,9 @@ fn register_chat_info_regional_functions(
     )
 }
 
-fn register_tts_settings_namespace(state: &mut LuaState) -> LuaResult<()> {
-    let tts_settings = ensure_namespace(state, "C_TTSSettings");
-    table_set_rust_fn_static(
-        state,
-        tts_settings,
-        "GetChannelEnabled",
-        get_tts_channel_enabled,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        tts_settings,
-        "SetChannelEnabled",
-        set_tts_channel_enabled,
-    )
-}
-
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     register_channel_globals(lua)?;
     let state = lua.state_mut();
     register_chat_info_namespace(state)?;
-    register_tts_settings_namespace(state)?;
     Ok(())
 }

@@ -41,6 +41,15 @@ const AVAILABLE_LOOT_METHODS: [i32; 5] = [0, 1, 2, 3, 4];
 pub(crate) fn register_c_party_info_surface(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_PartyInfo")?;
     register_group_membership_probes(state, table_ref)?;
+    if matches!(
+        crate::client_profile::ACTIVE,
+        crate::client_profile::ClientProfile::Retail | crate::client_profile::ClientProfile::Ptr
+    ) {
+        table_set_rust_fn_static(state, table_ref, "GetMinLevel", c_party_info_get_min_level)?;
+    } else if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Mists {
+        // Mists 5.5.4.70268 PartyInfoDocumentation.lua:125–135; omitted category at130.
+        table_set_rust_fn_static(state, table_ref, "GetMinLevel", mists_supplied_min_level)?;
+    }
     register_loot_method_probes(state, table_ref)?;
     #[cfg(feature = "retail-12-0-5")]
     {
@@ -48,6 +57,39 @@ pub(crate) fn register_c_party_info_surface(state: &mut LuaState) -> LuaResult<(
         countdown::register(state, table_ref)?;
     }
     Ok(())
+}
+
+fn mists_supplied_min_level(state: &mut LuaState) -> LuaResult<u32> {
+    if state.top > state.base {
+        return Err(rilua::runtime_error(
+            "unsupported: C_PartyInfo.GetMinLevel explicit category",
+        ));
+    }
+    let supplied = crate::lua_api::methods::borrow_state(state)?.mists_party_min_level;
+    let minimum = supplied.ok_or_else(|| {
+        rilua::runtime_error(
+            "native-unknown: C_PartyInfo.GetMinLevel has no supplied active-party minimum or documented default",
+        )
+    })?;
+    state.push(Val::Num(minimum));
+    Ok(1)
+}
+
+/// Minimum of the supplied player and active roster; no separate party snapshot.
+fn c_party_info_get_min_level(state: &mut LuaState) -> LuaResult<u32> {
+    let minimum = {
+        let sim = crate::lua_api::methods::borrow_state(state)?;
+        if sim.party_group_active {
+            sim.party_members
+                .iter()
+                .map(|member| member.level)
+                .fold(sim.player.level, i32::min)
+        } else {
+            sim.player.level
+        }
+    };
+    state.push(Val::Num(minimum as f64));
+    Ok(1)
 }
 
 fn register_group_membership_probes(

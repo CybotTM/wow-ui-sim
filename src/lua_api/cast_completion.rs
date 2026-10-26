@@ -21,7 +21,7 @@ pub(crate) fn extract_completed_cast(
 ) -> Option<(u32, u32)> {
     let mut s = state.borrow_mut();
     let c = s.casting.as_ref()?;
-    let now = s.start_time.elapsed().as_secs_f64();
+    let now = s.clock_elapsed().as_secs_f64();
     if now < c.end_time() {
         return None;
     }

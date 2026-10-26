@@ -16,7 +16,6 @@ pub(crate) use c_container::{BAG_SLOT_FLAG_EXCLUDE_JUNK_SELL, bag_slot_flag_is_s
 pub(crate) use c_container::{
     c_container_get_item_id, c_container_get_item_link, c_container_get_num_slots,
 };
-#[cfg(feature = "retail-12-0-0")]
 pub(crate) use c_item::location_item;
 pub(crate) use c_item::{
     c_item_get_item_id, c_item_is_consumable_item, c_item_is_equippable_item,
@@ -34,6 +33,7 @@ pub(crate) fn register_item_and_spell_surfaces(state: &mut LuaState) -> LuaResul
         super::item_set_bonuses::register(state)?;
     }
     c_container::register_c_item_upgrade(state)?;
+    super::item_upgrade_eligibility::register(state)?;
     c_container::register_c_container(state)?;
     c_currency::register_c_currency_info(state)?;
     c_equipment_set::register_c_equipment_set(state)?;

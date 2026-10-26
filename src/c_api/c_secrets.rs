@@ -15,8 +15,7 @@ use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
 #[cfg(feature = "aura-containers")]
-#[path = "../../data/spell_aura_secrecy.rs"]
-mod attributes;
+use sim_data_profile::spell_aura_secrecy as attributes;
 
 #[cfg(feature = "aura-containers")]
 const NEVER_SECRET: i32 = 0;

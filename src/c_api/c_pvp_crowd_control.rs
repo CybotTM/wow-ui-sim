@@ -19,7 +19,7 @@ fn query_duration(state: &mut LuaState) -> LuaResult<u32> {
     let unit = String::from_stack(state, 1)?;
     let window = {
         let sim = borrow_state(state)?;
-        let now = sim.start_time.elapsed().as_secs_f64();
+        let now = sim.clock_elapsed().as_secs_f64();
         crate::lua_api::globals::unit_misc::existing_guid_for_unit(&sim, &unit)
             .and_then(|guid| sim.arena_crowd_control.get(&guid).copied())
             .filter(|window| window.duration > 0.0 && now < window.start_time + window.duration)

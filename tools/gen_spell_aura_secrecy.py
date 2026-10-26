@@ -115,7 +115,7 @@ def main():
     parser.add_argument("--flags", type=Path, required=True)
     parser.add_argument("--definitions-tree", type=Path, required=True)
     parser.add_argument("--build", required=True)
-    parser.add_argument("--output", type=Path, default=Path("data/spell_aura_secrecy.rs"))
+    parser.add_argument("--output", type=Path, default=Path("crates/sim-data-profile/data/spell_aura_secrecy.rs"))
     parser.add_argument("--provenance", type=Path, default=Path("data/spell_aura_secrecy.provenance.json"))
     generate(parser.parse_args())
 

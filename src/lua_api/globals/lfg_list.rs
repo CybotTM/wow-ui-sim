@@ -25,7 +25,6 @@ use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
 use rilua::{LuaResult, Val, runtime_error};
 use std::collections::HashMap;
-use std::time::Instant;
 
 pub(crate) fn fire_event_with_args(
     state: &mut LuaState,
@@ -74,12 +73,13 @@ pub(crate) fn defer_lfg_event(
         let sim = app.sim_state.borrow();
         sim.loading_addon_index.or(sim.executing_addon_index)
     };
+    let now = app.sim_state.borrow().clock_now();
     app.sim_state
         .borrow_mut()
         .rilua_timers
         .push_back(PendingTimer {
             id,
-            fire_at: Instant::now(),
+            fire_at: now,
             interval: None,
             remaining: None,
             cancelled: false,
@@ -523,7 +523,7 @@ fn create_lfg_application(
     search_result_id: u32,
     role: String,
 ) -> LuaResult<()> {
-    let now = borrow_state(state)?.start_time.elapsed().as_secs_f64();
+    let now = borrow_state(state)?.clock_elapsed().as_secs_f64();
     let mut sim = borrow_state_mut(state)?;
     let app_id = sim.lfg_next_application_id;
     sim.lfg_next_application_id += 1;

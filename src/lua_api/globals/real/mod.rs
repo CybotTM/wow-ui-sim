@@ -101,6 +101,7 @@ pub mod table_freeze;
 pub mod template_queries;
 pub mod timerunning;
 pub mod totems;
+pub(crate) mod tutorial_requests;
 pub mod ui_widget_container;
 #[cfg(any(feature = "client-era", feature = "client-anniversary"))]
 pub(crate) mod unit_health_knowledge;
@@ -128,6 +129,8 @@ pub(crate) mod wrath_autocomplete;
 pub mod wrath_calendar;
 #[cfg(feature = "client-wrath")]
 pub(crate) mod wrath_friends;
+pub(crate) mod wrath_guild_bank;
+pub(crate) mod wrath_guild_info;
 #[cfg(feature = "client-wrath")]
 pub mod wrath_legacy;
 #[cfg(feature = "client-wrath")]
