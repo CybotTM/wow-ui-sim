@@ -4,12 +4,12 @@ Mists `C_LFGInfo.CanPlayerUseScenarioFinder()` consumes an explicit environment-
 
 ## What it must do
 
-- [ ] Publish the query only on Mists. Return exactly the supplied non-nil boolean and non-nil string, including the supplied string when allowed.
-- [ ] Keep eligibility independent of player level, expansion and scenario catalog. No constant or inferred eligibility default is permitted.
-- [ ] An absent input raises `native-unknown: C_LFGInfo.CanPlayerUseScenarioFinder has no supplied availability or documented default`. This is simulator missing-input policy, not native error wording.
-- [ ] The original XML-bound PVEFrame callback enables the visible scenario button when allowed; denial disables it and supplies its tooltip. Allowing again clears the tooltip. The separate original empty-list branch still hides the button.
-- [ ] Two environments keep independent tuples and presentation state. Clearing the input restores the explicit error; resupplying recovers.
-- [ ] The LFR original-consumer regression retains every visibility and gap-anchor assertion and completes past270 instead of accepting its old missing-function error.
+- [x] Publish the query only on Mists. Return exactly the supplied non-nil boolean and non-nil string, including the supplied string when allowed.
+- [x] Keep eligibility independent of player level, expansion and scenario catalog. No constant or inferred eligibility default is permitted.
+- [x] An absent input raises `native-unknown: C_LFGInfo.CanPlayerUseScenarioFinder has no supplied availability or documented default`. This is simulator missing-input policy, not native error wording.
+- [x] The original XML-bound PVEFrame callback enables the visible scenario button when allowed; denial disables it and supplies its tooltip. Allowing again clears the tooltip. The separate original empty-list branch still hides the button.
+- [x] Two environments keep independent tuples and presentation state. Clearing the input restores the explicit error; resupplying recovers.
+- [x] The LFR original-consumer regression retains every visibility and gap-anchor assertion and completes past270 instead of accepting its old missing-function error.
 
 ## How it works
 
@@ -29,8 +29,7 @@ Mists `C_LFGInfo.CanPlayerUseScenarioFinder()` consumes an explicit environment-
 
 ## Known gaps (current cycle)
 
-- [ ] Runtime GREEN proof remains pending; both original270 entry selectors have executed missing-producer RED.
-- [ ] Native eligibility/default policy is unknown.
+None within the supplied-input slice. Both original270 entry selectors and the advanced LFR regression have executed RED/GREEN. Native eligibility/default policy remains unknown and is outside this contract.
 
 ## Out of scope
 

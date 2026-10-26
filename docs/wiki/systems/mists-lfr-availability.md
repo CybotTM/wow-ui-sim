@@ -14,7 +14,7 @@ The regression verifies the selected TOC, original XML button identity, parent a
 
 ## Scenario successor advance
 
-The [scenario eligibility lane](mists-scenario-finder.md) supplies a separate bool/string tuple. The current LFR regression retains its pre270 observer and every original visibility/gap-anchor assertion, but now requires full callback completion past270 instead of accepting the old missing-function error. The revised test has executed missing-scenario-producer RED at270; successor-advance GREEN is pending. The earlier proof above records the historical LFR-only boundary, not the current test acceptance.
+The [scenario eligibility lane](mists-scenario-finder.md) supplies a separate bool/string tuple. The current LFR regression retains its pre270 observer and every original visibility/gap-anchor assertion, but now requires full callback completion past270 instead of accepting the old missing-function error. The byte-identical revised test fails missing-scenario-producer RED at270 and passes full-callback GREEN with all ten LFR observations. Stock remains6/12 without raw-key/count changes; all seven profiles have zero-warning all-target checks for the shared input/producer change. The earlier proof above records the historical LFR-only boundary, not the current test acceptance.
 
 ## Stock residual
 

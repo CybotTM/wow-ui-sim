@@ -1,6 +1,6 @@
 ## [2026-10-26] implementation | Mists supplied scenario eligibility
 
-[Environment-local bool/string input](systems/mists-scenario-finder.md) links the [contract](../specs/mists-scenario-finder.md). Allowed-first and denied-first original PVEFrame entry selectors reject the missing producer at270; the LFR test also rejects its former accepted successor error. The separate supplied-input producer is committed; GREEN, stock comparison and seven-profile checks remain pending.
+[Environment-local bool/string input](systems/mists-scenario-finder.md) links the [contract](../specs/mists-scenario-finder.md). Allowed-first and denied-first original270 RED/GREEN prove supplied tuples, two-environment transitions and unset recovery. The LFR successor-boundary advance retains all assertions and now completes past270. Mists stock remains6/12 without raw changes; all seven all-target checks have zero warnings. No native eligibility/default policy is inferred.
 
 ## [2026-10-26] proof | Complete PTR Edit Mode display-info
 
@@ -24,7 +24,7 @@
 
 ## [2026-10-26] implementation | Mists supplied LFR availability
 
-[Environment-local input and original PVEFrame](systems/mists-lfr-availability.md) link the [contract](../specs/mists-lfr-availability.md). Byte-identical original-line RED and supplied-state GREEN cover ten observations, two environments and unset recovery. Stock remains 6/12 with exactly two missing-function→named missing-input replacements. The exact scenario successor is outside this slice. Mists/Retail/Era all-target checks have zero warnings; formatting and changed-line readability pass.
+[Environment-local input and original PVEFrame](systems/mists-lfr-availability.md) link the [contract](../specs/mists-lfr-availability.md). Byte-identical original-line RED and supplied-state GREEN cover ten observations, two environments and unset recovery. Stock remains 6/12 with exactly two missing-function→named missing-input replacements. The [scenario successor](systems/mists-scenario-finder.md) is now supplied separately, and the current LFR regression completes past it. The initial LFR-only Mists/Retail/Era all-target checks have zero warnings; formatting and changed-line readability pass.
 
 ## [2026-10-26] proof | Supplied query catalogs
 

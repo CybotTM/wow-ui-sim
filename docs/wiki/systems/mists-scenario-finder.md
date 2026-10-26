@@ -18,12 +18,17 @@ The [LFR regression](../../specs/mists-lfr-availability.md) keeps its pre270 obs
 
 ## Proof
 
-Runtime and warning/stock gates pending.
+Allowed-first and denied-first selectors each fail RED at original270 with the missing query and pass GREEN with ten original-button observations, two environments and unset recovery. The byte-identical advanced LFR regression also rejects missing270 and passes full-callback GREEN with its ten LFR observations. No new successor occurs inside the PVEFrame callback.
+
+Pinned-master and GREEN Mists stock maps are identical at6 keys/12 occurrences, with no additions, removals or count changes. Stock still stops at the earlier unsupplied LFR query at229; separate stock GetMinLevel at ScenarioFinder_Shared.lua:58 is also pre-existing. Startup cleanliness and native defaults are not claimed. All14 executable invocations use protected fresh child copies of the current persisted CVar file; all original stat/hash guards pass.
+
+All seven profiles have separate full-feature all-target checks with zero Cargo JSON and plain compiler warnings. Formatting and changed-line manual Rust readability pass. Other-profile runtime execution and full-suite/CI acceptance are not claimed.
 
 ## Sources
 
 - [Supplied eligibility contract](../../specs/mists-scenario-finder.md)
 - `tests/mists_scenario_finder.rs` — original-consumer transitions, tuple shape and isolation.
+- `src/c_api/scenario_finder_availability.rs` — supplied tuple query and explicit unset error.
 - `src/c_api/c_lfg_info.rs` — profile publication boundary.
 
 ## See Also
