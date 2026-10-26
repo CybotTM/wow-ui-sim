@@ -54,6 +54,9 @@ const SPELL_COOLDOWN_HASH_FIELDS: usize = 5;
 
 pub(crate) fn register_c_spell_surface(state: &mut LuaState) -> LuaResult<()> {
     let ns = ensure_namespace(state, "C_Spell")?;
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Ptr {
+        table_set_rust_fn_static(state, ns, "GetItemCooldown", get_item_cooldown)?;
+    }
     #[cfg(feature = "retail-12-0-0")]
     table_set_rust_fn_static(
         state,
@@ -169,6 +172,27 @@ fn register_legacy_spell_globals(state: &mut LuaState) -> LuaResult<()> {
         legacy_get_spell_texture,
     )?;
     Ok(())
+}
+
+/// Supplied item records only: see the bounded PTR I4 shape contract.
+/// Enabled/unmodified playback preserves the existing simulator cooldown policy;
+/// native eligibility, category arbitration and secrecy remain unknown.
+fn get_item_cooldown(state: &mut LuaState) -> LuaResult<u32> {
+    let item_id = u32::from_stack(state, 1)?;
+    let cooldown = borrow_state(state)?.item_cooldowns.get(&item_id).cloned();
+    let Some(cooldown) = cooldown else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+    let info = create_table_with_capacity(state, SPELL_COOLDOWN_HASH_FIELDS);
+    state.push(info);
+    table_set_static(state, info, "startTime", Val::Num(cooldown.start));
+    table_set_static(state, info, "duration", Val::Num(cooldown.duration));
+    table_set_static(state, info, "isEnabled", Val::Bool(true));
+    let active = cooldown.start != 0.0 && cooldown.duration != 0.0;
+    table_set_static(state, info, "isActive", Val::Bool(active));
+    table_set_static(state, info, "modRate", Val::Num(1.0));
+    Ok(1)
 }
 
 fn get_spell_description(state: &mut LuaState) -> LuaResult<u32> {
