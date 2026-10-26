@@ -1,6 +1,6 @@
 ## [2026-10-25] investigation | PTR regional names
 
-[Sequential original-consumer RED](investigations/ptr-regional-names.md) distinguishes the regional nil-call from its surname successor with byte-identical tests and separate producer revisions. Supplied policy implementation is staged; complete GREEN and preservation remain pending.
+[Sequential original-consumer proof](investigations/ptr-regional-names.md) distinguishes both missing calls before full GREEN. PTR clears all UnitFrame155 keys (296/410→272/348), with 6 added raw keys individually traced. Forever 70532 remains exactly 26/26; naming/graveyard preservation passes. Retail/PTR/Forever all-target checks satisfy zero/known-three warning limits.
 
 ## [2026-10-25] proof | Classic defensive aura timer completion
 

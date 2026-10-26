@@ -23,7 +23,22 @@ The exact `ptr_regional_names::original_consumer::unit_frame_tracks_regional_and
 1. `677821014`: regional=false, `UnitFrame.lua:155: attempt to call a nil value`; surname is short-circuited.
 2. `ddbc800f8`: the regional producer is installed, the disabled-policy full-name assertion passes, then regional=true reaches `UnitFrame.lua:155: attempt to call field 'ShouldDisplaySurname' (a nil value)`.
 
-Complete GREEN and preservation remain pending. The baseline UnitFrame155 family is 13 primary keys / 30 occurrences, or 26 raw keys / 60 occurrences including ScriptErrors echoes, within PTR's saved 296/410 map. New successors must remain explicit and must be traced to their original emitter and masking predecessor.
+## GREEN and preservation
+
+Producer revision `77db393c3` passes the same exact selector: both regional and surname policy transitions, actual player/nonplayer names, one-value returns, unknown-policy rejection, and environment isolation. The existing CanPortGraveyard supplied-state and original PTR GhostFrame selectors pass unchanged. Forever 70532's original NameUtil transitions/default/arity and graveyard projection also pass on a byte-identical private cache copy.
+
+All cases have one-test listings, zero ignored tests, fresh byte-exact current CVar copies, and unchanged original CVar stat/hash guards. PTR/Forever all-target checks pass with only the three inherited `fast_handler_late_bind.rs` dead-code warnings; Retail passes with zero warnings. Cargo JSON and plain stderr were inspected. Formatting passes.
+
+## Stock changes and unmasked successors
+
+PTR's saved 296 keys/410 occurrences becomes 272/348. All 13 UnitFrame155 primary keys/30 occurrences disappear: 26 raw keys/60 occurrences including ScriptErrors echoes. There are 30 removed and 6 added raw keys, with no counts changed on retained keys:
+
+- PlayerFrame initializes `feedbackText` at `Mainline/PlayerFrame.lua:51` after `UnitFrame_Initialize` returns. Its former CombatFeedback nil pair disappears (6 occurrences).
+- PlayerFrame now reaches `RegisterEvent("PLAYER_PVP_FLAG_CHANGED")` at `PlayerFrame.lua:73`, after the repaired name call in `UnitFrame_Initialize`; the unsupported event adds one primary/reporter pair.
+- `PLAYER_ENTERING_WORLD` now passes `UnitFrame_Update` at `PlayerFrame.lua:130`, reaches `PlayerFrame_UpdateArt` and `PlayerFrame_ToPlayerArt`, then `BuffFrame:Update()` at line 696. `BuffFrameMixin:UpdateAuras` at `BuffFrame.lua:809` reaches missing `C_Item.GetWeaponEnchantInfo` at line 766. This adds one primary/reporter pair; UnitFrame's stored-event wrapper is at lines 998–1000.
+- The existing OverrideActionBarExpBar `GameRulesUtil.lua:144` / `C_GameRules.IsWoWHack` pair changes only its generated stored-invoker hash (`aa210eb0546614a3`→`1157f9ecb24367c6`). The full error and traceback are otherwise byte-identical; this is not a new missing API.
+
+These successors remain out of scope. No GameRules, event-catalog, weapon-enchant, RecentAllies, or housing repair is included. Forever's stock map stays exactly 26 keys/26 occurrences with no additions, removals or count changes. Both profiles still exit 1 for known stock errors; neither is clean startup.
 
 ## Sources
 

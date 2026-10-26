@@ -1,6 +1,6 @@
 ## [2026-10-25] investigation | PTR regional names
 
-[Sequential original-consumer RED](investigations/ptr-regional-names.md) reaches RegionalUniqueNamesEnabled first and ShouldDisplaySurname only after regional publication. The [contract](../specs/regional-unique-names.md) uses supplied policies; complete GREEN, stock and preservation remain pending.
+[Sequential original-consumer proof](investigations/ptr-regional-names.md) reaches regional and surname RED separately, then passes both supplied-policy transitions. PTR stock 296/410→272/348 clears the UnitFrame155 family; all 6 added raw keys are traced. Forever 70532 remains 26/26 and preservation passes. The [contract](../specs/regional-unique-names.md) and all three profile checks pass; native policies are not inferred.
 
 ## [2026-10-25] runtime proof | PTR I4 landable first batch
 

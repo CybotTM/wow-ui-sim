@@ -4,11 +4,11 @@ Regional name policy projects explicit player inputs. The [consumer investigatio
 
 ## What it must do
 
-- [ ] Forever and PTR publish `RegionalUniqueNamesEnabled()` with one boolean from `PlayerState.regional_unique_names_enabled`; other profiles do not gain the global.
-- [ ] The regional flag defaults to false as explicit simulator policy, not an inferred native default. Changes apply immediately and environments remain independent.
-- [ ] PTR publishes `C_PlayerInfo.ShouldDisplaySurname()` with one boolean from supplied `PlayerState.should_display_surname`. Unsupplied input raises an explicit error; it does not guess native policy.
-- [ ] The selected original PTR `UnitFrame_Update` displays the whole local name when regional names are disabled or surnames are enabled, and the first name when regional names are enabled and surnames are disabled. Both policy transitions and nonplayer full names are preserved.
-- [ ] Forever naming and PTR/Forever graveyard-port behavior remain unchanged.
+- [x] Forever and PTR publish `RegionalUniqueNamesEnabled()` with one boolean from `PlayerState.regional_unique_names_enabled`; other profiles do not gain the global.
+- [x] The regional flag defaults to false as explicit simulator policy, not an inferred native default. Changes apply immediately and environments remain independent.
+- [x] PTR publishes `C_PlayerInfo.ShouldDisplaySurname()` with one boolean from supplied `PlayerState.should_display_surname`. Unsupplied input raises an explicit error; it does not guess native policy.
+- [x] The selected original PTR `UnitFrame_Update` displays the whole local name when regional names are disabled or surnames are enabled, and the first name when regional names are enabled and surnames are disabled. Both policy transitions and nonplayer full names are preserved.
+- [x] Forever naming and PTR/Forever graveyard-port behavior remain unchanged.
 
 ## How it works
 
@@ -29,7 +29,7 @@ Regional name policy projects explicit player inputs. The [consumer investigatio
 
 ## Known gaps (current cycle)
 
-- [ ] Complete GREEN, preservation, stock deltas and all-target checks are pending. Sequential original-consumer RED has reached both missing queries.
+The bounded contract passes sequential RED/GREEN and preservation. PTR stock improves from 296/410 to 272/348; Forever 70532 remains exactly 26/26. Retail/PTR/Forever all-target checks pass within their zero/known-three warning limits. Native policy remains outside this supplied-input contract.
 
 ## Out of scope
 
