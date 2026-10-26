@@ -1,3 +1,7 @@
+## [2026-10-26] proof | Supplied equipment-set locked items
+
+[Original equipment consumers](systems/equipment-set-locks.md#original-consumer-proof) and the [contract](../specs/equipment-set-locks.md#bounded-proof--2026-10-26) close the supplied-state slice on R/P/F/M: 24 exact GREENs, 12 intended producer-only REDs, four zero-warning all-target checks and unchanged raw stock maps. Inputs are item-ID observations, not native lock criteria; W/E/A and item upgrades remain excluded.
+
 ## [2026-10-26] implementation | Equipment-set supplied lock query
 
 [Saved-set projection](systems/equipment-set-locks.md) replaces the constant-false path on R/P/F/M, with explicit native-unknown errors and strict boolean admin inputs. Original Retail equipment/membership/error REDs and the nil-observation RED were observed before the producer change. Final four-profile acceptance is pending; W/E/A and item upgrades remain excluded.

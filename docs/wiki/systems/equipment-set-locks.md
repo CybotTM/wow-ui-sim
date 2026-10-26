@@ -12,9 +12,13 @@ The [contract](../../specs/equipment-set-locks.md) uses explicit item-ID observa
 
 On R/P/F/M the temporary bootstrap returns without publishing its old default, so there is no fallback. Excluded W/E/A retain their existing workaround unchanged. Admin input reads require an actual Lua boolean: the general `bool::from_stack` helper accepts nil as false and other values as true, which is not an explicit observation.
 
-## Staged proof
+## Original-consumer proof
 
-The restored `tests/api_shape_equipment_set.rs` authenticates the selected TOC and original `EquipmentManager_EquipSet` source. Retail original-consumer RED reached Mainline259–266, then failed at locked equipment mutation, newly saved locked contents and missing-observation acceptance. A separate input RED caught nil being converted to an unlocked observation. The producer commit follows these observed REDs; final four-profile paired runtime/stock/check evidence remains pending.
+The restored `tests/api_shape_equipment_set.rs` authenticates the selected Game TOC and original `EquipmentManager_EquipSet` source before observing actual equipment, last-used-set and swap transitions. Each profile passes six exact GREEN cases; each of three original-consumer selectors independently fails against the byte-identical constant-false producer sibling. Mainline259–266 is selected on R/P/F; Mists selects Wrath307–314. The mixed locked/unlocked set, all-unlocked transition, relock, unrelated-item lock, resave, clear/error recovery and independent environments use explicit supplied fixtures.
+
+Retail's actual pre-producer temporary path also failed all three consumer selectors before implementation. A separate preliminary RED caught a missing admin method; another caught generic Lua truthiness accepting nil as an unlocked observation. The latter is input-plumbing proof, not native boolean policy. The old `c_item_api` implicit-unlocked assertion was observed failing under the new contract and replaced with explicit supported-profile errors while preserving excluded-profile behavior.
+
+The [contract proof table](../../specs/equipment-set-locks.md#bounded-proof--2026-10-26) owns exact per-profile stock and gate results. All four raw stock maps are unchanged; unrelated startup residuals remain. No loader errors were cleared, no vendor source was patched and no whole-client or native-policy parity is claimed.
 
 ## Sources
 

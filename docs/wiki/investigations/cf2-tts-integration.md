@@ -74,3 +74,7 @@ Master's temporary `tts_settings_defaults.rs` returns zero for every voice type.
 
 - [[lua-api]] — TTS model mechanics.
 - [[consumer-selection-and-red-proof]] — consumer applicability and RED limits.
+
+## Equipment-set restoration follow-up — 2026-10-26
+
+The historical `api_shape_equipment_set.rs` deferral row above is superseded for the supplied-observation slice by the [equipment-set lock contract](../../specs/equipment-set-locks.md). Its named selector now proves real original-consumer equip/no-equip behavior, not boolean shape alone. Other deferred units are unchanged.
