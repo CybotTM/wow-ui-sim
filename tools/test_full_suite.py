@@ -586,7 +586,7 @@ sys.exit(runner.run(sys.argv[2], 1, sys.argv[3], "ptr"))
         process = subprocess.run([sys.executable, str(RUNNER), 'run', self.sha,
                                   '--profile', 'ptr', '--target-dir', str(self.slot)],
                                  env=self.env, capture_output=True, text=True, timeout=10)
-        self.assertEqual(process.returncode, 0, process.stderr)
+        self.assertNotEqual(process.returncode, 0, process.stderr)
         record = json.loads(self.latest_attempt().read_text())
         self.assertEqual(record['status'], 'FAILED')
         self.assertEqual(record['steps']['integration']['exit'], 7)
