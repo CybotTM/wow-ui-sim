@@ -6,6 +6,10 @@ Reconciled the [historical target-spell boundary](investigations/forever-startup
 
 [Lookup scope and provenance](systems/lua-api.md#retail-uimap-catalog) link the catalog contract. Retail stock and cross-profile proof are tracked separately from this implementation record.
 
+## [2026-10-27] bounded proof | Monk specialization ordering
+
+[Class specialization order](systems/specialization-mastery-spells.md#class-specialization-order): two CLI-driven original content-frame cases exposed swapped Monk identities and pass with ordered lookup. Profile verification remains pending.
+
 ## [2026-10-26] implementation | Spectating UI scenario
 
 [Scenario and consumer evidence](systems/spectating-ui.md): state-backed query with a user-authorized false default. Retail consumer RED/GREEN and unchanged Retail/PTR stock are proven; seven all-target checks have zero compiler warnings.
