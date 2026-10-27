@@ -5,7 +5,7 @@
 ## What it must do
 
 - [x] For Retail and PTR, pass supplied false and true values to the original objective-tracker consumer.
-- [ ] Publish the same query and passive input on Forever; prove its original consumer.
+- [x] Publish the same query and passive input on Forever; prove its original consumer.
 - [ ] Publish neither input nor query on undeclared profiles; runtime absence remains unverified.
 - [ ] Accept `AllowedWhenUntainted` secret arguments as declared; secret behavior is not yet tested here.
 - [ ] Return false for an unsupplied quest as a simulator scenario default. Native containment and its default are unknown; the default's exact Lua boolean is not yet independently tested.
@@ -29,7 +29,7 @@ Retail 12.1.5.70448, PTR 12.1.7.70493 and Forever 1.60.1.70532 declare the requi
 
 ## Known gaps (current cycle)
 
-- [ ] Complete Forever consumer proof and seven-profile checks.
+- [ ] Complete the publication sweep and seven-profile checks.
 
 ## Out of scope
 
