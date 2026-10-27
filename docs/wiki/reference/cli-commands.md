@@ -137,9 +137,13 @@ Host noise: this machine mixes Zen 5 (CPUs 0-3, 12-15, 5.16 GHz) and Zen 5c (3.2
 | `--no-saved-vars` | Skip WTF SavedVariables (~18% of load time) |
 | `--delay <ms>` | Delay after startup events (dump-tree/screenshot) |
 | `--exec-lua "code"` | Execute Lua after startup; prefix with `@` to load file |
+| `--class <NAME|N>` | Set the player class by case-insensitive name or one-based index |
+| `--spec <NAME|N>` | Set the specialization by case-insensitive name or one-based index; uses the current class when `--class` is absent |
 | `--debug-borders` | Red borders overlay |
 | `--debug-anchors` | Green anchor-point dots |
 | `--debug-elements` | Both overlays |
+
+Class and specialization changes run after startup events and before `--exec-lua`. They dispatch `PLAYER_SPECIALIZATION_CHANGED` for `player`. They do not repeat `PLAYER_ENTERING_WORLD`, because a class or specialization change is not a world-entry lifecycle. Wrath, Era, and Anniversary reject `--spec` because these profiles do not model modern specialization selection. Unknown names or indices report valid choices and exit non-zero.
 
 ## Sources
 

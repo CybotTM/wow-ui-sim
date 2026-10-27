@@ -1,5 +1,6 @@
 mod addon_loading;
 mod cache_texture;
+mod class_spec;
 #[cfg(test)]
 mod exclusive_path_tests;
 mod exec_lua;
@@ -57,6 +58,14 @@ struct Args {
     /// Prefix with @ to load from file (e.g., --exec-lua @/tmp/debug.lua).
     #[arg(long, value_name = "CODE")]
     exec_lua: Option<String>,
+
+    /// Set player class by name or one-based index after startup.
+    #[arg(long, value_name = "NAME|N")]
+    class: Option<String>,
+
+    /// Set player specialization by name or one-based index after startup.
+    #[arg(long, value_name = "NAME|N")]
+    spec: Option<String>,
 
     /// Run `--exec-lua` under secureenv (fenv retargeted via `mark_secure`).
     /// Handy for inspecting/setting secure-scope globals from an ad-hoc
@@ -232,13 +241,19 @@ fn run_main() -> Result<(), Box<dyn std::error::Error>> {
     #[cfg(not(feature = "gui"))]
     let (env, _font_system, saved_vars) = init;
 
+    class_spec::configure(&env, args.class.as_deref(), args.spec.as_deref())?;
+    let mut exec_lua = resolve_exec_lua(&args.exec_lua);
+    if exec_lua.is_none() && (args.class.is_some() || args.spec.is_some()) {
+        exec_lua = Some(String::new());
+    }
+
     let dispatch = CommandDispatch {
         command: args.command,
         env,
         #[cfg(feature = "gui")]
         font_system,
         delay: args.delay,
-        exec_lua: resolve_exec_lua(&args.exec_lua),
+        exec_lua,
         exec_lua_secure: args.exec_lua_secure,
         saved_stdout,
         saved_vars,
