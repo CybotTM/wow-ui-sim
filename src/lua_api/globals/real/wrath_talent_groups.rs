@@ -111,12 +111,19 @@ fn get_num_glyph_sockets(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn get_unspent_talent_points(state: &mut LuaState) -> LuaResult<u32> {
-    let group = selected_group(state, 3)?;
-    let points = borrow_state(state)?
-        .wrath_unspent_talent_points
-        .get(&group)
-        .copied()
-        .unwrap_or(0);
+    let inspect = string_to_bool(state, stack_val(state, 1));
+    let pet = string_to_bool(state, stack_val(state, 2));
+    let points = if inspect || pet {
+        // No inspected or pet group is supplied in this scenario model.
+        0
+    } else {
+        let group = selected_group(state, 3)?;
+        borrow_state(state)?
+            .wrath_unspent_talent_points
+            .get(&group)
+            .copied()
+            .unwrap_or(0)
+    };
     state.push(Val::Num(points as f64));
     Ok(1)
 }
