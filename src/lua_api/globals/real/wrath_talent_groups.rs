@@ -81,7 +81,7 @@ fn get_glyph_socket_info(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn push_glyph_socket_info(state: &mut LuaState, socket: &crate::lua_api::state::WrathGlyphSocket) {
-    let has_glyph = socket.enabled && socket.glyph_spell_id.is_some();
+    let has_glyph = socket.glyph_spell_id.is_some();
     state.push(if socket.enabled {
         Val::Num(1.0)
     } else {
