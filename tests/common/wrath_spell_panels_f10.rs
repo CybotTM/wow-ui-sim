@@ -121,7 +121,7 @@ fn glyph_socket_consumer_tracks_supplied_records() {
 #[test]
 fn talent_tab_background_tracks_supplied_records_on_show() {
     let env = load_talent_fixture();
-    for (background, expected) in [("FirstTree", "FirstTree"), ("SecondTree", "SecondTree")] {
+    for (background, rank, prerequisite) in [("FirstTree", 1, false), ("SecondTree", 0, true), ("SecondTree", 1, true)] {
         env.state().borrow_mut().wrath_talent_tabs.insert(
             (1, 1),
             wow_ui_sim::lua_api::state::WrathTalentTab {
@@ -132,13 +132,57 @@ fn talent_tab_background_tracks_supplied_records_on_show() {
                 preview_points_spent: 1,
             },
         );
+        let mut rows = vec![wow_ui_sim::lua_api::state::WrathTalentRow {
+            name: "First talent".to_string(),
+            icon: "Interface\\Icons\\FirstTalent".to_string(),
+            tier: 1,
+            column: 1,
+            rank,
+            max_rank: 1,
+            exceptional: false,
+            meets_prereq: true,
+            preview_rank: rank,
+            meets_preview_prereq: true,
+            prerequisites: vec![],
+        }];
+        if prerequisite {
+            rows.push(wow_ui_sim::lua_api::state::WrathTalentRow {
+                name: "Second talent".to_string(),
+                icon: "Interface\\Icons\\SecondTalent".to_string(),
+                tier: 1,
+                column: 2,
+                rank: 1,
+                max_rank: 1,
+                exceptional: false,
+                meets_prereq: true,
+                preview_rank: 1,
+                meets_preview_prereq: true,
+                prerequisites: vec![wow_ui_sim::lua_api::state::WrathTalentPrerequisite {
+                    talent_index: 1,
+                    required_rank: 1,
+                }],
+            });
+        }
+        env.state().borrow_mut().wrath_talent_rows.insert((1, 1), rows);
+        env.exec("A_Admin.SetWrathUnspentTalentPoints(1, 3); SetCVar('previewTalents', '0')")
+            .expect("supply talent points");
         env.exec("PlayerTalentFrame:Hide(); PlayerTalentFrame:Show()")
             .expect("show native talent panel");
         assert_no_errors(&env);
         env.exec(&format!(
-            "assert(PlayerTalentFrameBackgroundTopLeft:GetTexture() == 'Interface\\\\TalentFrame\\\\{expected}-TopLeft')"
+            "assert(PlayerTalentFrameBackgroundTopLeft:GetTexture() == 'Interface\\\\TalentFrame\\\\{background}-TopLeft')"
         ))
         .expect("native consumer applies supplied background");
+        env.exec("assert(PlayerTalentFrameTalent1:IsShown()); assert(PlayerTalentFrameTalent1IconTexture:GetTexture() == 'Interface\\\\Icons\\\\FirstTalent')")
+            .expect("native consumer renders supplied talent");
+        if prerequisite {
+            let arrow = if rank == 0 { -1 } else { 1 };
+            env.exec(&format!("assert(PlayerTalentFrameTalent2:IsShown()); assert(PlayerTalentFrame.TALENT_BRANCH_ARRAY[1][2].leftArrow == {arrow})"))
+                .expect("native consumer reflects prerequisite rank");
+        } else {
+            env.exec("assert(not PlayerTalentFrameTalent2:IsShown())")
+                .expect("single-talent set hides second button");
+        }
     }
 }
 
