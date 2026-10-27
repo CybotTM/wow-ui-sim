@@ -2,6 +2,7 @@
 #![cfg(any(feature = "client-retail", feature = "client-ptr"))]
 
 use std::path::Path;
+use std::process::Command;
 use wow_ui_sim::loader::{
     StartupAddonLoadKind, discover_blizzard_startup_addons_for_screen, load_startup_addon,
 };
@@ -13,16 +14,22 @@ const ACCOUNT_CACHE: &[u8] =
     include_bytes!("fixtures/frame_position_replay/edit-mode-cache-account.txt");
 const CHARACTER_CACHE: &[u8] = b"2 2 2 2 0 0\0";
 
-fn import_fixture_cache(env: &WowLuaEnv, root: &Path, snapshot: Option<&str>) {
+fn import_cache(
+    env: &WowLuaEnv,
+    root: &Path,
+    snapshot: Option<&str>,
+    account_cache: &[u8],
+    character_cache: &[u8],
+) {
     let wtf = root.join("WTF");
     let account = wtf.join("Account/TestAccount");
     let character = account.join("Test Realm/Testchar");
     std::fs::create_dir_all(&character).expect("create isolated cache tree");
-    std::fs::write(account.join("edit-mode-cache-account.txt"), ACCOUNT_CACHE)
+    std::fs::write(account.join("edit-mode-cache-account.txt"), account_cache)
         .expect("write supplied account cache");
     std::fs::write(
         character.join("edit-mode-cache-character.txt"),
-        CHARACTER_CACHE,
+        character_cache,
     )
     .expect("write native character-cache indices");
     let mut manager = SavedVariablesManager::with_storage_dir(root.join("local-sv"));
@@ -91,13 +98,104 @@ pub(crate) fn load_whole_game_ui(env: &WowLuaEnv) -> Vec<String> {
     warnings
 }
 
+fn dispatch_specialization_change(env: &WowLuaEnv) {
+    env.exec("beforeEditModeDispatch = EditModeManagerFrame.layoutInfo")
+        .expect("record prior layout");
+    crate::common::panel_fixtures::clear_recorded_lua_errors(env);
+    env.fire_event_with_args("PLAYER_SPECIALIZATION_CHANGED", &[env.lua_string("player")])
+        .expect("dispatch specialization change");
+    let errors = crate::common::panel_fixtures::recorded_lua_errors(env);
+    assert!(
+        errors.is_empty(),
+        "specialization dispatch errors: {errors:?}"
+    );
+    env.exec("assert(EditModeManagerFrame.layoutInfo ~= beforeEditModeDispatch, 'EditMode handler did not run')")
+        .expect("registered EditMode handler ran");
+}
+
+#[test]
+fn truncated_account_cache_does_not_fabricate_layouts() {
+    test_timeout! {
+        let text = std::str::from_utf8(ACCOUNT_CACHE).expect("fixture text");
+        let cache = text.split_whitespace().take(561).collect::<Vec<_>>().join(" ");
+        for name in ["LayoutOne", "LayoutTwo"] {
+            let cache = cache.replace("Ultrawide", name);
+            let temp = tempfile::tempdir().expect("isolated cache");
+            let env = WowLuaEnv::new().expect("fresh environment");
+            import_cache(&env, temp.path(), None, cache.as_bytes(), CHARACTER_CACHE);
+            load_whole_game_ui(&env);
+            dispatch_specialization_change(&env);
+            env.exec(&format!(r#"
+                local layouts = C_EditMode.GetLayouts().layouts
+                assert(#layouts == 1, 'one real layout and no phantom saved layouts')
+                assert(layouts[1].layoutName == '{name}' and #layouts[1].systems == 52,
+                    'complete first layout must survive')
+                assert(#EditModeManagerFrame.layoutInfo.layouts == 3, 'presets plus one saved layout')
+                assert(PlayerFrame:GetNumPoints() > 0, 'PlayerFrame must retain anchors')
+            "#)).expect("original EditMode manager initialization");
+        }
+    }
+}
+
+#[test]
+fn truncated_account_cache_warns_during_default_startup() {
+    test_timeout! {
+        let text = std::str::from_utf8(ACCOUNT_CACHE).expect("fixture text");
+        let header = text.split_whitespace().take(38).collect::<Vec<_>>();
+        for count in [1, 2] {
+            let temp = tempfile::tempdir().expect("isolated cache");
+            let wtf = temp.path().join("WTF");
+            let account = wtf.join("Account/TestAccount");
+            let character = account.join("Test Realm/Testchar");
+            std::fs::create_dir_all(&character).expect("create cache tree");
+            let cache = format!("{count} {}", header[1..].join(" "));
+            std::fs::write(account.join("edit-mode-cache-account.txt"), cache).expect("write cache");
+            std::fs::write(character.join("edit-mode-cache-character.txt"), CHARACTER_CACHE).expect("write character cache");
+            let output = Command::new("timeout")
+                .args(["90", env!("CARGO_BIN_EXE_wow-sim"), "--no-addons", "--no-saved-vars", "lua-errors"])
+                .env("WOW_SIM_WTF_PATH", &wtf)
+                .env("WOW_SIM_WTF_ACCOUNT", "TestAccount")
+                .env("WOW_SIM_WTF_REALM", "Test Realm")
+                .env("WOW_SIM_WTF_CHARACTER", "Testchar")
+                .env_remove("RUST_LOG")
+                .env_remove("WOW_SIM_EDIT_MODE_LAYOUT")
+                .output().expect("run default startup");
+            assert!(output.status.success(), "startup failed for count {count}");
+            let stderr = String::from_utf8_lossy(&output.stderr);
+            assert!(stderr.contains("EditMode account cache declares layout rows that are missing"),
+                "missing default warning for count {count}: {stderr}");
+        }
+    }
+}
+
+#[test]
+fn complete_account_cache_preserves_both_layouts() {
+    test_timeout! {
+        let text = std::str::from_utf8(ACCOUNT_CACHE).expect("fixture text");
+        let text = text.replace("Ultrawide", "LayoutOne").replace("Widescreen", "LayoutTwo");
+        let temp = tempfile::tempdir().expect("isolated cache");
+        let env = WowLuaEnv::new().expect("fresh environment");
+        import_cache(&env, temp.path(), None, text.as_bytes(), CHARACTER_CACHE);
+        load_whole_game_ui(&env);
+        dispatch_specialization_change(&env);
+        env.exec(r#"
+            local layouts = C_EditMode.GetLayouts().layouts
+            assert(#layouts == 2, 'both saved layouts')
+            assert(layouts[1].layoutName == 'LayoutOne' and #layouts[1].systems == 52)
+            assert(layouts[2].layoutName == 'LayoutTwo' and #layouts[2].systems == 52)
+            assert(#EditModeManagerFrame.layoutInfo.layouts == 4, 'presets and saved layouts')
+            assert(PlayerFrame:GetNumPoints() > 0, 'PlayerFrame must retain anchors')
+        "#).expect("original EditMode manager initialization");
+    }
+}
+
 #[test]
 fn native_preset_index_two_keeps_classic_and_horizontal_micro_menu() {
     test_timeout! {
         let temp = tempfile::tempdir().expect("create isolated cache fixture");
         let env = WowLuaEnv::new().expect("fresh pre-addon environment");
         env.set_display_size(1920.0, 1080.0).expect("display input");
-        import_fixture_cache(&env, temp.path(), None);
+        import_cache(&env, temp.path(), None, ACCOUNT_CACHE, CHARACTER_CACHE);
         env.exec("assert(C_EditMode.GetLayouts().activeLayout == 2, 'native cache-index readiness')")
             .expect("unaltered character-cache active index");
         let warnings = load_whole_game_ui(&env);
@@ -125,7 +223,7 @@ fn explicit_layout_overrides_keep_widescreen_through_whole_startup() {
             let temp = tempfile::tempdir().expect("create isolated override fixture");
             let env = WowLuaEnv::new().expect("fresh pre-addon environment");
             env.set_display_size(1920.0, 1080.0).expect("display input");
-            import_fixture_cache(&env, temp.path(), Some(preferred));
+            import_cache(&env, temp.path(), Some(preferred), ACCOUNT_CACHE, CHARACTER_CACHE);
             let warnings = load_whole_game_ui(&env);
             env.exec(r#"
                 assert(EditModeManagerFrame.layoutInfo.activeLayout == 4,

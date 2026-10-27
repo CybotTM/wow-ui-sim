@@ -6,6 +6,7 @@ Current Retail/PTR startup must preserve the active-layout index supplied by the
 
 - [x] Import provided account/character cache files before whole unchanged Game UI startup; preserve the character's active index through preset insertion. Native cache index2 selects Classic with horizontal Micro Menu geometry, even when the second custom layout is vertical Widescreen.
 - [x] Preserve saved layout content, names/identifiers and existing named environment/snapshot override selection and precedence. Resolve an explicit saved-layout name to the combined selection space; do not reinterpret native character indices as custom-list positions.
+- [x] When the account cache declares more layouts than its token stream contains, do not fabricate layouts after exhaustion; emit a warning. This is a simulator scenario decision: native handling of the mismatch, and whether the client writes such a file, are unknown. Handling of partially started records is outside this contract.
 - [x] Keep selection, cache decoding and original consumer behavior distinct. No original WTF writes, vendor patches, forced orientation or guessed new numeric-override contract.
 
 ## How it works
@@ -21,6 +22,7 @@ Current Retail/PTR startup must preserve the active-layout index supplied by the
 
 ## Tests asserting this spec
 
+- [edit_mode_cache_startup.rs](../../tests/edit_mode_cache_startup.rs): truncated account cache emits a warning without phantom layouts and preserves PlayerFrame anchors; two distinct complete layouts remain intact through the registered specialization event.
 - [edit_mode_cache_startup.rs](../../tests/edit_mode_cache_startup.rs): fresh environment, isolated real-format file inputs, import before whole Game loading, original startup, selected Classic and public Micro Menu geometry. Native selection genuinely failed at `653e829f1`. At `7d9d9f621`, Retail native Classic/horizontal and four explicit Widescreen/vertical variants completed in two test names; parent/child recaps count once.
 - [edit_mode_api/cache.rs](../../tests/edit_mode_api/cache.rs): 10/10 Retail cache/parser/env/snapshot controls PASS at `7d9d9f621`; low-level cache proof is not whole consumer proof.
 
@@ -34,7 +36,7 @@ Test-only `b41b42fc1` sets active4 for the second custom layout, active3 for the
 
 At source `fb4b31b8f7b97bc460f15c0554fb39b91e8c6e2a`, Retail GUI-feature library cases `setup_layout_info_preserves_active_combined_index_after_prepending_presets` and `setup_layout_info_preserves_distinct_saved_action_bar_profile_settings` each passed 1/1, 0 FAIL, exit0 (focused total2 PASS). Repairs `b41b42fc1`/`ac170ecbf` now have bounded fixture execution: active4 selects Saved Wide; active2 selects Classic after manager-cache reset; active3 selects Ultrawide despite saved layoutID9, preserving distinct action-bar settings.
 
-Private evidence uses the [shared library epoch/seal](slider-bound-thumb-layout.md#tests-asserting-this-spec): `focused-runtime-results.json` and full `editmode-combined-index/stdout`/`stderr`, `editmode-distinct-settings/stdout`/`stderr` were read. Independent [saved-runtime reconciliation](/home/osso/.local/state/wow-ui-sim/verification/slider-scale-next/runtime-report.md) **PASS** verifies both actual names/counts, full streams, shared artifact and repaired fixture assertions. Historical source41cb broad FAIL remains historical FAIL; these two passes are not a full-suite rerun, fresh whole-startup, PTR or native/pixel acceptance. Existing source701 default check remains separate and was not rerun.
+Private evidence uses the [shared library epoch/seal](slider-bound-thumb-layout.md#tests-asserting-this-spec): `focused-runtime-results.json` and full `editmode-combined-index/stdout`/`stderr`, `editmode-distinct-settings/stdout`/`stderr` were read. Independent saved-runtime reconciliation **PASS** verifies both actual names/counts, full streams, shared artifact and repaired fixture assertions. Historical source41cb broad FAIL remains historical FAIL; these two passes are not a full-suite rerun, fresh whole-startup, PTR or native/pixel acceptance. Existing source701 default check remains separate and was not rerun.
 
 ## Known gaps (current cycle)
 
