@@ -126,7 +126,7 @@ fn talent_tab_background_tracks_supplied_records_on_show() {
             (1, 1),
             wow_ui_sim::lua_api::state::WrathTalentTab {
                 name: "Supplied talent tree".to_string(),
-                icon: "Interface\\Icons\\Supplied".to_string(),
+                icon: Some("Interface\\Icons\\Supplied".to_string()),
                 points_spent: 3,
                 background: background.to_string(),
                 preview_points_spent: u32::from(prerequisite),
@@ -137,7 +137,7 @@ fn talent_tab_background_tracks_supplied_records_on_show() {
                 (1, 2),
                 wow_ui_sim::lua_api::state::WrathTalentTab {
                     name: "Second tree".to_string(),
-                    icon: "Interface\\Icons\\SecondTree".to_string(),
+                    icon: None,
                     points_spent: 0,
                     background: "AnotherTree".to_string(),
                     preview_points_spent: 0,
@@ -146,7 +146,7 @@ fn talent_tab_background_tracks_supplied_records_on_show() {
         }
         let mut rows = vec![wow_ui_sim::lua_api::state::WrathTalentRow {
             name: "First talent".to_string(),
-            icon: "Interface\\Icons\\FirstTalent".to_string(),
+            icon: Some("Interface\\Icons\\FirstTalent".to_string()),
             tier: 1,
             column: 1,
             rank,
@@ -160,7 +160,7 @@ fn talent_tab_background_tracks_supplied_records_on_show() {
         if prerequisite {
             rows.push(wow_ui_sim::lua_api::state::WrathTalentRow {
                 name: "Second talent".to_string(),
-                icon: "Interface\\Icons\\SecondTalent".to_string(),
+                icon: Some("Interface\\Icons\\SecondTalent".to_string()),
                 tier: 1,
                 column: 2,
                 rank: 1,
@@ -194,6 +194,8 @@ fn talent_tab_background_tracks_supplied_records_on_show() {
         env.exec("assert(PlayerTalentFrameTalent1:IsShown()); assert(PlayerTalentFrameTalent1IconTexture:GetTexture() == 'Interface\\\\Icons\\\\FirstTalent')")
             .expect("native consumer renders supplied talent");
         if prerequisite {
+            env.exec("local name, icon = GetTalentTabInfo(2, false, false, 1); assert(name == 'Second tree' and icon == nil)")
+                .expect("supplied absent tab icon");
             let arrow = if rank == 0 { -1 } else { 1 };
             env.exec(&format!("assert(PlayerTalentFrameTalent2:IsShown()); assert(PlayerTalentFrame.TALENT_BRANCH_ARRAY[1][2].leftArrow == {arrow})"))
                 .expect("native consumer reflects prerequisite rank");

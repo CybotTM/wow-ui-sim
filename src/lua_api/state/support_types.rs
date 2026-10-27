@@ -4,7 +4,7 @@ use super::*;
 #[derive(Clone, Debug)]
 pub struct WrathTalentTab {
     pub name: String,
-    pub icon: String,
+    pub icon: Option<String>,
     pub points_spent: u32,
     pub background: String,
     pub preview_points_spent: u32,
@@ -14,7 +14,7 @@ pub struct WrathTalentTab {
 #[derive(Clone, Debug)]
 pub struct WrathTalentRow {
     pub name: String,
-    pub icon: String,
+    pub icon: Option<String>,
     pub tier: u32,
     pub column: u32,
     pub rank: u32,
