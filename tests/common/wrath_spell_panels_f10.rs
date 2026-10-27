@@ -150,6 +150,7 @@ fn original_spellbook_displays_supplied_slot_layouts() {
         A_Admin.SetWrathSpellBookSlot('spell', 1, 6603, 'Auto Attack', '', 'Interface\\Icons\\INV_Sword_04')
         A_Admin.SetWrathSpellBookSlot('spell', 2, 635, 'Holy Light', '', 'Interface\\Icons\\Spell_Holy_HolyBolt')
         A_Admin.SetWrathSpellBookSlot('spell', 3, 19750, 'Flash of Light', '', 'Interface\\Icons\\Spell_Holy_FlashHeal')
+        SpellButton1IconTexture:Show()
         local trace = {}
         debug.sethook(function(_, line)
             local info = debug.getinfo(2, 'S')
@@ -163,7 +164,7 @@ fn original_spellbook_displays_supplied_slot_layouts() {
         end, 'l')
         SpellBookFrame:Show()
         debug.sethook()
-        assert(trace[1] and trace[1]:match('^447:'), 'original line 447 must execute')
+        assert(trace[1] == '447:true', 'original line 447 must see the shown icon: '..table.concat(trace, ','))
         assert(trace[2] ~= '453:false', 'original missing-texture branch hid slot 1: '..table.concat(trace, ','))
         assert(trace[2] and trace[2]:match('^465:'), 'populated slot must take visible branch: '..table.concat(trace, ','))
         assert(SpellButton1IconTexture:IsVisible(), 'slot 1 icon must be visible at SpellBookFrame.lua:447')
