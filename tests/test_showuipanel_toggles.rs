@@ -795,6 +795,27 @@ fn admin_open_mailbox_opens_and_closes_mail_panel() {
 }
 
 #[test]
+fn wrath_send_mail_update_renders_empty_and_occupied_attachment_counts() {
+    if wow_ui_sim::client_profile::ACTIVE != wow_ui_sim::client_profile::ClientProfile::Wrath {
+        return;
+    }
+    test_timeout! {
+        let env = setup_env();
+        env.state().borrow_mut().player.send_mail_items[1] =
+            Some(wow_ui_sim::lua_api::state_types::MailAttachment {
+                item_id: 6948,
+                count: 5,
+                quality: 1,
+            });
+        env.exec(r#"
+            SendMailFrame_Update()
+            assert(SendMailAttachment1Count:GetText() == "", "empty slot count")
+            assert(SendMailAttachment2Count:GetText() == "5", "occupied slot count")
+        "#).expect("Wrath SendMailFrame_Update renders attachment counts");
+    }
+}
+
+#[test]
 fn open_all_bags_opens_a_bag_frame() {
     test_timeout! {
         let env = setup_env();
