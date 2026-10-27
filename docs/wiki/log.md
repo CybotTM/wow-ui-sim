@@ -1,3 +1,7 @@
+## [2026-10-26] implementation | Spectating UI scenario
+
+[Scenario and consumer evidence](systems/spectating-ui.md): state-backed query, with a user-authorized false default. Verification is pending.
+
 ## [2026-10-26] implementation | Wrath setup inputs
 
 [Wrath retained fixtures](investigations/wrath-retained-fixtures.md#shared-setup-boundaries) records the original container and target consumers and links their supplied bag, leadership and tap contracts. Full F15/F18 acceptance remains separate; exact 3.4.x native semantics are unknown.
