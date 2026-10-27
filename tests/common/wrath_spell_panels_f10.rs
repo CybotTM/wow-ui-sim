@@ -80,6 +80,45 @@ const TALENT_SOURCES: &[(&str, &str)] = &[
     ),
 ];
 
+#[test]
+fn glyph_socket_consumer_tracks_supplied_records() {
+    let env = load_talent_fixture();
+    env.exec("GlyphFrame_LoadUI()")
+        .expect("load original GlyphUI");
+    exec_consumer(
+        &env,
+        r#"
+        PlayerTalentFrame.talentGroup = 1
+        A_Admin.SetWrathGlyphSocket(1, 1, true, 1, 101, 'Interface\\Icons\\GlyphOne')
+        GlyphFrameGlyph_UpdateSlot(GlyphFrameGlyph1)
+        assert(GlyphFrameGlyph1.spell == 101)
+        assert(GlyphFrameGlyph1.glyph:GetTexture() == 'Interface\\Icons\\GlyphOne')
+        A_Admin.SetWrathGlyphSocket(1, 1, true, 2, 202, 'Interface\\Icons\\GlyphTwo')
+        GlyphFrameGlyph_UpdateSlot(GlyphFrameGlyph1)
+        assert(GlyphFrameGlyph1.spell == 202)
+        assert(GlyphFrameGlyph1.glyph:GetTexture() == 'Interface\\Icons\\GlyphTwo')
+        "#,
+    );
+}
+
+#[test]
+fn talent_controls_consumer_tracks_supplied_points() {
+    let env = load_talent_fixture();
+    exec_consumer(
+        &env,
+        r#"
+        A_Admin.SetWrathUnspentTalentPoints(1, 0)
+        SetCVar('previewTalents', '1')
+        PlayerSpecTab_OnClick(PlayerSpecTab1)
+        PlayerTalentFrame_UpdateControls(1, 1)
+        assert(not PlayerTalentFramePreviewBar:IsShown())
+        A_Admin.SetWrathUnspentTalentPoints(1, 3)
+        PlayerTalentFrame_UpdateControls(1, 1)
+        assert(PlayerTalentFramePreviewBar:IsShown())
+        "#,
+    );
+}
+
 /// F10: blizzard_player_spells_loads::blizzard_player_spells_panel_root_is_hidden_after_load.
 #[test]
 fn talent_root_remains_hidden_after_native_addon_load() {
