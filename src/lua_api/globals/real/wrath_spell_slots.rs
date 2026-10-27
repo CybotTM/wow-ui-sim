@@ -28,7 +28,8 @@ pub(crate) fn register_admin(builder: TableBuilder) -> LuaResult<TableBuilder> {
 
 pub(crate) fn register_queries(state: &mut LuaState) -> LuaResult<()> {
     table_set_rust_fn_static(state, state.global, "GetSpellTexture", get_spell_texture)?;
-    table_set_rust_fn_static(state, state.global, "GetSpellName", get_spell_name)
+    table_set_rust_fn_static(state, state.global, "GetSpellName", get_spell_name)?;
+    table_set_rust_fn_static(state, state.global, "IsSelectedSpell", is_selected_spell)
 }
 
 fn find_spell_slot(state: &mut LuaState) -> LuaResult<Option<SpellSlot>> {
@@ -66,6 +67,16 @@ fn get_spell_name(state: &mut LuaState) -> LuaResult<u32> {
         state.push(Val::Nil);
     }
     Ok(2)
+}
+
+fn is_selected_spell(state: &mut LuaState) -> LuaResult<u32> {
+    let selected = find_spell_slot(state)?.and_then(|record| record.selected);
+    state.push(if selected == Some(true) {
+        Val::Num(1.0)
+    } else {
+        Val::Nil
+    });
+    Ok(1)
 }
 
 fn set_spell_slot(state: &mut LuaState) -> LuaResult<u32> {
