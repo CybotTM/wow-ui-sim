@@ -187,6 +187,15 @@ fn talent_tab_background_tracks_supplied_records_on_show() {
             u32::from(prerequisite)
         ))
         .expect("supplied tab, row and preview counts");
+        env.exec(r#"
+            local name, icon, points, background, preview = GetTalentTabInfo(99, false, false, 1)
+            assert(select('#', GetTalentTabInfo(99, false, false, 1)) == 5)
+            assert(name == nil and icon == nil and points == 0 and background == nil and preview == 0)
+            local n, i, tier, column, rank, maximum, flag, available, previewRank, previewAvailable = GetTalentInfo(99, 1, false, false, 1)
+            assert(select('#', GetTalentInfo(99, 1, false, false, 1)) == 10)
+            assert(n == nil and i == nil and tier == 1 and column == 1 and rank == 0 and maximum == 0 and flag == 0 and available == nil and previewRank == 0 and previewAvailable == nil)
+            assert(select('#', GetTalentPrereqs(99, 1, false, false, 1)) == 0)
+        "#).expect("absent talent comparison return shapes");
         env.exec(&format!(
             "assert(PlayerTalentFrameBackgroundTopLeft:GetTexture() == 'Interface\\\\TalentFrame\\\\{background}-TopLeft')"
         ))
