@@ -10,6 +10,24 @@ use keybindings_panels_detail::{
     drain_test_errors, frame_is_shown, install_test_error_handler, setup_env,
 };
 
+#[cfg(any(feature = "client-ptr", feature = "client-wowforever"))]
+#[test]
+fn supplied_spellbook_rank_and_spec_selection_are_observed() {
+    let env = wow_ui_sim::lua_api::WowLuaEnv::new().expect("create environment");
+    env.exec(r#"
+        A_Admin.SetSpellBookItemLowRank(6603, true)
+        A_Admin.SetSpellBookItemLowRank(8690, false)
+        A_Admin.SetSpecSelectionEnabled(true)
+        assert(C_SpellBook.IsSpellBookItemLowRank(1, 0) == true)
+        assert(C_SpellBook.IsSpellBookItemLowRank(2, 0) == false)
+        assert(C_SpecializationInfo.IsSpecSelectionEnabled(2) == true)
+    "#).expect("initial supplied observations");
+    env.exec(r#"
+        A_Admin.SetSpecSelectionEnabled(false)
+        assert(C_SpecializationInfo.IsSpecSelectionEnabled(2) == false)
+    "#).expect("updated supplied specialization observation");
+}
+
 // These regressions use the ordered startup loader, not setup_env's injected
 // ClickBinding bootstrap, so Escape runs against production panel bookkeeping.
 post_wrath_ui_fixture! {

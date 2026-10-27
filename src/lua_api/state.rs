@@ -252,6 +252,7 @@ macro_rules! build_empty_sim_state {
             club_battle_tag_friend_requests: Vec::new(),
             clubs: crate::c_api::club_model::ClubState::default(),
             spell_cooldown_categories: HashMap::new(),
+            spellbook_low_rank: HashSet::new(),
             spell_cooldown_item_sources: HashMap::new(),
             active_blocked_rolesets: Vec::new(),
             active_allowed_rolesets: Vec::new(),

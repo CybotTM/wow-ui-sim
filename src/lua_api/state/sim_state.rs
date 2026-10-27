@@ -304,6 +304,8 @@ pub struct SimState {
     pub clubs: crate::c_api::club_model::ClubState,
     /// Host spell data: cooldown category of each spell that has one.
     pub spell_cooldown_categories: HashMap<u32, i32>,
+    /// Supplied low-rank spell IDs for the current scenario.
+    pub spellbook_low_rank: HashSet<u32>,
     /// Item whose use started a spell's current cooldown, keyed by spell ID.
     pub spell_cooldown_item_sources: HashMap<u32, i32>,
     /// `C_Roleset.ApplyRolesetFilters` blocklist, in applied order.
