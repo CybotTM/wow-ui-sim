@@ -528,6 +528,10 @@ class LockClosureRejected(ValueError):
     pass
 
 
+class UncertifiedFreshArtifact(ValueError):
+    pass
+
+
 def lock_closure_digest(lock_bytes, package_id):
     packages = tomllib.loads(lock_bytes.decode())["package"]
     if "#" not in package_id:
@@ -629,7 +633,7 @@ def certify_record(current, record, previous, source_before, artifacts, snapshot
                     raise LockClosureRejected(f"lock closure changed for {output}")
                 comparable["inputs"] = dict(comparable["inputs"], **{"Cargo.lock": hashes.get("Cargo.lock")})
             if comparable != certificate:
-                raise ValueError(f"uncertified fresh artifact {output}; rebuild required")
+                raise UncertifiedFreshArtifact(f"uncertified fresh artifact {output}; rebuild required")
         certificates[name] = certificate
     return certificates
 
@@ -652,7 +656,7 @@ def certify_artifacts(current, previous, source_before, artifacts, snapshot):
                 current["closure_verified"].append(artifact_path(record))
         except (OSError, ValueError, KeyError, tomllib.TOMLDecodeError) as error:
             errors.append(str(error))
-            if isinstance(error, LockClosureRejected):
+            if isinstance(error, (LockClosureRejected, UncertifiedFreshArtifact)):
                 current["rejected_artifacts"].append(artifact_path(record))
     return certificates, errors
 

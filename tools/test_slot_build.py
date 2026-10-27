@@ -689,7 +689,6 @@ class SourceFreshnessTests(unittest.TestCase):
     def assert_directory_change_rejected(self, change):
         self.build_directory_library()
         output = self.slot / "debug/deps/libprobe-retail.rmeta"
-        original = output.read_bytes()
         change(self.tree / "tests/nested")
         # Advance the slot-wide source baseline with an unrelated profile.
         result, _ = self.run_library_step("forever")
@@ -699,7 +698,7 @@ class SourceFreshnessTests(unittest.TestCase):
         self.assertEqual(receipt["changed_paths"], [])
         self.assertNotEqual(result.returncode, 0)
         self.assertEqual(receipt["result"], "stale-artifacts")
-        self.assertEqual(output.read_bytes(), original)
+        self.assertFalse(output.exists())
         self.assertEqual((self.slot / ".verified-source-identity.json").read_bytes(), verified)
 
     def test_directory_input_changed_nested_file_rejects_reuse(self):
@@ -793,11 +792,10 @@ class SourceFreshnessTests(unittest.TestCase):
         generated.write_text("pub const VALUE: u32 = 1;")
         self.build_generated_library(generated)
         output = self.slot / "debug/deps/libprobe-retail.rmeta"
-        original = output.read_bytes()
         verified = (self.slot / ".verified-source-identity.json").read_bytes()
         generated.write_text("pub const VALUE: u32 = 2;")
         result, receipt = self.run_library_step("retail", fresh=True)
-        self.assertEqual(output.read_bytes(), original)
+        self.assertFalse(output.exists())
         self.assertEqual(receipt["changed_paths"], [])
         self.assertNotEqual(result.returncode, 0)
         self.assertEqual(receipt["result"], "stale-artifacts")
@@ -806,11 +804,10 @@ class SourceFreshnessTests(unittest.TestCase):
     def assert_resolved_generated_input_is_guarded(self, spelling, generated):
         self.build_generated_library(spelling)
         output = self.slot / "debug/deps/libprobe-retail.rmeta"
-        original = output.read_bytes()
         verified = (self.slot / ".verified-source-identity.json").read_bytes()
         generated.write_text("pub const VALUE: u32 = 2;")
         result, receipt = self.run_library_step("retail", fresh=True)
-        self.assertEqual(output.read_bytes(), original)
+        self.assertFalse(output.exists())
         self.assertEqual(receipt["changed_paths"], [])
         self.assertNotEqual(result.returncode, 0)
         self.assertEqual(receipt["result"], "stale-artifacts")
@@ -854,7 +851,7 @@ class SourceFreshnessTests(unittest.TestCase):
         self.assertEqual(other.returncode, 0, other.stderr)
         verified = (self.slot / ".verified-source-identity.json").read_bytes()
         result, receipt = self.run_library_step("retail", fresh=True)
-        self.assertEqual(output.read_bytes(), original)
+        self.assertFalse(output.exists())
         self.assertEqual(receipt["changed_paths"], [])
         self.assertNotEqual(result.returncode, 0)
         self.assertEqual(receipt["result"], "stale-artifacts")
