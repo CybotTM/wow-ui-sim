@@ -31,7 +31,7 @@ fn xml_binding_preserves_addon_caller_identity() {
         .expect("bind actions");
     env.send_key_press("H", None).expect("press native binding");
     env.send_key_press("G", None).expect("press addon binding");
-    env.exec("assert(NativeSecure == true); assert(AddonSecure == false)")
+    env.exec("assert(NativeSecure == true, 'native body must be secure: ' .. tostring(NativeSecure)); assert(AddonSecure == false, 'addon body must be tainted: ' .. tostring(AddonSecure))")
         .expect("binding caller security follows its owner");
 }
 
