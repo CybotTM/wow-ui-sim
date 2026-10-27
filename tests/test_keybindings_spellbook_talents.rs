@@ -34,6 +34,38 @@ fn supplied_spec_selection_is_observed() {
     "#).expect("supplied specialization observations");
 }
 
+#[cfg(any(feature = "client-ptr", feature = "client-wowforever"))]
+#[test]
+fn spellbook_rank_accepts_untainted_secret_arguments() {
+    let env = wow_ui_sim::lua_api::WowLuaEnv::new().expect("create environment");
+    env.exec(r#"
+        A_Admin.SetSpellBookItemLowRank(6603, true)
+        local slot, bank = secretwrap(1), secretwrap(0)
+        assert(C_SpellBook.IsSpellBookItemLowRank(slot, 0) == true)
+        assert(C_SpellBook.IsSpellBookItemLowRank(1, bank) == true)
+        local function addon_slot() return C_SpellBook.IsSpellBookItemLowRank(slot, 0) end
+        local function addon_bank() return C_SpellBook.IsSpellBookItemLowRank(1, bank) end
+        debug.setobjecttaint(addon_slot, 'RankFixture')
+        debug.setobjecttaint(addon_bank, 'RankFixture')
+        assert(not pcall(addon_slot))
+        assert(not pcall(addon_bank))
+    "#).expect("AllowedWhenUntainted spellbook arguments");
+}
+
+#[cfg(any(feature = "client-ptr", feature = "client-wowforever"))]
+#[test]
+fn spec_selection_accepts_untainted_secret_argument() {
+    let env = wow_ui_sim::lua_api::WowLuaEnv::new().expect("create environment");
+    env.exec(r#"
+        A_Admin.SetSpecSelectionEnabled(true)
+        local class = secretwrap(2)
+        assert(C_SpecializationInfo.IsSpecSelectionEnabled(class) == true)
+        local function addon() return C_SpecializationInfo.IsSpecSelectionEnabled(class) end
+        debug.setobjecttaint(addon, 'SpecFixture')
+        assert(not pcall(addon))
+    "#).expect("AllowedWhenUntainted specialization argument");
+}
+
 #[cfg(feature = "client-ptr")]
 #[test]
 fn ptr_spellbook_filter_uses_supplied_rank() {
