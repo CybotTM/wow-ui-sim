@@ -17,10 +17,10 @@ pub struct SimState {
     pub(crate) nameplate_hit_test_insets: crate::c_api::c_nameplate_manager::NamePlateHitTestInsets,
     pub(crate) input_interface_style: crate::c_api::c_input_interface_style::InputInterfaceStyle,
     /// Explicit mapped-stick input; None means no configured snapshot, not device absence.
-    #[cfg(feature = "client-wowforever")]
+    #[cfg(any(feature = "client-wowforever", feature = "client-ptr"))]
     pub gamepad_mapped_sticks: Option<crate::c_api::c_game_pad::MappedStickSnapshot>,
     /// Independent free-look-hover policy; false default is a simulator guess.
-    #[cfg(feature = "client-wowforever")]
+    #[cfg(any(feature = "client-wowforever", feature = "client-ptr"))]
     pub(crate) gamepad_allow_hover_events_with_free_look: bool,
     /// Explicit Wrath RAF link snapshot, keyed by represented unit GUID.
     #[cfg(feature = "client-wrath")]
