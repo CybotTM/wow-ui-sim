@@ -61,18 +61,82 @@ fn test_get_map_info_has_shadowlands_compat_maps() {
 }
 
 #[test]
-fn test_get_map_info_returns_generic_details_for_unseeded_retail_maps() {
+fn test_get_map_info_world_roots_have_correct_identity() {
     let env = env();
-    let (map_id, name, parent_id): (i32, String, i32) = env
+    let roots: (String, i32, i32, String, i32, i32) = env
+        .eval(
+            r#"
+            local cosmic = C_Map.GetMapInfo(946)
+            local azeroth = C_Map.GetMapInfo(947)
+            return cosmic.name, cosmic.mapType, cosmic.parentMapID,
+                   azeroth.name, azeroth.mapType, azeroth.parentMapID
+            "#,
+        )
+        .unwrap();
+    assert_eq!(roots, ("Cosmic".into(), 0, 0, "Azeroth".into(), 1, 946));
+}
+
+#[test]
+fn test_get_map_info_answers_unseeded_retail_maps_from_the_ui_map_table() {
+    let env = env();
+    let (map_id, name, parent_id, map_type): (i32, String, i32, i32) = env
         .eval(
             r#"
             local info = C_Map.GetMapInfo(630)
-            return info.mapID, info.name, info.parentMapID
+            return info.mapID, info.name, info.parentMapID, info.mapType
             "#,
         )
         .unwrap();
     assert_eq!(map_id, 630);
-    assert_eq!(name, "Map 630");
+    if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Retail {
+        assert_eq!(name, "Azsuna", "UiMap.db2 row, not a placeholder");
+        assert_eq!(parent_id, 619, "Broken Isles");
+        assert_eq!(map_type, 3, "Zone");
+    } else {
+        assert_eq!(name, "Map 630");
+        assert_eq!(parent_id, 0);
+    }
+}
+
+#[test]
+fn test_map_util_finds_unseeded_continent_parent() {
+    let env = env();
+    if wow_ui_sim::client_profile::ACTIVE != wow_ui_sim::client_profile::ClientProfile::Retail {
+        let name: String = env.eval("return C_Map.GetMapInfo(630).name").unwrap();
+        assert_eq!(name, "Map 630");
+        return;
+    }
+    let path = wow_ui_sim::client_profile::blizzard_ui_addons_dir()
+        .join("Blizzard_FrameXMLUtil/Mainline/MapUtil.lua");
+    let source = std::fs::read_to_string(&path)
+        .unwrap_or_else(|error| panic!("read {}: {error}", path.display()));
+    env.exec(&source).expect("execute original MapUtil.lua");
+    let maps: (i32, String, i32, String) = env
+        .eval(
+            r#"
+            local continent = MapUtil.GetMapParentInfo(630, 2)
+            local city = MapUtil.GetMapParentInfo(2339, 3)
+            return continent and continent.mapID or 0, continent and continent.name or '',
+                   city and city.mapID or 0, city and city.name or ''
+            "#,
+        )
+        .unwrap();
+    assert_eq!(maps, (619, "Broken Isles".into(), 2339, "Dornogal".into()));
+}
+
+#[test]
+fn test_get_map_info_returns_generic_details_for_maps_the_table_lacks() {
+    let env = env();
+    let (map_id, name, parent_id): (i32, String, i32) = env
+        .eval(
+            r#"
+            local info = C_Map.GetMapInfo(9999)
+            return info.mapID, info.name, info.parentMapID
+            "#,
+        )
+        .unwrap();
+    assert_eq!(map_id, 9999);
+    assert_eq!(name, "Map 9999");
     assert_eq!(parent_id, 0);
 }
 

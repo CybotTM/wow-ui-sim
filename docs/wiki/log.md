@@ -2,6 +2,10 @@
 
 Reconciled the [historical target-spell boundary](investigations/forever-startup-gaps.md#historical-startup-packet-and-unknown-consumers) with the [scenario contract](../specs/spell-target-flyout.md). PTR original consumer RED/GREEN and Forever target/secret cases pass. All seven profile checks have zero compiler warnings; PTR stock removes two missing-API error keys, and Retail/Forever stock is unchanged. Native no-target behavior remains unknown.
 
+## [2026-10-27] implementation | Retail UiMap catalog
+
+[Lookup scope and provenance](systems/lua-api.md#retail-uimap-catalog) link the catalog contract. Retail stock and cross-profile proof are tracked separately from this implementation record.
+
 ## [2026-10-26] implementation | Spectating UI scenario
 
 [Scenario and consumer evidence](systems/spectating-ui.md): state-backed query with a user-authorized false default. Retail consumer RED/GREEN and unchanged Retail/PTR stock are proven; seven all-target checks have zero compiler warnings.

@@ -94,6 +94,7 @@ pub mod startup;
 pub mod texture;
 pub mod toc;
 pub use sim_data::traits;
+pub use sim_data::ui_maps;
 pub mod widget;
 #[cfg(any(
     feature = "client-wrath",

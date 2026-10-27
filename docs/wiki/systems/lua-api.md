@@ -575,8 +575,13 @@ The legacy global now projects the existing selected rank's supplied rights posi
 
 The [owning contract](../../specs/wrath-friends-legacy.md) records static12340 provenance, original FriendsFrame RED→GREEN, Wrath5/Retail19 bounded passes, both clean stock startups, response timing and unsupported status/sorting boundaries. Retail registration is unchanged; ignore/add/remove behavior is excluded. Retail check and joint F02 integration remain assigned to the merge gate.
 
+## Retail UiMap catalog
+
+`C_Map.GetMapInfo` checks seeded state first and then the Retail UiMap catalog. The [catalog contract](../../specs/ui-map-info-catalog.md) records the profile boundary, seed precedence, and data provenance limits. Other profiles do not use the Retail catalog.
+
 ## Sources
 
+- [UiMap information catalog](../../specs/ui-map-info-catalog.md) — profile scope and provenance.
 - [Wrath legacy friends contract](../../specs/wrath-friends-legacy.md) — native tuple/selection evidence and simulator-policy limits.
 - [Retail unused currency contract](../../specs/currency-unused-mutations.md) — flag scope, original consumers and held grouping.
 

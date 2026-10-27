@@ -27,5 +27,7 @@ pub mod spell_power;
 pub mod spells;
 #[path = "../data/traits.rs"]
 pub mod traits;
+#[path = "../data/ui_maps.rs"]
+pub mod ui_maps;
 #[path = "../data/zones.rs"]
 pub mod zones;
