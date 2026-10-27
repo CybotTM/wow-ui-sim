@@ -119,18 +119,34 @@ fn glyph_socket_consumer_tracks_supplied_records() {
 }
 
 #[test]
+fn talent_tab_background_tracks_supplied_records_on_show() {
+    let env = load_talent_fixture();
+    for (background, expected) in [("FirstTree", "FirstTree"), ("SecondTree", "SecondTree")] {
+        env.state().borrow_mut().wrath_talent_tabs.insert(
+            (1, 1),
+            wow_ui_sim::lua_api::state::WrathTalentTab {
+                name: "Supplied talent tree".to_string(),
+                icon: "Interface\\Icons\\Supplied".to_string(),
+                points_spent: 3,
+                background: background.to_string(),
+                preview_points_spent: 1,
+            },
+        );
+        env.exec("PlayerTalentFrame:Hide(); PlayerTalentFrame:Show()")
+            .expect("show native talent panel");
+        assert_no_errors(&env);
+        env.exec(&format!(
+            "assert(PlayerTalentFrameBackgroundTopLeft:GetTexture() == 'Interface\\\\TalentFrame\\\\{expected}-TopLeft')"
+        ))
+        .expect("native consumer applies supplied background");
+    }
+}
+
+#[test]
 fn talent_controls_consumer_tracks_supplied_points() {
     let env = load_talent_fixture();
     env.exec("A_Admin.SetWrathUnspentTalentPoints(1, 0)")
         .expect("supply zero points");
-    let error = env
-        .exec("PlayerSpecTab_OnClick(PlayerSpecTab1)")
-        .expect_err("unmodeled talent tab query remains visible");
-    assert!(
-        error.to_string().contains("TalentFrameBase.lua:118")
-            && error.to_string().contains("GetTalentTabInfo"),
-        "unexpected original consumer failure: {error}"
-    );
     env.exec(
         r#"
         assert(GetUnspentTalentPoints(false, false, 1) == 0)
