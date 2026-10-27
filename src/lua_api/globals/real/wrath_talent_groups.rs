@@ -140,17 +140,28 @@ fn get_unspent_talent_points(state: &mut LuaState) -> LuaResult<u32> {
 
 // Wrath show consumers: TalentFrameBase.lua:118,139,163,195,526,568,573.
 // Signatures: 3.1.0-api-changes.txt:25-27,32; 2.3.0-api-changes.txt:86,88.
-// Absent records and inspect/pet state are scenario defaults, not native claims.
-fn one_based_index(state: &LuaState, index: i32) -> Option<u32> {
+// Return shapes follow the aso 3.3.5a comparison (TalentInfo_Scripts.cpp:48–164,271–457).
+// Inspect and pet inputs are not supplied by this scenario model.
+fn one_based_index(state: &LuaState, index: i32) -> LuaResult<Option<u32>> {
     match stack_val(state, index) {
-        Val::Num(value) if value >= 1.0 => Some(value as u32),
-        _ => None,
+        Val::Num(value) if value >= 1.0 => Ok(Some(value as u32)),
+        Val::Num(_) => Ok(None),
+        _ => Err(rilua::runtime_error(
+            "Wrath talent query requires a numeric index",
+        )),
     }
 }
 
 fn push_string(state: &mut LuaState, value: &str) {
     let string = state.gc.intern_string(value.as_bytes());
     state.push(Val::Str(string));
+}
+
+fn push_optional_string(state: &mut LuaState, value: Option<&str>) {
+    match value {
+        Some(value) => push_string(state, value),
+        None => state.push(Val::Nil),
+    }
 }
 
 fn push_flag(state: &mut LuaState, value: bool) {
@@ -177,22 +188,22 @@ fn get_num_talent_tabs(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn get_talent_tab_info(state: &mut LuaState) -> LuaResult<u32> {
-    let Some(tab) = one_based_index(state, 1) else {
-        return Ok(0);
-    };
-    if is_other_unit(state, 2, 3) {
-        return Ok(0);
-    }
+    let tab = one_based_index(state, 1)?;
     let group = selected_group(state, 4)?;
-    let record = borrow_state(state)?
-        .wrath_talent_tabs
-        .get(&(group, tab))
-        .cloned();
+    let record = if is_other_unit(state, 2, 3) {
+        None
+    } else {
+        let sim = borrow_state(state)?;
+        tab.and_then(|tab| sim.wrath_talent_tabs.get(&(group, tab)).cloned())
+    };
     let Some(record) = record else {
-        return Ok(0);
+        for value in [Val::Nil, Val::Nil, Val::Num(0.0), Val::Nil, Val::Num(0.0)] {
+            state.push(value);
+        }
+        return Ok(5);
     };
     push_string(state, &record.name);
-    push_string(state, &record.icon);
+    push_optional_string(state, record.icon.as_deref());
     state.push(Val::Num(record.points_spent as f64));
     push_string(state, &record.background);
     state.push(Val::Num(record.preview_points_spent as f64));
@@ -200,7 +211,7 @@ fn get_talent_tab_info(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn get_num_talents(state: &mut LuaState) -> LuaResult<u32> {
-    let tab = one_based_index(state, 1);
+    let tab = one_based_index(state, 1)?;
     let count = if is_other_unit(state, 2, 3) {
         0
     } else {
@@ -214,7 +225,7 @@ fn get_num_talents(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn supplied_rows(state: &LuaState) -> LuaResult<Vec<crate::lua_api::state::WrathTalentRow>> {
-    let Some(tab) = one_based_index(state, 1) else {
+    let Some(tab) = one_based_index(state, 1)? else {
         return Ok(Vec::new());
     };
     if is_other_unit(state, 3, 4) {
@@ -229,15 +240,28 @@ fn supplied_rows(state: &LuaState) -> LuaResult<Vec<crate::lua_api::state::Wrath
 }
 
 fn get_talent_info(state: &mut LuaState) -> LuaResult<u32> {
-    let Some(index) = one_based_index(state, 2) else {
-        return Ok(0);
-    };
+    let index = one_based_index(state, 2)?;
     let rows = supplied_rows(state)?;
-    let Some(row) = rows.get((index - 1) as usize) else {
-        return Ok(0);
+    let row = index.and_then(|index| rows.get((index - 1) as usize));
+    let Some(row) = row else {
+        for value in [
+            Val::Nil,
+            Val::Nil,
+            Val::Num(1.0),
+            Val::Num(1.0),
+            Val::Num(0.0),
+            Val::Num(0.0),
+            Val::Num(0.0),
+            Val::Nil,
+            Val::Num(0.0),
+            Val::Nil,
+        ] {
+            state.push(value);
+        }
+        return Ok(10);
     };
     push_string(state, &row.name);
-    push_string(state, &row.icon);
+    push_optional_string(state, row.icon.as_deref());
     state.push(Val::Num(row.tier as f64));
     state.push(Val::Num(row.column as f64));
     state.push(Val::Num(row.rank as f64));
@@ -250,7 +274,7 @@ fn get_talent_info(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn get_talent_prereqs(state: &mut LuaState) -> LuaResult<u32> {
-    let Some(index) = one_based_index(state, 2) else {
+    let Some(index) = one_based_index(state, 2)? else {
         return Ok(0);
     };
     let rows = supplied_rows(state)?;
@@ -258,15 +282,13 @@ fn get_talent_prereqs(state: &mut LuaState) -> LuaResult<u32> {
         return Ok(0);
     };
     let mut count = 0;
-    for prerequisite in &row.prerequisites {
+    for prerequisite in row.prerequisites.iter().take(3) {
         let Some(target) = prerequisite
             .talent_index
             .checked_sub(1)
             .and_then(|i| rows.get(i as usize))
         else {
-            return Err(rilua::runtime_error(
-                "Wrath talent prerequisite references an absent row",
-            ));
+            continue;
         };
         state.push(Val::Num(target.tier as f64));
         state.push(Val::Num(target.column as f64));

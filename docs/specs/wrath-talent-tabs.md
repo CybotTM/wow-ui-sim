@@ -25,7 +25,7 @@ The Wrath talent panel reads scenario-supplied tabs, rows and prerequisites. The
 
 ## Known gaps (current cycle)
 
-- [ ] Reconcile the pending aso 3.3.5a comparison; absent records, inspected and pet state are scenario defaults, not claims about native values.
+- [ ] Verify the aso 3.3.5a comparison boundaries; inspected and pet catalogs remain unsupplied scenario state.
 - [ ] Verify the original render path and profile checks.
 
 ## Out of scope
@@ -34,4 +34,4 @@ The Wrath talent panel reads scenario-supplied tabs, rows and prerequisites. The
 
 ## Sources
 
-Pinned Wrath `FrameXML/TalentFrameBase.lua:118,139,163,195,526,568,573` and `Blizzard_TalentUI/Blizzard_TalentUI.lua:596,604` are original consumer calls. Historical signatures are in `data/patch-api/sources/3.1.0-api-changes.txt:25–27,32` and `2.3.0-api-changes.txt:86,88`; the preview-points signature differs from the pinned consumer. Native comparison is pending.
+Pinned Wrath `FrameXML/TalentFrameBase.lua:118,139,163,195,526,568,573` and `Blizzard_TalentUI/Blizzard_TalentUI.lua:596,604` are original consumer calls. Historical signatures are in `data/patch-api/sources/3.1.0-api-changes.txt:25–27,32` and `2.3.0-api-changes.txt:86,88`; the preview-points signature differs from the pinned consumer. The aso 3.3.5a comparison (`TalentInfo_Scripts.cpp:48–164,271–457`, `TalentInfo.cpp:220–226,306–354,719–742`) supports the tuple and prerequisite semantics. Its preview-points arguments are `(pet, group)`, matching the consumer and superseding the older signature.
