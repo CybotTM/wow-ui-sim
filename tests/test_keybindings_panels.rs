@@ -350,7 +350,7 @@ fn native_action_button_binding_tracks_down_and_up() {
         record_native_binding_caller(&env, "ActionButtonDown");
         record_native_binding_caller(&env, "ActionButtonUp");
 
-        for spell_id in [19750, 635] {
+        for spell_id in [19750, 82326] {
             {
                 let mut state = env.state().borrow_mut();
                 state.action_bars.insert(1, spell_id);
