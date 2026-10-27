@@ -106,6 +106,11 @@ fn glyph_socket_consumer_tracks_supplied_records() {
         assert(select('#', GetGlyphSocketInfo(2, 1)) == 0)
         assert(select('#', GetGlyphSocketInfo(0, 1)) == 0)
         assert(GetNumGlyphSockets() == 6)
+        A_Admin.SetWrathGlyphSocket(2, 1, true, 2, 303, 'Interface\\Icons\\GlyphThree')
+        local groupEnabled, groupType, groupSpell = GetGlyphSocketInfo(1, 2)
+        assert(groupEnabled == 1 and groupType == 2 and groupSpell == 303)
+        enabled, kind, spell, icon = GetGlyphSocketInfo(1, 1)
+        assert(enabled == nil and kind == 2 and spell == nil and icon == nil)
         "#,
     );
 }
@@ -128,6 +133,10 @@ fn talent_controls_consumer_tracks_supplied_points() {
         assert(GetUnspentTalentPoints(false, false, 1) == 0)
         A_Admin.SetWrathUnspentTalentPoints(1, 3)
         assert(GetUnspentTalentPoints(false, false, 1) == 3)
+        A_Admin.SetWrathUnspentTalentPoints(2, 9)
+        assert(GetUnspentTalentPoints(false, false, 2) == 9)
+        assert(GetUnspentTalentPoints(false, false, 1) == 3)
+        assert(GetUnspentTalentPoints(false, false) == 3)
         "#,
     )
     .expect("query both supplied talent point values");
