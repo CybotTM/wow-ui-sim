@@ -1,3 +1,7 @@
+## [2026-10-27] staged | Monk specialization ordering
+
+[Class specialization order](systems/specialization-mastery-spells.md#class-specialization-order): two CLI-driven original content-frame cases exposed swapped Monk identities. Ordered lookup is implemented; GREEN and profile verification remain pending.
+
 ## [2026-10-26] implementation | Spectating UI scenario
 
 [Scenario and consumer evidence](systems/spectating-ui.md): state-backed query with a user-authorized false default. Retail consumer RED/GREEN and unchanged Retail/PTR stock are proven; seven all-target checks have zero compiler warnings.

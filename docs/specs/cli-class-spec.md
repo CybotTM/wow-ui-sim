@@ -11,6 +11,7 @@
 - [ ] Reject specialization selection on Wrath, Era, and Anniversary.
 - [ ] Apply selections through `A_Admin`, then dispatch `PLAYER_SPECIALIZATION_CHANGED` with `player` before `--exec-lua`.
 - [ ] Do not repeat `PLAYER_ENTERING_WORLD` for a class or specialization change.
+- [ ] Monk Mistweaver and Windwalker indices resolve to their matching specialization identities in the Blizzard specialization content frame.
 
 ## How it works
 
@@ -21,10 +22,11 @@
 - `src/bin/wow_sim/class_spec.rs` resolves and applies the selected context.
 - `src/bin/wow_sim/main.rs` accepts and schedules the flags.
 - `src/lua_api/env.rs` and `src/lua_api/env_rilua.rs` execute the scheduled hook.
+- `crates/sim-data/data/specializations.rs` returns class specializations in `order_index` order.
 
 ## Tests asserting this spec
 
-- `tests/cli_class_spec.rs` checks two class and specialization pairs through `--exec-lua`.
+- `tests/cli_class_spec.rs` checks class and specialization pairs through `--exec-lua` and exercises the Blizzard Monk specialization content frame.
 - `src/bin/wow_sim/class_spec.rs` tests class and specialization resolution.
 
 ## Known gaps (current cycle)

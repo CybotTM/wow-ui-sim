@@ -3920,7 +3920,7 @@ The sixteen retail 12.0.0 `Enum.EditModeDamageMeterSetting.*` and `Enum.EditMode
 | [[frame-data-flow]] | Parallel Lua/Rust systems, same-object engine-root XML configuration, addon-load ownership/cleanup, global tables (__frame_fields/__scripts), method lookup order, Mixin() application with early EditMode base aliases, event dispatch flow |
 | [[taint-system]] | Protected-frame gating, dual Lua environment (genv/secureenv), Elune-backed issecure/securecall, bounded per-environment click-binding interaction profile, Blizzard `issecure()` call-site matrix, SecureHandler fallback, state/attribute drivers |
 | [[casc-asset-cache]] | CASC cache layers, `.product.db` selected-product identity, measured timings, failure modes, and the 4,398-file Forever mapping/sync proof |
-| [[specialization-mastery-spells]] | Per-spec mastery spell IDs modeled from ChrSpecialization.db2 (`SpecInfo.mastery_spell_ids`); backs `C_SpecializationInfo.GetSpecializationMasterySpells` and the Character sheet Mastery tooltip |
+| [[specialization-mastery-spells]] | Per-spec mastery spell IDs and class specialization ordering from ChrSpecialization.db2 |
 | [[duration-core]] | Lua table-proxy timing, three-formatter duration consumption, player cast/channel queries, manual clocks, Copy/Assign, curve evaluation, simulator policies and native/consumer bounds |
 
 ## investigations/
