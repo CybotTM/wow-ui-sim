@@ -685,8 +685,7 @@ pub struct LfgListCounts {
 /// A binding body and its original XML source location.
 #[derive(Debug, Clone)]
 pub struct BindingBody {
-    pub source: String,
-    pub chunk_name: String,
+    pub function: rilua::Val,
     pub run_on_up: bool,
 }
 

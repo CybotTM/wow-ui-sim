@@ -520,15 +520,8 @@ fn execute_binding_body(
     let globals = Val::Table(state.global);
     let value = create_string(state, key_state);
     table_set_static(state, globals, "keystate", value);
-    let result = LuaApiMut::load_bytes(state, body.source.as_bytes(), &body.chunk_name)
-        .map_err(|error| error.to_string())
-        .and_then(|function| {
-            crate::lua_api::script_helpers::call_void_function_state(
-                state,
-                Val::Function(function.gc_ref()),
-                &[],
-            )
-        });
+    let result =
+        crate::lua_api::script_helpers::call_void_function_state(state, body.function, &[]);
     if let Err(error) = result {
         call_error_handler_state(state, &error);
     }

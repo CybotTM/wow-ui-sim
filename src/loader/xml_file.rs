@@ -183,11 +183,11 @@ fn process_element(
                         "\n".repeat(binding.source_line.saturating_sub(1))
                     );
                     let chunk_name = format!("@{}", path.display());
+                    let function = compile_binding_body(env, &source, &chunk_name, ctx)?;
                     env.state().borrow_mut().keybindings.bodies.insert(
                         name.clone(),
                         crate::lua_api::sim_substates::BindingBody {
-                            source,
-                            chunk_name,
+                            function,
                             run_on_up: binding.run_on_up,
                         },
                     );
@@ -208,6 +208,34 @@ fn process_element(
         XmlElement::ModifiedClick(_) => Ok(0),
         _ => process_timed_frame(env, element, ctx, timing).map(|_| 0),
     }
+}
+
+fn compile_binding_body(
+    env: &LoaderEnv<'_>,
+    source: &str,
+    chunk_name: &str,
+    ctx: &AddonContext<'_>,
+) -> Result<Val, LoadError> {
+    env.with_state(|state| {
+        let function = LuaApiMut::load_bytes(state, source.as_bytes(), chunk_name)
+            .map_err(|error| LoadError::Lua(error.to_string()))?;
+        super::lua_file::prepare_addon_function(state, &function, ctx)?;
+        let value = Val::Function(function.gc_ref());
+        let roots =
+            crate::lua_api::methods::registry_table_or_create(state, "__binding_body_roots");
+        if let Val::Table(table_ref) = roots {
+            let table = state
+                .gc
+                .tables
+                .get_mut(table_ref)
+                .ok_or_else(|| LoadError::Lua("binding root table unavailable".into()))?;
+            table
+                .raw_set(value, Val::Bool(true), &state.gc.string_arena)
+                .map_err(|error| LoadError::Lua(error.to_string()))?;
+            state.gc.barrier_back(table_ref);
+        }
+        Ok(value)
+    })
 }
 
 fn process_timed_frame(

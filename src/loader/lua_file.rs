@@ -193,16 +193,7 @@ fn execute_compiled_lua_file(
     ctx: &AddonContext,
     chunk_name: &str,
 ) -> Result<rilua::Val, LoadError> {
-    // The VM tracks this exact closure allocation and applies its addon taint on entry.
-    if ctx.taint {
-        stamp_addon_taint_state(state, &func, ctx.name)
-            .map_err(|e| report_lua_load_error(state, e))?;
-    }
-    if ctx.use_secure_env {
-        mark_secure_state(state, &func).map_err(|e| report_lua_load_error(state, e))?;
-    }
-    crate::lua_api::loader_env::apply_loading_scoped_fenv_state(state, &func)
-        .map_err(|e| report_lua_load_error(state, e))?;
+    prepare_addon_function(state, &func, ctx)?;
     let result = if ctx.taint {
         execute_budgeted_addon_file(state, func, ctx, chunk_name)
     } else {
@@ -211,6 +202,22 @@ fn execute_compiled_lua_file(
         })
     };
     result.map_err(|e| contextual_lua_load_error(state, e, chunk_name))
+}
+
+pub(crate) fn prepare_addon_function(
+    state: &mut LuaState,
+    func: &rilua::Function,
+    ctx: &AddonContext,
+) -> Result<(), LoadError> {
+    if ctx.taint {
+        stamp_addon_taint_state(state, func, ctx.name)
+            .map_err(|e| report_lua_load_error(state, e))?;
+    }
+    if ctx.use_secure_env {
+        mark_secure_state(state, func).map_err(|e| report_lua_load_error(state, e))?;
+    }
+    crate::lua_api::loader_env::apply_loading_scoped_fenv_state(state, func)
+        .map_err(|e| report_lua_load_error(state, e))
 }
 
 fn execute_budgeted_addon_file(
