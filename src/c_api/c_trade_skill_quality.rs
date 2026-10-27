@@ -27,6 +27,7 @@ pub struct CraftingQualityInfo {
 #[derive(Debug, Default)]
 pub struct RecipeQualityInputs {
     pub item_quality: HashMap<(u32, u32), CraftingQualityInfo>,
+    pub reagent_item_quality: HashMap<u32, CraftingQualityInfo>,
     pub reagent_links: HashMap<(u32, u32, u32), String>,
 }
 
@@ -36,6 +37,7 @@ pub(super) fn register(state: &mut LuaState) -> LuaResult<()> {
     table_set_rust_fn_static(state, ns, "GetRecipeQualityReagentLink", reagent_link)?;
     if matches!(ACTIVE, ClientProfile::Retail | ClientProfile::Ptr) {
         table_set_rust_fn_static(state, ns, "GetItemCraftedQualityInfo", crafted_item_quality)?;
+        table_set_rust_fn_static(state, ns, "GetItemReagentQualityInfo", reagent_item_quality)?;
     }
     Ok(())
 }
@@ -76,6 +78,28 @@ fn crafted_item_quality(state: &mut LuaState) -> LuaResult<u32> {
     let record = match parse_item_id_from_val(state, value) {
         Some(item_id) => borrow_state(state)?
             .crafted_item_quality
+            .get(&item_id)
+            .cloned(),
+        None => None,
+    };
+    let Some(record) = record else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+    Ok(push_crafting_quality_snapshot(state, &record))
+}
+
+fn reagent_item_quality(state: &mut LuaState) -> LuaResult<u32> {
+    let value = rilua::table_security::unwrap_secret(state, stack_val(state, 1))?;
+    if !matches!(value, Val::Num(_) | Val::Str(_)) {
+        return Err(rilua::runtime_error(
+            "C_TradeSkillUI.GetItemReagentQualityInfo: itemInfo must be an item ID or link",
+        ));
+    }
+    let record = match parse_item_id_from_val(state, value) {
+        Some(item_id) => borrow_state(state)?
+            .recipe_quality_inputs
+            .reagent_item_quality
             .get(&item_id)
             .cloned(),
         None => None,

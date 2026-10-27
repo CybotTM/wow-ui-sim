@@ -652,3 +652,112 @@ fn reputation_surface_exists_for_keybind_setup() {
         );
     }
 }
+
+#[cfg(any(feature = "client-retail", feature = "client-ptr"))]
+#[test]
+fn item_button_azerite_overlay_uses_supplied_item_identity() {
+    let env = setup_env();
+    env.state()
+        .borrow_mut()
+        .azerite_empowered
+        .empowered_items
+        .insert(900001);
+    env.exec(
+        r#"
+        local button = CreateFrame('Button', nil, UIParent)
+        button.IconOverlay = button:CreateTexture(nil, 'OVERLAY')
+        SetItemButtonOverlay(button, 900001, Enum.ItemQuality.Common, false)
+        assert(button.IconOverlay:GetAtlas() == 'AzeriteIconFrame')
+        assert(button.IconOverlay:IsShown())
+        assert(C_AzeriteEmpoweredItem.IsAzeriteEmpoweredItemByID(900001) == true)
+        assert(C_AzeriteEmpoweredItem.IsAzeriteEmpoweredItemByID(900002) == false)
+    "#,
+    )
+    .expect("original item button Azerite overlay and distinct supplied identities");
+}
+
+#[cfg(any(feature = "client-retail", feature = "client-ptr"))]
+#[test]
+fn item_button_reagent_overlay_uses_supplied_item_qualities() {
+    use wow_ui_sim::c_api::c_trade_skill_quality::CraftingQualityInfo;
+    let env = setup_env();
+    {
+        let mut state = env.state().borrow_mut();
+        for (id, quality, atlas) in [
+            (900001, 1, "professions-icon-quality-tier1-small"),
+            (900002, 2, "professions-icon-quality-tier2-small"),
+        ] {
+            state.recipe_quality_inputs.reagent_item_quality.insert(
+                id,
+                CraftingQualityInfo {
+                    quality,
+                    icon_inventory: atlas.to_owned(),
+                    ..Default::default()
+                },
+            );
+        }
+    }
+    env.exec(
+        r#"
+        local first = CreateFrame('Button', nil, UIParent)
+        local second = CreateFrame('Button', nil, UIParent)
+        SetItemCraftingQualityOverlay(first, 900001)
+        SetItemCraftingQualityOverlay(second, 900002)
+        assert(first.isProfessionItem and not first.isCraftedItem)
+        assert(second.isProfessionItem and not second.isCraftedItem)
+        assert(first.ProfessionQualityOverlay:GetAtlas() == 'professions-icon-quality-tier1-small')
+        assert(second.ProfessionQualityOverlay:GetAtlas() == 'professions-icon-quality-tier2-small')
+        assert(C_TradeSkillUI.GetItemReagentQualityInfo(900001).quality == 1)
+        assert(C_TradeSkillUI.GetItemReagentQualityInfo(900002).quality == 2)
+        assert(C_TradeSkillUI.GetItemReagentQualityInfo(900003) == nil)
+    "#,
+    )
+    .expect("original item button reagent overlays use supplied quality");
+}
+
+#[cfg(any(feature = "client-retail", feature = "client-ptr"))]
+#[test]
+fn item_button_queries_authenticate_secret_arguments_by_caller_taint() {
+    use wow_ui_sim::c_api::c_trade_skill_quality::CraftingQualityInfo;
+
+    let env = setup_env();
+    {
+        let mut state = env.state().borrow_mut();
+        state.azerite_empowered.empowered_items.insert(900001);
+        state.recipe_quality_inputs.reagent_item_quality.insert(
+            900001,
+            CraftingQualityInfo {
+                quality: 2,
+                icon_inventory: "professions-icon-quality-tier2-small".to_owned(),
+                ..Default::default()
+            },
+        );
+    }
+    env.exec(
+        r#"
+        local azerite = C_AzeriteEmpoweredItem.IsAzeriteEmpoweredItemByID
+        local reagent = C_TradeSkillUI.GetItemReagentQualityInfo
+        assert(type(azerite) == 'function', 'Azerite query must exist')
+        assert(type(reagent) == 'function', 'reagent query must exist')
+        assert(debug.getstacktaint() == nil, 'untainted setup')
+        local item = secretwrap(900001)
+        assert(issecretvalue(item), 'authentic secret item')
+        assert(azerite(item) == true, 'untainted secret Azerite result')
+        local info = reagent(item)
+        assert(info.quality == 2, 'untainted secret reagent quality')
+        assert(info.iconInventory == 'professions-icon-quality-tier2-small', 'untainted secret reagent atlas')
+        local function probe()
+            assert(debug.getstacktaint() == 'ItemButtonProbe', 'tainted caller context')
+            assert(issecretvalue(item), 'secret identity retained')
+            assert(not pcall(azerite, item), 'tainted secret Azerite query must fail')
+            assert(not pcall(reagent, item), 'tainted secret reagent query must fail')
+            assert(azerite(900001) == true, 'tainted public Azerite query')
+            assert(reagent(900001).quality == 2, 'tainted public reagent query')
+        end
+        debug.setobjecttaint(probe, 'ItemButtonProbe')
+        probe()
+        assert(debug.getstacktaint() == nil, 'caller taint restored')
+        "#,
+    )
+    .expect("item button queries authenticate secret arguments");
+}
