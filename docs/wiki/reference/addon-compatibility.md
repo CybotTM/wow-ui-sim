@@ -49,7 +49,9 @@ The Docker builder must select a client profile explicitly:
 cargo build --release --bin wow-sim --no-default-features --features client-retail,gui --locked
 ```
 
-`--no-default-features` removes the GUI dependency tree; `client-retail` supplies the required runtime profile for the headless binary. `frame_collect` owns the shared `HitOrderKey`, so headless compilation no longer depends on the GUI-only `hit_grid` module. Docker CI for v0.1.29 failed when the profile was omitted and that reverse dependency still existed; the next tag will carry both fixes.
+`--no-default-features` drops the default `sound` feature. `client-retail` selects the runtime profile. `gui` adds the renderer, and with it CASC support, so the image includes the `screenshot` command. The runtime image has no GPU: it uses Mesa lavapipe with `WOW_SIM_SOFTWARE_RENDER=1`, the same software-render path as CI. The image ships no WoW game data, so screenshots draw layout and text but no game textures.
+
+History: Docker CI for v0.1.29 failed because the profile feature was omitted and `frame_collect` depended on the GUI-only `hit_grid` module. Both were fixed before v0.1.37.
 
 ## Load Order
 
