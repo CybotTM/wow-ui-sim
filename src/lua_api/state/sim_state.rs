@@ -92,6 +92,7 @@ pub struct SimState {
     pub wrath_glyph_sockets: HashMap<(u32, u32), WrathGlyphSocket>,
     pub wrath_unspent_talent_points: HashMap<u32, u32>,
     pub wrath_talent_tabs: HashMap<(u32, u32), WrathTalentTab>,
+    pub wrath_talent_rows: HashMap<(u32, u32), Vec<WrathTalentRow>>,
     #[cfg(any(
         feature = "client-wrath",
         feature = "client-era",

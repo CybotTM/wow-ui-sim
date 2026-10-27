@@ -10,6 +10,21 @@ pub struct WrathTalentTab {
     pub preview_points_spent: u32,
 }
 
+/// Scenario-supplied Wrath talent row.
+#[derive(Clone, Debug)]
+pub struct WrathTalentRow {
+    pub name: String,
+    pub icon: String,
+    pub tier: u32,
+    pub column: u32,
+    pub rank: u32,
+    pub max_rank: u32,
+    pub exceptional: bool,
+    pub meets_prereq: bool,
+    pub preview_rank: u32,
+    pub meets_preview_prereq: bool,
+}
+
 /// Scenario-supplied Wrath glyph socket data.
 #[derive(Clone, Debug)]
 pub struct WrathGlyphSocket {
