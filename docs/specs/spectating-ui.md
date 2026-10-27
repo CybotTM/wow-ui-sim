@@ -24,7 +24,7 @@ This simulator scenario supplies the state read by `C_SpectatingUI.IsSpectating`
 
 ## Known gaps (current cycle)
 
-- [ ] Complete seven-profile all-target verification.
+- [x] Seven-profile all-target checks pass with zero compiler warnings.
 
 ## Out of scope
 

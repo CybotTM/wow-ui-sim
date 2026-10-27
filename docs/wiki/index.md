@@ -1,6 +1,6 @@
 ## [2026-10-26] implementation | Spectating UI scenario
 
-[Scenario state and selected consumer](systems/spectating-ui.md) describe the user-authorized false default and undocumented native contract. Retail original-consumer RED/GREEN and unchanged Retail/PTR stock are proven; the seven-profile check remains pending.
+[Scenario state and selected consumer](systems/spectating-ui.md) describe the user-authorized false default and undocumented native contract. Retail original-consumer RED/GREEN and unchanged Retail/PTR stock are proven; seven all-target checks have zero warnings.
 
 ## [2026-10-26] proof | Forever Camelot spellbook supplied observations
 
