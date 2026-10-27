@@ -76,6 +76,8 @@ fn delay_dispatches_addon_timer_and_updates_before_exec_lua() {
         DelayFixtureElapsed = 0
         DelayFixtureFired = false
         DelayFixtureScheduled = false
+        -- Headless startup dispatches six updates after FIRST_FRAME_RENDERED.
+        -- Schedule only on a subsequent update, never during startup.
         local ticks = 0
         local frame = CreateFrame("Frame")
         frame:RegisterEvent("FIRST_FRAME_RENDERED")
@@ -95,23 +97,26 @@ fn delay_dispatches_addon_timer_and_updates_before_exec_lua() {
     .expect("write fixture Lua");
 
     for (delay, scheduled, fired) in [
-        (1500, "true", "true"),
-        (20, "true", "false"),
-        (0, "false", "false"),
+        (Some(1500), "true", "true"),
+        (Some(20), "true", "false"),
+        (Some(0), "false", "false"),
+        (None, "false", "false"),
     ] {
-        let data = root.path().join(format!("data-{delay}"));
+        let data = root.path().join(format!("data-{delay:?}"));
         copy_current_cvars(&data);
-        let output = Command::new("timeout")
+        let mut command = Command::new("timeout");
+        command
             .args([
                 "90",
                 env!("CARGO_BIN_EXE_wow-sim"),
                 "--no-saved-vars",
                 "--addons-path",
             ])
-            .arg(&addons)
-            .args([
-                "--delay",
-                &delay.to_string(),
+            .arg(&addons);
+        if let Some(delay) = delay {
+            command.args(["--delay", &delay.to_string()]);
+        }
+        let output = command.args([
                 "--exec-lua",
                 "print('DELAY_RESULT', tostring(DelayFixtureScheduled), tostring(DelayFixtureFired), DelayFixtureElapsed)",
                 "dump-tree",
@@ -135,12 +140,13 @@ fn delay_dispatches_addon_timer_and_updates_before_exec_lua() {
             .iter()
             .position(|value| *value == "DELAY_RESULT")
             .unwrap();
-        assert_eq!(values[index + 1], scheduled, "delay {delay}: {line}");
-        assert_eq!(values[index + 2], fired, "delay {delay}: {line}");
+        assert_eq!(values[index + 1], scheduled, "delay {delay:?}: {line}");
+        assert_eq!(values[index + 2], fired, "delay {delay:?}: {line}");
         let elapsed: f64 = values[index + 3].parse().expect("numeric elapsed");
-        if delay > 0 {
-            assert!(elapsed > 0.0, "delay {delay}: {line}");
+        if delay.is_some_and(|delay| delay > 0) {
+            assert!(elapsed > 0.0, "delay {delay:?}: {line}");
         }
+        println!("delay {delay:?}: {line}");
     }
 }
 
