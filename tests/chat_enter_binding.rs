@@ -80,6 +80,7 @@ fn explicit_enter_binding_overrides_default_chat_action(env: &WowLuaEnv) {
 }
 }
 
+#[cfg(feature = "client-retail")]
 prefork_full_ui_case! {
 fn spectating_state_changes_original_game_menu_escape(env: &WowLuaEnv) {
     clear_chat_focus(env);
