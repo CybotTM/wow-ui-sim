@@ -714,3 +714,50 @@ fn item_button_reagent_overlay_uses_supplied_item_qualities() {
     )
     .expect("original item button reagent overlays use supplied quality");
 }
+
+#[cfg(any(feature = "client-retail", feature = "client-ptr"))]
+#[test]
+fn item_button_queries_authenticate_secret_arguments_by_caller_taint() {
+    use wow_ui_sim::c_api::c_trade_skill_quality::CraftingQualityInfo;
+
+    let env = setup_env();
+    {
+        let mut state = env.state().borrow_mut();
+        state.azerite_empowered.empowered_items.insert(900001);
+        state.recipe_quality_inputs.reagent_item_quality.insert(
+            900001,
+            CraftingQualityInfo {
+                quality: 2,
+                icon_inventory: "professions-icon-quality-tier2-small".to_owned(),
+                ..Default::default()
+            },
+        );
+    }
+    env.exec(
+        r#"
+        local azerite = C_AzeriteEmpoweredItem.IsAzeriteEmpoweredItemByID
+        local reagent = C_TradeSkillUI.GetItemReagentQualityInfo
+        assert(type(azerite) == 'function', 'Azerite query must exist')
+        assert(type(reagent) == 'function', 'reagent query must exist')
+        assert(debug.getstacktaint() == nil, 'untainted setup')
+        local item = secretwrap(900001)
+        assert(issecretvalue(item), 'authentic secret item')
+        assert(azerite(item) == true, 'untainted secret Azerite result')
+        local info = reagent(item)
+        assert(info.quality == 2, 'untainted secret reagent quality')
+        assert(info.iconInventory == 'professions-icon-quality-tier2-small', 'untainted secret reagent atlas')
+        local function probe()
+            assert(debug.getstacktaint() == 'ItemButtonProbe', 'tainted caller context')
+            assert(issecretvalue(item), 'secret identity retained')
+            assert(not pcall(azerite, item), 'tainted secret Azerite query must fail')
+            assert(not pcall(reagent, item), 'tainted secret reagent query must fail')
+            assert(azerite(900001) == true, 'tainted public Azerite query')
+            assert(reagent(900001).quality == 2, 'tainted public reagent query')
+        end
+        debug.setobjecttaint(probe, 'ItemButtonProbe')
+        probe()
+        assert(debug.getstacktaint() == nil, 'caller taint restored')
+        "#,
+    )
+    .expect("item button queries authenticate secret arguments");
+}
