@@ -316,7 +316,7 @@ impl SavedVariablesManager {
             .ok()
             .or_else(|| snapshot_layout.map(str::to_string));
         let preferred_layout_arg = optional_string_arg(state, preferred_layout.as_deref());
-        call_function_state(
+        let missing_layouts = call_function_state(
             state,
             load_cache,
             &[
@@ -326,6 +326,9 @@ impl SavedVariablesManager {
                 preferred_layout_arg,
             ],
         )?;
+        if matches!(missing_layouts, Val::Bool(true)) {
+            tracing::warn!("EditMode account cache declares layout rows that are missing");
+        }
         Ok(true)
     }
 

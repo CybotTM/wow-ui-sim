@@ -195,7 +195,12 @@ if rawget(C_EditMode, "GetAccountSettings") == nil then
     end
 
     local layouts = {}
+    local missingLayouts = false
     for _ = 1, layoutCount do
+      if cursor > #tokens then
+        missingLayouts = true
+        break
+      end
       local layoutIndex, layoutName, systemCount
       layoutIndex, cursor = __wow_edit_mode_read_number(tokens, cursor)
       layoutName, cursor = __wow_edit_mode_read(tokens, cursor)
@@ -212,7 +217,7 @@ if rawget(C_EditMode, "GetAccountSettings") == nil then
       })
     end
 
-    return layouts, accountSettings
+    return layouts, accountSettings, missingLayouts
   end
 
   local function __wow_edit_mode_active_layout_from_character_cache(text, activeSpecIndex)
@@ -311,7 +316,7 @@ if rawget(C_EditMode, "GetAccountSettings") == nil then
   end
 
   function C_EditMode.__LoadCache(accountCache, characterCache, activeSpecIndex, preferredLayout)
-    local layouts, accountSettings = __wow_edit_mode_parse_account_cache(accountCache)
+    local layouts, accountSettings, missingLayouts = __wow_edit_mode_parse_account_cache(accountCache)
     local activeLayout = __wow_edit_mode_active_layout_from_character_cache(characterCache, activeSpecIndex)
     activeLayout = __wow_edit_mode_active_layout_from_override(layouts, preferredLayout) or activeLayout
     __wow_edit_mode_layout_state = {
@@ -321,6 +326,7 @@ if rawget(C_EditMode, "GetAccountSettings") == nil then
     if #accountSettings > 0 then
       __wow_edit_mode_account_setting_state = __wow_merge_edit_mode_account_settings(accountSettings)
     end
+    return missingLayouts
   end
 end
 "##;

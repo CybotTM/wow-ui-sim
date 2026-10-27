@@ -6,6 +6,7 @@ Current Retail/PTR startup must preserve the active-layout index supplied by the
 
 - [x] Import provided account/character cache files before whole unchanged Game UI startup; preserve the character's active index through preset insertion. Native cache index2 selects Classic with horizontal Micro Menu geometry, even when the second custom layout is vertical Widescreen.
 - [x] Preserve saved layout content, names/identifiers and existing named environment/snapshot override selection and precedence. Resolve an explicit saved-layout name to the combined selection space; do not reinterpret native character indices as custom-list positions.
+- [ ] When the account cache declares more layouts than its token stream contains, do not fabricate layouts after exhaustion; emit a warning. This is a simulator scenario decision: native handling of the mismatch, and whether the client writes such a file, are unknown. Handling of partially started records is outside this contract.
 - [x] Keep selection, cache decoding and original consumer behavior distinct. No original WTF writes, vendor patches, forced orientation or guessed new numeric-override contract.
 
 ## How it works
