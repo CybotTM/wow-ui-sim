@@ -145,8 +145,8 @@ fn truncated_account_cache_warns_during_default_startup() {
             let cache = format!("{count} {}", header[1..].join(" "));
             std::fs::write(account.join("edit-mode-cache-account.txt"), cache).expect("write cache");
             std::fs::write(character.join("edit-mode-cache-character.txt"), CHARACTER_CACHE).expect("write character cache");
-            let output = Command::new(env!("CARGO_BIN_EXE_wow-sim"))
-                .args(["--no-addons", "--no-saved-vars", "lua-errors"])
+            let output = Command::new("timeout")
+                .args(["90", env!("CARGO_BIN_EXE_wow-sim"), "--no-addons", "--no-saved-vars", "lua-errors"])
                 .env("WOW_SIM_WTF_PATH", &wtf)
                 .env("WOW_SIM_WTF_ACCOUNT", "TestAccount")
                 .env("WOW_SIM_WTF_REALM", "Test Realm")
