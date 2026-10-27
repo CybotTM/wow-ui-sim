@@ -11,6 +11,8 @@ use super::c_spell_book;
 use rilua::LuaResult;
 use rilua::vm::state::LuaState;
 
+#[cfg(feature = "client-wrath")]
+pub(crate) use c_container::c_container_get_bag_name;
 #[cfg(feature = "client-wowforever")]
 pub(crate) use c_container::{BAG_SLOT_FLAG_EXCLUDE_JUNK_SELL, bag_slot_flag_is_set};
 pub(crate) use c_container::{

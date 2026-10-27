@@ -23,6 +23,16 @@ pub type EnumDef = (&'static str, &'static [(&'static str, i32)]);
 /// Sequential enum: (enum_name, &[variant_names]) - values are 0, 1, 2, ...
 pub type SeqEnumDef = (&'static str, &'static [&'static str]);
 
+// PTR CatalogShopConstantsDocumentation.lua:54-56.
+pub const VC_INIT_STATE: EnumDef = (
+    "VcInitState",
+    &[
+        ("VcIsReset", 0),
+        ("VcIsInitializing", 1),
+        ("VcIsInitialized", 2),
+    ],
+);
+
 // ============================================================================
 // All sequential enums (for batch registration)
 // ============================================================================

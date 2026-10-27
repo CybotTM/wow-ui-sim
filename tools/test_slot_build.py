@@ -618,6 +618,7 @@ class SourceFreshnessTests(unittest.TestCase):
         (self.tree / "src").mkdir()
         (self.tree / "src/main.rs").write_text('fn main() { println!("A"); }')
         (self.tree / "Cargo.toml").write_text('[package]\nname="probe"\nversion="0.1.0"\n')
+        (self.tree / "Cargo.lock").write_text('version = 3\n[[package]]\nname = "probe"\nversion = "0.1.0"\n')
         self.git("add", ".")
         self.git("commit", "-qm", "A")
 
@@ -644,7 +645,7 @@ class SourceFreshnessTests(unittest.TestCase):
             '    binary.write_bytes(source.read_bytes())\n'
             '    binary.with_suffix(".d").write_text(str(binary)+": src/main.rs\\n")\n'
             'exec(sys.argv[4])\n'
-            'print(json.dumps({"reason":"compiler-artifact","filenames":[str(binary)],\n'
+            f'print(json.dumps({{"reason":"compiler-artifact","package_id":{f"path+file://{self.tree}#probe@0.1.0"!r},"filenames":[str(binary)],\n'
             '    "executable":str(binary) if json.loads(sys.argv[5]) else None,"fresh":fresh}))\n'
         )
         request = self.slot / "library-request.json"
@@ -688,7 +689,6 @@ class SourceFreshnessTests(unittest.TestCase):
     def assert_directory_change_rejected(self, change):
         self.build_directory_library()
         output = self.slot / "debug/deps/libprobe-retail.rmeta"
-        original = output.read_bytes()
         change(self.tree / "tests/nested")
         # Advance the slot-wide source baseline with an unrelated profile.
         result, _ = self.run_library_step("forever")
@@ -698,7 +698,7 @@ class SourceFreshnessTests(unittest.TestCase):
         self.assertEqual(receipt["changed_paths"], [])
         self.assertNotEqual(result.returncode, 0)
         self.assertEqual(receipt["result"], "stale-artifacts")
-        self.assertEqual(output.read_bytes(), original)
+        self.assertFalse(output.exists())
         self.assertEqual((self.slot / ".verified-source-identity.json").read_bytes(), verified)
 
     def test_directory_input_changed_nested_file_rejects_reuse(self):
@@ -792,11 +792,10 @@ class SourceFreshnessTests(unittest.TestCase):
         generated.write_text("pub const VALUE: u32 = 1;")
         self.build_generated_library(generated)
         output = self.slot / "debug/deps/libprobe-retail.rmeta"
-        original = output.read_bytes()
         verified = (self.slot / ".verified-source-identity.json").read_bytes()
         generated.write_text("pub const VALUE: u32 = 2;")
         result, receipt = self.run_library_step("retail", fresh=True)
-        self.assertEqual(output.read_bytes(), original)
+        self.assertFalse(output.exists())
         self.assertEqual(receipt["changed_paths"], [])
         self.assertNotEqual(result.returncode, 0)
         self.assertEqual(receipt["result"], "stale-artifacts")
@@ -805,11 +804,10 @@ class SourceFreshnessTests(unittest.TestCase):
     def assert_resolved_generated_input_is_guarded(self, spelling, generated):
         self.build_generated_library(spelling)
         output = self.slot / "debug/deps/libprobe-retail.rmeta"
-        original = output.read_bytes()
         verified = (self.slot / ".verified-source-identity.json").read_bytes()
         generated.write_text("pub const VALUE: u32 = 2;")
         result, receipt = self.run_library_step("retail", fresh=True)
-        self.assertEqual(output.read_bytes(), original)
+        self.assertFalse(output.exists())
         self.assertEqual(receipt["changed_paths"], [])
         self.assertNotEqual(result.returncode, 0)
         self.assertEqual(receipt["result"], "stale-artifacts")
@@ -853,7 +851,7 @@ class SourceFreshnessTests(unittest.TestCase):
         self.assertEqual(other.returncode, 0, other.stderr)
         verified = (self.slot / ".verified-source-identity.json").read_bytes()
         result, receipt = self.run_library_step("retail", fresh=True)
-        self.assertEqual(output.read_bytes(), original)
+        self.assertFalse(output.exists())
         self.assertEqual(receipt["changed_paths"], [])
         self.assertNotEqual(result.returncode, 0)
         self.assertEqual(receipt["result"], "stale-artifacts")
@@ -1188,7 +1186,7 @@ class SourceFreshnessTests(unittest.TestCase):
             'None if old else binary.write_bytes(source.read_bytes()); '
             'binary.chmod(0o755); '
             'binary.with_suffix(".d").write_text(str(binary) + ": " + str(source) + "\\n"); '
-            'print(json.dumps({"reason":"compiler-artifact","executable":str(binary),"fresh":False}))'
+            f'print(json.dumps({{"reason":"compiler-artifact","package_id":{f"path+file://{self.tree}#probe@0.1.0"!r},"executable":str(binary),"fresh":False}}))'
         )
         request = self.slot / "request.json"
         request.write_text(json.dumps({
@@ -1218,6 +1216,7 @@ class SourceFreshnessTests(unittest.TestCase):
         emitter = ('import json,sys,os; from pathlib import Path; '
                    'Path(sys.argv[1]).chmod(0o755); os.utime(sys.argv[1], None); '
                    'print(json.dumps({"reason":"compiler-artifact",'
+                   f'"package_id":{f"path+file://{self.tree}#probe@0.1.0"!r},'
                    '"executable":sys.argv[1],"fresh":False})); sys.exit(int(sys.argv[2]))')
         request = self.slot / "request.json"
         for code in [0, 7]:
@@ -1393,7 +1392,7 @@ class SourceFreshnessTests(unittest.TestCase):
             '    binary.chmod(0o755)\n'
             '    binary.with_suffix(".d").write_text(f"{binary}: {source}\\n")\n'
             'if phase == "failed": sys.exit(7)\n'
-            'print(json.dumps({"reason":"compiler-artifact",\n'
+            f'print(json.dumps({{"reason":"compiler-artifact", "package_id":{f"path+file://{self.tree}#probe@0.1.0"!r},\n'
             '    "executable":str(binary), "fresh":phase == "missing"}))\n'
         )
         results, receipts = [], []
@@ -1650,6 +1649,8 @@ class SourceFreshnessTests(unittest.TestCase):
         (self.tree / "tests/Cargo.toml").write_text(
             '[package]\nname="tests"\nversion="0.1.0"\n'
             '[[test]]\nname="foo"\npath="foo.rs"\n')
+        with (self.tree / "Cargo.lock").open("a") as lock:
+            lock.write('[[package]]\nname = "tests"\nversion = "0.1.0"\n')
         self.git("add", ".")
         self.git("commit", "-qm", "test A")
         metadata = json.loads(subprocess.check_output(
@@ -1753,6 +1754,340 @@ class SourceFreshnessTests(unittest.TestCase):
         saved = json.loads(receipt.read_text())
         self.assertEqual(saved["artifacts"], {"debug/probe": "def"})
         self.assertEqual(saved["identity"], current["identity"])
+
+
+
+class LockClosureTransitionTests(unittest.TestCase):
+    setUp = SourceFreshnessTests.setUp
+    git = SourceFreshnessTests.git
+    # The changed leaf is two edges away from probe. Unrelated is outside
+    # probe's closure; switching the root dependency exercises both cases.
+    def lock_text(self, version, depends):
+        return (f'version = 3\n\n[[package]]\nname = "probe"\nversion = "0.1.0"\n'
+                f'dependencies = ["{depends}"]\n\n'
+                '[[package]]\nname = "stable"\nversion = "1.0.0"\n\n'
+                '[[package]]\nname = "middle"\nversion = "1.0.0"\n'
+                'dependencies = ["leaf"]\n\n'
+                f'[[package]]\nname = "leaf"\nversion = "{version}"\n'
+                'source = "registry+https://github.com/rust-lang/crates.io-index"\n')
+
+    def setup_transition(self, depends="stable"):
+        self.package_id = f"path+file://{self.tree}#probe@0.1.0"
+        self.output = self.slot / "debug/deps/libprobe-123.rlib"
+        self.fingerprint = self.slot / "debug/.fingerprint/probe-123/lib-probe"
+        self.output.parent.mkdir(parents=True)
+        self.output.write_bytes(b"compiled artifact")
+        self.output.with_name("probe-123.d").write_text(
+            f"{self.output}: {self.tree}/src/main.rs\n")
+        self.fingerprint.parent.mkdir(parents=True)
+        self.fingerprint.write_text("fingerprint")
+        self.lock_old = self.lock_text("1.0.0", depends)
+        (self.tree / "Cargo.lock").write_text(self.lock_old)
+        self.git("add", ".")
+        self.git("commit", "-qm", "old lock")
+        self.old_revision = self.git("rev-parse", "HEAD").decode().strip()
+        result, receipt = self.execute(False)
+        self.assertIsNone(result, result)
+        self.assertEqual(receipt["result"], "success")
+        return receipt
+
+    def execute(self, fresh):
+        (self.slot / ".owner").write_text("test-owner")
+        request = self.slot / "request.json"
+        receipt = self.slot / "receipt.json"
+        request.write_text(json.dumps({"slot": str(self.slot), "worktree": str(self.tree),
+            "owner": "test-owner", "unit": "fixture", "receipt": str(receipt),
+            "cargo": ["fake-compiler"]}))
+        record = {"reason": "compiler-artifact", "package_id": self.package_id,
+                  "manifest_path": str(self.tree / "Cargo.toml"),
+                  "target": {"name": "probe", "kind": ["lib"]},
+                  "filenames": [str(self.output)], "executable": None, "fresh": fresh}
+        error = None
+        with patch.object(self.module, "read_package_roots", return_value={
+                self.package_id: [str(self.tree)]}), \
+             patch.object(self.module, "run_build_command", return_value=(0, [record])):
+            try:
+                self.module.execute_build(request)
+            except ValueError as exc:
+                error = str(exc)
+        return error, json.loads(receipt.read_text())
+
+    def change_lock(self, depends="stable"):
+        (self.tree / "Cargo.lock").write_text(self.lock_text("2.0.0", depends))
+        self.git("add", "Cargo.lock")
+        self.git("commit", "-qm", "change leaf")
+
+    def make_legacy(self, revision=None, mismatch=False):
+        import hashlib
+        path = self.slot / ".verified-source-identity.json"
+        previous = json.loads(path.read_text())
+        certificate = previous["artifact_certificates"][str(self.output.relative_to(self.slot))]
+        # Strip any new lock-closure representation to model a persisted old receipt.
+        certificate = {"inputs": dict(certificate["inputs"]), "sha256": certificate["sha256"]}
+        certificate["inputs"]["Cargo.lock"] = hashlib.sha256(
+            b"different lock" if mismatch else self.lock_old.encode()).hexdigest()
+        previous["artifact_certificates"] = {str(self.output.relative_to(self.slot)): certificate}
+        if revision is not None:
+            previous["identity"]["head"] = revision
+        path.write_text(json.dumps(previous))
+
+    def test_uncertified_fresh_workspace_libraries_evict_then_rebuild(self):
+        names = ("sim-xml", "sim-lua-bridge")
+        records = []
+        for name in names:
+            root = self.tree / "crates" / name
+            (root / "src").mkdir(parents=True)
+            (root / "Cargo.toml").write_text(f'[package]\nname="{name}"\nversion="0.1.0"\n')
+            (root / "src/lib.rs").write_text(f'// {name}\n')
+            target = name.replace("-", "_")
+            output = self.slot / f"debug/deps/lib{target}-abc123.rlib"
+            output.parent.mkdir(parents=True, exist_ok=True)
+            output.write_bytes(name.encode())
+            output.with_name(f"{target}-abc123.d").write_text(f"{output}: {root}/src/lib.rs\n")
+            fingerprint = self.slot / f"debug/.fingerprint/{name}-abc123/stamp"
+            fingerprint.parent.mkdir(parents=True)
+            fingerprint.write_text("fingerprint")
+            records.append({"reason": "compiler-artifact", "package_id": f"path+file://{root}#0.1.0",
+                            "manifest_path": str(root / "Cargo.toml"),
+                            "target": {"name": target, "kind": ["lib"]},
+                            "filenames": [str(output)], "executable": None, "fresh": True})
+        (self.tree / "Cargo.lock").write_text('version = 3\n' + ''.join(
+            f'\n[[package]]\nname="{name}"\nversion="0.1.0"\n' for name in names))
+        self.git("add", ".")
+        self.git("commit", "-qm", "workspace fixture")
+        other = self.slot / "debug/deps/libother-456.rlib"
+        other.write_bytes(b"keep")
+        other_fingerprint = self.slot / "debug/.fingerprint/other-456/stamp"
+        other_fingerprint.parent.mkdir(parents=True)
+        other_fingerprint.write_text("keep")
+        (self.slot / ".owner").write_text("test-owner")
+        request = self.slot / "request.json"
+        receipt_path = self.slot / "receipt.json"
+        request.write_text(json.dumps({"slot": str(self.slot), "worktree": str(self.tree),
+            "owner": "test-owner", "unit": "fixture", "receipt": str(receipt_path),
+            "cargo": ["fake-compiler"]}))
+        roots = {record["package_id"]: [str(Path(record["manifest_path"]).parent)] for record in records}
+
+        def execute():
+            with patch.object(self.module, "read_package_roots", return_value=roots), \
+                 patch.object(self.module, "run_build_command", return_value=(0, records)):
+                try:
+                    self.module.execute_build(request)
+                except ValueError as error:
+                    return str(error), json.loads(receipt_path.read_text())
+            return None, json.loads(receipt_path.read_text())
+
+        error, receipt = execute()
+        self.assertIsNotNone(error)
+        self.assertEqual(receipt["result"], "stale-artifacts")
+        self.assertEqual(len([e for e in receipt["dep_info_errors"] if "uncertified fresh artifact" in e]), 2)
+        expected = {f"debug/deps/lib{name.replace('-', '_')}-abc123.rlib" for name in names}
+        expected |= {f"debug/.fingerprint/{name}-abc123" for name in names}
+        self.assertEqual(set(receipt["evicted_artifacts"]), expected)
+        for record in records:
+            self.assertFalse(Path(record["filenames"][0]).exists())
+        self.assertTrue(other.exists())
+        self.assertTrue(other_fingerprint.exists())
+
+        for record in records:
+            Path(record["filenames"][0]).write_bytes(b"rebuilt")
+            record["fresh"] = False
+        error, receipt = execute()
+        self.assertIsNone(error, error)
+        self.assertEqual(receipt["result"], "success")
+        for record in records:
+            self.assertIn(str(Path(record["filenames"][0]).relative_to(self.slot)),
+                          receipt["artifact_certificates"])
+            record["fresh"] = True
+        error, receipt = execute()
+        self.assertIsNone(error, error)
+        self.assertEqual(receipt["result"], "success")
+        self.assertTrue(all(Path(record["filenames"][0]).exists() for record in records))
+        self.assertTrue(other.exists())
+        self.assertTrue(other_fingerprint.exists())
+
+    def test_path_version_only_transition_accepts_and_evicts(self):
+        self.setup_transition()
+        self.package_id = f"path+file://{self.tree}/probe#0.1.0"
+        # Create a certificate with the actual Cargo path-ID form.
+        error, _ = self.execute(False)
+        self.assertIsNone(error, error)
+        self.change_lock()
+        error, _ = self.execute(True)
+        self.assertIsNone(error, error)
+        (self.tree / "Cargo.lock").write_text(self.lock_text("2.0.0", "middle"))
+        self.git("add", "Cargo.lock")
+        self.git("commit", "-qm", "change closure")
+        error, _ = self.execute(True)
+        self.assertIsNotNone(error)
+        self.assertFalse(self.output.exists())
+        self.assertFalse(self.fingerprint.exists())
+
+    def test_duplicate_name_version_resolves_source(self):
+        lock = b'''version = 3
+[[package]]
+name = "probe"
+version = "0.1.0"
+dependencies = ["storage 0.2.0 (git+https://example.org/repo?rev=abc)"]
+[[package]]
+name = "storage"
+version = "0.2.0"
+source = "registry+https://example.org/index"
+[[package]]
+name = "storage"
+version = "0.2.0"
+source = "git+https://example.org/repo?rev=abc#abc"
+'''
+        digest = self.module.lock_closure_digest(lock, "path+file:///tmp/probe#probe@0.1.0")
+        changed_other = lock.replace(b'example.org/index', b'other.org/index')
+        self.assertEqual(digest, self.module.lock_closure_digest(changed_other, "path+file:///tmp/probe#probe@0.1.0"))
+
+    def test_checksum_and_dependency_edges_change_digest(self):
+        lock = b'''version = 3
+[[package]]
+name = "probe"
+version = "0.1.0"
+dependencies = ["a", "b"]
+[[package]]
+name = "a"
+version = "1.0.0"
+checksum = "one"
+dependencies = ["b"]
+[[package]]
+name = "b"
+version = "1.0.0"
+'''
+        package = "path+file:///tmp/probe#probe@0.1.0"
+        digest = self.module.lock_closure_digest(lock, package)
+        self.assertNotEqual(digest, self.module.lock_closure_digest(lock.replace(b'"one"', b'"two"'), package))
+        self.assertNotEqual(digest, self.module.lock_closure_digest(lock.replace(b'dependencies = ["b"]', b'dependencies = []'), package))
+
+    def test_build_script_parent_fingerprint_is_evicted(self):
+        self.setup_transition("middle")
+        self.output.unlink()
+        self.fingerprint.unlink()
+        self.output = self.slot / "debug/build/probe-abc123/build-script-build"
+        self.output.parent.mkdir(parents=True)
+        self.output.write_bytes(b"build script")
+        self.output.with_suffix(".d").write_text(f"{self.output}: {self.tree}/src/main.rs\n")
+        self.fingerprint = self.slot / "debug/.fingerprint/probe-abc123/build-script-build-script-build"
+        self.fingerprint.parent.mkdir(parents=True)
+        self.fingerprint.write_text("fingerprint")
+        error, _ = self.execute(False)
+        self.assertIsNone(error, error)
+        self.change_lock("middle")
+        error, _ = self.execute(True)
+        self.assertIsNotNone(error)
+        self.assertFalse(self.output.exists())
+        self.assertFalse(self.fingerprint.exists())
+
+    def test_unidentified_fingerprint_fails_without_deleting_unrelated(self):
+        self.setup_transition("middle")
+        self.fingerprint.unlink()
+        self.fingerprint.parent.rmdir()
+        other = self.slot / "debug/.fingerprint/other-456/stamp"
+        other.parent.mkdir(parents=True)
+        other.write_text("keep")
+        self.change_lock("middle")
+        error, _ = self.execute(True)
+        self.assertFalse(self.output.exists())
+        self.assertTrue(other.exists())
+        self.assertIn(str(self.output), error)
+        self.assertIn("fingerprint", error)
+        self.assertIn("could not be identified", error)
+        self.execute(False)
+        self.assertTrue(other.exists())
+
+    def test_uplifted_executable_evicts_hashed_source_and_fingerprint_only(self):
+        receipt = self.setup_transition("middle")
+        uplift = self.slot / "debug/probe"
+        hashed = self.slot / "debug/deps/probe-abc123"
+        uplift.write_bytes(b"binary")
+        hashed.write_bytes(b"binary")
+        fingerprint = self.slot / "debug/.fingerprint/probe-abc123/stamp"
+        fingerprint.parent.mkdir(parents=True)
+        fingerprint.write_text("fingerprint")
+        other = self.slot / "debug/.fingerprint/other-456/stamp"
+        other.parent.mkdir(parents=True)
+        other.write_text("keep")
+        receipt["reported_artifacts"] = [{"package_id": self.package_id,
+            "target": {"name": "probe", "kind": ["bin"]},
+            "executable": str(uplift), "filenames": [str(uplift)]}]
+        receipt["rejected_artifacts"] = [str(uplift)]
+        receipt["dep_info_errors"] = ["rejected fixture"]
+        with self.assertRaises(ValueError):
+            self.module.finish_build(self.slot, self.slot / "receipt.json", receipt, None, {}, 0)
+        self.assertFalse(uplift.exists())
+        self.assertFalse(hashed.exists())
+        self.assertFalse(fingerprint.exists())
+        self.assertTrue(other.exists())
+        self.assertTrue(self.output.exists())
+        self.assertTrue(self.fingerprint.exists())
+
+    def test_unrelated_lock_change_accepts_certificate_and_stale_check(self):
+        self.setup_transition()
+        self.change_lock()
+        error, receipt = self.execute(True)
+        with self.subTest(check="certificate"):
+            self.assertFalse(receipt["dep_info_errors"], error)
+        with self.subTest(check="stale"):
+            self.assertEqual(self.module.find_stale_artifacts(receipt, {}, receipt["artifacts"]), [])
+        self.assertTrue(self.output.exists())
+
+    def test_transitive_lock_change_rejects_fresh_artifact(self):
+        self.setup_transition("middle")
+        self.change_lock("middle")
+        error, receipt = self.execute(True)
+        self.assertIsNotNone(error)
+        self.assertEqual(receipt["result"], "stale-artifacts")
+
+    def test_legacy_certificate_migrates_from_matching_revision(self):
+        self.setup_transition()
+        self.make_legacy()
+        self.change_lock()
+        error, receipt = self.execute(True)
+        self.assertIsNone(error, error)
+        self.assertEqual(receipt["result"], "success")
+        self.assertTrue(self.output.exists())
+
+    def test_unverifiable_legacy_certificate_evicts_output_and_fingerprint(self):
+        for case in ("missing_revision", "digest_mismatch"):
+            with self.subTest(case=case), tempfile.TemporaryDirectory() as directory:
+                # Isolate each persisted receipt and its git history.
+                original_slot, original_tree = self.slot, self.tree
+                self.slot = Path(directory)
+                self.tree = self.slot / "tree"
+                self.tree.mkdir()
+                self.git("init", "-q")
+                self.git("config", "user.email", "test@example.com")
+                self.git("config", "user.name", "Test")
+                (self.tree / "src").mkdir()
+                (self.tree / "src/main.rs").write_text("fn main() {}")
+                (self.tree / "Cargo.toml").write_text('[package]\nname="probe"\nversion="0.1.0"\n')
+                self.git("add", ".")
+                self.git("commit", "-qm", "initial")
+                self.setup_transition()
+                self.make_legacy(revision="0000000000000000000000000000000000000000"
+                                 if case == "missing_revision" else None,
+                                 mismatch=case == "digest_mismatch")
+                self.change_lock()
+                error, receipt = self.execute(True)
+                self.assertIsNotNone(error)
+                self.assertEqual(receipt["result"], "stale-artifacts")
+                with self.subTest(artifact="output"):
+                    self.assertFalse(self.output.exists(), "rejected output must be evicted")
+                with self.subTest(artifact="fingerprint"):
+                    self.assertFalse(self.fingerprint.exists(), "fingerprint must be evicted")
+                self.slot, self.tree = original_slot, original_tree
+
+    def test_non_lock_source_change_still_rejects_fresh_artifact(self):
+        self.setup_transition()
+        (self.tree / "src/main.rs").write_text("fn main() { println!(\"changed\"); }")
+        self.git("add", "src/main.rs")
+        self.git("commit", "-qm", "change source")
+        error, receipt = self.execute(True)
+        self.assertIsNotNone(error)
+        self.assertEqual(receipt["result"], "stale-artifacts")
 
 
 if __name__ == "__main__":

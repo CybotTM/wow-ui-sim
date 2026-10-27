@@ -229,6 +229,44 @@ fn forever_original_pvp_consumer_uses_completion_state() {
 }
 
 #[test]
+fn forever_stock_target_spell_reaches_original_item_context() {
+    let env = startup();
+    env.exec(
+        r#"
+        local info = debug.getinfo(ItemButtonUtil.GetItemContext, 'S')
+        assert(info.source:match('Blizzard_FrameXMLUtil/ItemUtil.lua$'))
+        local ok, result = xpcall(ItemButtonUtil.GetItemContext, debug.traceback)
+        assert(ok, result)
+        assert(result == nil and C_Spell.GetTargetSpellID() == 0)
+        assert(C_Spell.GetTargetSpellID() ~= FEED_PET_SPELL_ID)
+        "#,
+    )
+    .expect("stock target must reach original item-context consumer");
+}
+
+#[test]
+fn forever_stock_localities_reach_original_dropdown() {
+    let env = startup();
+    env.exec(
+        r#"
+        local init = CommunitiesGuildPreferredPlaySettingsFrameMixin.InitializeDatacenterDropdown
+        local info = debug.getinfo(init, 'S')
+        assert(info.source:match('Blizzard_Communities/GuildPreferredPlaySettings.lua$'))
+        local menu
+        local dropdown = { SetupMenu = function(_, callback) menu = callback end }
+        local frame = { DatacenterDropdown = dropdown }
+        init(frame)
+        local entries = 0
+        menu(dropdown, { CreateButton = function() entries = entries + 1 end })
+        local ids, names = C_AccountServices.GetPreferredDatacenterLocalities()
+        assert(type(ids) == 'table' and type(names) == 'table')
+        assert(#ids == 0 and #names == 0 and entries == 0)
+    "#,
+    )
+    .expect("stock localities must reach original dropdown consumer");
+}
+
+#[test]
 fn forever_original_item_context_uses_supplied_target_spell() {
     let env = startup();
     env.state().borrow_mut().forever_startup.target_spell_id = Some(6991);

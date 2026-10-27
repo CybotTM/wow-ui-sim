@@ -1,3 +1,7 @@
+## [2026-10-26] implementation | Wrath setup inputs
+
+[Wrath retained fixtures](investigations/wrath-retained-fixtures.md#shared-setup-boundaries) records the original container and target consumers and links their supplied bag, leadership and tap contracts. Full F15/F18 acceptance remains separate; exact 3.4.x native semantics are unknown.
+
 ## [2026-10-26] bounded proof | Shared ammo requirement observation
 
 [Original slots and exact error probes](investigations/forever-startup-gaps.md#shared-ptrforever-ammo-observation): both PTR/Forever XML-bound RED/GREEN pairs and two existing Forever preservation cases pass. The asserted-failure xpcall follows `mists_scenario_minlevel`, with false status, exact message and original frame assertions. Stock PTR122/138→122/138 and Forever26/26→44/44 has complete per-key attribution, not clean startup. All seven full-feature all-target checks have zero Cargo JSON/plain compiler warnings;23 CVar guards and10 pinned-input hashes are unchanged. No native ammo default or derivation is inferred.
@@ -558,6 +562,10 @@ Updated [classic startup cascades](investigations/classic-startup-producer-casca
 ## [2026-10-16] evidence | Approved batch bounded builds and original consumers
 
 [Proof owner](../baselines/approved-batch-2026-10-16.md) records separately attributed Retail/Wrath RED/GREEN/preservation, clean Retail startup and unchanged failing Wrath inventory. [[simple-html]] documents shared structured layout and XML/pointer fixture boundaries. CheckButton numeric input is local; strings and shared boolean extraction remain unchanged. T4 original Wrath sound consumers and final verifier gates remain open.
+
+## [2026-10-16] performance | Startup primitive redundancy
+
+[Investigation](investigations/startup-primitive-redundancy.md) records Retail 42/42 shared before/after preservation, six additional after-only unit cases, passing check/formatting and three captures per seal. All six startups exit 0 `[]` with unchanged original CVars. Syncthing contention, large timing variance, sample loss and attribution limits prevent a speedup claim. SetText optimization stays deferred; no native/all-profile acceptance.
 
 ## [2026-10-16] evidence | Quest turn-in and charge selector bounded GREEN
 
@@ -3125,3 +3133,15 @@ Reconciled tracked specs and wiki against merged master `35dedb8b6` and the two 
 ## 2026-10-26 — Forever Camelot spellbook
 
 Recorded [supplied observations](systems/forever-camelot-spellbook.md), selected-constructor ordering, three exact RED/GREEN pairs, unchanged 26/26 stock and seven zero-warning all-target checks. Linked the shared availability model and retained the item-browsing/device-startup limits.
+
+## 2026-10-25 | ingest | Phase-3 core crate boundaries
+
+Recorded static widget/layout, texture decoding and GPU cuts in [core boundaries](design/core-crate-boundaries.md); retained asset/font cycles and unproven build/CPU status are explicit.
+
+## [2026-10-25] correction | Phase 3 move-only rejection repair
+
+[Crate boundaries](design/core-crate-boundaries.md) now retain Frame/EditBox/layout
+and coupled GPU ownership in root to preserve the original profile predicate,
+signatures and three exact cfg guards. Neutral types and quads remain extracted.
+The handoff recipe warms each revision once, separately recorded, then measures
+mtime-only lib.rs and c_club.rs rebuilds. Static-only handoff; no CPU/build proof.

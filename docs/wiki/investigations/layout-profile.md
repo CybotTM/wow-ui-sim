@@ -60,5 +60,7 @@ The siphash saving is larger than the layout saving because `LayoutCache` was hi
 
 ## See Also
 
+- [[startup-primitive-redundancy]] — separate October 2026 cycle-bookkeeping removal and bounded Retail preservation; not this historical release comparison.
+
 - [[table-rehashing]] — rilua table rehash profiling, same methodology
 - [[on-update-dirty]] — OnUpdate dirty propagation; related to when layout recompute fires

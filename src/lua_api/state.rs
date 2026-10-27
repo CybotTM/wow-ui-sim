@@ -11,6 +11,15 @@ use std::collections::{BTreeSet, HashMap, HashSet, VecDeque};
 use std::path::PathBuf;
 use std::time::Instant;
 
+/// Supplied tap flags for a unit identity; absent records use untapped scenario defaults.
+#[cfg(feature = "client-wrath")]
+#[derive(Clone, Copy, Debug, Default)]
+pub struct WrathUnitTapState {
+    pub tapped: bool,
+    pub by_player: bool,
+    pub by_all_threat_list: bool,
+}
+
 macro_rules! build_empty_sim_state {
     ($collections:ident, $runtime:ident) => {{
         let quest_log_entries = QuestLogState::seeded();
@@ -304,6 +313,8 @@ macro_rules! build_empty_sim_state {
             ))]
             instance_identity: Default::default(),
             wrath_relic_slot: Default::default(),
+            #[cfg(feature = "client-wrath")]
+            wrath_unit_tap_states: HashMap::new(),
             current_target: $runtime.current_target,
             previous_target: None,
             current_focus: $runtime.current_focus,
@@ -440,7 +451,7 @@ macro_rules! build_empty_sim_state {
             pressed_keys: HashSet::new(),
             game_rules: GameRulesState::default(),
             discord: DiscordState::default(),
-            forever_startup: Default::default(),
+            forever_startup: crate::c_api::forever_startup::StartupInputs::stock(),
             player_choice: PlayerChoiceState::default(),
             housing_service_enabled: true,
             housing: HousingState::default(),
@@ -452,7 +463,7 @@ macro_rules! build_empty_sim_state {
             lfg_list_counts: LfgListCounts::default(),
             lfg_active_entry: None,
             can_use_premade_group: true,
-            lfr_availability: None,
+            lfr_availability: crate::c_api::stock_lfr_availability(),
             transmog_availability: Default::default(),
             forever_outfits: None,
             scenario_finder_availability: None,
