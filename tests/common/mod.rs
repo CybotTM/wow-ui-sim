@@ -16,7 +16,6 @@ pub mod blizzard_addon_manifest;
 mod event_helpers;
 pub mod game_menu_fixture;
 pub mod panel_fixtures;
-pub mod wrath_autocomplete;
 #[cfg(target_os = "linux")]
 pub(crate) mod prefork_process;
 #[cfg(target_os = "linux")]
@@ -24,12 +23,21 @@ mod timeout_reexec;
 pub(crate) mod workload_gate;
 mod workload_gate_core;
 pub mod wrath_achievement_fixtures;
+pub mod wrath_autocomplete;
 pub mod wrath_watch_fixture;
 
 use std::ops::Deref;
 use std::path::{Path, PathBuf};
 use wow_ui_sim::loader::{find_toc_file, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
+
+/// Construct the headless environment used by cursor consumer fixtures.
+pub fn new_headless_cursor_env() -> WowLuaEnv {
+    let env = WowLuaEnv::new().expect("create headless cursor environment");
+    let fonts = wow_ui_sim::render::font::WowFontSystem::new_without_casc();
+    env.set_font_system(std::rc::Rc::new(std::cell::RefCell::new(fonts)));
+    env
+}
 
 /// Run a test closure with a per-call timeout.
 /// Default 120s — enough for full Blizzard UI load + test logic.
