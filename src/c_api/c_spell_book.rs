@@ -38,6 +38,12 @@ pub(crate) fn register_c_spell_book(state: &mut LuaState) -> LuaResult<()> {
             "IsSpellBookItemLowRank",
             is_spell_book_item_low_rank,
         )?;
+        table_set_rust_fn_static(
+            state,
+            table_ref,
+            "IsSpellBookItemLooseFlyoutMember",
+            is_spell_book_item_loose_flyout_member,
+        )?;
     }
     register_spell_flyout_queries(state, table_ref)?;
     #[cfg(feature = "client-mists")]
@@ -471,6 +477,17 @@ fn c_spell_book_get_spell_book_item_cast_count(state: &mut LuaState) -> LuaResul
 }
 
 fn is_spell_book_item_low_rank(state: &mut LuaState) -> LuaResult<u32> {
+    read_spell_book_item_flag(state, |sim| &sim.spellbook_low_rank)
+}
+
+fn is_spell_book_item_loose_flyout_member(state: &mut LuaState) -> LuaResult<u32> {
+    read_spell_book_item_flag(state, |sim| &sim.spellbook_loose_flyout_members)
+}
+
+fn read_spell_book_item_flag(
+    state: &mut LuaState,
+    select: fn(&crate::lua_api::state::SimState) -> &std::collections::HashSet<u32>,
+) -> LuaResult<u32> {
     let slot = rilua::table_security::unwrap_secret(state, stack_val(state, 1))?;
     let bank = rilua::table_security::unwrap_secret(state, stack_val(state, 2))?;
     if !matches!(slot, Val::Num(_)) || !matches!(bank, Val::Num(_)) {
@@ -479,11 +496,11 @@ fn is_spell_book_item_low_rank(state: &mut LuaState) -> LuaResult<u32> {
         ));
     }
     let spell_id = resolve_player_spellbook_entry(slot, bank);
-    let is_low_rank = {
+    let has_flag = {
         let sim = borrow_state(state)?;
-        spell_id.is_some_and(|id| sim.spellbook_low_rank.contains(&id))
+        spell_id.is_some_and(|id| select(&sim).contains(&id))
     };
-    state.push(Val::Bool(is_low_rank));
+    state.push(Val::Bool(has_flag));
     Ok(1)
 }
 

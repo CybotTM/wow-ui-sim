@@ -40,7 +40,6 @@ impl StartupInputs {
         let mut inputs = Self::default();
         if ACTIVE == ClientProfile::WowForever {
             inputs.ammo_required = Some(false);
-            inputs.target_spell_id = Some(0);
         }
         inputs
     }
@@ -58,6 +57,8 @@ pub(crate) fn register(state: &mut LuaState) -> LuaResult<()> {
         // Both pins declare PaperDollInfoDocumentation.lua:11–18 (no-argument bool).
         let paper_doll = ensure_namespace(state, "C_PaperDollInfo")?;
         table_set_rust_fn_static(state, paper_doll, "AmmoNeeded", ammo_needed)?;
+        let spell = ensure_namespace(state, "C_Spell")?;
+        table_set_rust_fn_static(state, spell, "GetTargetSpellID", target_spell_id)?;
     }
     if ACTIVE != ClientProfile::WowForever {
         return Ok(());
@@ -196,9 +197,7 @@ fn register_character_queries(state: &mut LuaState) -> LuaResult<()> {
         next_bank_tab,
     )?;
     let pvp = ensure_namespace(state, "C_PvP")?;
-    table_set_rust_fn_static(state, pvp, "IsMatchComplete", match_complete)?;
-    let spell = ensure_namespace(state, "C_Spell")?;
-    table_set_rust_fn_static(state, spell, "GetTargetSpellID", target_spell_id)
+    table_set_rust_fn_static(state, pvp, "IsMatchComplete", match_complete)
 }
 
 fn preferred_datacenter_localities(state: &mut LuaState) -> LuaResult<u32> {
@@ -284,10 +283,8 @@ fn match_complete(state: &mut LuaState) -> LuaResult<u32> {
 
 fn target_spell_id(state: &mut LuaState) -> LuaResult<u32> {
     let id = borrow_state(state)?.forever_startup.target_spell_id;
-    let id = id.ok_or_else(|| rilua::runtime_error(
-        "native-unknown: C_Spell.GetTargetSpellID has no supplied target or documented no-target value"
-    ))?;
-    state.push(Val::Num(f64::from(id)));
+    // The no-target native value is unknown; nil is the simulator scenario default.
+    state.push(id.map_or(Val::Nil, |id| Val::Num(f64::from(id))));
     Ok(1)
 }
 
