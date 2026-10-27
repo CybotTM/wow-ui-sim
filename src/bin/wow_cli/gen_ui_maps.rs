@@ -22,7 +22,6 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     let file = File::open(&csv_path)?;
     let reader = BufReader::new(file);
 
-    std::fs::create_dir_all("data")?;
     let output_path = Path::new("crates/sim-data/data/ui_maps.rs");
     let mut out = File::create(output_path)?;
 
@@ -70,13 +69,13 @@ fn build_ui_map_table(
     let mut skipped = 0u32;
     let mut columns: Option<Columns> = None;
 
-    for line in reader.lines() {
+    for (index, line) in reader.lines().enumerate() {
         let line = line?;
         let Some(cols) = columns.as_ref() else {
             columns = Some(find_columns(&line)?);
             continue;
         };
-        match parse_ui_map_row(cols, &line) {
+        match parse_ui_map_row(cols, &line, index + 1)? {
             Some((id, value)) => {
                 builder.entry(id, &value);
                 count += 1;
@@ -96,22 +95,32 @@ fn build_ui_map_table(
     Ok((count, skipped))
 }
 
-fn parse_ui_map_row(cols: &Columns, line: &str) -> Option<(u32, String)> {
+fn parse_ui_map_row(
+    cols: &Columns,
+    line: &str,
+    row: usize,
+) -> Result<Option<(u32, String)>, String> {
     let fields = parse_csv_line(line);
-    let needed = [cols.name, cols.id, cols.parent, cols.flags, cols.map_type]
-        .into_iter()
-        .max()?;
-    if fields.len() <= needed {
-        return None;
-    }
-    let id: u32 = fields[cols.id].parse().ok()?;
-    let name = &fields[cols.name];
+    let field = |index: usize, name: &str| {
+        fields
+            .get(index)
+            .map(String::as_str)
+            .ok_or_else(|| format!("UiMap.csv row {row}: missing field {name} (short row)"))
+    };
+    let number = |index: usize, name: &str| -> Result<u32, String> {
+        let value = field(index, name)?;
+        value
+            .parse()
+            .map_err(|_| format!("UiMap.csv row {row}: invalid {name}: {value:?}"))
+    };
+    let name = field(cols.name, "Name_lang")?;
+    let id = number(cols.id, "ID")?;
+    let parent_map_id = number(cols.parent, "ParentUiMapID")?;
+    let flags = number(cols.flags, "Flags")?;
+    let map_type = number(cols.map_type, "Type")?;
     if name.is_empty() {
-        return None;
+        return Ok(None);
     }
-    let parent_map_id: u32 = fields[cols.parent].parse().unwrap_or(0);
-    let flags: u32 = fields[cols.flags].parse().unwrap_or(0);
-    let map_type: u32 = fields[cols.map_type].parse().unwrap_or(0);
 
     let value = format!(
         "UiMapInfo {{ name: \"{}\", map_type: {}, parent_map_id: {}, flags: {} }}",
@@ -120,7 +129,7 @@ fn parse_ui_map_row(cols: &Columns, line: &str) -> Option<(u32, String)> {
         parent_map_id,
         flags
     );
-    Some((id, value))
+    Ok(Some((id, value)))
 }
 
 #[cfg(test)]
@@ -128,9 +137,37 @@ mod tests {
     use super::*;
 
     #[test]
-    fn malformed_parent_is_rejected() {
+    fn malformed_numeric_fields_are_rejected() {
         let columns = find_columns("Name_lang,ID,ParentUiMapID,Flags,Type").unwrap();
-        assert!(parse_ui_map_row(&columns, "Dornogal,2339,invalid,0,3").is_none());
+        for (line, field) in [
+            ("Dornogal,no,2248,0,3", "ID"),
+            ("Dornogal,2339,no,0,3", "ParentUiMapID"),
+            ("Dornogal,2339,2248,no,3", "Flags"),
+            ("Dornogal,2339,2248,0,no", "Type"),
+        ] {
+            let error = parse_ui_map_row(&columns, line, 42).unwrap_err();
+            assert!(error.contains("row 42"), "{error}");
+            assert!(error.contains(field), "{error}");
+        }
+    }
+
+    #[test]
+    fn short_row_identifies_missing_field() {
+        let columns = find_columns("Name_lang,ID,ParentUiMapID,Flags,Type").unwrap();
+        let error = parse_ui_map_row(&columns, "Dornogal,2339,2248", 7).unwrap_err();
+        assert!(error.contains("row 7"), "{error}");
+        assert!(error.contains("Flags"), "{error}");
+        assert!(error.contains("short row"), "{error}");
+    }
+
+    #[test]
+    fn unnamed_row_is_skipped() {
+        let columns = find_columns("Name_lang,ID,ParentUiMapID,Flags,Type").unwrap();
+        assert!(
+            parse_ui_map_row(&columns, ",1500,1355,0,5", 2)
+                .unwrap()
+                .is_none()
+        );
     }
 }
 
