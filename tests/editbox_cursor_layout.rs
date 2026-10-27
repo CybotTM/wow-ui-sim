@@ -9,6 +9,31 @@ use wow_ui_sim::render::font::{DEFAULT_WOW_FONT, WowFontSystem};
 
 const TICK_SECONDS: f64 = 0.016;
 
+#[test]
+fn headless_cursor_uses_real_font_geometry_without_explicit_injection() {
+    let env = WowLuaEnv::new().expect("create headless environment");
+    env.exec(CREATE_FIXTURE)
+        .expect("create existing cursor fixture");
+    env.fire_on_update(TICK_SECONDS).unwrap();
+    env.exec(
+        r#"
+        assert(#CursorRecords == 1, 'first shaped cursor must be delivered')
+        local first = CursorRecords[1]
+        assert(first.x == 5 and first.y < 0 and first.height > 0)
+        CursorBox:SetCursorPosition(2)
+        "#,
+    )
+    .expect("first headless cursor delivery");
+    env.fire_on_update(TICK_SECONDS).unwrap();
+    env.exec(
+        r#"
+        assert(#CursorRecords == 2, 'cursor movement must deliver new geometry')
+        assert(CursorRecords[2].x > CursorRecords[1].x)
+        "#,
+    )
+    .expect("headless cursor must use shaped glyph advances");
+}
+
 fn create_env_with_installed_fonts() -> WowLuaEnv {
     let fonts = WowFontSystem::new_without_casc();
     assert!(
