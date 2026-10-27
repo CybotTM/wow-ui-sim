@@ -39,14 +39,14 @@ docker run --rm -v ./MyAddon:/app/Interface/AddOns/MyAddon ghcr.io/osso/wow-ui-s
 docker run --rm -v ./MyAddon:/app/Interface/AddOns/MyAddon ghcr.io/osso/wow-ui-sim --no-saved-vars run-tests MyAddon
 ```
 
-The Docker image is headless-only (~220MB): no audio, no textures, no GPU drivers. `screenshot` is not supported in Docker. The image is optimized for `run-tests`, `self-test`, and `lua-errors`.
+The Docker image supports `screenshot` through Mesa software Vulkan, as well as `run-tests`, `self-test`, and `lua-errors`. It excludes audio and does not bundle WoW game textures. See the [Docker usage](../../../README.md#docker).
 
 ### Release build contract
 
 The Docker builder must select a client profile explicitly:
 
 ```bash
-cargo build --release --bin wow-sim --no-default-features --features client-retail --locked
+cargo build --release --bin wow-sim --no-default-features --features client-retail,gui --locked
 ```
 
 `--no-default-features` removes the GUI dependency tree; `client-retail` supplies the required runtime profile for the headless binary. `frame_collect` owns the shared `HitOrderKey`, so headless compilation no longer depends on the GUI-only `hit_grid` module. Docker CI for v0.1.29 failed when the profile was omitted and that reverse dependency still existed; the next tag will carry both fixes.
