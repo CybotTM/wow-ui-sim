@@ -185,7 +185,11 @@ fn process_element(
                     let chunk_name = format!("@{}", path.display());
                     env.state().borrow_mut().keybindings.bodies.insert(
                         name.clone(),
-                        crate::lua_api::sim_substates::BindingBody { source, chunk_name },
+                        crate::lua_api::sim_substates::BindingBody {
+                            source,
+                            chunk_name,
+                            run_on_up: binding.run_on_up,
+                        },
                     );
                 }
             }

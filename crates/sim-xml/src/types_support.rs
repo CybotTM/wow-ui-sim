@@ -353,6 +353,8 @@ pub struct BindingXml {
     pub category: Option<String>,
     #[serde(rename = "@header")]
     pub header: Option<String>,
+    #[serde(rename = "@runOnUp", default)]
+    pub run_on_up: bool,
     #[serde(rename = "$text")]
     pub body: Option<String>,
     #[serde(skip)]

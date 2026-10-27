@@ -687,12 +687,14 @@ pub struct LfgListCounts {
 pub struct BindingBody {
     pub source: String,
     pub chunk_name: String,
+    pub run_on_up: bool,
 }
 
 /// Keybinding assignments and loaded XML binding bodies.
 #[derive(Debug, Default, Clone)]
 pub struct Keybindings {
     pub bodies: std::collections::HashMap<String, BindingBody>,
+    pub pending_releases: std::collections::HashMap<String, BindingBody>,
     /// Explicit active context IDs; no binding priority or routing is inferred.
     pub active_contexts: std::collections::HashSet<i32>,
     /// Insertion-ordered base bindings set by `SetBinding(key, action)`.
