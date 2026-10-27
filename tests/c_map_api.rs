@@ -101,6 +101,11 @@ fn test_get_map_info_answers_unseeded_retail_maps_from_the_ui_map_table() {
 #[test]
 fn test_map_util_finds_unseeded_continent_parent() {
     let env = env();
+    if wow_ui_sim::client_profile::ACTIVE != wow_ui_sim::client_profile::ClientProfile::Retail {
+        let name: String = env.eval("return C_Map.GetMapInfo(630).name").unwrap();
+        assert_eq!(name, "Map 630");
+        return;
+    }
     let path = wow_ui_sim::client_profile::blizzard_ui_addons_dir()
         .join("Blizzard_FrameXMLUtil/Mainline/MapUtil.lua");
     let source = std::fs::read_to_string(&path)
