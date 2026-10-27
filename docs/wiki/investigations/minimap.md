@@ -2,6 +2,10 @@
 
 Current state of the minimap implementation: basic circular placeholder render, not a functional WoW minimap.
 
+## Supplied quest-blob containment
+
+The [quest-blob contract](../../specs/minimap-quest-blob-observation.md) supplies per-quest containment for Retail, PTR and Forever. It does not model minimap geometry. Retail's original objective-tracker consumer passes for supplied false and true; its producer-only RED reaches the missing call. Native containment and the unsupplied scenario default remain unverified.
+
 ## What Works
 
 - `WidgetType::Minimap` enum variant and XML parsing
