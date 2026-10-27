@@ -6,7 +6,10 @@ use rilua::{LuaApiMut, LuaResult, Val};
 
 pub fn register(lua: &mut rilua::Lua) -> LuaResult<()> {
     LuaApiMut::register_function(lua, "GetActiveTalentGroup", get_active_talent_group)?;
-    LuaApiMut::register_function(lua, "GetNumTalentGroups", get_num_talent_groups)
+    LuaApiMut::register_function(lua, "GetNumTalentGroups", get_num_talent_groups)?;
+    LuaApiMut::register_function(lua, "GetGlyphSocketInfo", get_glyph_socket_info)?;
+    LuaApiMut::register_function(lua, "GetNumGlyphSockets", get_num_glyph_sockets)?;
+    LuaApiMut::register_function(lua, "GetUnspentTalentPoints", get_unspent_talent_points)
 }
 
 fn get_active_talent_group(state: &mut LuaState) -> LuaResult<u32> {
@@ -41,6 +44,87 @@ fn get_num_talent_groups(state: &mut LuaState) -> LuaResult<u32> {
         }
     };
     state.push(Val::Num(count as f64));
+    Ok(1)
+}
+
+// Wrath consumers: Blizzard_GlyphUI.lua:65 and Blizzard_TalentUI.lua:499.
+// Signatures: data/patch-api/sources/3.1.0-api-changes.txt:24,34.
+// Return semantics follow the aso 3.3.5a decompilation comparison; absent
+// scenario inputs are empty or zero, not a native initialization claim.
+fn selected_group(state: &LuaState, index: i32) -> LuaResult<u32> {
+    match stack_val(state, index) {
+        Val::Num(value) => Ok(value as u32),
+        _ => Ok(borrow_state(state)?.wrath_legacy.player_talent_group + 1),
+    }
+}
+
+fn get_glyph_socket_info(state: &mut LuaState) -> LuaResult<u32> {
+    let index = match stack_val(state, 1) {
+        Val::Num(value) if (1.0..=6.0).contains(&value) => value as u32,
+        Val::Num(_) => return Ok(0),
+        _ => {
+            return Err(rilua::runtime_error(
+                "GetGlyphSocketInfo expects a numeric index",
+            ));
+        }
+    };
+    let group = selected_group(state, 2)?;
+    let socket = borrow_state(state)?
+        .wrath_glyph_sockets
+        .get(&(group, index))
+        .cloned();
+    let Some(socket) = socket else {
+        return Ok(0);
+    };
+    push_glyph_socket_info(state, &socket);
+    Ok(4)
+}
+
+fn push_glyph_socket_info(state: &mut LuaState, socket: &crate::lua_api::state::WrathGlyphSocket) {
+    let has_glyph = socket.glyph_spell_id.is_some();
+    state.push(if socket.enabled {
+        Val::Num(1.0)
+    } else {
+        Val::Nil
+    });
+    state.push(
+        socket
+            .glyph_type
+            .map_or(Val::Nil, |value| Val::Num(value as f64)),
+    );
+    state.push(
+        socket
+            .glyph_spell_id
+            .filter(|_| has_glyph)
+            .map_or(Val::Nil, |value| Val::Num(value as f64)),
+    );
+    let icon = socket.icon.as_deref().filter(|_| has_glyph);
+    let icon = icon.map_or(Val::Nil, |value| {
+        Val::Str(state.gc.intern_string(value.as_bytes()))
+    });
+    state.push(icon);
+}
+
+fn get_num_glyph_sockets(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(6.0));
+    Ok(1)
+}
+
+fn get_unspent_talent_points(state: &mut LuaState) -> LuaResult<u32> {
+    let inspect = string_to_bool(state, stack_val(state, 1));
+    let pet = string_to_bool(state, stack_val(state, 2));
+    let points = if inspect || pet {
+        // No inspected or pet group is supplied in this scenario model.
+        0
+    } else {
+        let group = selected_group(state, 3)?;
+        borrow_state(state)?
+            .wrath_unspent_talent_points
+            .get(&group)
+            .copied()
+            .unwrap_or(0)
+    };
+    state.push(Val::Num(points as f64));
     Ok(1)
 }
 

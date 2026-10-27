@@ -4,6 +4,10 @@
 
 Sets the scenario input for `C_SpecializationInfo.IsSpecSelectionEnabled` on PTR and WoWForever. The scenario defaults to true; this does not describe native eligibility.
 
+### Wrath scenario inputs
+
+`A_Admin.SetWrathGlyphSocket(group, index, enabled, glyphType, glyphSpellID, icon)` supplies one socket in a one-based talent group. The socket index is 1 through 6; the last three values may be nil. `A_Admin.SetWrathUnspentTalentPoints(group, points)` supplies a group's unspent points. These setters are available only on Wrath. Unsupplied sockets have no record and unsupplied points are zero; these are simulator scenario defaults, not native initial values. No inspected or pet talent groups are supplied; their point queries return zero as a scenario default. Setters do not fire events.
+
 ### A_Admin.SetSpec(specIndex)
 
 Sets the player's active specialization.

@@ -6,6 +6,10 @@ The [target-spell and flyout contract](../specs/spell-target-flyout.md) replaces
 
 [Scenario state and selected consumer](systems/spectating-ui.md) describe the user-authorized false default and undocumented native contract. Retail original-consumer RED/GREEN and unchanged Retail/PTR stock are proven; seven all-target checks have zero warnings.
 
+## [2026-10-27] bounded proof | Wrath glyph and talent inputs
+
+[Original consumer boundaries](investigations/wrath-spell-panels-f10.md) link the [supplied-input contract](../specs/wrath-glyph-talent-inputs.md). Two byte-identical RED/GREEN selectors cover glyph records and unspent points; the next talent-panel failure is nil `GetTalentTabInfo`. Wrath and Retail stock remain 0/0. Seven all-target checks have zero compiler warnings; the PTR check used source-equivalent pre-follow-up code.
+
 ## [2026-10-26] proof | Forever Camelot spellbook supplied observations
 
 [Original selected consumers](systems/forever-camelot-spellbook.md) link the [contract](../specs/forever-camelot-spellbook.md): shared availability and an independent three-state supplied outfit list, without catalog ungating or native defaults. Three byte-identical original-consumer RED/GREEN pairs pass; paired stock remains 26/26 with zero raw-key deltas, all 34 CVar guards are unchanged and all seven all-target checks have zero compiler warnings. Full item browsing and device startup remain outside this proof.

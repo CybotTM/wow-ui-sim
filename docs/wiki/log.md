@@ -6,6 +6,10 @@ Reconciled the [historical target-spell boundary](investigations/forever-startup
 
 [Scenario and consumer evidence](systems/spectating-ui.md): state-backed query with a user-authorized false default. Retail consumer RED/GREEN and unchanged Retail/PTR stock are proven; seven all-target checks have zero compiler warnings.
 
+## [2026-10-27] bounded proof | Wrath glyph and talent inputs
+
+[Wrath F10 boundaries](investigations/wrath-spell-panels-f10.md) record the supplied glyph and point selectors, the corrected native comparison, and the separate `GetTalentTabInfo` failure. Wrath and Retail stock are unchanged at 0/0. Seven all-target checks have zero compiler warnings; PTR uses source-equivalent pre-follow-up code.
+
 ## [2026-10-26] implementation | Wrath setup inputs
 
 [Wrath retained fixtures](investigations/wrath-retained-fixtures.md#shared-setup-boundaries) records the original container and target consumers and links their supplied bag, leadership and tap contracts. Full F15/F18 acceptance remains separate; exact 3.4.x native semantics are unknown.

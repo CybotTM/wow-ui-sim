@@ -80,6 +80,73 @@ const TALENT_SOURCES: &[(&str, &str)] = &[
     ),
 ];
 
+#[test]
+fn glyph_socket_consumer_tracks_supplied_records() {
+    let env = load_talent_fixture();
+    env.exec("GlyphFrame_LoadUI()")
+        .expect("load original GlyphUI");
+    exec_consumer(
+        &env,
+        r#"
+        PlayerTalentFrame.talentGroup = 1
+        A_Admin.SetWrathGlyphSocket(1, 1, true, 1, 101, 'Interface\\Icons\\GlyphOne')
+        GlyphFrameGlyph_UpdateSlot(GlyphFrameGlyph1)
+        assert(GlyphFrameGlyph1.spell == 101)
+        assert(GlyphFrameGlyph1.glyph:GetTexture() == 'Interface\\Icons\\GlyphOne')
+        A_Admin.SetWrathGlyphSocket(1, 1, true, 2, 202, 'Interface\\Icons\\GlyphTwo')
+        GlyphFrameGlyph_UpdateSlot(GlyphFrameGlyph1)
+        assert(GlyphFrameGlyph1.spell == 202)
+        assert(GlyphFrameGlyph1.glyph:GetTexture() == 'Interface\\Icons\\GlyphTwo')
+        A_Admin.SetWrathGlyphSocket(1, 1, true, 1, nil, nil)
+        local enabled, kind, spell, icon = GetGlyphSocketInfo(1, 1)
+        assert(enabled == 1 and kind == 1 and spell == nil and icon == nil)
+        A_Admin.SetWrathGlyphSocket(1, 1, false, 2, nil, nil)
+        enabled, kind, spell, icon = GetGlyphSocketInfo(1, 1)
+        assert(enabled == nil and kind == 2 and spell == nil and icon == nil)
+        A_Admin.SetWrathGlyphSocket(1, 1, false, 2, 202, 'Interface\\Icons\\GlyphTwo')
+        enabled, kind, spell, icon = GetGlyphSocketInfo(1, 1)
+        assert(enabled == nil and kind == 2 and spell == 202 and icon == 'Interface\\Icons\\GlyphTwo', 'locked populated socket must retain glyph')
+        assert(select('#', GetGlyphSocketInfo(2, 1)) == 0)
+        assert(select('#', GetGlyphSocketInfo(0, 1)) == 0)
+        assert(GetNumGlyphSockets() == 6)
+        A_Admin.SetWrathGlyphSocket(2, 1, true, 2, 303, 'Interface\\Icons\\GlyphThree')
+        local groupEnabled, groupType, groupSpell = GetGlyphSocketInfo(1, 2)
+        assert(groupEnabled == 1 and groupType == 2 and groupSpell == 303)
+        enabled, kind, spell, icon = GetGlyphSocketInfo(1, 1)
+        assert(enabled == nil and kind == 2 and spell == 202 and icon == 'Interface\\Icons\\GlyphTwo')
+        "#,
+    );
+}
+
+#[test]
+fn talent_controls_consumer_tracks_supplied_points() {
+    let env = load_talent_fixture();
+    env.exec("A_Admin.SetWrathUnspentTalentPoints(1, 0)")
+        .expect("supply zero points");
+    let error = env
+        .exec("PlayerSpecTab_OnClick(PlayerSpecTab1)")
+        .expect_err("unmodeled talent tab query remains visible");
+    assert!(
+        error.to_string().contains("TalentFrameBase.lua:118")
+            && error.to_string().contains("GetTalentTabInfo"),
+        "unexpected original consumer failure: {error}"
+    );
+    env.exec(
+        r#"
+        assert(GetUnspentTalentPoints(false, false, 1) == 0)
+        A_Admin.SetWrathUnspentTalentPoints(1, 3)
+        assert(GetUnspentTalentPoints(false, false, 1) == 3)
+        A_Admin.SetWrathUnspentTalentPoints(2, 9)
+        assert(GetUnspentTalentPoints(false, false, 2) == 9)
+        assert(GetUnspentTalentPoints(false, false, 1) == 3)
+        assert(GetUnspentTalentPoints(false, false) == 3)
+        assert(GetUnspentTalentPoints(true, false, 1) == 0)
+        assert(GetUnspentTalentPoints(false, true, 1) == 0)
+        "#,
+    )
+    .expect("query both supplied talent point values");
+}
+
 /// F10: blizzard_player_spells_loads::blizzard_player_spells_panel_root_is_hidden_after_load.
 #[test]
 fn talent_root_remains_hidden_after_native_addon_load() {

@@ -125,6 +125,18 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
 }
 
 fn register_player(b: TableBuilder) -> LuaResult<TableBuilder> {
+    let b = if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
+        b.set_function(
+            "SetWrathGlyphSocket",
+            super::admin_spec::set_wrath_glyph_socket,
+        )?
+        .set_function(
+            "SetWrathUnspentTalentPoints",
+            super::admin_spec::set_wrath_unspent_talent_points,
+        )?
+    } else {
+        b
+    };
     #[cfg(feature = "client-wowforever")]
     let b = b.set_function(
         "SetPlayerFacing",
