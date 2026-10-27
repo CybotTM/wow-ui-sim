@@ -311,6 +311,19 @@ mod tests {
     }
 
     #[test]
+    fn format_preserves_literal_bytes() {
+        let env = WowLuaEnv::new().expect("env");
+        env.exec(
+            r#"
+            local bytes = string.char(255, 128)
+            assert(string.format(bytes .. ' %% %.1F', 2.5) == bytes .. ' % 2.5')
+            assert(string.format('é %% %1$d 雪', 7) == 'é % 7 雪')
+        "#,
+        )
+        .expect("format must preserve literal bytes");
+    }
+
+    #[test]
     fn nil_numeric_format_args_are_zero() {
         let env = WowLuaEnv::new().expect("env");
         let out: String = env
