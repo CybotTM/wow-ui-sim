@@ -10,7 +10,7 @@ Wrath consumers read scenario-supplied glyph sockets and unspent talent points. 
 - [ ] Verify remaining invalid-index and absent-group boundaries.
 - [x] Return distinct supplied unspent point values per group; an omitted group selects the active group.
 - [ ] Verify unsupplied player points and non-numeric group selection.
-- [ ] Return scenario-default zero for inspect or pet calls; no inspected or pet group state is supplied.
+- [x] Return scenario-default zero for inspect or pet calls; no inspected or pet group state is supplied.
 - [ ] Expose the input setters only on Wrath and do not fire events from them.
 
 ## How it works
@@ -29,7 +29,7 @@ Wrath consumers read scenario-supplied glyph sockets and unspent talent points. 
 
 ## Known gaps (current cycle)
 
-- [ ] Complete Retail stock and all-target profile checks.
+- [ ] Model inspected and pet talent state in a separate follow-up.
 
 ## Out of scope
 

@@ -1,6 +1,6 @@
 ## [2026-10-27] bounded proof | Wrath glyph and talent inputs
 
-[Wrath F10 boundaries](investigations/wrath-spell-panels-f10.md) record the supplied glyph and point selectors, the corrected native comparison, and the separate `GetTalentTabInfo` failure. Wrath stock is unchanged; Retail stock and all-target checks are pending.
+[Wrath F10 boundaries](investigations/wrath-spell-panels-f10.md) record the supplied glyph and point selectors, the corrected native comparison, and the separate `GetTalentTabInfo` failure. Wrath and Retail stock are unchanged at 0/0. Seven all-target checks have zero compiler warnings; PTR uses source-equivalent pre-follow-up code.
 
 ## [2026-10-26] implementation | Wrath setup inputs
 

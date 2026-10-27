@@ -1,6 +1,6 @@
 ## [2026-10-27] bounded proof | Wrath glyph and talent inputs
 
-[Original consumer boundaries](investigations/wrath-spell-panels-f10.md) link the [supplied-input contract](../specs/wrath-glyph-talent-inputs.md). Two byte-identical RED/GREEN selectors cover glyph records and unspent points; the next talent-panel failure is nil `GetTalentTabInfo`. Wrath stock remains 0/0. Retail stock and all-target checks remain pending.
+[Original consumer boundaries](investigations/wrath-spell-panels-f10.md) link the [supplied-input contract](../specs/wrath-glyph-talent-inputs.md). Two byte-identical RED/GREEN selectors cover glyph records and unspent points; the next talent-panel failure is nil `GetTalentTabInfo`. Wrath and Retail stock remain 0/0. Seven all-target checks have zero compiler warnings; the PTR check used source-equivalent pre-follow-up code.
 
 ## [2026-10-26] proof | Forever Camelot spellbook supplied observations
 
