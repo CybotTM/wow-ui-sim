@@ -97,6 +97,37 @@ fn talent_addon_reports_loaded_after_explicit_native_load() {
     exec_consumer(&env, "assert(IsAddOnLoaded('Blizzard_TalentUI'))");
 }
 
+#[test]
+fn supplied_spellbook_slot_records_can_be_set() {
+    let env = load_spellbook_fixture();
+    env.exec(r#"A_Admin.SetWrathSpellBookSlot('spell', 1, 6603, 'Auto Attack', '', 'Interface\\Icons\\INV_Sword_04')"#)
+        .expect("supply a Wrath spellbook slot record");
+}
+
+#[test]
+fn original_spellbook_displays_supplied_slot_layouts() {
+    let env = load_spellbook_fixture();
+    exec_consumer(&env, r#"
+        A_Admin.SetWrathSpellBookSlot('spell', 1, 6603, 'Auto Attack', '', 'Interface\\Icons\\INV_Sword_04')
+        A_Admin.SetWrathSpellBookSlot('spell', 2, 635, 'Holy Light', '', 'Interface\\Icons\\Spell_Holy_HolyBolt')
+        A_Admin.SetWrathSpellBookSlot('spell', 3, 19750, 'Flash of Light', '', 'Interface\\Icons\\Spell_Holy_FlashHeal')
+        SpellBookFrame:Show()
+        assert(SpellButton1IconTexture:IsVisible(), 'slot 1 icon must be visible at SpellBookFrame.lua:447')
+        assert(SpellButton1IconTexture:GetTexture() == 'Interface\\Icons\\INV_Sword_04')
+        assert(SpellButton1SpellName:GetText() == 'Auto Attack', 'slot 1 name at SpellBookFrame.lua:495')
+        assert(SpellButton2SpellName:GetText() == 'Holy Light', 'slot 2 name at SpellBookFrame.lua:495')
+        SpellBookFrame:Hide()
+        A_Admin.SetWrathSpellBookSlot('spell', 1, 19750, 'Flash of Light', '', 'Interface\\Icons\\Spell_Holy_FlashHeal')
+        A_Admin.SetWrathSpellBookSlot('spell', 2, 6603, 'Auto Attack', '', 'Interface\\Icons\\INV_Sword_04')
+        A_Admin.SetWrathSpellBookSlot('spell', 3, 635, 'Holy Light', '', 'Interface\\Icons\\Spell_Holy_HolyBolt')
+        SpellBookFrame:Show()
+        assert(SpellButton1IconTexture:IsVisible(), 'changed slot 1 icon must be visible')
+        assert(SpellButton1IconTexture:GetTexture() == 'Interface\\Icons\\Spell_Holy_FlashHeal')
+        assert(SpellButton1SpellName:GetText() == 'Flash of Light')
+        assert(SpellButton2SpellName:GetText() == 'Auto Attack')
+    "#);
+}
+
 /// F10: spellbook::spellbook_spells_visible_on_first_open.
 #[test]
 fn spellbook_shows_supplied_spell_on_first_native_open() {
