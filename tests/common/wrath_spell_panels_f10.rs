@@ -113,19 +113,24 @@ fn glyph_socket_consumer_tracks_supplied_records() {
 #[test]
 fn talent_controls_consumer_tracks_supplied_points() {
     let env = load_talent_fixture();
-    exec_consumer(
-        &env,
-        r#"
-        A_Admin.SetWrathUnspentTalentPoints(1, 0)
-        SetCVar('previewTalents', '1')
-        PlayerSpecTab_OnClick(PlayerSpecTab1)
-        PlayerTalentFrame_UpdateControls(1, 1)
-        assert(not PlayerTalentFramePreviewBar:IsShown())
-        A_Admin.SetWrathUnspentTalentPoints(1, 3)
-        PlayerTalentFrame_UpdateControls(1, 1)
-        assert(PlayerTalentFramePreviewBar:IsShown())
-        "#,
+    env.exec("A_Admin.SetWrathUnspentTalentPoints(1, 0)")
+        .expect("supply zero points");
+    let error = env
+        .exec("PlayerSpecTab_OnClick(PlayerSpecTab1)")
+        .expect_err("unmodeled talent tab query remains visible");
+    assert!(
+        error.to_string().contains("TalentFrameBase.lua:118")
+            && error.to_string().contains("GetTalentTabInfo"),
+        "unexpected original consumer failure: {error}"
     );
+    env.exec(
+        r#"
+        assert(GetUnspentTalentPoints(false, false, 1) == 0)
+        A_Admin.SetWrathUnspentTalentPoints(1, 3)
+        assert(GetUnspentTalentPoints(false, false, 1) == 3)
+        "#,
+    )
+    .expect("query both supplied talent point values");
 }
 
 /// F10: blizzard_player_spells_loads::blizzard_player_spells_panel_root_is_hidden_after_load.
