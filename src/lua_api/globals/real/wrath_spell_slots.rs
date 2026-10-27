@@ -14,6 +14,7 @@ pub struct SpellSlot {
     pub name: String,
     pub rank: String,
     pub icon: String,
+    pub selected: Option<bool>,
 }
 
 pub type SpellSlots = HashMap<(String, u32), SpellSlot>;
@@ -80,6 +81,7 @@ fn set_spell_slot(state: &mut LuaState) -> LuaResult<u32> {
         name: String::from_stack(state, 4)?,
         rank: String::from_stack(state, 5)?,
         icon: String::from_stack(state, 6)?,
+        selected: Option::<bool>::from_stack(state, 7)?,
     };
     borrow_state_mut(state)?
         .wrath_spell_slots
