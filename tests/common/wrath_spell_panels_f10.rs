@@ -105,6 +105,31 @@ fn supplied_spellbook_slot_records_can_be_set() {
 }
 
 #[test]
+fn original_spellbook_reads_supplied_slot_names() {
+    let env = load_spellbook_fixture();
+    exec_consumer(&env, r#"
+        -- Isolate the name consumer from the separate texture producer.
+        GetSpellTexture = function(slot, book)
+            if book == 'spell' and slot >= 1 and slot <= 3 then
+                return 'Interface\\Icons\\INV_Sword_04'
+            end
+        end
+        A_Admin.SetWrathSpellBookSlot('spell', 1, 6603, 'Auto Attack', '', 'Interface\\Icons\\INV_Sword_04')
+        A_Admin.SetWrathSpellBookSlot('spell', 2, 635, 'Holy Light', '', 'Interface\\Icons\\Spell_Holy_HolyBolt')
+        A_Admin.SetWrathSpellBookSlot('spell', 3, 19750, 'Flash of Light', '', 'Interface\\Icons\\Spell_Holy_FlashHeal')
+        SpellBookFrame:Show()
+        assert(SpellButton1SpellName:GetText() == 'Auto Attack', 'SpellBookFrame.lua:495 slot 1')
+        assert(SpellButton2SpellName:GetText() == 'Holy Light', 'SpellBookFrame.lua:495 slot 2')
+        SpellBookFrame:Hide()
+        A_Admin.SetWrathSpellBookSlot('spell', 1, 19750, 'Flash of Light', '', 'Interface\\Icons\\Spell_Holy_FlashHeal')
+        A_Admin.SetWrathSpellBookSlot('spell', 2, 6603, 'Auto Attack', '', 'Interface\\Icons\\INV_Sword_04')
+        SpellBookFrame:Show()
+        assert(SpellButton1SpellName:GetText() == 'Flash of Light')
+        assert(SpellButton2SpellName:GetText() == 'Auto Attack')
+    "#);
+}
+
+#[test]
 fn original_spellbook_displays_supplied_slot_layouts() {
     let env = load_spellbook_fixture();
     exec_consumer(&env, r#"
