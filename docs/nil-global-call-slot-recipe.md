@@ -10,7 +10,7 @@ Staged 2026-10-24. Static READY-FOR-SLOT is not runtime acceptance. No slot was 
 | MASTER | `571284aaa8bb29f17d27e90110e4f863921d9330` | `b2629b6329484945cb14e43b0e5590ee308c5df4` | Paired stock comparison, NOT historical S25 RED |
 | GREEN integration | `9083bf83fa63bbfbe0242ee835e939a2824896db` | `101d7b0287e56efbded3c2d2b87936310aad4aa6` | Merge of lane `1920b10c9f7b4c908055497c6f01b6f88b4be51f` and MASTER |
 
-ROOT = `/home/osso/.worktrees/wow-ui-sim-rilua-nilcall`, branch `rilua-nilcall`. Parent records full final branch SHA including this recipe commit as GREEN before execution; confirms its code/test/manifest/lock tree is identical to GREEN integration above. Do not use a moving `master` name. Record full tree and source hashes even for documentation-only descendants.
+ROOT = `~/.worktrees/wow-ui-sim-rilua-nilcall`, branch `rilua-nilcall`. Parent records full final branch SHA including this recipe commit as GREEN before execution; confirms its code/test/manifest/lock tree is identical to GREEN integration above. Do not use a moving `master` name. Record full tree and source hashes even for documentation-only descendants.
 
 Merge was conflict-free; wiki index/log equal MASTER, with no unique lane wiki changes discarded. All five diagnostic test files remain byte-identical to OLD. The OLD manifest/lock are not replaced with the newer pin. Do not build new switch wiring against the OLD dependency.
 
@@ -20,7 +20,7 @@ Bind each command to full SHA/tree, complete tracked/untracked input manifest an
 
 ## 2. One owned slot; durable asynchronous exit capture
 
-Parent chooses ONE idle approved `/home/osso/.cache/wow-ui-sim-targets/slot-{0,1,2,3}` only after checking existing owner/lock/marker, all relevant units/process cgroups and open slot references. Use the shared slot coordinator's existing lock and ownership protocol; a new lane-private lock does not authorize reuse. Acquire its exclusive lock before marker creation/transfer, record owner/session, grant, source/profile, actual unit MainPID and history. Do not overwrite another marker, infer idle from MainPID=0, create a fifth target, use canonical target or prune caches. If coordination cannot establish exclusive ownership, HOLD.
+Parent chooses ONE idle approved `~/.cache/wow-ui-sim-targets/slot-{0,1,2,3}` only after checking existing owner/lock/marker, all relevant units/process cgroups and open slot references. Use the shared slot coordinator's existing lock and ownership protocol; a new lane-private lock does not authorize reuse. Acquire its exclusive lock before marker creation/transfer, record owner/session, grant, source/profile, actual unit MainPID and history. Do not overwrite another marker, infer idle from MainPID=0, create a fifth target, use canonical target or prune caches. If coordination cannot establish exclusive ownership, HOLD.
 
 Bind SLOT_LOCK to the coordinator's existing absolute lock path for the chosen slot and record it; do not invent an alternate filename. Each unit also holds that same kernel lock for its entire command lifetime using `['flock', '--exclusive', '--nonblock', '--conflict-exit-code=75', '--no-fork', str(SLOT_LOCK), *ARGV]` as its launched command. Lock contention/status75 is HOLD, never test RED. If the coordinator already holds the kernel lock, use its established transfer/execution protocol rather than self-deadlocking or bypassing it; no submission until ownership and lifetime locking agree.
 
@@ -30,7 +30,7 @@ Use new private OUT attempt directory outside target caches (0700), logs/receipt
 
 ```python
 ['env', 'CAPACITY_ID=rilua-nilcall-sim-proof', 'timeout', '35',
- '/home/osso/.worktrees/logs/capacity.sh']
+ '~/.worktrees/logs/capacity.sh']
 ```
 
 No priority identity/FIFO bypass. On HOLD return to independent work and schedule next bounded attempt within 150 seconds; no synchronous build polling or unbounded admission loop. Submission returns immediately; inspect later. No timeout on compilation. Runtime timeout is 88s plus 2s kill grace, never over 90s.
@@ -64,7 +64,7 @@ PASS requires **ActiveState=active, SubState=exited, Result=success, ExecMainCod
 
 ## 3. Fresh current CVar copy with O_NOATIME guard
 
-For EVERY executable invocation (including discovery, each single test and stock capture), resolve original from parent's unmodified absolute XDG_DATA_HOME, otherwise `/home/osso/.local/share`, plus `wow-sim/cvars.json`. Record original path and resolved symlink target. Missing/unreadable/unstable source is HOLD; do not create defaults. Never mutate parent environment, reset or restore the original.
+For EVERY executable invocation (including discovery, each single test and stock capture), resolve original from parent's unmodified absolute XDG_DATA_HOME, otherwise `~/.local/share`, plus `wow-sim/cvars.json`. Record original path and resolved symlink target. Missing/unreadable/unstable source is HOLD; do not create defaults. Never mutate parent environment, reset or restore the original.
 
 Use this future snapshot helper, **not ordinary read_bytes on the original**:
 
