@@ -197,6 +197,9 @@ fn original_wrath_bag_location_reads_cooldown() {
         let env = WowLuaEnv::new().unwrap();
         seed_two_bag_observations(&env);
         env.exec(r#"
+            -- Other missing producers are prerequisites for the consumer's return.
+            GetContainerItemDurability = function() return 1, 1 end
+            GetContainerItemGems = function() return 1, 2 end
             local function check(bag, slot, expectedStart, expectedDuration)
                 local location = ITEM_INVENTORY_LOCATION_PLAYER + ITEM_INVENTORY_LOCATION_BAGS + bag * 256 + slot
                 local _, _, _, _, _, _, _, _, start, duration = EquipmentManager_GetItemInfoByLocation(location)
@@ -216,6 +219,7 @@ fn original_wrath_bag_location_reads_durability() {
         env.exec(r#"
             -- Isolate the later consumer boundary from the preceding missing producer.
             GetContainerItemCooldown = function() return 0, 0, 1 end
+            GetContainerItemGems = function() return 1, 2 end
             local function check(bag, slot, expectedCurrent, expectedMaximum)
                 local location = ITEM_INVENTORY_LOCATION_PLAYER + ITEM_INVENTORY_LOCATION_BAGS + bag * 256 + slot
                 local _, _, _, _, current, maximum = EquipmentManager_GetItemInfoByLocation(location)
