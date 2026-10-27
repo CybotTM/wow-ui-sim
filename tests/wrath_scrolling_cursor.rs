@@ -195,8 +195,6 @@ fn original_mail_body_first_text_delivers_cursor_and_scrolls() {
         r#"
         assert(SendMailBodyEditBox and SendMailBodyEditBox:GetScript('OnTextChanged'))
         assert(SendMailBodyEditBox:GetScript('OnCursorChanged'))
-        MailFrame:Show()
-        SendMailFrame:Show()
         local box = SendMailBodyEditBox
         local scroll = box:GetParent():GetParent()
         scroll:SetHeight(30)
@@ -208,6 +206,8 @@ fn original_mail_body_first_text_delivers_cursor_and_scrolls() {
         local text = string.rep('line\n', 12) .. 'end'
         box:SetText(text)
         box:SetCursorPosition(#text)
+        MailFrame:Show()
+        SendMailFrame:Show()
         "#,
     )
     .expect("SETUP FAILURE: original mail body first text");
