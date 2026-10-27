@@ -27,6 +27,7 @@ pub struct CraftingQualityInfo {
 #[derive(Debug, Default)]
 pub struct RecipeQualityInputs {
     pub item_quality: HashMap<(u32, u32), CraftingQualityInfo>,
+    pub reagent_item_quality: HashMap<u32, CraftingQualityInfo>,
     pub reagent_links: HashMap<(u32, u32, u32), String>,
 }
 
