@@ -10,6 +10,90 @@ use keybindings_panels_detail::{
     drain_test_errors, frame_is_shown, install_test_error_handler, setup_env,
 };
 
+#[cfg(any(feature = "client-ptr", feature = "client-wowforever"))]
+#[test]
+fn supplied_spellbook_rank_is_observed() {
+    let env = wow_ui_sim::lua_api::WowLuaEnv::new().expect("create environment");
+    env.exec(r#"
+        A_Admin.SetSpellBookItemLowRank(6603, true)
+        A_Admin.SetSpellBookItemLowRank(8690, false)
+        assert(C_SpellBook.IsSpellBookItemLowRank(1, 0) == true)
+        assert(C_SpellBook.IsSpellBookItemLowRank(2, 0) == false)
+    "#).expect("supplied rank observations");
+}
+
+#[cfg(any(feature = "client-ptr", feature = "client-wowforever"))]
+#[test]
+fn supplied_spec_selection_is_observed() {
+    let env = wow_ui_sim::lua_api::WowLuaEnv::new().expect("create environment");
+    env.exec(r#"
+        A_Admin.SetSpecSelectionEnabled(true)
+        assert(C_SpecializationInfo.IsSpecSelectionEnabled(2) == true)
+        A_Admin.SetSpecSelectionEnabled(false)
+        assert(C_SpecializationInfo.IsSpecSelectionEnabled(2) == false)
+    "#).expect("supplied specialization observations");
+}
+
+#[cfg(any(feature = "client-ptr", feature = "client-wowforever"))]
+#[test]
+fn spellbook_rank_accepts_untainted_secret_arguments() {
+    let env = wow_ui_sim::lua_api::WowLuaEnv::new().expect("create environment");
+    env.exec(r#"
+        A_Admin.SetSpellBookItemLowRank(6603, true)
+        local slot, bank = secretwrap(1), secretwrap(0)
+        assert(C_SpellBook.IsSpellBookItemLowRank(slot, 0) == true)
+        assert(C_SpellBook.IsSpellBookItemLowRank(1, bank) == true)
+        local function addon_slot() return C_SpellBook.IsSpellBookItemLowRank(slot, 0) end
+        local function addon_bank() return C_SpellBook.IsSpellBookItemLowRank(1, bank) end
+        debug.setobjecttaint(addon_slot, 'RankFixture')
+        debug.setobjecttaint(addon_bank, 'RankFixture')
+        assert(not pcall(addon_slot))
+        assert(not pcall(addon_bank))
+    "#).expect("AllowedWhenUntainted spellbook arguments");
+}
+
+#[cfg(any(feature = "client-ptr", feature = "client-wowforever"))]
+#[test]
+fn spec_selection_accepts_untainted_secret_argument() {
+    let env = wow_ui_sim::lua_api::WowLuaEnv::new().expect("create environment");
+    env.exec(r#"
+        A_Admin.SetSpecSelectionEnabled(true)
+        local class = secretwrap(2)
+        assert(C_SpecializationInfo.IsSpecSelectionEnabled(class) == true)
+        local function addon() return C_SpecializationInfo.IsSpecSelectionEnabled(class) end
+        debug.setobjecttaint(addon, 'SpecFixture')
+        assert(not pcall(addon))
+    "#).expect("AllowedWhenUntainted specialization argument");
+}
+
+#[cfg(feature = "client-ptr")]
+#[test]
+fn ptr_spellbook_filter_uses_supplied_rank() {
+    let env = setup_env();
+    env.send_key_press("S", None).expect("load spellbook through key binding");
+    env.exec(r#"
+        A_Admin.SetSpellBookItemLowRank(6603, true)
+        assert(SpellBookFrameMixin.ShouldDisplaySpellBookItem(nil, false, false, true, true, 1, 0) == false)
+        A_Admin.SetSpellBookItemLowRank(6603, false)
+        local ok, result = pcall(SpellBookFrameMixin.ShouldDisplaySpellBookItem, nil, false, false, true, true, 1, 0)
+        assert((ok and result == true) or (not ok and tostring(result):find("IsSpellBookItemLooseFlyoutMember", 1, true)),
+            "non-low-rank item must reach the later flyout query")
+    "#).expect("original spellbook filter consumes supplied rank");
+}
+
+#[cfg(feature = "client-ptr")]
+#[test]
+fn ptr_spec_tab_uses_supplied_spec_selection() {
+    let env = setup_env();
+    env.send_key_press("S", None).expect("load player spells through key binding");
+    env.exec(r#"
+        A_Admin.SetSpecSelectionEnabled(true)
+        assert(PlayerSpellsFrame:IsTabAvailable(PlayerSpellsFrame.specTabID) == true)
+        A_Admin.SetSpecSelectionEnabled(false)
+        assert(PlayerSpellsFrame:IsTabAvailable(PlayerSpellsFrame.specTabID) == false)
+    "#).expect("original specialization tab consumes supplied state");
+}
+
 // These regressions use the ordered startup loader, not setup_env's injected
 // ClickBinding bootstrap, so Escape runs against production panel bookkeeping.
 post_wrath_ui_fixture! {

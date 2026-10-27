@@ -138,6 +138,7 @@ fn register_player(b: TableBuilder) -> LuaResult<TableBuilder> {
         .set_function("SetPlayerHealth", set_player_health)?
         .set_function("SetPlayerPower", set_player_power)?
         .set_function("SetSpec", set_spec)?
+        .set_function("SetSpecSelectionEnabled", set_spec_selection_enabled)?
         .set_function("SetTalentRank", set_talent_rank)?
         .set_function("SetTalentSelection", set_talent_selection)?
         .set_function("ResetTalents", reset_talents)?
@@ -159,6 +160,7 @@ fn register_combat_casting(b: TableBuilder) -> LuaResult<TableBuilder> {
         .set_function("FailCasting", cast_inputs::fail_casting)?
         .set_function("SetGCD", set_gcd)?
         .set_function("SetSpellCooldown", set_spell_cooldown)?
+        .set_function("SetSpellBookItemLowRank", set_spellbook_item_low_rank)?
         .set_function("SetMoving", set_moving)?
         .set_function("SetMounted", set_mounted)?
         .set_function("SetFlying", set_flying)?
@@ -587,6 +589,24 @@ fn set_gcd(state: &mut LuaState) -> LuaResult<u32> {
     let mut st = borrow_state_mut(state)?;
     let now = st.clock_elapsed().as_secs_f64();
     st.gcd = Some((now, duration));
+    Ok(0)
+}
+
+fn set_spec_selection_enabled(state: &mut LuaState) -> LuaResult<u32> {
+    let enabled = bool::from_stack(state, 1)?;
+    borrow_state_mut(state)?.talents.spec_selection_enabled = enabled;
+    Ok(0)
+}
+
+fn set_spellbook_item_low_rank(state: &mut LuaState) -> LuaResult<u32> {
+    let spell_id = u32::from_stack(state, 1)?;
+    let low_rank = bool::from_stack(state, 2)?;
+    let mut state = borrow_state_mut(state)?;
+    if low_rank {
+        state.spellbook_low_rank.insert(spell_id);
+    } else {
+        state.spellbook_low_rank.remove(&spell_id);
+    }
     Ok(0)
 }
 

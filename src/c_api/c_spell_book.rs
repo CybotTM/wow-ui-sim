@@ -12,7 +12,7 @@ use crate::lua_api::script_helpers::{
 };
 use crate::lua_api::state::{SpellFlyoutInfo, SpellFlyoutSlot};
 use crate::lua_api::state_types::CursorInfo;
-use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
+use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
 use crate::spells;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -27,6 +27,18 @@ pub(crate) fn register_c_spell_book(state: &mut LuaState) -> LuaResult<()> {
     register_spell_book_item_queries(state, table_ref)?;
     register_spell_book_item_actions(state, table_ref)?;
     register_spell_book_state_queries(state, table_ref)?;
+    if matches!(
+        crate::client_profile::ACTIVE,
+        crate::client_profile::ClientProfile::Ptr
+            | crate::client_profile::ClientProfile::WowForever
+    ) {
+        table_set_rust_fn_static(
+            state,
+            table_ref,
+            "IsSpellBookItemLowRank",
+            is_spell_book_item_low_rank,
+        )?;
+    }
     register_spell_flyout_queries(state, table_ref)?;
     #[cfg(feature = "client-mists")]
     crate::c_api::legacy_spell_book::register_legacy_spell_book_globals(state)?;
@@ -458,7 +470,23 @@ fn c_spell_book_get_spell_book_item_cast_count(state: &mut LuaState) -> LuaResul
     Ok(1)
 }
 
-#[cfg(feature = "retail-12-0-0")]
+fn is_spell_book_item_low_rank(state: &mut LuaState) -> LuaResult<u32> {
+    let slot = rilua::table_security::unwrap_secret(state, stack_val(state, 1))?;
+    let bank = rilua::table_security::unwrap_secret(state, stack_val(state, 2))?;
+    if !matches!(slot, Val::Num(_)) || !matches!(bank, Val::Num(_)) {
+        return Err(rilua::runtime_error(
+            "spellbook slot and bank must be numbers",
+        ));
+    }
+    let spell_id = resolve_player_spellbook_entry(slot, bank);
+    let is_low_rank = {
+        let sim = borrow_state(state)?;
+        spell_id.is_some_and(|id| sim.spellbook_low_rank.contains(&id))
+    };
+    state.push(Val::Bool(is_low_rank));
+    Ok(1)
+}
+
 fn resolve_player_spellbook_entry(slot: Val, bank: Val) -> Option<u32> {
     const PLAYER_SPELL_BANK: f64 = 0.0;
     if !matches!(bank, Val::Num(bank) if bank == PLAYER_SPELL_BANK) {

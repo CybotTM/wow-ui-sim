@@ -1,5 +1,9 @@
 # Specialization & Talents
 
+### A_Admin.SetSpecSelectionEnabled(enabled)
+
+Sets the scenario input for `C_SpecializationInfo.IsSpecSelectionEnabled` on PTR and WoWForever. The scenario defaults to true; this does not describe native eligibility.
+
 ### A_Admin.SetSpec(specIndex)
 
 Sets the player's active specialization.

@@ -1,5 +1,9 @@
 # Combat State
 
+### A_Admin.SetSpellBookItemLowRank(spellID, lowRank)
+
+Sets or clears a scenario low-rank flag for a spell ID. The scenario starts with no flagged spells; this is not native rank data. On PTR and WoWForever, `C_SpellBook.IsSpellBookItemLowRank` reads this input.
+
 ### A_Admin.SetActionRepeatActive(slot, active)
 
 Supplies positive action-slot repeat membership independently of casting/current
