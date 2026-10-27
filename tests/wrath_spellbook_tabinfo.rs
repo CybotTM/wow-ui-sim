@@ -19,6 +19,7 @@ fn assert_original_consumers(toc: &std::path::Path) {
     for (name, digest) in [
         ("SpellBookFrame.lua", SPELLBOOK_SHA256),
         ("UIPanelTemplates.lua", SCROLLING_SHA256),
+        ("TalentFrameBase.lua", "ef7a60127e817d24e2e48fca3434fb6031a268a1746e813698427a8b454301de"),
         (
             "../AddOns/Blizzard_DebugTools/Blizzard_DebugTools.lua",
             "bbacf3103785ff4609e2e55daeb73d23ae87195a27080ae3a9ce1b18e8816af8",

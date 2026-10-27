@@ -62,6 +62,8 @@ macro_rules! build_empty_sim_state {
             guild_roster_selection: 0,
             wrath_glyph_sockets: Default::default(),
             wrath_unspent_talent_points: Default::default(),
+            wrath_talent_tabs: Default::default(),
+            wrath_talent_rows: Default::default(),
             #[cfg(any(
                 feature = "client-wrath",
                 feature = "client-era",
@@ -695,6 +697,8 @@ macro_rules! build_empty_sim_state {
             challenge_completion: Default::default(),
             challenge_run: Default::default(),
             manual_clock: None,
+            wrath_spell_slots: Default::default(),
+            wrath_spell_selection: (None, None),
             known_spells: ::std::collections::HashSet::new(),
             harmful_spells: ::std::collections::HashSet::new(),
             helpful_spells: ::std::collections::HashSet::new(),
