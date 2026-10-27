@@ -137,6 +137,8 @@ fn talent_controls_consumer_tracks_supplied_points() {
         assert(GetUnspentTalentPoints(false, false, 2) == 9)
         assert(GetUnspentTalentPoints(false, false, 1) == 3)
         assert(GetUnspentTalentPoints(false, false) == 3)
+        assert(GetUnspentTalentPoints(true, false, 1) == 0)
+        assert(GetUnspentTalentPoints(false, true, 1) == 0)
         "#,
     )
     .expect("query both supplied talent point values");

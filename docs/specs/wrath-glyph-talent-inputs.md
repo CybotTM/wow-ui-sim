@@ -9,7 +9,8 @@ Wrath consumers read scenario-supplied glyph sockets and unspent talent points. 
 - [x] Return six sockets. A supplied enabled socket without a glyph returns enabled 1 and its type, with nil spell and icon. A locked record returns nil enabled, spell and icon, and its supplied type. An absent record or index 0 returns zero values. These rules follow the aso 3.3.5a comparison; unsupplied records are scenario state, not native initial values.
 - [ ] Verify remaining invalid-index and absent-group boundaries.
 - [x] Return distinct supplied unspent point values per group; an omitted group selects the active group.
-- [ ] Verify unsupplied points and non-numeric group selection.
+- [ ] Verify unsupplied player points and non-numeric group selection.
+- [ ] Return scenario-default zero for inspect or pet calls; no inspected or pet group state is supplied.
 - [ ] Expose the input setters only on Wrath and do not fire events from them.
 
 ## How it works
@@ -32,7 +33,7 @@ Wrath consumers read scenario-supplied glyph sockets and unspent talent points. 
 
 ## Out of scope
 
-- Talent catalogs and native initial allocations are not supplied by these queries.
+- Talent catalogs, inspected or pet talent state, and native initial allocations are not supplied by these queries.
 
 ## Evidence
 
