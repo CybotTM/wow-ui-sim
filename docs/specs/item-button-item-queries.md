@@ -4,8 +4,9 @@ The Retail and PTR ItemButton consumer uses supplied item observations for Azeri
 
 ## What it must do
 
-- [ ] `C_AzeriteEmpoweredItem.IsAzeriteEmpoweredItemByID` reads the existing supplied empowered-item ID set and returns a boolean.
-- [ ] `C_TradeSkillUI.GetItemReagentQualityInfo` reads item-keyed supplied reagent quality and returns a detached `CraftingQualityInfo` snapshot or nil when no record is supplied.
+- [x] `C_AzeriteEmpoweredItem.IsAzeriteEmpoweredItemByID` reads the existing supplied empowered-item ID set and returns a boolean.
+- [x] `C_TradeSkillUI.GetItemReagentQualityInfo` reads item-keyed supplied reagent quality or returns nil when no record is supplied.
+- [ ] Reagent quality snapshots remain detached from supplied state.
 - [ ] Both APIs authenticate secret selectors before parsing, and accept the existing item-ID and link parser forms.
 - [ ] Publish these queries on Retail and PTR only in this lane. Pinned declarations are `AzeriteEmpoweredItemDocumentation.lua:172` in both profiles and `TradeSkillUIDocumentation.lua:364` (Retail) / `:379` (PTR).
 
@@ -24,8 +25,8 @@ The Retail and PTR ItemButton consumer uses supplied item observations for Azeri
 
 ## Known gaps (current cycle)
 
-- [ ] Retail and PTR GREEN, secret-input and profile coverage remain unverified.
-- [ ] Check the next character-toggle failure after these queries work.
+- [ ] PTR secret-input and excluded-profile runtime coverage remain unverified.
+- Retail character-toggle next fails at `AzeritePaperDollItemOverlay.lua:13` (`C_AzeriteItem.IsAzeriteItem`), not `GetMinItemLevel`; the latter is not implemented in this lane.
 
 ## Out of scope
 
