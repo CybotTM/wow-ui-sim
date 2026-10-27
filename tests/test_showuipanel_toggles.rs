@@ -795,6 +795,24 @@ fn admin_open_mailbox_opens_and_closes_mail_panel() {
 }
 
 #[test]
+fn wrath_admin_mailbox_drives_original_mail_frame() {
+    if wow_ui_sim::client_profile::ACTIVE != wow_ui_sim::client_profile::ClientProfile::Wrath {
+        return;
+    }
+    test_timeout! {
+        let env = setup_env();
+        env.exec(r#"
+            assert(not MailFrame:IsShown(), "mailbox starts closed")
+            A_Admin.OpenMailbox()
+            assert(MailFrame:IsShown(), "MailFrame MAIL_SHOW consumer opens mailbox")
+            assert(InboxFrame:IsShown(), "MailFrame MAIL_SHOW consumer opens inbox")
+            A_Admin.CloseMailbox()
+            assert(not MailFrame:IsShown(), "MailFrame MAIL_CLOSED consumer closes mailbox")
+        "#).expect("original Wrath MailFrame consumes admin mailbox events");
+    }
+}
+
+#[test]
 fn wrath_send_mail_update_renders_empty_and_occupied_attachment_counts() {
     if wow_ui_sim::client_profile::ACTIVE != wow_ui_sim::client_profile::ClientProfile::Wrath {
         return;
@@ -804,11 +822,15 @@ fn wrath_send_mail_update_renders_empty_and_occupied_attachment_counts() {
         env.exec(r#"
             A_Admin.ClearBags()
             A_Admin.AddBagItem(0, 1, 6948, 5)
+            A_Admin.AddBagItem(0, 2, 6948, 3)
             PickupContainerItem(0, 1)
             ClickSendMailItemButton(2)
+            PickupContainerItem(0, 2)
+            ClickSendMailItemButton(3)
             SendMailFrame_Update()
             assert(SendMailAttachment1Count:GetText() == "", "empty slot count")
-            assert(SendMailAttachment2Count:GetText() == "5", "occupied slot count")
+            assert(SendMailAttachment2Count:GetText() == "5", "first occupied slot count")
+            assert(SendMailAttachment3Count:GetText() == "3", "second occupied slot count")
         "#).expect("Wrath SendMailFrame_Update renders attachment counts");
     }
 }
