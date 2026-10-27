@@ -62,6 +62,7 @@ macro_rules! build_empty_sim_state {
             guild_roster_selection: 0,
             wrath_glyph_sockets: Default::default(),
             wrath_unspent_talent_points: Default::default(),
+            wrath_talent_tabs: Default::default(),
             #[cfg(any(
                 feature = "client-wrath",
                 feature = "client-era",

@@ -91,6 +91,7 @@ pub struct SimState {
     /// Explicit Wrath scenario inputs; empty means unsupplied.
     pub wrath_glyph_sockets: HashMap<(u32, u32), WrathGlyphSocket>,
     pub wrath_unspent_talent_points: HashMap<u32, u32>,
+    pub wrath_talent_tabs: HashMap<(u32, u32), WrathTalentTab>,
     #[cfg(any(
         feature = "client-wrath",
         feature = "client-era",

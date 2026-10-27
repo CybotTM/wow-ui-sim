@@ -1,5 +1,15 @@
 use super::*;
 
+/// Scenario-supplied Wrath talent tab data.
+#[derive(Clone, Debug)]
+pub struct WrathTalentTab {
+    pub name: String,
+    pub icon: String,
+    pub points_spent: u32,
+    pub background: String,
+    pub preview_points_spent: u32,
+}
+
 /// Scenario-supplied Wrath glyph socket data.
 #[derive(Clone, Debug)]
 pub struct WrathGlyphSocket {
