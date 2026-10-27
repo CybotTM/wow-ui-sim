@@ -12,20 +12,38 @@ use keybindings_panels_detail::{
 
 #[cfg(any(feature = "client-ptr", feature = "client-wowforever"))]
 #[test]
-fn supplied_spellbook_rank_and_spec_selection_are_observed() {
+fn supplied_spellbook_rank_is_observed() {
     let env = wow_ui_sim::lua_api::WowLuaEnv::new().expect("create environment");
     env.exec(r#"
         A_Admin.SetSpellBookItemLowRank(6603, true)
         A_Admin.SetSpellBookItemLowRank(8690, false)
-        A_Admin.SetSpecSelectionEnabled(true)
         assert(C_SpellBook.IsSpellBookItemLowRank(1, 0) == true)
         assert(C_SpellBook.IsSpellBookItemLowRank(2, 0) == false)
-        assert(C_SpecializationInfo.IsSpecSelectionEnabled(2) == true)
-    "#).expect("initial supplied observations");
+    "#).expect("supplied rank observations");
+}
+
+#[cfg(any(feature = "client-ptr", feature = "client-wowforever"))]
+#[test]
+fn supplied_spec_selection_is_observed() {
+    let env = wow_ui_sim::lua_api::WowLuaEnv::new().expect("create environment");
     env.exec(r#"
+        A_Admin.SetSpecSelectionEnabled(true)
+        assert(C_SpecializationInfo.IsSpecSelectionEnabled(2) == true)
         A_Admin.SetSpecSelectionEnabled(false)
         assert(C_SpecializationInfo.IsSpecSelectionEnabled(2) == false)
-    "#).expect("updated supplied specialization observation");
+    "#).expect("supplied specialization observations");
+}
+
+#[cfg(feature = "client-ptr")]
+#[test]
+fn ptr_spec_tab_uses_supplied_spec_selection() {
+    let env = setup_env();
+    env.exec(r#"
+        A_Admin.SetSpecSelectionEnabled(true)
+        assert(PlayerSpellsFrame:IsTabAvailable(PlayerSpellsFrame.specTabID) == true)
+        A_Admin.SetSpecSelectionEnabled(false)
+        assert(PlayerSpellsFrame:IsTabAvailable(PlayerSpellsFrame.specTabID) == false)
+    "#).expect("original specialization tab consumes supplied state");
 }
 
 // These regressions use the ordered startup loader, not setup_env's injected
