@@ -1,6 +1,6 @@
 ## [2026-10-26] implementation | Spectating UI scenario
 
-[Scenario and consumer evidence](systems/spectating-ui.md): state-backed query, with a user-authorized false default. Verification is pending.
+[Scenario and consumer evidence](systems/spectating-ui.md): state-backed query with a user-authorized false default. Retail consumer RED/GREEN and unchanged Retail/PTR stock are proven; seven-profile checks are pending.
 
 ## [2026-10-26] implementation | Wrath setup inputs
 

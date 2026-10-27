@@ -5,8 +5,8 @@ This simulator scenario supplies the state read by `C_SpectatingUI.IsSpectating`
 ## What it must do
 
 - [ ] Publish `IsSpectating()` on Retail, PTR, and WowForever, whose pinned UI calls it.
-- [ ] Return the environment-local supplied boolean. The initial `false` is a user-authorized simulator scenario default, not a native observation.
-- [ ] The original Retail game-menu Esc handler consumes both supplied values.
+- [x] Return the environment-local supplied boolean. The initial `false` is a user-authorized simulator scenario default, not a native observation.
+- [x] The original Retail game-menu Esc handler consumes both supplied values.
 
 ## How it works
 
@@ -24,7 +24,7 @@ This simulator scenario supplies the state read by `C_SpectatingUI.IsSpectating`
 
 ## Known gaps (current cycle)
 
-- [ ] Complete RED/GREEN and profile verification.
+- [ ] Complete seven-profile all-target verification.
 
 ## Out of scope
 
