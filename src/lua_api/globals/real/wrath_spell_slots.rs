@@ -35,13 +35,62 @@ pub(crate) fn register_queries(state: &mut LuaState) -> LuaResult<()> {
     table_set_rust_fn_static(state, state.global, "IsSelectedSpell", is_selected_spell)
 }
 
-fn find_spell_slot(state: &mut LuaState) -> LuaResult<Option<SpellSlot>> {
+enum SpellQuery {
+    Slot(Option<SpellSlot>),
+    Name(Option<SpellSlot>),
+}
+
+fn find_named_spell(slots: &SpellSlots, name: &str, rank: &str) -> Option<SpellSlot> {
+    let name = name.to_lowercase();
+    let rank = rank.to_lowercase();
+    slots
+        .iter()
+        .filter(|(_, record)| {
+            record.name.to_lowercase() == name
+                && (rank.is_empty() || record.rank.to_lowercase() == rank)
+        })
+        .max_by(
+            |((left_book, left_slot), _), ((right_book, right_slot), _)| {
+                (left_slot, left_book).cmp(&(right_slot, right_book))
+            },
+        )
+        .map(|(_, record)| record.clone())
+}
+
+fn find_spell_by_name(state: &mut LuaState) -> LuaResult<Option<SpellSlot>> {
+    let name = String::from_stack(state, 1)?;
+    let rank = match stack_val(state, 2) {
+        Val::Str(_) => Some(String::from_stack(state, 2)?),
+        _ => None,
+    };
+    let slots = &borrow_state(state)?.wrath_spell_slots;
+    if let Some(rank) = rank {
+        return Ok(find_named_spell(slots, &name, &rank));
+    }
+    if let Some(record) = find_named_spell(slots, &name, "") {
+        return Ok(Some(record));
+    }
+    let Some((base, suffix)) = name.rsplit_once('(') else {
+        return Ok(None);
+    };
+    let rank = suffix.split(')').next().unwrap_or(suffix);
+    Ok(find_named_spell(slots, base, rank))
+}
+
+fn find_spell_slot(state: &mut LuaState, function: &str) -> LuaResult<SpellQuery> {
     let slot = match stack_val(state, 1) {
+        Val::Str(_) => return Ok(SpellQuery::Name(find_spell_by_name(state)?)),
         Val::Num(slot) if (1.0..=1024.0).contains(&slot) && slot.fract() == 0.0 => slot as u32,
-        _ => return Err(rilua::runtime_error("Invalid spell slot")),
+        _ => {
+            return Err(rilua::runtime_error(format!(
+                "{function}(): Invalid spell slot"
+            )));
+        }
     };
     if !matches!(stack_val(state, 2), Val::Str(_)) {
-        return Err(rilua::runtime_error("Invalid spell slot"));
+        return Err(rilua::runtime_error(format!(
+            "{function}(): Invalid spell slot"
+        )));
     }
     let book = String::from_stack(state, 2)?;
     let book = if book.eq_ignore_ascii_case("pet") {
@@ -49,14 +98,28 @@ fn find_spell_slot(state: &mut LuaState) -> LuaResult<Option<SpellSlot>> {
     } else {
         "spell"
     };
-    Ok(borrow_state(state)?
-        .wrath_spell_slots
-        .get(&(book.to_string(), slot))
-        .cloned())
+    Ok(SpellQuery::Slot(
+        borrow_state(state)?
+            .wrath_spell_slots
+            .get(&(book.to_string(), slot))
+            .cloned(),
+    ))
+}
+
+fn resolve_spell_slot(
+    state: &mut LuaState,
+    function: &str,
+) -> LuaResult<Option<Option<SpellSlot>>> {
+    match find_spell_slot(state, function)? {
+        SpellQuery::Name(None) => Ok(None),
+        SpellQuery::Name(record) | SpellQuery::Slot(record) => Ok(Some(record)),
+    }
 }
 
 fn get_spell_texture(state: &mut LuaState) -> LuaResult<u32> {
-    let record = find_spell_slot(state)?;
+    let Some(record) = resolve_spell_slot(state, "GetSpellTexture")? else {
+        return Ok(0);
+    };
     let texture = record
         .filter(|record| !record.icon.is_empty())
         .map_or(Val::Nil, |record| create_string(state, &record.icon));
@@ -65,7 +128,10 @@ fn get_spell_texture(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn get_spell_name(state: &mut LuaState) -> LuaResult<u32> {
-    if let Some(record) = find_spell_slot(state)? {
+    let Some(record) = resolve_spell_slot(state, "GetSpellName")? else {
+        return Ok(0);
+    };
+    if let Some(record) = record {
         let name = create_string(state, &record.name);
         state.push(name);
         let rank = create_string(state, &record.rank);
@@ -78,7 +144,9 @@ fn get_spell_name(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn is_selected_spell(state: &mut LuaState) -> LuaResult<u32> {
-    let record = find_spell_slot(state)?;
+    let Some(record) = resolve_spell_slot(state, "IsSelectedSpell")? else {
+        return Ok(0);
+    };
     let selected = if let Some(record) = record {
         let (trade_skill_line, form) = borrow_state(state)?.wrath_spell_selection;
         let trade_match = record.eligible_trade_skill_line.is_some()
