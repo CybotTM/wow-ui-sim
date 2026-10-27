@@ -119,18 +119,107 @@ fn glyph_socket_consumer_tracks_supplied_records() {
 }
 
 #[test]
+fn talent_tab_background_tracks_supplied_records_on_show() {
+    let env = load_talent_fixture();
+    for (background, rank, prerequisite) in [("FirstTree", 1, false), ("SecondTree", 0, true), ("SecondTree", 1, true)] {
+        env.state().borrow_mut().wrath_talent_tabs.insert(
+            (1, 1),
+            wow_ui_sim::lua_api::state::WrathTalentTab {
+                name: "Supplied talent tree".to_string(),
+                icon: Some("Interface\\Icons\\Supplied".to_string()),
+                points_spent: 3,
+                background: background.to_string(),
+                preview_points_spent: u32::from(prerequisite),
+            },
+        );
+        if prerequisite {
+            env.state().borrow_mut().wrath_talent_tabs.insert(
+                (1, 2),
+                wow_ui_sim::lua_api::state::WrathTalentTab {
+                    name: "Second tree".to_string(),
+                    icon: None,
+                    points_spent: 0,
+                    background: "AnotherTree".to_string(),
+                    preview_points_spent: 0,
+                },
+            );
+        }
+        let mut rows = vec![wow_ui_sim::lua_api::state::WrathTalentRow {
+            name: "First talent".to_string(),
+            icon: Some("Interface\\Icons\\FirstTalent".to_string()),
+            tier: 1,
+            column: 1,
+            rank,
+            max_rank: 1,
+            exceptional: false,
+            meets_prereq: true,
+            preview_rank: rank,
+            meets_preview_prereq: true,
+            prerequisites: vec![],
+        }];
+        if prerequisite {
+            rows.push(wow_ui_sim::lua_api::state::WrathTalentRow {
+                name: "Second talent".to_string(),
+                icon: Some("Interface\\Icons\\SecondTalent".to_string()),
+                tier: 1,
+                column: 2,
+                rank: 1,
+                max_rank: 1,
+                exceptional: false,
+                meets_prereq: true,
+                preview_rank: 1,
+                meets_preview_prereq: true,
+                prerequisites: vec![wow_ui_sim::lua_api::state::WrathTalentPrerequisite {
+                    talent_index: 1,
+                    required_rank: 1,
+                }],
+            });
+        }
+        env.state().borrow_mut().wrath_talent_rows.insert((1, 1), rows);
+        env.exec("A_Admin.SetWrathUnspentTalentPoints(1, 3); SetCVar('previewTalents', '0')")
+            .expect("supply talent points");
+        env.exec("PlayerTalentFrame:Hide(); PlayerTalentFrame:Show()")
+            .expect("show native talent panel");
+        assert_no_errors(&env);
+        let expected_tabs = if prerequisite { 2 } else { 1 };
+        env.exec(&format!(
+            "assert(GetNumTalentTabs(false, false) == {expected_tabs}); assert(GetNumTalents(1, false, false) == {expected_tabs}); assert(GetGroupPreviewTalentPointsSpent(false, 1) == {})",
+            u32::from(prerequisite)
+        ))
+        .expect("supplied tab, row and preview counts");
+        env.exec(r#"
+            local name, icon, points, background, preview = GetTalentTabInfo(99, false, false, 1)
+            assert(select('#', GetTalentTabInfo(99, false, false, 1)) == 5)
+            assert(name == nil and icon == nil and points == 0 and background == nil and preview == 0)
+            local n, i, tier, column, rank, maximum, flag, available, previewRank, previewAvailable = GetTalentInfo(99, 1, false, false, 1)
+            assert(select('#', GetTalentInfo(99, 1, false, false, 1)) == 10)
+            assert(n == nil and i == nil and tier == 1 and column == 1 and rank == 0 and maximum == 0 and flag == 0 and available == nil and previewRank == 0 and previewAvailable == nil)
+            assert(select('#', GetTalentPrereqs(99, 1, false, false, 1)) == 0)
+        "#).expect("absent talent comparison return shapes");
+        env.exec(&format!(
+            "assert(PlayerTalentFrameBackgroundTopLeft:GetTexture() == 'Interface\\\\TalentFrame\\\\{background}-TopLeft')"
+        ))
+        .expect("native consumer applies supplied background");
+        env.exec("assert(PlayerTalentFrameTalent1:IsShown()); assert(PlayerTalentFrameTalent1IconTexture:GetTexture() == 'Interface\\\\Icons\\\\FirstTalent')")
+            .expect("native consumer renders supplied talent");
+        if prerequisite {
+            env.exec("local name, icon = GetTalentTabInfo(2, false, false, 1); assert(name == 'Second tree' and icon == nil)")
+                .expect("supplied absent tab icon");
+            let arrow = if rank == 0 { -1 } else { 1 };
+            env.exec(&format!("assert(PlayerTalentFrameTalent2:IsShown()); assert(PlayerTalentFrame.TALENT_BRANCH_ARRAY[1][2].leftArrow == {arrow})"))
+                .expect("native consumer reflects prerequisite rank");
+        } else {
+            env.exec("assert(not PlayerTalentFrameTalent2:IsShown())")
+                .expect("single-talent set hides second button");
+        }
+    }
+}
+
+#[test]
 fn talent_controls_consumer_tracks_supplied_points() {
     let env = load_talent_fixture();
     env.exec("A_Admin.SetWrathUnspentTalentPoints(1, 0)")
         .expect("supply zero points");
-    let error = env
-        .exec("PlayerSpecTab_OnClick(PlayerSpecTab1)")
-        .expect_err("unmodeled talent tab query remains visible");
-    assert!(
-        error.to_string().contains("TalentFrameBase.lua:118")
-            && error.to_string().contains("GetTalentTabInfo"),
-        "unexpected original consumer failure: {error}"
-    );
     env.exec(
         r#"
         assert(GetUnspentTalentPoints(false, false, 1) == 0)
