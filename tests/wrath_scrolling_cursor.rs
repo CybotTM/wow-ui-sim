@@ -13,6 +13,36 @@ const PINNED_SHA256: &str = "d975f94a6d7deb8895a8ab47a2b6975cca4fd9e45f67cc15c54
 const TICK_SECONDS: f64 = 0.016;
 
 #[test]
+fn original_wrath_send_mail_selects_supplied_stationery() {
+    let env = crate::common::new_headless_cursor_env();
+    env.set_screen_size(1024.0, 768.0);
+    let toc = wow_ui_sim::client_profile::blizzard_ui_framexml_toc()
+        .expect("SETUP FAILURE: Wrath FrameXML cache");
+    wow_ui_sim::loader::load_addon(&env.loader_env(), &toc)
+        .expect("SETUP FAILURE: load native FrameXML");
+    env.exec(r#"
+        A_Admin.SetStationeryCatalog({
+            { name = 'Scarlet', texture = 'Scarlet' },
+            { name = 'Azure', texture = 'Azure' },
+        })
+    "#).unwrap();
+    let previous_errors = env.state().borrow().lua_errors.len();
+    env.exec("SendMailFrame:Show()").expect("show original send mail frame");
+    let errors = env.state().borrow().lua_errors[previous_errors..].to_vec();
+    assert!(errors.is_empty(), "original send-mail OnShow failed: {errors:?}");
+    env.exec(r#"
+        assert(GetSelectedStationeryTexture() == 'Scarlet')
+        StationeryPopupButton_OnClick(nil, 2)
+        assert(GetSelectedStationeryTexture() == 'Azure')
+        assert(StationeryPopupFrame.selectedIndex == 2)
+        assert(SendStationeryBackgroundLeft:GetTexture() == STATIONERY_PATH..'Azure1')
+        StationeryPopupButton_OnClick(nil, 1)
+        assert(GetSelectedStationeryTexture() == 'Scarlet')
+        assert(SendStationeryBackgroundLeft:GetTexture() == STATIONERY_PATH..'Scarlet1')
+    "#).expect("original consumer selects both catalog entries");
+}
+
+#[test]
 fn original_wrath_stationery_popup_renders_supplied_catalog() {
     let env = crate::common::new_headless_cursor_env();
     env.set_screen_size(1024.0, 768.0);
