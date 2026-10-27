@@ -177,3 +177,72 @@ fn wrath_carried_gems_project_supplied_item_link() {
         env.exec("local first, second = GetContainerItemGems(0, 1); assert(first == 40111 and second == 40112)").unwrap();
     }
 }
+
+fn seed_two_bag_observations(env: &WowLuaEnv) {
+    seed_bag_observations(env);
+    let mut state = env.state().borrow_mut();
+    let second = state.bag_items.get_mut(&(1, 2)).expect("second carried ring");
+    second.item_id = 49812;
+    second.hyperlink = Some("|Hitem:49812:0:40201:40202:0:0|h[Ring]|h".into());
+    second.durability = Some((42, 91));
+    state.item_cooldowns.insert(
+        49812,
+        wow_ui_sim::lua_api::state::SpellCooldownState { start: 19.0, duration: 47.0 },
+    );
+}
+
+#[test]
+fn original_wrath_bag_location_reads_cooldown() {
+    test_timeout! {
+        let env = WowLuaEnv::new().unwrap();
+        seed_two_bag_observations(&env);
+        env.exec(r#"
+            local function check(bag, slot, expectedStart, expectedDuration)
+                local location = ITEM_INVENTORY_LOCATION_PLAYER + ITEM_INVENTORY_LOCATION_BAGS + bag * 256 + slot
+                local _, _, _, _, _, _, _, _, start, duration = EquipmentManager_GetItemInfoByLocation(location)
+                assert(start == expectedStart and duration == expectedDuration, "consumer cooldown mismatch")
+            end
+            check(0, 1, 11, 31)
+            check(1, 2, 19, 47)
+        "#).unwrap();
+    }
+}
+
+#[test]
+fn original_wrath_bag_location_reads_durability() {
+    test_timeout! {
+        let env = WowLuaEnv::new().unwrap();
+        seed_two_bag_observations(&env);
+        env.exec(r#"
+            -- Isolate the later consumer boundary from the preceding missing producer.
+            GetContainerItemCooldown = function() return 0, 0, 1 end
+            local function check(bag, slot, expectedCurrent, expectedMaximum)
+                local location = ITEM_INVENTORY_LOCATION_PLAYER + ITEM_INVENTORY_LOCATION_BAGS + bag * 256 + slot
+                local _, _, _, _, current, maximum = EquipmentManager_GetItemInfoByLocation(location)
+                assert(current == expectedCurrent and maximum == expectedMaximum, "consumer durability mismatch")
+            end
+            check(0, 1, 27, 83)
+            check(1, 2, 42, 91)
+        "#).unwrap();
+    }
+}
+
+#[test]
+fn original_wrath_bag_location_reads_gems() {
+    test_timeout! {
+        let env = WowLuaEnv::new().unwrap();
+        seed_two_bag_observations(&env);
+        env.exec(r#"
+            -- Isolate the gem boundary from the two preceding missing producers.
+            GetContainerItemCooldown = function() return 0, 0, 1 end
+            GetContainerItemDurability = function() return 1, 1 end
+            local function check(bag, slot, expectedFirst, expectedSecond)
+                local location = ITEM_INVENTORY_LOCATION_PLAYER + ITEM_INVENTORY_LOCATION_BAGS + bag * 256 + slot
+                local _, _, _, _, _, _, _, _, _, _, _, _, first, second = EquipmentManager_GetItemInfoByLocation(location)
+                assert(first == expectedFirst and second == expectedSecond, "consumer gems mismatch")
+            end
+            check(0, 1, 40111, 40112)
+            check(1, 2, 40201, 40202)
+        "#).unwrap();
+    }
+}
