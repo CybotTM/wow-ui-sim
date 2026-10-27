@@ -24,7 +24,6 @@ pub struct MappedStickSnapshot {
 
 pub(crate) fn register(state: &mut LuaState) -> LuaResult<()> {
     let namespace = super::ensure_namespace(state, "C_GamePad")?;
-    table_set_rust_fn_static(state, namespace, "IsEnabled", is_enabled)?;
     table_set_rust_fn_static(
         state,
         namespace,
@@ -37,6 +36,10 @@ pub(crate) fn register(state: &mut LuaState) -> LuaResult<()> {
         "StickIndexToConfigName",
         stick_index_to_config_name,
     )?;
+    if crate::client_profile::ACTIVE != crate::client_profile::ClientProfile::WowForever {
+        return Ok(());
+    }
+    table_set_rust_fn_static(state, namespace, "IsEnabled", is_enabled)?;
     table_set_rust_fn_static(
         state,
         namespace,

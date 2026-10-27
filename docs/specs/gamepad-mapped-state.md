@@ -35,6 +35,10 @@ Five hover cases now pass in the current run; checked criteria reflect their bou
 - [Environment-local input and staged result tables](../wiki/systems/gamepad-mapped-state.md)
 - [Separate logical input style](forever-input-interface-style.md)
 
+## PTR publication
+
+PTR `Blizzard_APIDocumentationGenerated/GamePadDocumentation.lua:168,273` declares `GetDeviceMappedState` and `StickIndexToConfigName`; `Blizzard_GamepadSharedUtility/InputBindingStack/InputAxisBinding.lua:5,10` consumes them during load. PTR publishes only these two `C_GamePad` members using the same supplied-stick model and absent-snapshot nil policy. Native hardware and enablement behavior remain unknown. Retail publication is unchanged.
+
 ## Implementation inventory
 
 - `src/c_api/c_game_pad.rs` — public concrete stick inputs, mapped queries, and secret-aware hover getter/setter using synchronous `script_helpers::fire_named_event_state` after releasing the state borrow.
