@@ -58,6 +58,8 @@ fn check_desired(desired: bool) {
         "#,
     )
     .expect("observe the original selected micro-menu consumer");
+    env.exec("A_Admin.SetSpec(2)")
+        .expect("change specialization");
     crate::common::panel_fixtures::clear_recorded_lua_errors(&env);
     env.fire_event_with_args("PLAYER_SPECIALIZATION_CHANGED", &[env.lua_string("player")])
         .expect("dispatch specialization change");
