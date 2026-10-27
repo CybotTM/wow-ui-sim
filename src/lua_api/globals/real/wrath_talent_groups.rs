@@ -9,7 +9,17 @@ pub fn register(lua: &mut rilua::Lua) -> LuaResult<()> {
     LuaApiMut::register_function(lua, "GetNumTalentGroups", get_num_talent_groups)?;
     LuaApiMut::register_function(lua, "GetGlyphSocketInfo", get_glyph_socket_info)?;
     LuaApiMut::register_function(lua, "GetNumGlyphSockets", get_num_glyph_sockets)?;
-    LuaApiMut::register_function(lua, "GetUnspentTalentPoints", get_unspent_talent_points)
+    LuaApiMut::register_function(lua, "GetUnspentTalentPoints", get_unspent_talent_points)?;
+    LuaApiMut::register_function(lua, "GetNumTalentTabs", get_num_talent_tabs)?;
+    LuaApiMut::register_function(lua, "GetTalentTabInfo", get_talent_tab_info)?;
+    LuaApiMut::register_function(lua, "GetNumTalents", get_num_talents)?;
+    LuaApiMut::register_function(lua, "GetTalentInfo", get_talent_info)?;
+    LuaApiMut::register_function(lua, "GetTalentPrereqs", get_talent_prereqs)?;
+    LuaApiMut::register_function(
+        lua,
+        "GetGroupPreviewTalentPointsSpent",
+        get_group_preview_points,
+    )
 }
 
 fn get_active_talent_group(state: &mut LuaState) -> LuaResult<u32> {
@@ -123,6 +133,161 @@ fn get_unspent_talent_points(state: &mut LuaState) -> LuaResult<u32> {
             .get(&group)
             .copied()
             .unwrap_or(0)
+    };
+    state.push(Val::Num(points as f64));
+    Ok(1)
+}
+
+// Wrath show consumers: TalentFrameBase.lua:118,139,163,195,526,568,573.
+// Signatures: 3.1.0-api-changes.txt:25-27,32; 2.3.0-api-changes.txt:86,88.
+// Absent records and inspect/pet state are scenario defaults, not native claims.
+fn one_based_index(state: &LuaState, index: i32) -> Option<u32> {
+    match stack_val(state, index) {
+        Val::Num(value) if value >= 1.0 => Some(value as u32),
+        _ => None,
+    }
+}
+
+fn push_string(state: &mut LuaState, value: &str) {
+    let string = state.gc.intern_string(value.as_bytes());
+    state.push(Val::Str(string));
+}
+
+fn push_flag(state: &mut LuaState, value: bool) {
+    state.push(if value { Val::Num(1.0) } else { Val::Nil });
+}
+
+fn is_other_unit(state: &LuaState, inspect: i32, pet: i32) -> bool {
+    string_to_bool(state, stack_val(state, inspect)) || string_to_bool(state, stack_val(state, pet))
+}
+
+fn get_num_talent_tabs(state: &mut LuaState) -> LuaResult<u32> {
+    let count = if is_other_unit(state, 1, 2) {
+        0
+    } else {
+        let sim = borrow_state(state)?;
+        let group = sim.wrath_legacy.player_talent_group + 1;
+        sim.wrath_talent_tabs
+            .keys()
+            .filter(|(g, _)| *g == group)
+            .count()
+    };
+    state.push(Val::Num(count as f64));
+    Ok(1)
+}
+
+fn get_talent_tab_info(state: &mut LuaState) -> LuaResult<u32> {
+    let Some(tab) = one_based_index(state, 1) else {
+        return Ok(0);
+    };
+    if is_other_unit(state, 2, 3) {
+        return Ok(0);
+    }
+    let group = selected_group(state, 4)?;
+    let record = borrow_state(state)?
+        .wrath_talent_tabs
+        .get(&(group, tab))
+        .cloned();
+    let Some(record) = record else {
+        return Ok(0);
+    };
+    push_string(state, &record.name);
+    push_string(state, &record.icon);
+    state.push(Val::Num(record.points_spent as f64));
+    push_string(state, &record.background);
+    state.push(Val::Num(record.preview_points_spent as f64));
+    Ok(5)
+}
+
+fn get_num_talents(state: &mut LuaState) -> LuaResult<u32> {
+    let tab = one_based_index(state, 1);
+    let count = if is_other_unit(state, 2, 3) {
+        0
+    } else {
+        let sim = borrow_state(state)?;
+        let group = sim.wrath_legacy.player_talent_group + 1;
+        tab.and_then(|tab| sim.wrath_talent_rows.get(&(group, tab)))
+            .map_or(0, Vec::len)
+    };
+    state.push(Val::Num(count as f64));
+    Ok(1)
+}
+
+fn supplied_rows(state: &LuaState) -> LuaResult<Vec<crate::lua_api::state::WrathTalentRow>> {
+    let Some(tab) = one_based_index(state, 1) else {
+        return Ok(Vec::new());
+    };
+    if is_other_unit(state, 3, 4) {
+        return Ok(Vec::new());
+    }
+    let group = selected_group(state, 5)?;
+    Ok(borrow_state(state)?
+        .wrath_talent_rows
+        .get(&(group, tab))
+        .cloned()
+        .unwrap_or_default())
+}
+
+fn get_talent_info(state: &mut LuaState) -> LuaResult<u32> {
+    let Some(index) = one_based_index(state, 2) else {
+        return Ok(0);
+    };
+    let rows = supplied_rows(state)?;
+    let Some(row) = rows.get((index - 1) as usize) else {
+        return Ok(0);
+    };
+    push_string(state, &row.name);
+    push_string(state, &row.icon);
+    state.push(Val::Num(row.tier as f64));
+    state.push(Val::Num(row.column as f64));
+    state.push(Val::Num(row.rank as f64));
+    state.push(Val::Num(row.max_rank as f64));
+    push_flag(state, row.exceptional);
+    push_flag(state, row.meets_prereq);
+    state.push(Val::Num(row.preview_rank as f64));
+    push_flag(state, row.meets_preview_prereq);
+    Ok(10)
+}
+
+fn get_talent_prereqs(state: &mut LuaState) -> LuaResult<u32> {
+    let Some(index) = one_based_index(state, 2) else {
+        return Ok(0);
+    };
+    let rows = supplied_rows(state)?;
+    let Some(row) = rows.get((index - 1) as usize) else {
+        return Ok(0);
+    };
+    let mut count = 0;
+    for prerequisite in &row.prerequisites {
+        let Some(target) = prerequisite
+            .talent_index
+            .checked_sub(1)
+            .and_then(|i| rows.get(i as usize))
+        else {
+            return Err(rilua::runtime_error(
+                "Wrath talent prerequisite references an absent row",
+            ));
+        };
+        state.push(Val::Num(target.tier as f64));
+        state.push(Val::Num(target.column as f64));
+        push_flag(state, target.rank >= prerequisite.required_rank);
+        push_flag(state, target.preview_rank >= prerequisite.required_rank);
+        count += 4;
+    }
+    Ok(count)
+}
+
+fn get_group_preview_points(state: &mut LuaState) -> LuaResult<u32> {
+    let points = if string_to_bool(state, stack_val(state, 1)) {
+        0
+    } else {
+        let group = selected_group(state, 2)?;
+        borrow_state(state)?
+            .wrath_talent_tabs
+            .iter()
+            .filter(|((g, _), _)| *g == group)
+            .map(|(_, tab)| tab.preview_points_spent)
+            .sum::<u32>()
     };
     state.push(Val::Num(points as f64));
     Ok(1)
