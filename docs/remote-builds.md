@@ -34,8 +34,7 @@ path per persistent target slot; do not build through changing worktree paths.
 The stable-path experiment
 (`~/.local/state/wow-ui-sim/handoff/compile-throughput-20261025/stablepath-experiment.md`)
 measured lower touch/edit CPU with incremental enabled. Its single-slot cache
-size is not a long-run growth bound. Keep normalized `Cargo.lock` bytes identical between lanes
-([ordering evidence](wiki/investigations/compile-bin-lockwatch.md#cargolock-watch)).
+size is not a long-run growth bound.
 
 Coordinate slot ownership before launch. For new claims, the claimant writes
 `slot-N/.owner` with mode `0600`, containing exactly the `--owner` string, without
@@ -168,6 +167,9 @@ disjoint inputs are not judged for freshness. A test-only edit therefore does no
 reject an unaffected fresh bin, even within the same package. Records affected
 only by mtime refresh require `fresh=false`; executables also require a current
 hash, but identical rebuilt bytes are accepted.
+For a fresh artifact, a root `Cargo.lock` change does not reject reuse when its
+package and transitive dependency closure is unchanged. The closure digest covers
+each reachable package's name, version, source, checksum, and sorted dependency list. Other input checks are unchanged.
 The existing conservative root derivation and source mtime refresh are unchanged.
 
 The slot-wide identity is only a source-refresh baseline, not proof that every
@@ -180,9 +182,15 @@ Certificates for unreported
 outputs retain their original input hashes across unrelated builds. A `fresh=true`
 record must match its own certificate, including its complete input set and output
 bytes, even when the slot-wide content diff is empty. A missing certificate fails
-closed; old receipts do not certify fresh outputs. A `fresh=false` record with valid
-dep-info and output hashes can establish a certificate. Rebuild the affected Cargo
-artifact before retrying; changing receipt identities does not provide proof.
+closed. Certificates also record the lock closure digest. For a legacy certificate,
+the worker reads `Cargo.lock` from the recorded revision and uses it only when its
+SHA256 matches the certificate's lock input. A missing revision, failed Git read,
+or digest mismatch rejects the fresh artifact. A changed closure also rejects it.
+For those lock-closure rejections, the worker evicts the rejected record's outputs
+and matching fingerprint entries and records them in `evicted_artifacts` in the
+receipt. For an uplifted executable, the worker identifies its matching hashed `deps` artifact and evicts it with its fingerprint. If the fingerprint cannot be identified, the worker deletes only the reported rejected outputs and fails with an explicit error; it does not wipe unrelated fingerprints. Other rejection behavior is unchanged. A `fresh=false` record with valid
+dep-info and output hashes can establish a certificate. Changing receipt identities
+does not provide proof.
 
 Directory dep-info inputs are certified as recursive content trees. Entries are
 sorted by relative name and hashed with length-delimited names and content digests;
@@ -298,90 +306,17 @@ A separate local temporary-marker discovery/execution/cleanup control passes, an
 
 ## Asynchronous full suite
 
-`python3 tools/full_suite.py submit [REF] --profile PROFILE --target-dir SLOT --build-jobs 1`
-schedules one detached profile worker. `PROFILE` is `retail` (default), `ptr`,
-`wrath`, `mists`, `wowforever`, `era`, or `anniversary`.
+`python3 tools/full_suite.py submit [REF] --profile PROFILE --target-dir SLOT --build-jobs 1` starts an asynchronous worker. Profiles are `retail` (default), `ptr`, `wrath`, `mists`, `wowforever`, `era`, and `anniversary`. `run` executes the worker synchronously. Both default to `origin/master`; the worker resolves REF after fetching, so pass a full SHA for revision-bound runs.
 
-`run` and `submit` default REF to `origin/master`, not the current checkout or
-local HEAD. Resolution fetches origin; submit forwards the ref for resolution by
-the detached worker, so a moving ref may select different code by execution time.
-For revision-bound verification, pass the same explicit full commit SHA to every
-profile submission and to `status SHA`.
+The suite flock serializes runs. Each SHA uses a detached worktree at `~/.worktrees/wow-ui-sim-fullsuite-<sha12>`. The worker rejects a mismatched or dirty worktree. It admits the explicitly selected slot through `capacity.sh`, then claims `.owner` exclusively. After the run, it moves the claim to `~/.local/state/wow-ui-sim/handoff/full-suite/<sha12>-<profile>/`. If the build unit's state remains unknown after three checks, it retains the claim, records a failure, and exits nonzero for reconciliation.
 
-`python3 tools/full_suite.py status [REF]` lists all seven profiles for the resolved
-SHA; without REF it lists the latest receipt's SHA. Missing profile receipts are
-JSON `null`, not passes. The worker keeps
-its existing suite lock and dedicated checkout/results under `~/Projects/wow/`.
-The results `.lock` serializes revision resolution, checkout preparation and all
-applicable child lifetimes, including unsuccessful exits. Each step invokes native
-Cargo directly; the obsolete external builder-lock wrapper is not a dependency
-and its lock does not block these children.
+The build uses `scripts/slot-build.py` and `cargo test --no-run --all-targets --locked --offline --message-format=json`, with the selected profile features. The slot guard supplies the stable source mount, admission, artifact certification, and receipt. Only a successful service and receipt admit test execution. The integration and library binaries run for every profile; `prefork_full_ui` runs for Retail and Mists. Other profiles record it as not applicable. Test services bind the same source mount and use isolated CVar data. Build and test services use `MemoryMax=9G` and `MemorySwapMax=0`.
 
-Both `submit` and `run` require `--target-dir SLOT`: an absolute path resolving
-to one of the four approved cache slots in [build policy](../AGENTS.md#development-buildrun).
-Canonical and suite checkout `target/` paths, non-slot paths, relative paths, and
-slots redirected outside the approved set by symlinks are rejected before launch
-or checkout. Select an available, coordinated slot; validation does not reserve it.
+`--build-jobs` defaults to 1; `FULL_SUITE_JOBS` defaults to 16 test threads. Each run records phase commands, exits, durations, failures, and `WOW_SIM_TIMEOUT_FIXTURE_CAPACITY` in an attempt receipt `~/Projects/wow/full-suite-results/<sha>-<profile>-attempt-<timestamp>.json`, with a matching log. A non-PASSED attempt exits nonzero. Pre-claim failures and an unwritable receipt store can prevent a receipt.
 
-`--build-jobs N` accepts positive integers and defaults to **1** for both actions;
-there is no caller-environment build-job default. Submit passes build jobs and the
-resolved target as explicit worker arguments. Every Cargo phase receives `-jN`,
-`CARGO_BUILD_JOBS=N`, and `CARGO_TARGET_DIR=SLOT`, overriding inherited values.
-Cargo steps retain `--offline --locked`; dependencies must already be cached and
-the lockfile current. `FULL_SUITE_JOBS` controls nextest test workers only
-(default 16), independently of compilation jobs, and submit forwards its chosen
-value explicitly via `systemd-run --setenv`. Complete
-integration and library scopes use nextest with `--no-fail-fast` for every profile.
-The complete `prefork_full_ui` scope uses `cargo test` only for Retail/Mists,
-matching `prefork-full-ui` admission in Cargo.toml and the target's compile guards.
-Other profiles record `steps.prefork.status = "not_applicable"` with a reason and
-an N/A log entry, without an exit code or fabricated failure/pass record.
-Nonzero Cargo exits, parsed failures and both stdout/stderr remain in the stored
-JSON/log; later applicable steps still run.
+Only a PASSED attempt promotes `~/Projects/wow/full-suite-results/<sha>-<profile>.json`; master runs also promote the matching profile baseline. The worker stages and fsyncs both files, backs up existing files, then renames the baseline before the canonical result. The canonical rename is the commit point. A rename failure triggers rollback; a process or machine crash between the two renames is not covered by rollback. `status [REF]` displays canonical profile results, any legacy Retail result, and the latest attempt for the selected SHA. The attempt includes its status, finish timestamp, and phase inferred from recorded steps. Without REF, status selects the newest attempt, or the newest canonical result when no attempt exists; it also displays the newest PASSED canonical result if it belongs to another SHA.
 
-Retail deliberately retains Cargo default features (`sound,gui,casc,client-retail`)
-with unchanged child argv so historical Retail receipts remain comparable.
-Every other profile passes `--no-default-features --features sound,gui,casc,client-<profile>`
-to every applicable Cargo command. No extra prefork feature is forced.
-
-Receipts and logs are `<sha>-<profile>.json` and `<sha>-<profile>.log`; each receipt
-and worker summary identifies `profile`. Master runs update only
-`master-latest-<profile>.json`; NEW failures compare only to that profile's baseline
-(or JSON `null` when absent). Historical `<sha>.json` Retail receipts remain
-readable in status under `legacy_retail`, separate from new profile receipts;
-historical `master-latest.json` is neither overwritten nor used across profiles.
-Submit forwards the profile explicitly; systemd unit names include it.
-
-Submit each desired profile separately against the same final SHA and a coordinated
-approved slot; the existing suite lock serializes them. No `--profile all` matrix
-mode: retain the single-profile worker/receipt contract rather than add aggregate
-orchestration. Seven receipts establish seven-profile coverage, not one aggregate
-acceptance receipt; review each profile's applicable scopes and failures.
-
-Source revision `3eab34fb9` adds two fields to each executed step's JSON:
-`command` is the exact argv passed to the subprocess, including `--offline`
-and `--locked` where passed; `environment` contains only
-`WOW_SIM_TIMEOUT_FIXTURE_CAPACITY`. Its value is JSON `null` when unset,
-`""` when empty, or the literal string (including `"reserved"`). No other
-inherited environment is recorded. [Bounded metadata proof](../data/test-perf/evidence/full-suite-result-metadata-2026-10-12/README.md) covers three new cases, six existing sandbox controls and the installed controller's source-byte equality/mode0755. No suite was rerun. Future metadata cannot reconstruct historical environment or establish contention, failure cause or current full-suite acceptance.
-
-Submit resource policy aligned October 10, 2026: detached `systemd-run --user`
-uses `agents.slice`, `CPUQuota=1200%`, `MemoryHigh=16G` and `MemoryMax=16G`,
-matching the bounded native units' operational CPU/memory limits. Unlike the guarded units in the
-[bounded native-unit handoff](wiki/investigations/integrated-source-and-factory-proof-2026-10-09.md#current-bounded-native-workflow-correction--2026-10-10),
-this controller has no available-memory/load admission guard. That remaining
-mismatch is reported, not redesigned; submission still returns without waiting
-for the worker.
-
-Bounded worker regression tests (temporary git/Cargo executable fixtures and real
-flocks, no actual builds or systemd) prove children execute while the old builder
-lock remains held, independent jobs/flags, all-scope failure/stream retention,
-and controller serialization before checkout and through child execution:
-`python3 -I -m unittest discover -s tools -p test_full_suite.py -v`.
-Fake-systemd coverage checks detached worker argv/resource limits, explicit
-build-job/target forwarding, default jobs and all four slots; rejection coverage
-checks both submit and worker paths, including symlink redirection. Installation
-coverage writes only to a temporary home.
+The Python tests use fake launchers and do not establish real systemd or suite behavior. Submit each profile separately against a coordinated approved slot.
 
 Main deploys with `./deploy.sh` from the repository root (a Python installer,
 not Bash). It installs only `tools/full_suite.py` as executable

@@ -5,7 +5,8 @@ use std::collections::{HashMap, HashSet};
 use crate::c_api::helpers::ensure_namespace;
 use crate::client_profile::{ACTIVE, ClientProfile};
 use crate::lua_api::methods::{
-    borrow_state, borrow_state_mut, create_string, create_table_with_fields, table_set_num,
+    borrow_state, borrow_state_mut, create_string, create_table, create_table_with_fields,
+    table_set_num,
 };
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
@@ -33,6 +34,18 @@ pub struct StartupInputs {
     pub group_buff_alerts: Vec<GroupBuffAlert>,
 }
 
+impl StartupInputs {
+    /// Best guesses for the stock simulator scenario, not native observations.
+    pub(crate) fn stock() -> Self {
+        let mut inputs = Self::default();
+        if ACTIVE == ClientProfile::WowForever {
+            inputs.ammo_required = Some(false);
+            inputs.target_spell_id = Some(0);
+        }
+        inputs
+    }
+}
+
 pub(crate) fn register(state: &mut LuaState) -> LuaResult<()> {
     if matches!(
         ACTIVE,
@@ -53,6 +66,14 @@ pub(crate) fn register(state: &mut LuaState) -> LuaResult<()> {
     register_external_event(state)?;
     register_character_queries(state)?;
     register_services(state)?;
+    // The Forever consumer expects parallel arrays; native defaults are unknown.
+    let account = ensure_namespace(state, "C_AccountServices")?;
+    table_set_rust_fn_static(
+        state,
+        account,
+        "GetPreferredDatacenterLocalities",
+        preferred_datacenter_localities,
+    )?;
     let cvar = ensure_namespace(state, "C_CVar")?;
     // Forever 70532 CVarDocumentation.lua:171 and :114; both return no values.
     table_set_rust_fn_static(state, cvar, "SetTempCVar", set_temporary_cvar)?;
@@ -178,6 +199,14 @@ fn register_character_queries(state: &mut LuaState) -> LuaResult<()> {
     table_set_rust_fn_static(state, pvp, "IsMatchComplete", match_complete)?;
     let spell = ensure_namespace(state, "C_Spell")?;
     table_set_rust_fn_static(state, spell, "GetTargetSpellID", target_spell_id)
+}
+
+fn preferred_datacenter_localities(state: &mut LuaState) -> LuaResult<u32> {
+    let ids = create_table(state);
+    let names = create_table(state);
+    state.push(ids);
+    state.push(names);
+    Ok(2)
 }
 
 fn cursor_visible(state: &mut LuaState) -> LuaResult<u32> {

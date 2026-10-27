@@ -24,7 +24,6 @@ impl FrameStrata {
         self as usize
     }
 
-    #[allow(clippy::should_implement_trait)]
     pub fn from_str(s: &str) -> Option<Self> {
         Some(if s.eq_ignore_ascii_case("WORLD") {
             Self::World
@@ -77,7 +76,6 @@ pub enum DrawLayer {
 }
 
 impl DrawLayer {
-    #[allow(clippy::should_implement_trait)]
     pub fn from_str(s: &str) -> Option<Self> {
         Some(if s.eq_ignore_ascii_case("BACKGROUND") {
             Self::Background

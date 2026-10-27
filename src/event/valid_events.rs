@@ -67,11 +67,17 @@ const POLICY: ValidationPolicy = ValidationPolicy {
         }
     },
 };
-// PTR 12.1.7.70493 SystemDocumentation.lua declares this script event.
-// Keep build-specific publication above the feature-neutral sim-event crate.
-fn is_ptr_shard_transfer(name: &str) -> bool {
+// PTR Blizzard_APIDocumentationGenerated: SystemDocumentation.lua:177,189;
+// VoiceChatDocumentation.lua:919; UnitDocumentation.lua:4290.
+fn is_ptr_event(name: &str) -> bool {
     crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Ptr
-        && name == "SHARD_TRANSFER"
+        && matches!(
+            name,
+            "SHARD_TRANSFER"
+                | "SHARD_TRANSFER_IMMINENT"
+                | "VOICE_CHAT_ACTIVE_VOICE_PROVIDER_CHANGED"
+                | "UNIT_HAPPINESS"
+        )
 }
 
 pub fn is_registerable_event(name: &str) -> bool {
@@ -83,12 +89,12 @@ pub fn is_registerable_event(name: &str) -> bool {
     {
         return true;
     }
-    is_ptr_shard_transfer(name)
+    is_ptr_event(name)
         || crate::c_api::forever_startup::accepts_event(name)
         || sim_event::is_registerable_event(name, POLICY)
 }
 pub fn is_valid_event(name: &str) -> bool {
-    is_ptr_shard_transfer(name)
+    is_ptr_event(name)
         || crate::c_api::forever_startup::accepts_event(name)
         || sim_event::is_valid_event(name, POLICY)
 }

@@ -42,14 +42,19 @@ fn register_global_strings(
     existing_policy: ExistingGlobalPolicy,
 ) {
     for (name, value) in crate::global_strings::GLOBAL_STRINGS.entries() {
-        let existing = table_get(state, global, name);
-        let preserve_function =
-            cfg!(feature = "client-wowforever") && matches!(existing, Val::Function(_));
-        if !preserve_function && should_set_global(state, global, name, existing_policy) {
-            let resolved = resolve_lua_escapes(value);
-            let lua_value = create_string(state, &resolved);
-            table_set(state, global, name, lua_value);
+        let preserve_existing = match existing_policy {
+            ExistingGlobalPolicy::Preserve => table_get(state, global, name) != Val::Nil,
+            ExistingGlobalPolicy::Replace => {
+                cfg!(feature = "client-wowforever")
+                    && matches!(table_get(state, global, name), Val::Function(_))
+            }
+        };
+        if preserve_existing {
+            continue;
         }
+        let resolved = resolve_lua_escapes(value);
+        let lua_value = create_string(state, &resolved);
+        table_set(state, global, name, lua_value);
     }
 }
 
@@ -141,4 +146,83 @@ const STRING_DEFS: &[&[crate::lua_api::globals::strings::string_data::StringDef]
 
 fn should_register_int_constant(name: &str, epoch: RetailApiEpoch) -> bool {
     !(epoch == RetailApiEpoch::Retail12_0_0 && name == "LE_FRAME_TUTORIAL_LINK_TRANSMOG_OUTFIT")
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{register_all_ui_strings, restore_missing_ui_strings};
+
+    #[test]
+    fn ui_string_restore_preserves_all_non_nil_values_and_fills_deleted_keys() {
+        let mut lua = rilua::Lua::new().unwrap();
+        register_all_ui_strings(&mut lua).unwrap();
+        lua.exec(
+            r#"
+            ACCEPT = false
+            CANCEL = 19
+            YES = function() return 'custom' end
+            NO = {}
+            SavedYes, SavedNo = YES, NO
+        "#,
+        )
+        .unwrap();
+        restore_missing_ui_strings(&mut lua).unwrap();
+        lua.exec(
+            r#"
+            assert(ACCEPT == false)
+            assert(CANCEL == 19)
+            assert(rawequal(YES, SavedYes) and YES() == 'custom')
+            assert(rawequal(NO, SavedNo))
+            ACCEPT, CANCEL = nil, nil
+        "#,
+        )
+        .unwrap();
+        restore_missing_ui_strings(&mut lua).unwrap();
+        lua.exec("assert(ACCEPT == 'Accept'); assert(CANCEL == 'Cancel')")
+            .unwrap();
+    }
+
+    #[test]
+    fn ui_string_replace_preserves_functions_only_on_forever() {
+        let mut lua = rilua::Lua::new().unwrap();
+        lua.exec(
+            r#"
+            ACCEPT = function() return 'custom' end
+            SavedAccept = ACCEPT
+            CANCEL, YES, NO = false, 19, {}
+        "#,
+        )
+        .unwrap();
+        register_all_ui_strings(&mut lua).unwrap();
+        if cfg!(feature = "client-wowforever") {
+            lua.exec("assert(rawequal(ACCEPT, SavedAccept)); assert(ACCEPT() == 'custom')")
+                .unwrap();
+        } else {
+            lua.exec("assert(ACCEPT == 'Accept')").unwrap();
+        }
+        lua.exec("assert(CANCEL == 'Cancel'); assert(YES == 'Yes'); assert(NO == 'No')")
+            .unwrap();
+    }
+
+    #[test]
+    fn ui_string_registration_reads_raw_globals_without_index_callbacks() {
+        let mut lua = rilua::Lua::new().unwrap();
+        lua.exec(
+            r#"
+            IndexCalls = 0
+            setmetatable(_G, { __index = function()
+                IndexCalls = IndexCalls + 1
+                return 'virtual value'
+            end })
+        "#,
+        )
+        .unwrap();
+        restore_missing_ui_strings(&mut lua).unwrap();
+        lua.exec("assert(IndexCalls == 0); assert(rawget(_G, 'ACCEPT') == 'Accept')")
+            .unwrap();
+        lua.exec("ACCEPT = nil").unwrap();
+        register_all_ui_strings(&mut lua).unwrap();
+        lua.exec("assert(IndexCalls == 0); assert(rawget(_G, 'ACCEPT') == 'Accept')")
+            .unwrap();
+    }
 }

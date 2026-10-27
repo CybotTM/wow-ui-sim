@@ -16,10 +16,12 @@ fn supply(env: &WowLuaEnv, required: Option<bool>) {
 fn load_original_slot() -> WowLuaEnv {
     let ui = blizzard_ui_dir();
     let env = new_blizzard_addon_env(&ui);
-    assert_eq!(env.state().borrow().forever_startup.ammo_required, None);
     supply(&env, Some(false));
     load_blizzard_addon_closure_into_env(&env, &ui, &["Blizzard_UIPanels_Game"], &[]);
-    eprintln!("unfiltered slot load diagnostics: {:?}", env.state().borrow().lua_errors);
+    eprintln!(
+        "unfiltered slot load diagnostics: {:?}",
+        env.state().borrow().lua_errors
+    );
     let game = match ACTIVE {
         ClientProfile::Ptr => "Mainline",
         ClientProfile::WowForever => "Camelot",
@@ -71,8 +73,36 @@ fn observe_slot(env: &WowLuaEnv, required: bool) {
         .unwrap();
     } else {
         assert_eq!(env.eval::<i32>("return AmmoProbe:GetID()").unwrap(), 1777);
-        assert!(!env.eval::<bool>("return C_PaperDollInfo.AmmoNeeded()").unwrap());
+        assert!(
+            !env.eval::<bool>("return C_PaperDollInfo.AmmoNeeded()")
+                .unwrap()
+        );
     }
+}
+
+#[test]
+#[cfg(feature = "client-wowforever")]
+fn stock_ammo_default_reaches_original_slot() {
+    let ui = blizzard_ui_dir();
+    let env = new_blizzard_addon_env(&ui);
+    load_blizzard_addon_closure_into_env(&env, &ui, &["Blizzard_UIPanels_Game"], &[]);
+    env.exec(
+        r#"
+        assert(CharacterAmmoSlot, 'original XML slot')
+        local info = debug.getinfo(PaperDollItemSlotButton_OnLoad, 'S')
+        assert(info.source:match('Blizzard_UIPanels_Game/Camelot/PaperDollFrame.lua$'))
+        local ok, trace = xpcall(function()
+            PaperDollItemSlotButton_OnLoad(CharacterAmmoSlot)
+        end, debug.traceback)
+        assert(ok, trace)
+        assert(not CharacterAmmoSlot:IsShown())
+    "#,
+    )
+    .expect("stock ammo must reach original slot consumer");
+    assert!(
+        !env.eval::<bool>("return C_PaperDollInfo.AmmoNeeded()")
+            .unwrap()
+    );
 }
 
 #[test]
@@ -83,7 +113,9 @@ fn original_xml_slot_supplied_transitions_isolation_and_unset() {
         observe_slot(&first, required);
         observe_slot(&second, !required);
         assert_eq!(
-            first.eval::<bool>("return C_PaperDollInfo.AmmoNeeded()").unwrap(),
+            first
+                .eval::<bool>("return C_PaperDollInfo.AmmoNeeded()")
+                .unwrap(),
             required,
             "second environment must not change first observation"
         );
@@ -101,16 +133,25 @@ fn original_xml_slot_supplied_transitions_isolation_and_unset() {
             "#,
         )
         .expect("asserted-failure probe must return its observation");
-    assert!(!ok, "unset input must fail through the original XML-bound slot");
+    assert!(
+        !ok,
+        "unset input must fail through the original XML-bound slot"
+    );
     assert_eq!(message, UNSUPPLIED);
     let line = match ACTIVE {
         ClientProfile::Ptr => "PaperDollFrame.lua:1702",
         ClientProfile::WowForever => "PaperDollFrame.lua:1952",
         _ => unreachable!(),
     };
-    assert!(traceback.contains(line), "original consumer boundary: {traceback}");
+    assert!(
+        traceback.contains(line),
+        "original consumer boundary: {traceback}"
+    );
     if ACTIVE == ClientProfile::WowForever {
-        assert!(traceback.contains("PaperDollFrame.lua:3654"), "original XML delegate: {traceback}");
+        assert!(
+            traceback.contains("PaperDollFrame.lua:3654"),
+            "original XML delegate: {traceback}"
+        );
     }
     observe_slot(&second, true);
     observe_slot(&first, true);

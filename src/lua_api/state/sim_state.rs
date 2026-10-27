@@ -393,6 +393,8 @@ pub struct SimState {
     ))]
     pub instance_identity:
         crate::lua_api::globals::real::instanced_identity::InstanceIdentityContext,
+    #[cfg(feature = "client-wrath")]
+    pub wrath_unit_tap_states: HashMap<String, crate::lua_api::state::WrathUnitTapState>,
     pub current_target: Option<TargetInfo>,
     pub previous_target: Option<TargetInfo>,
     pub current_focus: Option<TargetInfo>,

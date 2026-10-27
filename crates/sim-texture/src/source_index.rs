@@ -5,20 +5,20 @@ use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
 
 #[derive(Debug, Default)]
-pub(super) struct SourceIndex {
+pub struct SourceIndex {
     directories: HashMap<PathBuf, DirectorySnapshot>,
     observation: SourceObservation,
 }
 
 /// A CPU negative decision is reusable only while all consulted paths are unchanged.
 #[derive(Debug, Default, Clone)]
-pub(super) struct SourceObservation {
+pub struct SourceObservation {
     stamps: HashMap<PathBuf, Option<DirectoryStamp>>,
     untracked_source: bool,
 }
 
 impl SourceObservation {
-    pub(super) fn is_current(&self) -> bool {
+    pub fn is_current(&self) -> bool {
         if self.untracked_source || self.stamps.is_empty() {
             return false;
         }
@@ -45,20 +45,20 @@ struct DirectoryStamp {
 }
 
 impl SourceIndex {
-    pub(super) fn clear(&mut self) {
+    pub fn clear(&mut self) {
         self.directories.clear();
         self.begin_resolution();
     }
 
-    pub(super) fn begin_resolution(&mut self) {
+    pub fn begin_resolution(&mut self) {
         self.observation = SourceObservation::default();
     }
 
-    pub(super) fn observation(&self) -> SourceObservation {
+    pub fn observation(&self) -> SourceObservation {
         self.observation.clone()
     }
 
-    pub(super) fn observe_source(&mut self, base: &Path, relative: &str) {
+    pub fn observe_source(&mut self, base: &Path, relative: &str) {
         let mut current = base.to_path_buf();
         self.observe_entry(&current);
         if let Some(parent) = Path::new(relative).parent() {
@@ -69,18 +69,18 @@ impl SourceIndex {
         }
     }
 
-    pub(super) fn observe_entry(&mut self, path: &Path) {
+    pub fn observe_entry(&mut self, path: &Path) {
         self.observation
             .stamps
             .entry(path.to_path_buf())
             .or_insert_with(|| read_source_stamp(path));
     }
 
-    pub(super) fn disallow_negative_cache(&mut self) {
+    pub fn disallow_negative_cache(&mut self) {
         self.observation.untracked_source = true;
     }
 
-    pub(super) fn search(&mut self) -> DirectorySearch<'_> {
+    pub fn search(&mut self) -> DirectorySearch<'_> {
         DirectorySearch {
             index: self,
             refreshed: HashSet::new(),
@@ -88,13 +88,13 @@ impl SourceIndex {
     }
 }
 
-pub(super) struct DirectorySearch<'a> {
+pub struct DirectorySearch<'a> {
     index: &'a mut SourceIndex,
     refreshed: HashSet<PathBuf>,
 }
 
 impl DirectorySearch<'_> {
-    pub(super) fn read_match(&mut self, dir: &Path, name: &str) -> Option<PathBuf> {
+    pub fn read_match(&mut self, dir: &Path, name: &str) -> Option<PathBuf> {
         self.index.observe_entry(dir);
         let stamp = read_source_stamp(dir)?;
         let stale = self

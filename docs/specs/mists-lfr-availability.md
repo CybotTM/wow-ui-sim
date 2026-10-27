@@ -4,7 +4,7 @@ Mists `C_LFGInfo.IsLFREnabled` consumes an explicit environment-local availabili
 
 ## What it must do
 
-- [x] Publish the query only on Mists and return exactly one boolean for supplied true or false.
+- [x] Publish the query only on Mists and return exactly one boolean for supplied true or false. The stock scenario supplies true as a best guess, not native proof.
 - [x] Preserve unknown availability as an unset value. An unset query raises `native-unknown: C_LFGInfo.IsLFREnabled has no supplied availability or documented default`; it does not silently disable LFR. This is approved simulator missing-input policy, not native error behavior.
 - [x] The selected original XML-bound PVEFrame callback shows the LFR button for supplied true and hides it for supplied false, with repeated changes and the original hidden-LFR gap-closing anchor.
 - [x] Independent environments retain independent input and button state. Player level does not determine availability.
@@ -20,7 +20,7 @@ Mists `C_LFGInfo.IsLFREnabled` consumes an explicit environment-local availabili
 
 - `src/c_api/lfr_availability.rs` — boolean query and explicit unset error.
 - `src/c_api/c_lfg_info.rs` — Mists-only publication through ACTIVE.
-- `src/lua_api/state/sim_state.rs`, `src/lua_api/state.rs` — environment-local optional input and unset initialization.
+- `src/lua_api/state/sim_state.rs`, `src/lua_api/state.rs` — environment-local optional input and stock scenario initialization.
 
 ## Tests asserting this spec
 
@@ -28,8 +28,8 @@ Mists `C_LFGInfo.IsLFREnabled` consumes an explicit environment-local availabili
 
 ## Known gaps (current cycle)
 
-- [ ] Native default/availability policy remains unknown. Stock intentionally reports the named missing-input residual.
+- [ ] Native default/availability policy remains unknown.
 
 ## Out of scope
 
-Native service/default policy, automatic availability derivation from level/catalog/expansion, usability policy, scenario catalogs, other-profile publication and Blizzard edits are excluded. The consumer treats nil and false as hidden, but the declaration requires a non-nil bool; the explicit unset error avoids turning unknown into an invented disabled default.
+Native service/default policy, automatic availability derivation from level/catalog/expansion, usability policy, scenario catalogs, other-profile publication and Blizzard edits are excluded. The consumer treats nil and false as hidden, but the declaration requires a non-nil bool; the explicit unset error preserves an explicitly cleared input.
