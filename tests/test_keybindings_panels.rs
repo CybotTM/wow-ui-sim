@@ -340,6 +340,28 @@ fn keybind_s_keeps_spellbook_backgrounds_below_icons_after_initial_bucket_build(
     }
 }
 
+#[cfg(feature = "client-wrath")]
+#[test]
+fn native_action_button_binding_tracks_down_and_up() {
+    test_timeout! {
+        let env = setup_env();
+        env.exec("assert(SetBinding('1', 'ACTIONBUTTON1')); assert(GetBindingAction('1') == 'ACTIONBUTTON1'); assert(ActionButton1:GetButtonState() == 'NORMAL')")
+            .expect("bind native action button and check initial state");
+        record_native_binding_caller(&env, "ActionButtonDown");
+        record_native_binding_caller(&env, "ActionButtonUp");
+
+        env.send_key_down("1", None).expect("press action key");
+        assert_native_binding_caller(&env, 126);
+        env.exec("assert(ActionButton1:GetButtonState() == 'PUSHED')")
+            .expect("native key-down pushes action button");
+
+        env.send_key_up("1");
+        assert_native_binding_caller(&env, 128);
+        env.exec("assert(ActionButton1:GetButtonState() == 'NORMAL')")
+            .expect("native key-up releases action button");
+    }
+}
+
 // ── N → PlayerSpellsUtil.ToggleClassTalentFrame() ───────────────────────
 
 #[cfg(not(feature = "client-wrath"))]
