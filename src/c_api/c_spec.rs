@@ -4,7 +4,7 @@ use crate::lua_api::game_data::CastingState;
 use crate::lua_api::globals::real::specialization_helpers::push_specialization_identity;
 use crate::lua_api::globals::spellbook_data;
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_table};
-use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
+use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
 use crate::specializations;
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
@@ -115,7 +115,10 @@ fn holds_rust_fn(state: &mut LuaState, table_ref: LuaTableRef, name: &'static st
 }
 
 fn c_spec_is_spec_selection_enabled(state: &mut LuaState) -> LuaResult<u32> {
-    let _class_id = f64::from_stack(state, 1)?;
+    let class_id = rilua::table_security::unwrap_secret(state, stack_val(state, 1))?;
+    if !matches!(class_id, Val::Num(_)) {
+        return Err(rilua::runtime_error("class ID must be a number"));
+    }
     let enabled = borrow_state(state)?.talents.spec_selection_enabled;
     state.push(Val::Bool(enabled));
     Ok(1)

@@ -12,7 +12,7 @@ use crate::lua_api::script_helpers::{
 };
 use crate::lua_api::state::{SpellFlyoutInfo, SpellFlyoutSlot};
 use crate::lua_api::state_types::CursorInfo;
-use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
+use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
 use crate::spells;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -471,9 +471,14 @@ fn c_spell_book_get_spell_book_item_cast_count(state: &mut LuaState) -> LuaResul
 }
 
 fn is_spell_book_item_low_rank(state: &mut LuaState) -> LuaResult<u32> {
-    let slot = f64::from_stack(state, 1)?;
-    let bank = f64::from_stack(state, 2)?;
-    let spell_id = resolve_player_spellbook_entry(Val::Num(slot), Val::Num(bank));
+    let slot = rilua::table_security::unwrap_secret(state, stack_val(state, 1))?;
+    let bank = rilua::table_security::unwrap_secret(state, stack_val(state, 2))?;
+    if !matches!(slot, Val::Num(_)) || !matches!(bank, Val::Num(_)) {
+        return Err(rilua::runtime_error(
+            "spellbook slot and bank must be numbers",
+        ));
+    }
+    let spell_id = resolve_player_spellbook_entry(slot, bank);
     let is_low_rank = {
         let sim = borrow_state(state)?;
         spell_id.is_some_and(|id| sim.spellbook_low_rank.contains(&id))
