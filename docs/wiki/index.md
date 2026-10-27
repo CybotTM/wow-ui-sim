@@ -1,3 +1,7 @@
+## [2026-10-27] implementation | Retail UiMap catalog
+
+[UiMap lookup scope](systems/lua-api.md#retail-uimap-catalog) links the catalog contract and its export provenance limits. The Retail-only catalog follows seeded state; other profiles retain their existing behavior.
+
 ## [2026-10-26] implementation | Spectating UI scenario
 
 [Scenario state and selected consumer](systems/spectating-ui.md) describe the user-authorized false default and undocumented native contract. Retail original-consumer RED/GREEN and unchanged Retail/PTR stock are proven; seven all-target checks have zero warnings.
