@@ -12,6 +12,53 @@ use wow_ui_sim::xml::{XmlElement, parse_xml, register_template};
 const PINNED_SHA256: &str = "d975f94a6d7deb8895a8ab47a2b6975cca4fd9e45f67cc15c54c8e100b37427e";
 const TICK_SECONDS: f64 = 0.016;
 
+#[test]
+fn original_wrath_stationery_popup_renders_supplied_catalog() {
+    let env = crate::common::new_headless_cursor_env();
+    env.set_screen_size(1024.0, 768.0);
+    let toc = wow_ui_sim::client_profile::blizzard_ui_framexml_toc()
+        .expect("SETUP FAILURE: Wrath FrameXML cache");
+    wow_ui_sim::loader::load_addon(&env.loader_env(), &toc)
+        .expect("SETUP FAILURE: load native FrameXML");
+    let previous_errors = env.state().borrow().lua_errors.len();
+    env.exec("StationeryPopupFrame:Show()")
+        .expect("open original stationery popup");
+    let errors = env.state().borrow().lua_errors[previous_errors..].to_vec();
+    assert!(
+        errors.is_empty(),
+        "original popup OnShow failed: {errors:?}"
+    );
+    env.exec(
+        r#"
+        A_Admin.SetMoney(100)
+        A_Admin.SetStationeryCatalog({
+            { name = 'Scarlet', texture = 'Interface\\Icons\\INV_Misc_Note_01', cost = 250 },
+            { name = 'Azure', texture = 'Interface\\Icons\\INV_Misc_Note_02' },
+        })
+        StationeryPopupFrame:Hide()
+        StationeryPopupFrame:Show()
+        assert(StationeryPopupButton1Name:GetText() == 'Scarlet')
+        assert(StationeryPopupButton2Name:GetText() == 'Azure')
+        assert(StationeryPopupButton1Icon:GetTexture() == 'Interface\\Icons\\INV_Misc_Note_01')
+        assert(StationeryPopupButton2Icon:GetTexture() == 'Interface\\Icons\\INV_Misc_Note_02')
+        assert(StationeryPopupButton1MoneyFrame.staticMoney == 250)
+        assert(StationeryPopupButton2MoneyFrame.staticMoney == 0)
+        assert(not StationeryPopupButton1:IsEnabled())
+        assert(StationeryPopupButton2:IsEnabled())
+        local red = StationeryPopupButton1MoneyFrame.small and NumberFontNormalRightRed or NumberFontNormalLargeRightRed
+        assert(StationeryPopupButton1MoneyFrameCopperButton:GetNormalFontObject() == red)
+        assert(StationeryPopupButton1:IsShown() and StationeryPopupButton2:IsShown())
+        assert(not StationeryPopupButton3:IsShown())
+        "#,
+    )
+    .expect("original popup renders the supplied catalog");
+    let errors = env.state().borrow().lua_errors[previous_errors..].to_vec();
+    assert!(
+        errors.is_empty(),
+        "original popup update failed: {errors:?}"
+    );
+}
+
 /// Append to tests/wrath_scrolling_cursor.rs; producer is intentionally separate.
 #[test]
 fn active_nested_load_addon_xml_cursor_precedes_original_synchronous_consumer() {
