@@ -3,10 +3,10 @@
 use std::collections::HashMap;
 
 use crate::client_profile::{ACTIVE, ClientProfile};
-use crate::lua_api::methods::borrow_state_mut;
-use crate::lua_bridge::{FromStack, TableBuilder};
-use rilua::LuaResult;
+use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string};
+use crate::lua_bridge::{FromStack, TableBuilder, stack_val, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
+use rilua::{LuaResult, Val};
 
 #[derive(Clone)]
 pub struct SpellSlot {
@@ -23,6 +23,48 @@ pub(crate) fn register_admin(builder: TableBuilder) -> LuaResult<TableBuilder> {
         return Ok(builder);
     }
     builder.set_function("SetWrathSpellBookSlot", set_spell_slot)
+}
+
+pub(crate) fn register_queries(state: &mut LuaState) -> LuaResult<()> {
+    table_set_rust_fn_static(state, state.global, "GetSpellTexture", get_spell_texture)?;
+    table_set_rust_fn_static(state, state.global, "GetSpellName", get_spell_name)
+}
+
+fn find_spell_slot(state: &mut LuaState) -> LuaResult<Option<SpellSlot>> {
+    let slot = match stack_val(state, 1) {
+        Val::Num(slot) if (1.0..=1024.0).contains(&slot) && slot.fract() == 0.0 => slot as u32,
+        _ => return Err(rilua::runtime_error("Invalid spell slot")),
+    };
+    let book = String::from_stack(state, 2)?;
+    if !matches!(book.as_str(), "spell" | "pet") {
+        return Err(rilua::runtime_error("Invalid spell slot"));
+    }
+    Ok(borrow_state(state)?
+        .wrath_spell_slots
+        .get(&(book, slot))
+        .cloned())
+}
+
+fn get_spell_texture(state: &mut LuaState) -> LuaResult<u32> {
+    let record = find_spell_slot(state)?;
+    let texture = record
+        .filter(|record| !record.icon.is_empty())
+        .map_or(Val::Nil, |record| create_string(state, &record.icon));
+    state.push(texture);
+    Ok(1)
+}
+
+fn get_spell_name(state: &mut LuaState) -> LuaResult<u32> {
+    if let Some(record) = find_spell_slot(state)? {
+        let name = create_string(state, &record.name);
+        state.push(name);
+        let rank = create_string(state, &record.rank);
+        state.push(rank);
+    } else {
+        state.push(Val::Nil);
+        state.push(Val::Nil);
+    }
+    Ok(2)
 }
 
 fn set_spell_slot(state: &mut LuaState) -> LuaResult<u32> {
