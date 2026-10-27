@@ -111,10 +111,17 @@ fn test_map_util_finds_unseeded_continent_parent() {
     let source = std::fs::read_to_string(&path)
         .unwrap_or_else(|error| panic!("read {}: {error}", path.display()));
     env.exec(&source).expect("execute original MapUtil.lua");
-    let (id, name): (i32, String) = env
-        .eval("local map = MapUtil.GetMapParentInfo(630, 2); return map and map.mapID or 0, map and map.name or ''")
+    let maps: (i32, String, i32, String) = env
+        .eval(
+            r#"
+            local continent = MapUtil.GetMapParentInfo(630, 2)
+            local city = MapUtil.GetMapParentInfo(2339, 3)
+            return continent and continent.mapID or 0, continent and continent.name or '',
+                   city and city.mapID or 0, city and city.name or ''
+            "#,
+        )
         .unwrap();
-    assert_eq!((id, name.as_str()), (619, "Broken Isles"));
+    assert_eq!(maps, (619, "Broken Isles".into(), 2339, "Dornogal".into()));
 }
 
 #[test]
