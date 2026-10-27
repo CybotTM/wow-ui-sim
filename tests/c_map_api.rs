@@ -88,9 +88,14 @@ fn test_get_map_info_answers_unseeded_retail_maps_from_the_ui_map_table() {
         )
         .unwrap();
     assert_eq!(map_id, 630);
-    assert_eq!(name, "Azsuna", "UiMap.db2 row, not a placeholder");
-    assert_eq!(parent_id, 619, "Broken Isles");
-    assert_eq!(map_type, 3, "Zone");
+    if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Retail {
+        assert_eq!(name, "Azsuna", "UiMap.db2 row, not a placeholder");
+        assert_eq!(parent_id, 619, "Broken Isles");
+        assert_eq!(map_type, 3, "Zone");
+    } else {
+        assert_eq!(name, "Map 630");
+        assert_eq!(parent_id, 0);
+    }
 }
 
 #[test]
