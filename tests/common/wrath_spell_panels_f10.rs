@@ -97,6 +97,10 @@ fn glyph_socket_consumer_tracks_supplied_records() {
         GlyphFrameGlyph_UpdateSlot(GlyphFrameGlyph1)
         assert(GlyphFrameGlyph1.spell == 202)
         assert(GlyphFrameGlyph1.glyph:GetTexture() == 'Interface\\Icons\\GlyphTwo')
+        A_Admin.SetWrathGlyphSocket(1, 1, true, 1, nil, nil)
+        local enabled, kind, spell, icon = GetGlyphSocketInfo(1, 1)
+        assert(enabled == 1 and kind == 1 and spell == nil and icon == nil)
+        assert(GetNumGlyphSockets() == 6)
         "#,
     );
 }
