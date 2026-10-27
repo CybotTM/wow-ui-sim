@@ -466,6 +466,41 @@ fn test_minimap_set_player_texture_no_error() {
     env.exec("C_Minimap.SetPlayerTexture(0, 0)").unwrap();
 }
 
+#[test]
+fn test_objective_tracker_quest_blob_observation() {
+    use crate::common::blizzard_addon_harness::{
+        blizzard_ui_dir, load_blizzard_addon_closure_into_env, new_blizzard_addon_env,
+    };
+    use wow_ui_sim::client_profile::{ACTIVE, ClientProfile};
+    use wow_ui_sim::loader::find_toc_file;
+    use wow_ui_sim::toc::TocFile;
+
+    if !matches!(ACTIVE, ClientProfile::Retail | ClientProfile::Ptr | ClientProfile::WowForever) {
+        return;
+    }
+    let ui = blizzard_ui_dir();
+    let toc = TocFile::from_file(&find_toc_file(&ui.join("Blizzard_ObjectiveTracker")).unwrap()).unwrap();
+    assert!(toc.files.iter().any(|file| file == "Blizzard_ObjectiveTrackerShared.lua"));
+    let env = new_blizzard_addon_env(&ui);
+    let loaded = load_blizzard_addon_closure_into_env(&env, &ui, &["Blizzard_ObjectiveTracker"], &[]);
+    assert!(loaded.iter().any(|name| name == "Blizzard_ObjectiveTracker"));
+    env.exec(r#"
+        local method = QuestObjectiveItemButtonMixin.CheckUpdateInsideBlob
+        local info = debug.getinfo(method, 'S')
+        assert(info.source:gsub('\\', '/'):find('Blizzard_ObjectiveTrackerShared.lua', 1, true))
+        local button = {
+            GetAttribute = function(_, key) assert(key == 'questID'); return 701 end,
+            UpdateInsideBlob = function(self, id, inside) self.id, self.inside = id, inside end,
+        }
+        A_Admin.SetMinimapQuestBlobInside(701, false)
+        method(button)
+        assert(button.id == 701 and button.inside == false)
+        A_Admin.SetMinimapQuestBlobInside(701, true)
+        method(button)
+        assert(button.id == 701 and button.inside == true)
+    "#).unwrap();
+}
+
 // ============================================================================
 // C_Navigation
 // ============================================================================
