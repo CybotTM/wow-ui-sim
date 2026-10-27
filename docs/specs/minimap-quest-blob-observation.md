@@ -29,7 +29,8 @@ Retail 12.1.5.70448, PTR 12.1.7.70493 and Forever 1.60.1.70532 declare the requi
 
 ## Known gaps (current cycle)
 
-- [ ] Complete the publication sweep and seven-profile checks.
+- [ ] The Retail 11.0.7 publication sweep still fails on the same pre-existing stale LFG authentication gap in RED and GREEN. The minimap row is resolved.
+- [x] All seven profile all-target checks pass with zero compiler warnings.
 
 ## Out of scope
 

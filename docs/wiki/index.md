@@ -1,6 +1,6 @@
 ## [2026-10-27] implementation | Minimap quest-blob observations
 
-[Minimap containment](investigations/minimap.md#supplied-quest-blob-containment) links the supplied-state contract. Retail, PTR and Forever original-consumer RED/GREEN are proven; paired Retail/PTR stock is unchanged.
+[Minimap containment](investigations/minimap.md#supplied-quest-blob-containment) links the supplied-state contract. Retail, PTR and Forever original-consumer RED/GREEN are proven; paired Retail/PTR stock is unchanged and seven all-target checks have zero compiler warnings. The Retail publication sweep still fails on the same pre-existing LFG gap in both siblings.
 
 ## [2026-10-27] implementation | Target spell and flyout inputs
 

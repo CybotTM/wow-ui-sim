@@ -1,6 +1,6 @@
 ## [2026-10-27] implementation | Minimap quest-blob observations
 
-[Containment input and Retail consumer](investigations/minimap.md#supplied-quest-blob-containment) link the scenario contract. Retail, PTR and Forever RED/GREEN and paired Retail/PTR stock are proven.
+[Containment input and Retail consumer](investigations/minimap.md#supplied-quest-blob-containment) link the scenario contract. Retail, PTR and Forever RED/GREEN and paired Retail/PTR stock are proven; seven all-target checks have zero compiler warnings. The paired publication sweep retains the same pre-existing LFG failure.
 
 ## [2026-10-27] implementation | Target spell and flyout inputs
 
