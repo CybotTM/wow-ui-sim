@@ -169,10 +169,17 @@ fn supplied_spellbook_slot_queries_validate_and_return_unresolved_values() {
         local name, rank = GetSpellName(1024, 'spell')
         assert(name == nil and rank == nil)
         assert(IsSelectedSpell(1, 'spell') == nil)
-        A_Admin.SetWrathSpellBookSlot('spell', 1, 6603, 'Auto Attack', '', 'icon', true)
+        A_Admin.SetWrathSpellBookSlot('spell', 1, 6603, 'Auto Attack', '', 'icon', 164, 2)
+        A_Admin.SetWrathSpellBookSelection(164, nil)
         assert(IsSelectedSpell(1, 'spell') == 1)
-        A_Admin.SetWrathSpellBookSlot('spell', 1, 6603, 'Auto Attack', '', 'icon', false)
+        assert(GetSpellName(1, 'other') == 'Auto Attack')
+        A_Admin.SetWrathSpellBookSelection(165, nil)
         assert(IsSelectedSpell(1, 'spell') == nil)
+        A_Admin.SetWrathSpellBookSelection(nil, 2)
+        assert(IsSelectedSpell(1, 'spell') == 1)
+        A_Admin.SetWrathSpellBookSelection(nil, 3)
+        assert(IsSelectedSpell(1, 'spell') == nil)
+        assert(IsSelectedSpell(1, 'PET') == nil)
     "#).expect("unresolved in-range slots return nil values");
     for expression in [
         "GetSpellTexture(0, 'spell')", "GetSpellTexture(1025, 'spell')",
