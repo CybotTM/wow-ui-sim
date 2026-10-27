@@ -4,9 +4,12 @@ Wrath consumers read scenario-supplied glyph sockets and unspent talent points. 
 
 ## What it must do
 
-- [ ] Supply each socket's enabled state, glyph type, spell ID and icon per one-based talent group and socket 1–6.
-- [ ] Return six sockets. A supplied enabled socket without a glyph returns enabled 1 and its type, with nil spell and icon. A locked record returns nil enabled, spell and icon, and its supplied type. An absent record or index outside 1–6 returns zero values. These rules follow the aso 3.3.5a comparison; unsupplied records are scenario state, not native initial values.
-- [ ] Return supplied unspent points by group, or scenario-default zero when unsupplied. An omitted or non-numeric group selects the active group.
+- [x] Supply socket enabled state, glyph type, spell ID and icon per one-based talent group; socket 1 is exercised in two groups.
+- [ ] Verify supplied records at sockets 2–6.
+- [x] Return six sockets. A supplied enabled socket without a glyph returns enabled 1 and its type, with nil spell and icon. A locked record returns nil enabled, spell and icon, and its supplied type. An absent record or index 0 returns zero values. These rules follow the aso 3.3.5a comparison; unsupplied records are scenario state, not native initial values.
+- [ ] Verify remaining invalid-index and absent-group boundaries.
+- [x] Return distinct supplied unspent point values per group; an omitted group selects the active group.
+- [ ] Verify unsupplied points and non-numeric group selection.
 - [ ] Expose the input setters only on Wrath and do not fire events from them.
 
 ## How it works
@@ -25,7 +28,7 @@ Wrath consumers read scenario-supplied glyph sockets and unspent talent points. 
 
 ## Known gaps (current cycle)
 
-- [ ] Confirm the two independent original-consumer RED/GREEN pairs and stock startup comparisons.
+- [ ] Complete Retail stock and all-target profile checks.
 
 ## Out of scope
 

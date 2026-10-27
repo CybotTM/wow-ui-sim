@@ -1,3 +1,7 @@
+## [2026-10-27] bounded proof | Wrath glyph and talent inputs
+
+[Wrath F10 boundaries](investigations/wrath-spell-panels-f10.md) record the supplied glyph and point selectors, the corrected native comparison, and the separate `GetTalentTabInfo` failure. Wrath stock is unchanged; Retail stock and all-target checks are pending.
+
 ## [2026-10-26] implementation | Wrath setup inputs
 
 [Wrath retained fixtures](investigations/wrath-retained-fixtures.md#shared-setup-boundaries) records the original container and target consumers and links their supplied bag, leadership and tap contracts. Full F15/F18 acceptance remains separate; exact 3.4.x native semantics are unknown.
