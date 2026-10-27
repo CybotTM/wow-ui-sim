@@ -34,6 +34,6 @@ fn cli_class_and_spec_are_visible_to_exec_lua() {
         let stdout = String::from_utf8_lossy(&output.stdout);
         let stderr = String::from_utf8_lossy(&output.stderr);
         assert!(output.status.success(), "{stdout}\n{stderr}");
-        assert!(stdout.contains(expected), "{stdout}\n{stderr}");
+        assert!(stderr.contains(expected), "{stdout}\n{stderr}");
     }
 }
