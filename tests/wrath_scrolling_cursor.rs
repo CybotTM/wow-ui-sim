@@ -184,6 +184,99 @@ fn original_wrath_startup_error_panel_has_cursor_before_direct_scrolling_update(
 }
 
 #[test]
+fn original_error_panel_handles_two_errors_before_first_tick() {
+    let env = WowLuaEnv::new().expect("SETUP FAILURE: Wrath environment");
+    env.set_screen_size(1024.0, 768.0);
+    let toc = wow_ui_sim::client_profile::blizzard_ui_framexml_toc()
+        .expect("SETUP FAILURE: Wrath FrameXML cache");
+    wow_ui_sim::loader::load_addon(&env.loader_env(), &toc)
+        .expect("SETUP FAILURE: load native FrameXML");
+    let debug_toc = wow_ui_sim::client_profile::blizzard_ui_addons_dir()
+        .join("Blizzard_DebugTools/Blizzard_DebugTools.toc");
+    wow_ui_sim::loader::load_addon(&env.loader_env(), &debug_toc)
+        .expect("SETUP FAILURE: load native DebugTools");
+    env.exec(
+        r#"
+        local box = ScriptErrorsFrameScrollFrameText
+        assert(box and box:GetScript('OnCursorChanged') == ScrollingEdit_OnCursorChanged)
+        assert(not ScriptErrorsFrame:IsShown())
+        assert(box.cursorOffset == nil and box.cursorHeight == nil)
+        ErrorPanelCursorEvents = 0
+        box:HookScript('OnCursorChanged', function() ErrorPanelCursorEvents = ErrorPanelCursorEvents + 1 end)
+        ScriptErrorsFrame_OnError('first error', false)
+        ScriptErrorsFrame_OnError('second error', false)
+        "#,
+    )
+    .expect("original error panel must process consecutive errors without cursorOffset failure");
+    env.fire_on_update(TICK_SECONDS).unwrap();
+    let errors = env.state().borrow().lua_errors.clone();
+    assert!(
+        !errors.iter().any(|error| error.contains("cursorOffset")),
+        "original error panel cursor error: {errors:?}"
+    );
+    env.exec(
+        r#"
+        local box = ScriptErrorsFrameScrollFrameText
+        assert(ScriptErrorsFrame:IsShown() and box:GetText():find('first error', 1, true))
+        assert(ErrorPanelCursorEvents > 0)
+        assert(type(box.cursorOffset) == 'number' and type(box.cursorHeight) == 'number')
+        assert(box.cursorHeight > 0 and box.handleCursorChange == false)
+        assert(box:GetParent():GetVerticalScroll() == 0)
+        "#,
+    )
+    .expect("original error panel must have real cursor geometry and reset scroll");
+}
+
+#[test]
+fn original_mail_body_first_text_delivers_cursor_and_scrolls() {
+    let env = WowLuaEnv::new().expect("SETUP FAILURE: Wrath environment");
+    env.set_screen_size(1024.0, 768.0);
+    let toc = wow_ui_sim::client_profile::blizzard_ui_framexml_toc()
+        .expect("SETUP FAILURE: Wrath FrameXML cache");
+    wow_ui_sim::loader::load_addon(&env.loader_env(), &toc)
+        .expect("SETUP FAILURE: load native FrameXML");
+    env.exec(
+        r#"
+        assert(SendMailBodyEditBox and SendMailBodyEditBox:GetScript('OnTextChanged'))
+        assert(SendMailBodyEditBox:GetScript('OnCursorChanged'))
+        MailFrame:Show()
+        SendMailFrame:Show()
+        local box = SendMailBodyEditBox
+        local scroll = box:GetParent():GetParent()
+        scroll:SetHeight(30)
+        box:SetHeight(300)
+        scroll:SetVerticalScroll(0)
+        MailCursorEvents = 0
+        box:HookScript('OnCursorChanged', function() MailCursorEvents = MailCursorEvents + 1 end)
+        assert(box.cursorOffset == nil and box.cursorHeight == nil)
+        local text = string.rep('line\n', 12) .. 'end'
+        box:SetText(text)
+        box:SetCursorPosition(#text)
+        "#,
+    )
+    .expect("SETUP FAILURE: original mail body first text");
+    env.fire_on_update(TICK_SECONDS).unwrap();
+    let errors = env.state().borrow().lua_errors.clone();
+    assert!(
+        !errors.iter().any(|error| error.contains("cursorOffset")),
+        "original mail consumer cursor error: {errors:?}"
+    );
+    env.exec(
+        r#"
+        local box = SendMailBodyEditBox
+        local scroll = box:GetParent():GetParent()
+        assert(MailCursorEvents > 0)
+        assert(type(box.cursorOffset) == 'number' and type(box.cursorHeight) == 'number')
+        assert(box.cursorHeight > 0 and box.cursorOffset < 0)
+        assert(box.handleCursorChange == false)
+        assert(scroll:GetVerticalScroll() > 0)
+        assert(scroll:GetVerticalScroll() <= scroll:GetVerticalScrollRange())
+        "#,
+    )
+    .expect("original mail consumer must receive cursor geometry and scroll");
+}
+
+#[test]
 fn original_wrath_settext_delivers_cursor_before_synchronous_changed_consumer() {
     let env = create_original_wrath_consumer_env();
     exec_and_audit(
