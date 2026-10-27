@@ -593,6 +593,20 @@ pub struct LfgApplication {
     pub role: String,
 }
 
+/// A supplied stationery catalog entry.
+#[derive(Debug, Clone)]
+pub struct MailStationery {
+    pub name: String,
+    pub texture: MailStationeryTexture,
+    pub cost: Option<f64>,
+}
+
+#[derive(Debug, Clone)]
+pub enum MailStationeryTexture {
+    Path(String),
+    FileId(f64),
+}
+
 /// An item attachment in a mail message.
 #[derive(Debug, Clone)]
 pub struct MailAttachment {

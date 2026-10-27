@@ -15,6 +15,35 @@ use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
 use rilua::{LuaApiMut, LuaResult, Val};
 
+fn get_num_stationeries(state: &mut LuaState) -> LuaResult<u32> {
+    let count = borrow_state(state)?.player.stationery_catalog.len();
+    state.push(Val::Num(count as f64));
+    Ok(1)
+}
+
+fn get_stationery_info(state: &mut LuaState) -> LuaResult<u32> {
+    let raw_index = i64::from_stack(state, 1)?;
+    let index = usize::try_from(raw_index)
+        .ok()
+        .and_then(|index| index.checked_sub(1));
+    let entry = {
+        let model = borrow_state(state)?;
+        index.and_then(|index| model.player.stationery_catalog.get(index).cloned())
+    };
+    let Some(entry) = entry else { return Ok(0) };
+    let name = create_string(state, &entry.name);
+    state.push(name);
+    let texture = match entry.texture {
+        crate::lua_api::state_types::MailStationeryTexture::Path(path) => {
+            create_string(state, &path)
+        }
+        crate::lua_api::state_types::MailStationeryTexture::FileId(id) => Val::Num(id),
+    };
+    state.push(texture);
+    state.push(entry.cost.map(Val::Num).unwrap_or(Val::Nil));
+    Ok(3)
+}
+
 fn has_new_mail(state: &mut LuaState) -> LuaResult<u32> {
     let unread = borrow_state(state)?
         .player
@@ -307,6 +336,10 @@ fn ensure_c_mail_table(state: &mut LuaState) -> GcRef<Table> {
 }
 
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
+        LuaApiMut::register_function(lua, "GetNumStationeries", get_num_stationeries)?;
+        LuaApiMut::register_function(lua, "GetStationeryInfo", get_stationery_info)?;
+    }
     LuaApiMut::register_function(lua, "HasNewMail", has_new_mail)?;
     LuaApiMut::register_function(lua, "GetInboxNumItems", get_inbox_num_items)?;
     LuaApiMut::register_function(lua, "GetInboxHeaderInfo", get_inbox_header_info)?;

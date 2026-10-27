@@ -8,10 +8,74 @@
 use super::admin::{build_mail, opt_string_stack};
 use crate::items;
 use crate::lua_api::methods::{borrow_state_mut, table_get};
-use crate::lua_api::state_types::MailAttachment;
+use crate::lua_api::state_types::{MailAttachment, MailStationery, MailStationeryTexture};
 use crate::lua_bridge::{FromStack, stack_val};
 use rilua::vm::state::LuaState;
-use rilua::{LuaResult, Val};
+use rilua::{LuaError, LuaResult, RuntimeError, Val};
+
+fn invalid_stationery(message: &str) -> LuaError {
+    LuaError::Runtime(RuntimeError {
+        message: format!("SetStationeryCatalog: {message}"),
+        level: 1,
+        traceback: vec![],
+    })
+}
+
+fn stationery_string(state: &LuaState, value: Val) -> Option<String> {
+    let Val::Str(value) = value else { return None };
+    state
+        .gc
+        .string_arena
+        .get(value)
+        .map(|value| String::from_utf8_lossy(value.data()).into_owned())
+}
+
+fn parse_stationery(state: &mut LuaState, entry: Val) -> LuaResult<MailStationery> {
+    let name_value = table_get(state, entry, "name");
+    let name = stationery_string(state, name_value)
+        .ok_or_else(|| invalid_stationery("name must be a string"))?;
+    let texture = match table_get(state, entry, "texture") {
+        Val::Str(value) => MailStationeryTexture::Path(
+            stationery_string(state, Val::Str(value))
+                .ok_or_else(|| invalid_stationery("invalid texture"))?,
+        ),
+        Val::Num(value) if value.is_finite() && value > 0.0 => MailStationeryTexture::FileId(value),
+        _ => {
+            return Err(invalid_stationery(
+                "texture must be a path or positive file ID",
+            ));
+        }
+    };
+    let cost = match table_get(state, entry, "cost") {
+        Val::Nil => None,
+        Val::Num(value) if value.is_finite() && value >= 0.0 => Some(value),
+        _ => return Err(invalid_stationery("cost must be nonnegative or nil")),
+    };
+    Ok(MailStationery {
+        name,
+        texture,
+        cost,
+    })
+}
+
+pub(super) fn set_stationery_catalog(state: &mut LuaState) -> LuaResult<u32> {
+    let Val::Table(table) = stack_val(state, 1) else {
+        return Err(invalid_stationery("expected a catalog table"));
+    };
+    let entries = state
+        .gc
+        .tables
+        .get(table)
+        .ok_or_else(|| invalid_stationery("invalid catalog table"))?
+        .array_slice()
+        .to_vec();
+    let catalog = entries
+        .into_iter()
+        .map(|entry| parse_stationery(state, entry))
+        .collect::<LuaResult<Vec<_>>>()?;
+    borrow_state_mut(state)?.player.stationery_catalog = catalog;
+    Ok(0)
+}
 
 // ── Mail ──────────────────────────────────────────────────────────────────────
 
