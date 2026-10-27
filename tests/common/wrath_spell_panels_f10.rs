@@ -170,7 +170,7 @@ fn supplied_spellbook_slot_queries_validate_and_return_unresolved_values() {
         assert(name == nil and rank == nil)
         assert(IsSelectedSpell(1, 'spell') == nil)
         A_Admin.SetWrathSpellBookSlot('spell', 1, 6603, 'Auto Attack', '', 'icon', true)
-        assert(IsSelectedSpell(1, 'spell') == true)
+        assert(IsSelectedSpell(1, 'spell') == 1)
         A_Admin.SetWrathSpellBookSlot('spell', 1, 6603, 'Auto Attack', '', 'icon', false)
         assert(IsSelectedSpell(1, 'spell') == nil)
     "#).expect("unresolved in-range slots return nil values");
