@@ -8,10 +8,23 @@ fn original_time_util_preserves_non_ascii_format_literals() {
         assert!(loaded.iter().any(|name| name == "Blizzard_SharedXML"));
         env.exec(r#"
             assert(debug.getinfo(TimeUtil.GetRecentTimeDate, 'S').source:find('TimeUtil.lua', 1, true))
-            LASTONLINE_HOURS = 'été %1$d %%'
-            assert(TimeUtil.GetRecentTimeDate(0, 0, 0, 2) == 'été 2 %')
-            LASTONLINE_HOURS = '雪 %1$d %%'
-            assert(TimeUtil.GetRecentTimeDate(0, 0, 0, 3) == '雪 3 %')
+            local function hex(value)
+                return (value:gsub('.', function(byte)
+                    return string.format('%02x', string.byte(byte))
+                end))
+            end
+            local failures = {}
+            for _, case in ipairs({
+                {'été %1$d %%', 2, 'été 2 %'},
+                {'雪 %1$d %%', 3, '雪 3 %'},
+            }) do
+                LASTONLINE_HOURS = case[1]
+                local actual = TimeUtil.GetRecentTimeDate(0, 0, 0, case[2])
+                if actual ~= case[3] then
+                    table.insert(failures, 'actual=' .. hex(actual) .. ' expected=' .. hex(case[3]))
+                end
+            end
+            assert(#failures == 0, table.concat(failures, '; '))
         "#).expect("original TimeUtil must preserve format literals");
     });
 }
