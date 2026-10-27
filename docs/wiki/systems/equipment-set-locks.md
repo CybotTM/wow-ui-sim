@@ -8,7 +8,7 @@ The [contract](../../specs/equipment-set-locks.md) uses explicit item-ID observa
 
 ## Query projection and unknown inputs
 
-`src/c_api/equipment_set_locks.rs` finds the current saved set and joins its stored item IDs to the supplied observations. It requires an observation for every stored item, then returns their boolean OR. Resaving changes membership immediately. It does not use combat, current bag position, ignored-slot flags, upgrades or invented lock criteria. Unknown sets and missing observations raise explicit simulator errors with the same `native-unknown:` style as Forever's target-spell policy. Native empty-set/default/unknown-set parity is not established.
+`src/c_api/equipment_set_locks.rs` finds the current saved set and joins its stored item IDs to the supplied observations. It requires an observation for every stored item, then returns their boolean OR. Resaving changes membership immediately. It does not use combat, current bag position, ignored-slot flags, upgrades or invented lock criteria. Unknown sets and missing observations raise explicit simulator errors with a `native-unknown:` prefix. Native empty-set/default/unknown-set parity is not established.
 
 On R/P/F/M the temporary bootstrap returns without publishing its old default, so there is no fallback. Excluded W/E/A retain their existing workaround unchanged. Admin input reads require an actual Lua boolean: the general `bool::from_stack` helper accepts nil as false and other values as true, which is not an explicit observation.
 

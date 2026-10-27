@@ -1,3 +1,7 @@
+## [2026-10-27] implementation | Target spell and flyout inputs
+
+The [target-spell and flyout contract](../specs/spell-target-flyout.md) replaces the [historical missing-target error](investigations/forever-startup-gaps.md#historical-startup-packet-and-unknown-consumers) with a best-guess nil scenario default and supplies spellbook membership on PTR/Forever. Native no-target behavior remains unknown. PTR consumer proof is available; remaining profile verification is pending.
+
 ## [2026-10-26] implementation | Spectating UI scenario
 
 [Scenario state and selected consumer](systems/spectating-ui.md) describe the user-authorized false default and undocumented native contract. Retail original-consumer RED/GREEN and unchanged Retail/PTR stock are proven; seven all-target checks have zero warnings.

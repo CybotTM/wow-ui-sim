@@ -1,3 +1,7 @@
+## [2026-10-27] implementation | Target spell and flyout inputs
+
+Reconciled the [historical target-spell boundary](investigations/forever-startup-gaps.md#historical-startup-packet-and-unknown-consumers) with the [scenario contract](../specs/spell-target-flyout.md). PTR original consumer RED/GREEN proof is recorded; native no-target behavior and remaining profile verification are open.
+
 ## [2026-10-26] implementation | Spectating UI scenario
 
 [Scenario and consumer evidence](systems/spectating-ui.md): state-backed query with a user-authorized false default. Retail consumer RED/GREEN and unchanged Retail/PTR stock are proven; seven all-target checks have zero compiler warnings.
