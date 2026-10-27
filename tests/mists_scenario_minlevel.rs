@@ -7,7 +7,6 @@ use wow_ui_sim::loader::find_toc_file;
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::toc::TocFile;
 
-const UNKNOWN: &str = "native-unknown: C_PartyInfo.GetMinLevel has no supplied active-party minimum or documented default";
 const UNSUPPORTED: &str = "unsupported: C_PartyInfo.GetMinLevel explicit category";
 
 fn load_original_scenario() -> WowLuaEnv {
@@ -45,7 +44,8 @@ fn assert_empty_catalog_preservation(env: &WowLuaEnv) {
     let errors_before = env.state().borrow().lua_errors.len();
     env.exec(
         r#"
-        ScenarioFinderFrame_UpdateAvailability()
+        local ok, reason = xpcall(ScenarioFinderFrame_UpdateAvailability, debug.traceback)
+        if not ok then error(reason, 0) end
         assert(ScenarioFinderFrame.NoScenariosCover:IsShown())
         assert(ScenarioFinderFrame.NoScenariosCover.Label:GetText() == NO_SCENARIO_AVAILABLE)
     "#,
@@ -58,31 +58,15 @@ fn assert_empty_catalog_preservation(env: &WowLuaEnv) {
 fn original_empty_catalog_preserves_cover_after_supplied_minimum() {
     let env = load_original_scenario();
     assert_eq!(env.state().borrow().mists_party_min_level, None);
-    let error = env
-        .exec(
-            "local ok, reason = xpcall(ScenarioFinderFrame_UpdateAvailability, debug.traceback); if not ok then error(reason, 0) end",
-        )
-        .expect_err("unsupplied original consumer must fail at line58");
-    assert!(
-        error.to_string().contains("ScenarioFinder_Shared.lua:58"),
-        "{error}"
-    );
-    eprintln!("unsupplied original line58 boundary: {error}");
+    assert_empty_catalog_preservation(&env);
+    assert_eq!(query_minimum(&env), env.state().borrow().player.level as f64);
     env.state().borrow_mut().mists_party_min_level = Some(85.0);
     assert_empty_catalog_preservation(&env);
     env.state().borrow_mut().mists_party_min_level = Some(90.0);
     assert_empty_catalog_preservation(&env);
     env.state().borrow_mut().mists_party_min_level = None;
-    let error = env
-        .exec(
-            "local ok, reason = xpcall(ScenarioFinderFrame_UpdateAvailability, debug.traceback); if not ok then error(reason, 0) end",
-        )
-        .expect_err("cleared observation restores original line58 boundary");
-    let message = error.to_string();
-    assert!(
-        message.contains("ScenarioFinder_Shared.lua:58") && message.contains(UNKNOWN),
-        "{error}"
-    );
+    assert_empty_catalog_preservation(&env);
+    assert_eq!(query_minimum(&env), env.state().borrow().player.level as f64);
 }
 
 fn query_minimum(env: &WowLuaEnv) -> f64 {
@@ -94,13 +78,11 @@ fn query_minimum(env: &WowLuaEnv) -> f64 {
 }
 
 #[test]
-fn supplied_minimum_is_exact_environment_local_and_unset_is_unknown() {
+fn supplied_minimum_is_exact_environment_local_and_solo_defaults_to_player() {
     let first = WowLuaEnv::new().unwrap();
     let second = WowLuaEnv::new().unwrap();
-    let error = first
-        .exec("C_PartyInfo.GetMinLevel()")
-        .expect_err("no invented default from seeded roster");
-    assert!(error.to_string().contains(UNKNOWN), "{error}");
+    first.state().borrow_mut().player.level = 42;
+    assert_eq!(query_minimum(&first), 42.0);
     first.state().borrow_mut().mists_party_min_level = Some(85.0);
     second.state().borrow_mut().mists_party_min_level = Some(90.0);
     assert_eq!(query_minimum(&first), 85.0);
@@ -108,10 +90,8 @@ fn supplied_minimum_is_exact_environment_local_and_unset_is_unknown() {
     first.state().borrow_mut().mists_party_min_level = Some(90.0);
     assert_eq!(query_minimum(&first), 90.0);
     second.state().borrow_mut().mists_party_min_level = None;
-    let error = second
-        .exec("C_PartyInfo.GetMinLevel()")
-        .expect_err("clearing one environment restores unknown");
-    assert!(error.to_string().contains(UNKNOWN), "{error}");
+    second.state().borrow_mut().player.level = 37;
+    assert_eq!(query_minimum(&second), 37.0);
     assert_eq!(query_minimum(&first), 90.0);
 }
 
