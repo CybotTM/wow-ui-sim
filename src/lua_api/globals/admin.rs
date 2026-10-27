@@ -56,7 +56,7 @@ use super::admin_encounter::{
 use super::admin_equipment::{equip_item, unequip_item};
 use super::admin_events::{fire_event_admin, toggle_debug_anchors, toggle_debug_borders};
 use super::admin_interactions::{close_mailbox, open_mailbox};
-use super::admin_mail::{add_mail, clear_inbox, set_inbox_count};
+use super::admin_mail::{add_mail, clear_inbox, set_inbox_count, set_stationery_catalog};
 use super::admin_movement::{set_falling, set_flying, set_mounted, set_moving, set_swimming};
 use super::admin_party_target_helpers::{
     clear_focus, clear_target, kill_party_member, res_party_member, set_focus, set_focus_health,
@@ -377,7 +377,8 @@ fn register_inventory_and_mail(b: TableBuilder) -> LuaResult<TableBuilder> {
         .set_function("ClearInbox", clear_inbox)?
         .set_function("OpenMailbox", open_mailbox)?
         .set_function("CloseMailbox", close_mailbox)?
-        .set_function("SetInboxCount", set_inbox_count)?;
+        .set_function("SetInboxCount", set_inbox_count)?
+        .set_function("SetStationeryCatalog", set_stationery_catalog)?;
 
     register_auction_house_admin(b)
 }

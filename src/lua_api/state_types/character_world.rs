@@ -6,8 +6,8 @@ use crate::lua_api::game_data::AuraInfo;
 use crate::lua_api::state_defaults::default_equipped_items;
 
 use super::collections::{
-    EquippedItem, GreatVaultActivity, HeirloomData, MailAttachment, MailMessage, MountData,
-    PetData, PremadeListing, ToyData, TransmogAppearance, WarbandSceneData,
+    EquippedItem, GreatVaultActivity, HeirloomData, MailAttachment, MailMessage, MailStationery,
+    MountData, PetData, PremadeListing, ToyData, TransmogAppearance, WarbandSceneData,
 };
 
 /// Computed character stats (base + gear).
@@ -274,6 +274,8 @@ pub struct PlayerState {
     pub pending_spec_change: Option<i32>,
     /// Mail inbox.
     pub inbox: Vec<MailMessage>,
+    /// Supplied stationery catalog; empty by simulator scenario default.
+    pub stationery_catalog: Vec<MailStationery>,
     /// Items attached to outgoing mail (12 slots max).
     pub send_mail_items: [Option<MailAttachment>; 12],
     /// Money attached to outgoing mail (copper).
