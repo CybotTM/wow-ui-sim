@@ -16,6 +16,10 @@ Most specs have exactly one mastery spell; initial/Adventurer specs have none.
 Examples: Holy Paladin 183997 (Lightbringer), Protection Paladin 76671 (Divine
 Bulwark), Retribution 267316 (Highlord's Judgment).
 
+### Class specialization order
+
+The generated catalog is not always in specialization order: Monk's source rows list Windwalker before Mistweaver. `specs_for_class` orders entries by `order_index` so one-based API indices select the corresponding identity. The [CLI class/spec contract](../../specs/cli-class-spec.md) exercises both Monk selections through the Blizzard specialization content frame.
+
 ### API surface
 
 - `c_spec_get_specialization_mastery_spells` in `src/c_api/c_spec.rs` maps the
@@ -36,7 +40,7 @@ Bulwark), Retribution 267316 (Highlord's Judgment).
 
 ## Sources
 
-- `data/specializations.rs` — generated spec data with mastery spell IDs
+- `crates/sim-data/data/specializations.rs` — generated spec data and ordered class lookup
 - `src/c_api/c_spec.rs` — namespace method
 - `tests/blizzard_deprecated_specialization_loads.rs` — deprecated-wrapper coverage
 

@@ -62,6 +62,7 @@ impl WowLuaEnv {
     /// `exec_rilua_secure` (runs under secureenv). Lets callers that
     /// have a `secure: bool` toggle avoid an `if/else` at every use.
     pub fn exec_maybe_secure(&self, code: &str, secure: bool) -> crate::Result<()> {
+        self.run_post_startup_exec_hook();
         if secure {
             Ok(self.exec_rilua_secure(code)?)
         } else {
