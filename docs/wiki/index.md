@@ -10,6 +10,10 @@ The [target-spell and flyout contract](../specs/spell-target-flyout.md) replaces
 
 [Scenario state and selected consumer](systems/spectating-ui.md) describe the user-authorized false default and undocumented native contract. Retail original-consumer RED/GREEN and unchanged Retail/PTR stock are proven; seven all-target checks have zero warnings.
 
+## [2026-10-27] bounded proof | Wrath talent rendering
+
+[Original show-path proof](investigations/wrath-spell-panels-f10.md) links the [supplied tab and row contract](../specs/wrath-talent-tabs.md). Two distinct supplied states render, including a rank-dependent prerequisite. RED fails at the original tab query; stock comparison and remaining profile checks are pending.
+
 ## [2026-10-27] bounded proof | Wrath glyph and talent inputs
 
 [Original consumer boundaries](investigations/wrath-spell-panels-f10.md) link the [supplied-input contract](../specs/wrath-glyph-talent-inputs.md). Two byte-identical RED/GREEN selectors cover glyph records and unspent points; the next talent-panel failure is nil `GetTalentTabInfo`. Wrath and Retail stock remain 0/0. Seven all-target checks have zero compiler warnings; the PTR check used source-equivalent pre-follow-up code.
