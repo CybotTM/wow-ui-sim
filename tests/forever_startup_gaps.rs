@@ -276,11 +276,6 @@ fn forever_original_item_context_uses_supplied_target_spell() {
     env.exec("assert(ItemButtonUtil.GetItemContext() ~= ItemButtonUtil.ItemContextEnum.FeedPet)")
         .unwrap();
     env.state().borrow_mut().forever_startup.target_spell_id = None;
-    env.exec(
-        r#"
-        local ok, message = pcall(C_Spell.GetTargetSpellID)
-        assert(not ok and string.find(message, "native%-unknown"))
-        "#,
-    )
-    .unwrap();
+    env.exec("assert(C_Spell.GetTargetSpellID() == nil)")
+        .unwrap();
 }

@@ -306,6 +306,8 @@ pub struct SimState {
     pub spell_cooldown_categories: HashMap<u32, i32>,
     /// Supplied low-rank spell IDs for the current scenario.
     pub spellbook_low_rank: HashSet<u32>,
+    /// Supplied spell IDs represented in a flyout.
+    pub spellbook_loose_flyout_members: HashSet<u32>,
     /// Item whose use started a spell's current cooldown, keyed by spell ID.
     pub spell_cooldown_item_sources: HashMap<u32, i32>,
     /// `C_Roleset.ApplyRolesetFilters` blocklist, in applied order.

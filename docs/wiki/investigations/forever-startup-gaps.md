@@ -83,7 +83,10 @@ handling or vendor callback is changed.
 ## Historical startup packet and unknown consumers
 
 `GetTargetSpellID` documents a non-null number but no absent-target sentinel.
-Absent supplied input raises an explicit native-unknown error. Repairing earlier
+At this historical boundary, absent supplied input raised a native-unknown error.
+The later [target-spell contract](../../specs/spell-target-flyout.md) replaces that
+error with a nil scenario default; native no-target behavior remains unknown.
+Repairing earlier
 PaperDoll/BagSlot errors lets more bag consumers reach this query; do not hide
 these reports by returning an invented zero. Native facts were requested from
 the laptop. Locality declaration/behavior is also pending that evidence.

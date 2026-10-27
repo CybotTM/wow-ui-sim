@@ -81,6 +81,52 @@ fn ptr_spellbook_filter_uses_supplied_rank() {
     "#).expect("original spellbook filter consumes supplied rank");
 }
 
+#[cfg(any(feature = "client-ptr", feature = "client-wowforever"))]
+#[test]
+fn flyout_membership_accepts_untainted_secret_arguments() {
+    let env = wow_ui_sim::lua_api::WowLuaEnv::new().expect("create environment");
+    env.state().borrow_mut().spellbook_loose_flyout_members.insert(6603);
+    env.exec(r#"
+        slot, bank = secretwrap(1), secretwrap(0)
+        assert(C_SpellBook.IsSpellBookItemLooseFlyoutMember(slot, 0) == true)
+        assert(C_SpellBook.IsSpellBookItemLooseFlyoutMember(1, bank) == true)
+        function addon_slot() return C_SpellBook.IsSpellBookItemLooseFlyoutMember(slot, 0) end
+        function addon_bank() return C_SpellBook.IsSpellBookItemLooseFlyoutMember(1, bank) end
+        debug.setobjecttaint(addon_slot, 'FlyoutFixture')
+        debug.setobjecttaint(addon_bank, 'FlyoutFixture')
+    "#).expect("untainted secret arguments");
+    assert!(env.exec("addon_slot()").is_err(), "tainted secret slot must fail");
+    assert!(env.exec("addon_bank()").is_err(), "tainted secret bank must fail");
+}
+
+#[cfg(feature = "client-ptr")]
+#[test]
+fn ptr_spellbook_filter_uses_supplied_flyout_membership() {
+    let env = setup_env();
+    env.send_key_press("S", None).expect("load spellbook");
+    env.state().borrow_mut().spellbook_loose_flyout_members.insert(6603);
+    env.exec(r#"
+        assert(SpellBookFrameMixin.ShouldDisplaySpellBookItem(nil, false, false, false, false, 1, 0) == false)
+        assert(SpellBookFrameMixin.ShouldDisplaySpellBookItem(nil, false, false, false, false, 2, 0) == true)
+        assert(SpellBookFrameMixin.ShouldDisplaySpellBookItem(nil, false, false, false, true, 1, 0) == true)
+    "#).expect("original spellbook filter consumes supplied flyout membership");
+}
+
+#[cfg(feature = "client-ptr")]
+#[test]
+fn ptr_item_context_uses_supplied_target_spell() {
+    let env = setup_env();
+    env.state().borrow_mut().forever_startup.target_spell_id = Some(6991);
+    env.exec("assert(ItemButtonUtil.GetItemContext() == ItemButtonUtil.ItemContextEnum.FeedPet)")
+        .expect("feed pet context");
+    env.state().borrow_mut().forever_startup.target_spell_id = Some(19750);
+    env.exec("assert(ItemButtonUtil.GetItemContext() ~= ItemButtonUtil.ItemContextEnum.FeedPet)")
+        .expect("other target context");
+    env.state().borrow_mut().forever_startup.target_spell_id = None;
+    env.exec("assert(C_Spell.GetTargetSpellID() == nil)")
+        .expect("no supplied target");
+}
+
 #[cfg(feature = "client-ptr")]
 #[test]
 fn ptr_spec_tab_uses_supplied_spec_selection() {
