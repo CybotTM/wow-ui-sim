@@ -46,12 +46,15 @@ wow-sim --no-saved-vars self-test --max-ticks 20000
 
 Render the UI without starting the GUI. WebP is the default at standalone quality 15; `wow-cli screenshot` captures from a running simulator at live IPC quality 65. Explicit `--png` writes lossless PNG and forces `.png`. Without it, output is forced to `.webp`, even for `-o frame.png`. Encoding selection leaves source pixels, viewport (default 1600×1200), crop, color handling, and layout unchanged. Windows IPC remains unsupported. See the [output-format contract](../../specs/screenshot-output-format.md).
 
+`wow-sim screenshot --quality <1-100>` sets the standalone WebP quality; `--png` ignores it. `--ui-scale <f>` (default 1.0) scales `UIParent` before the canvas size is set, so the managed containers are laid out for the scaled UI; the client's scale is `height / 768 × uiScale`, for example 1.6875 for 1440p at uiScale 0.9. Above 1.0 the render lookup draws the 2x atlas art; `WOW_SIM_HIRES_ATLASES=0` or `=1` overrides that choice. See [[ui-capture-fidelity]].
+
 ```bash
 wow-sim --no-addons --no-saved-vars screenshot              # → screenshot.webp (1600×1200)
 wow-sim screenshot -o frame.webp --filter AddonList         # Subtree only
 wow-sim screenshot --width 1920 --height 1080
 wow-sim screenshot --png -o frame.webp                     # → frame.png (lossless)
 wow-cli screenshot --png -o live.webp                      # → live.png (running server)
+wow-sim screenshot --width 3440 --height 1440 --ui-scale 1.6875 --quality 90
 ```
 
 ### `dump-tree`

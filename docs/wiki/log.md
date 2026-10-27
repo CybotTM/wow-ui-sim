@@ -1,3 +1,7 @@
+## [2026-10-27] investigation | UI capture fidelity
+
+Created [UI capture fidelity](investigations/ui-capture-fidelity.md) for the render fixes ported from the capture comparison, and documented `--quality`, `--ui-scale` and `WOW_SIM_HIRES_ATLASES` in [CLI commands](reference/cli-commands.md#screenshot).
+
 ## [2026-10-27] implementation | Minimap quest-blob observations
 
 [Containment input and Retail consumer](investigations/minimap.md#supplied-quest-blob-containment) link the scenario contract. Retail, PTR and Forever RED/GREEN and paired Retail/PTR stock are proven; seven all-target checks have zero compiler warnings. The paired publication sweep retains the same pre-existing LFG failure.
