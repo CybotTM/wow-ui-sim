@@ -23,6 +23,14 @@ pub struct WrathTalentRow {
     pub meets_prereq: bool,
     pub preview_rank: u32,
     pub meets_preview_prereq: bool,
+    pub prerequisites: Vec<WrathTalentPrerequisite>,
+}
+
+/// Scenario-supplied prerequisite refers to a one-based talent row.
+#[derive(Clone, Debug)]
+pub struct WrathTalentPrerequisite {
+    pub talent_index: u32,
+    pub required_rank: u32,
 }
 
 /// Scenario-supplied Wrath glyph socket data.
