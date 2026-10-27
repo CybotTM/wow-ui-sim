@@ -10,7 +10,6 @@ mod render_order_support;
 
 use image::RgbaImage;
 use std::path::PathBuf;
-use wow_ui_sim::loader::load_addon;
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::lua_api::globals::global_frames;
 use wow_ui_sim::render::headless::render_to_image;
@@ -99,76 +98,49 @@ fn target_portrait_rect(env: &WowLuaEnv, width: f32, height: f32) -> (f32, f32, 
     (rect.x, rect.y, rect.width, rect.height)
 }
 
-const BLIZZARD_ADDONS: &[(&str, &str)] = &[
-    ("Blizzard_SharedXMLBase", "Blizzard_SharedXMLBase.toc"),
-    ("Blizzard_Colors", "Blizzard_Colors.toc"),
-    ("Blizzard_SharedXML", "Blizzard_SharedXML.toc"),
-    ("Blizzard_SharedXMLGame", "Blizzard_SharedXMLGame.toc"),
-    (
-        "Blizzard_UIPanelTemplates",
-        "Blizzard_UIPanelTemplates_Mainline.toc",
-    ),
-    (
-        "Blizzard_FrameXMLBase",
-        "Blizzard_FrameXMLBase_Mainline.toc",
-    ),
-    ("Blizzard_FrameEffects", "Blizzard_FrameEffects.toc"),
-    ("Blizzard_LoadLocale", "Blizzard_LoadLocale.toc"),
-    ("Blizzard_Fonts_Shared", "Blizzard_Fonts_Shared.toc"),
-    ("Blizzard_HelpPlate", "Blizzard_HelpPlate.toc"),
-    (
-        "Blizzard_AccessibilityTemplates",
-        "Blizzard_AccessibilityTemplates.toc",
-    ),
-    ("Blizzard_ObjectAPI", "Blizzard_ObjectAPI_Mainline.toc"),
-    ("Blizzard_UIParent", "Blizzard_UIParent.toc"),
-    ("Blizzard_TextStatusBar", "Blizzard_TextStatusBar.toc"),
-    ("Blizzard_MoneyFrame", "Blizzard_MoneyFrame_Mainline.toc"),
-    ("Blizzard_POIButton", "Blizzard_POIButton.toc"),
-    ("Blizzard_Flyout", "Blizzard_Flyout.toc"),
-    ("Blizzard_StoreUI", "Blizzard_StoreUI.toc"),
-    ("Blizzard_MicroMenu", "Blizzard_MicroMenu_Mainline.toc"),
-    ("Blizzard_GameMenuEsc", "Blizzard_GameMenuEsc.toc"),
-    ("Blizzard_GameMenu", "Blizzard_GameMenu_Mainline.toc"),
-    ("Blizzard_EditMode", "Blizzard_EditMode.toc"),
-    ("Blizzard_GarrisonBase", "Blizzard_GarrisonBase.toc"),
-    ("Blizzard_GameTooltip", "Blizzard_GameTooltip_Mainline.toc"),
-    (
-        "Blizzard_UIParentPanelManager",
-        "Blizzard_UIParentPanelManager_Mainline.toc",
-    ),
-    (
-        "Blizzard_Settings_Shared",
-        "Blizzard_Settings_Shared.toc",
-    ),
-    (
-        "Blizzard_SettingsDefinitions_Shared",
-        "Blizzard_SettingsDefinitions_Shared.toc",
-    ),
-    (
-        "Blizzard_SettingsDefinitions_Frame",
-        "Blizzard_SettingsDefinitions_Frame.toc",
-    ),
-    ("Blizzard_FrameXMLUtil", "Blizzard_FrameXMLUtil.toc"),
-    ("Blizzard_ItemButton", "Blizzard_ItemButton_Mainline.toc"),
-    ("Blizzard_QuickKeybind", "Blizzard_QuickKeybind.toc"),
-    ("Blizzard_FrameXML", "Blizzard_FrameXML.toc"),
-    (
-        "Blizzard_UIPanels_Game",
-        "Blizzard_UIPanels_Game_Mainline.toc",
-    ),
-    ("Blizzard_BuffFrame", "Blizzard_BuffFrame.toc"),
-    ("Blizzard_SpellDiminishUI", "Blizzard_SpellDiminishUI.toc"),
-    ("Blizzard_ActionBar", "Blizzard_ActionBar_Mainline.toc"),
-    (
-        "Blizzard_ActionBarController",
-        "Blizzard_ActionBarController.toc",
-    ),
-    ("Blizzard_RaidWarning", "Blizzard_RaidWarning.toc"),
-    ("Blizzard_VisualAlerts", "Blizzard_VisualAlerts.toc"),
-    ("Blizzard_PrivateAurasUI", "Blizzard_PrivateAurasUI.toc"),
-    ("Blizzard_AuraContainer", "Blizzard_AuraContainer.toc"),
-    ("Blizzard_UnitFrame", "Blizzard_UnitFrame_Mainline.toc"),
+const BLIZZARD_ADDONS: &[&str] = &[
+    "Blizzard_SharedXMLBase",
+    "Blizzard_Colors",
+    "Blizzard_SharedXML",
+    "Blizzard_SharedXMLGame",
+    "Blizzard_UIPanelTemplates",
+    "Blizzard_FrameXMLBase",
+    "Blizzard_FrameEffects",
+    "Blizzard_LoadLocale",
+    "Blizzard_Fonts_Shared",
+    "Blizzard_HelpPlate",
+    "Blizzard_AccessibilityTemplates",
+    "Blizzard_ObjectAPI",
+    "Blizzard_UIParent",
+    "Blizzard_TextStatusBar",
+    "Blizzard_MoneyFrame",
+    "Blizzard_POIButton",
+    "Blizzard_Flyout",
+    "Blizzard_StoreUI",
+    "Blizzard_MicroMenu",
+    "Blizzard_GameMenuEsc",
+    "Blizzard_GameMenu",
+    "Blizzard_EditMode",
+    "Blizzard_GarrisonBase",
+    "Blizzard_GameTooltip",
+    "Blizzard_UIParentPanelManager",
+    "Blizzard_Settings_Shared",
+    "Blizzard_SettingsDefinitions_Shared",
+    "Blizzard_SettingsDefinitions_Frame",
+    "Blizzard_FrameXMLUtil",
+    "Blizzard_ItemButton",
+    "Blizzard_QuickKeybind",
+    "Blizzard_FrameXML",
+    "Blizzard_UIPanels_Game",
+    "Blizzard_BuffFrame",
+    "Blizzard_SpellDiminishUI",
+    "Blizzard_ActionBar",
+    "Blizzard_ActionBarController",
+    "Blizzard_RaidWarning",
+    "Blizzard_VisualAlerts",
+    "Blizzard_PrivateAurasUI",
+    "Blizzard_AuraContainer",
+    "Blizzard_UnitFrame",
 ];
 
 /// Create environment with the Blizzard targeting surface plus Blizzard_UnitFrame.
@@ -183,23 +155,11 @@ fn setup_env() -> common::LockedEnv {
             state.addon_base_paths = vec![ui.clone()];
         }
 
-        for (name, toc) in BLIZZARD_ADDONS {
+        for name in BLIZZARD_ADDONS {
             if *name == "Blizzard_UnitFrame" {
-                common::load_blizzard_addon_bootstrap(
-                    &env,
-                    &ui,
-                    name,
-                    "Mainline/TargetFrame.lua",
-                );
+                common::load_blizzard_addon_bootstrap(&env, &ui, name, "Mainline/TargetFrame.lua");
             }
-            let toc_path = ui.join(name).join(toc);
-            assert!(
-                toc_path.exists(),
-                "declared Blizzard fixture TOC should exist: {}",
-                toc_path.display()
-            );
-            load_addon(&env.loader_env(), &toc_path)
-                .unwrap_or_else(|error| panic!("failed to load {name}: {error}"));
+            common::load_required_blizzard_addon(&env, &ui, name);
             env.apply_runtime_addon_load_workarounds(name);
         }
         env.apply_post_load_workarounds();
