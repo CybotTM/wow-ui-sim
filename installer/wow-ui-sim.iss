@@ -14,15 +14,23 @@
 #define OutputBaseFilename "wow-ui-sim-setup"
 #endif
 
+#ifdef Forever
+#define ProductName "WoW UI Simulator Forever"
+#define ProductId "{{6D8C21F0-652C-4AE0-A46E-0A2C90A729A6}"
+#else
+#define ProductName "WoW UI Simulator"
+#define ProductId "{{8B6B89DF-7E56-4A69-A2E1-9B439A1D4BA1}"
+#endif
+
 [Setup]
-AppId={{8B6B89DF-7E56-4A69-A2E1-9B439A1D4BA1}
-AppName=WoW UI Simulator
+AppId={#ProductId}
+AppName={#ProductName}
 AppVersion={#AppVersion}
 AppPublisher=Osso
 AppPublisherURL=https://github.com/Osso/wow-ui-sim
 AppSupportURL=https://github.com/Osso/wow-ui-sim/issues
 AppUpdatesURL=https://github.com/Osso/wow-ui-sim/releases
-DefaultDirName={localappdata}\Programs\WoW UI Simulator
+DefaultDirName={localappdata}\Programs\{#ProductName}
 DisableProgramGroupPage=yes
 OutputDir={#OutputDir}
 OutputBaseFilename={#OutputBaseFilename}
@@ -40,4 +48,4 @@ Source: "{#SourceDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs 
 Source: "wow-sim.ico"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
-Name: "{autoprograms}\WoW UI Simulator"; Filename: "{app}\wow-sim.exe"; WorkingDir: "{app}"; IconFilename: "{app}\wow-sim.ico"
+Name: "{autoprograms}\{#ProductName}"; Filename: "{app}\wow-sim.exe"; WorkingDir: "{app}"; IconFilename: "{app}\wow-sim.ico"

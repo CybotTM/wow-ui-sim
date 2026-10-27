@@ -76,6 +76,10 @@ scripts/start-profile.sh live
 
 Use local while gaming on desktop. Raw Cargo stays local. See [native workflow, profile flags, and runtime proof limits](docs/remote-builds.md).
 
+## Release packages
+
+GitHub releases provide Retail, Mists, and WoW Forever packages for Linux x86-64, Windows x86-64, and macOS Apple Silicon. Windows packages include a ZIP and an installer; macOS packages use a DMG. Forever package names include `forever`, and its installer and macOS app use separate identities.
+
 ## Docker
 
 Published addon-test images and CI/release workflows remain separate from native development.

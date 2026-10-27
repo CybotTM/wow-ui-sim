@@ -31,6 +31,11 @@ jobs:
             platform: linux
             bin-dir: target/x86_64-unknown-linux-gnu/release
             features: sound,gui,client-mists
+          - name: forever-linux-x86_64
+            os: ubuntu-latest
+            platform: linux
+            bin-dir: target/x86_64-unknown-linux-gnu/release
+            features: sound,gui,client-wowforever
           - name: windows-x86_64
             os: windows-latest
             platform: windows
@@ -41,6 +46,11 @@ jobs:
             platform: windows
             bin-dir: target/x86_64-pc-windows-msvc/release
             features: sound,gui,client-mists
+          - name: forever-windows-x86_64
+            os: windows-latest
+            platform: windows
+            bin-dir: target/x86_64-pc-windows-msvc/release
+            features: sound,gui,client-wowforever
           - name: macos-aarch64
             os: macos-latest
             platform: macos
@@ -51,6 +61,11 @@ jobs:
             platform: macos
             bin-dir: target/aarch64-apple-darwin/release
             features: sound,gui,client-mists
+          - name: forever-macos-aarch64
+            os: macos-latest
+            platform: macos
+            bin-dir: target/aarch64-apple-darwin/release
+            features: sound,gui,client-wowforever
 
     steps:
       - name: Enable Git long paths
@@ -82,14 +97,14 @@ jobs:
           sudo apt-get install -y pkg-config libicu-dev libasound2-dev libudev-dev
 
       - name: Install macOS ICU
-        if: runner.os == 'macOS' && contains(matrix.features, 'client-retail')
+        if: runner.os == 'macOS' && (contains(matrix.features, 'client-retail') || contains(matrix.features, 'client-wowforever'))
         shell: bash
         run: |
           brew install icu4c pkg-config
           echo "PKG_CONFIG_PATH=$(brew --prefix icu4c)/lib/pkgconfig" >> "${GITHUB_ENV}"
 
       - name: Read pinned vcpkg revision
-        if: runner.os == 'Windows' && contains(matrix.features, 'client-retail')
+        if: runner.os == 'Windows' && (contains(matrix.features, 'client-retail') || contains(matrix.features, 'client-wowforever'))
         id: vcpkg-pin
         shell: pwsh
         run: |
@@ -98,7 +113,7 @@ jobs:
           "revision=$revision" >> $env:GITHUB_OUTPUT
 
       - name: Checkout pinned vcpkg
-        if: runner.os == 'Windows' && contains(matrix.features, 'client-retail')
+        if: runner.os == 'Windows' && (contains(matrix.features, 'client-retail') || contains(matrix.features, 'client-wowforever'))
         uses: actions/checkout@v4
         with:
           repository: microsoft/vcpkg
@@ -107,7 +122,7 @@ jobs:
           persist-credentials: false
 
       - name: Install static Windows ICU
-        if: runner.os == 'Windows' && contains(matrix.features, 'client-retail')
+        if: runner.os == 'Windows' && (contains(matrix.features, 'client-retail') || contains(matrix.features, 'client-wowforever'))
         shell: pwsh
         run: |
           $root = Join-Path $env:GITHUB_WORKSPACE '.ci-vcpkg'
@@ -119,7 +134,7 @@ jobs:
           'VCPKGRS_TRIPLET=x64-windows-static-md' >> $env:GITHUB_ENV
 
       - name: Report Unix ICU versions
-        if: runner.os != 'Windows' && contains(matrix.features, 'client-retail')
+        if: runner.os != 'Windows' && (contains(matrix.features, 'client-retail') || contains(matrix.features, 'client-wowforever'))
         shell: bash
         run: |
           set -euo pipefail
@@ -206,7 +221,13 @@ jobs:
           set -euo pipefail
           name="wow-ui-sim-${RELEASE_REF}-${{ matrix.name }}"
           version="${RELEASE_REF#v}"
-          app="dist/WoW Sim.app"
+          app_name="WoW Sim"
+          bundle_id="net.osso.wow-ui-sim"
+          if [[ "${{ matrix.features }}" == *client-wowforever* ]]; then
+            app_name="WoW Sim Forever"
+            bundle_id="net.osso.wow-ui-sim.forever"
+          fi
+          app="dist/${app_name}.app"
           contents="${app}/Contents"
 
           # Generate the source PNG for the iconset (also writes the ICO,
@@ -239,7 +260,7 @@ jobs:
           cp -R Interface/AddOns/Admin Interface/AddOns/SimCommands Interface/AddOns/TestFramework \
             "${contents}/Resources/Interface/AddOns/"
 
-          if [[ "${{ matrix.features }}" == *client-retail* ]]; then
+          if [[ "${{ matrix.features }}" == *client-retail* || "${{ matrix.features }}" == *client-wowforever* ]]; then
             python3 "${GITHUB_WORKSPACE}/scripts/bundle-macos-icu.py" \
               "${contents}/MacOS/wow-sim" "$(brew --prefix icu4c)/lib"
           fi
@@ -255,9 +276,9 @@ jobs:
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
           <plist version="1.0">
           <dict>
-            <key>CFBundleName</key>            <string>WoW Sim</string>
-            <key>CFBundleDisplayName</key>     <string>WoW Sim</string>
-            <key>CFBundleIdentifier</key>      <string>net.osso.wow-ui-sim</string>
+            <key>CFBundleName</key>            <string>${app_name}</string>
+            <key>CFBundleDisplayName</key>     <string>${app_name}</string>
+            <key>CFBundleIdentifier</key>      <string>${bundle_id}</string>
             <key>CFBundleVersion</key>         <string>${version}</string>
             <key>CFBundleShortVersionString</key><string>${version}</string>
             <key>CFBundleExecutable</key>      <string>wow-sim</string>
@@ -293,7 +314,7 @@ jobs:
 
           dmg="dist/${name}.dmg"
           rm -f "${dmg}"
-          hdiutil create -volname "WoW Sim ${version}" \
+          hdiutil create -volname "${app_name} ${version}" \
             -srcfolder "${stage}" \
             -ov -format UDZO \
             "${dmg}"
@@ -324,7 +345,9 @@ jobs:
 
           Compress-Archive -Path $root -DestinationPath "dist\$name.zip" -Force
           $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
-          & $iscc ".\installer\wow-ui-sim.iss" `
+          $profileArgs = @()
+          if ("${{ matrix.features }}" -like "*client-wowforever*") { $profileArgs += "/DForever" }
+          & $iscc ".\installer\wow-ui-sim.iss" @profileArgs `
             "/DAppVersion=$env:RELEASE_REF" `
             "/DSourceDir=$((Resolve-Path $root).Path)" `
             "/DOutputDir=$((Resolve-Path dist).Path)" `
