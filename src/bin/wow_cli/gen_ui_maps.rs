@@ -123,6 +123,17 @@ fn parse_ui_map_row(cols: &Columns, line: &str) -> Option<(u32, String)> {
     Some((id, value))
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn malformed_parent_is_rejected() {
+        let columns = find_columns("Name_lang,ID,ParentUiMapID,Flags,Type").unwrap();
+        assert!(parse_ui_map_row(&columns, "Dornogal,2339,invalid,0,3").is_none());
+    }
+}
+
 fn write_header(out: &mut File) -> std::io::Result<()> {
     writeln!(out, "//! Auto-generated UiMap data from the WoW UiMap CSV.")?;
     writeln!(
