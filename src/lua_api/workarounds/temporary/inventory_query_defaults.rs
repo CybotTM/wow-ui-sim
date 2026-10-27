@@ -44,6 +44,23 @@ mod tests {
     use crate::lua_api::WowLuaEnv;
 
     #[test]
+    fn installs_unmodeled_inventory_items_for_slot_default() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+
+        let function_type: String = env
+            .eval("return type(GetInventoryItemsForSlot)")
+            .expect("inventory slot lookup type probe should run");
+        assert_eq!(function_type, "function");
+
+        if crate::client_profile::ACTIVE != crate::client_profile::ClientProfile::Wrath {
+            let is_nil: bool = env
+                .eval("return GetInventoryItemsForSlot(1) == nil")
+                .expect("inventory slot lookup fallback probe should run");
+            assert!(is_nil);
+        }
+    }
+
+    #[test]
     fn installs_unmodeled_profession_bag_default() {
         let env = WowLuaEnv::new().expect("lua env should initialize");
 
@@ -57,6 +74,24 @@ mod tests {
             .expect("profession bag fallback probe should run");
 
         assert_eq!(result, ("function".to_string(), false));
+    }
+
+    #[test]
+    fn preserves_existing_inventory_items_for_slot_function() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+        env.exec("function GetInventoryItemsForSlot() return 'existing' end")
+            .expect("fixture should install existing inventory slot lookup");
+
+        {
+            let mut lua = env.lua.borrow_mut();
+            super::apply_bootstrap(&mut lua).expect("inventory query defaults should apply");
+        }
+
+        let value: String = env
+            .eval("return GetInventoryItemsForSlot(1)")
+            .expect("inventory slot lookup preservation probe should run");
+
+        assert_eq!(value, "existing");
     }
 
     #[test]
