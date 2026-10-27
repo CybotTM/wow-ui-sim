@@ -298,7 +298,7 @@ fn c_container_id_to_inventory_id(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
-fn c_container_get_bag_name(state: &mut LuaState) -> LuaResult<u32> {
+pub(crate) fn c_container_get_bag_name(state: &mut LuaState) -> LuaResult<u32> {
     let bag = i32::from_stack(state, 1)?;
     let name = borrow_state(state)?
         .bag_info

@@ -268,6 +268,10 @@ Historical utility-command replay requires `--features tools`; see the [replay n
 
 [Source findings](investigations/compile-bin-lockwatch.md) and [contract](../specs/integration-bin-selection.md): opt-in utility bins preserve wow-sim test consumers and operational builders. Static-only; no slot/build/CPU proof.
 
+## [2026-10-25] design | Core crate boundaries
+
+[Widget, decoding and GPU boundaries](design/core-crate-boundaries.md) record profile-neutral leaves, root re-exports and retained font/asset composition. Static staging only; seven-profile and compile-CPU proof await a slot.
+
 ## [2026-10-24] design | Generated data crate boundary
 
 [Crate split](design/generated-data-crates.md) preserves the root facade and selected tables while isolating common catalogs from profile features. Same-slot touched-root rebuild 413.80→258.52 s; peak child RSS6,189,056→2,717,272 KiB. Retail/Wrath checks and94 bounded Rust tests pass; all23 generated files retain their hashes. Single warm-dependency samples, not a cold-build or full-profile claim.
@@ -565,6 +569,10 @@ mapping remains unknown. Producer and tests staged only; no build/slot/runtime p
 ## [2026-10-16] source | Retail 70448 profile update
 
 [Client profile checkpoint](systems/client-profiles.md#retail-70448-source-and-producer-update--october-16-2026) links exact source identity, private-cache acquisition, public API epoch and producer regressions. Bounded runtime/preservation acceptance: startup `[]`, 265/265 preservation, 139 newly enabled epoch cases and 23 atlas/aura controls; native/all-profile/full-suite acceptance remains separate.
+
+## [2026-10-16] performance | Startup primitive redundancy
+
+[Investigation](investigations/startup-primitive-redundancy.md) records separate layout-cycle and UI-string lookup removals, Retail 42/42 shared before/after preservation plus six after-only unit cases, and three captures per seal. Syncthing contention, variance, sample loss and attribution limits prevent a speedup claim; SetText optimization stays deferred. No all-profile acceptance.
 
 ## [2026-10-16] documentation | Container, message history and transform label producers
 

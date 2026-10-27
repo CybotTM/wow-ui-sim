@@ -17,16 +17,16 @@ struct ThreeSliceParams<'a> {
     path: Option<&'a str>,
 }
 
-pub(crate) struct ThreeSlicePathParams<'a> {
-    pub(crate) bounds: Rectangle,
-    pub(crate) left_cap_width: f32,
-    pub(crate) right_cap_width: f32,
-    pub(crate) path: &'a str,
-    pub(crate) tex_width: f32,
-    pub(crate) color: [f32; 4],
-    pub(crate) blend_mode: BlendMode,
-    pub(crate) v_top: f32,
-    pub(crate) v_bottom: f32,
+pub struct ThreeSlicePathParams<'a> {
+    pub bounds: Rectangle,
+    pub left_cap_width: f32,
+    pub right_cap_width: f32,
+    pub path: &'a str,
+    pub tex_width: f32,
+    pub color: [f32; 4],
+    pub blend_mode: BlendMode,
+    pub v_top: f32,
+    pub v_bottom: f32,
 }
 
 struct ThreeSliceLayout {
@@ -73,7 +73,7 @@ impl QuadBatch {
     }
 
     /// Push a horizontal 3-slice texture with custom blend mode.
-    pub(crate) fn push_three_slice_h_path_blend(&mut self, params: ThreeSlicePathParams<'_>) {
+    pub fn push_three_slice_h_path_blend(&mut self, params: ThreeSlicePathParams<'_>) {
         if params.bounds.width <= params.left_cap_width + params.right_cap_width {
             self.push_textured_path(params.bounds, params.path, params.color, params.blend_mode);
             return;

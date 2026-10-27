@@ -1,0 +1,10 @@
+[package]
+name = "sim-texture"
+version = "0.1.0"
+edition = "2024"
+license = "GPL-3.0-only"
+
+[dependencies]
+image = "0.25"
+image-blp = "1"
+dirs = "5.0"

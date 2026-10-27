@@ -28,10 +28,9 @@ unknown.
   `Blizzard_APIDocumentationGenerated/PaperDollInfoDocumentation.lua:11–18`
   (PTR12.1.7.70493, Forever1.60.1.70532). PaperDoll hides AmmoSlot only when
   false; true continues initialization but does not Show a previously hidden
-  slot. No equipment/class/weapon mapping, `UnitUsesAmmo` equivalence, startup
-  seed, native default or automatic event is inferred. Removing Forever's
-  implicit false can expose stock startup errors; PTR's missing-function errors
-  become named missing-input errors, not clean startup.
+  slot. The Forever stock scenario starts with `Some(false)` as a best guess;
+  PTR remains unset. This is not native proof. No equipment/class/weapon mapping,
+  `UnitUsesAmmo` equivalence or automatic event is inferred.
 - Group-buff rows contain non-null numeric `spellID` and `visualValue` fields;
   `visualValue` uses the documented `VisualAlertType` enum. Linked-rank expansion
   requires host-supplied rows; no spell-rank policy is inferred.
@@ -60,8 +59,9 @@ unknown.
   entry without writing saved CVars. `GetCVar`/`GetCVarBool` and their namespace
   counterparts see the temporary scalar before the saved/base value. This does
   not establish native mutation events, validation or other temporary-CVar APIs.
-- `C_Spell.GetTargetSpellID()` requires a supplied numeric identifier. An absent
-  input is explicit native-unknown, not an invented no-target sentinel.
+- `C_Spell.GetTargetSpellID()` reads a supplied numeric identifier. The stock
+  idle scenario supplies zero as a best guess, not a native observation. An
+  explicitly unset input raises the simulator's missing-input error.
 
 ## Events
 
@@ -77,13 +77,12 @@ adds registration support, not native event-generation policy.
 
 `C_AccountServices.GetPreferredDatacenterLocalities` is consumed by the selected
 GuildPreferredPlaySettings source but has no declaration in this build's generated
-API documentation. Its native contract remains unconfirmed. Do not infer a
-catalog or native return from that consumer alone.
+API documentation. Its native contract remains unconfirmed. The stock scenario
+returns two empty parallel arrays as a best guess, not a native observation.
+No locality catalog is inferred.
 
-Evidence disposition: **laptop aso source-only audit 2026-10-25: native-unknown**
-for both locality registration/returns and the idle target-spell return. Preserve
-these as classified baseline residue; do not invent an idle target ID or locality
-catalog to obtain a clean startup.
+The laptop aso source-only audit on 2026-10-25 classified locality returns and
+idle target-spell return as native-unknown.
 
 ## Excluded housing UI
 

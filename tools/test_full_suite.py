@@ -34,577 +34,760 @@ def wait_for(path, process):
         time.sleep(0.01)
 
 
-class FullSuiteWorkerTests(unittest.TestCase):
-    def setUp(self):
-        self.temp = tempfile.TemporaryDirectory()
-        self.addCleanup(self.temp.cleanup)
-        self.root = Path(self.temp.name)
-        self.bin = self.root / "bin"
-        self.bin.mkdir()
-        self.checkout = self.root / "Projects/wow/full-suite-checkout"
-        (self.checkout / ".git").mkdir(parents=True)
-        (self.root / "Projects/wow/wow-ui-sim").mkdir()
-        self.results = self.root / "Projects/wow/full-suite-results"
-        self.results.mkdir()
-        self.target_dir = self.root / ".cache/wow-ui-sim-targets/slot-2"
-        self.target_dir.mkdir(parents=True)
-        self.wrapper = self.bin / "build-lock"
-        self.lock_path = self.root / "builder.lock"
-        write_executable(
-            self.bin / "git",
-            "import json, os, pathlib, sys\n"
-            "root = pathlib.Path(os.environ['HOME'])\n"
-            "with (root / (os.environ['WORKER'] + '.git')).open('a') as log:\n"
-            "    log.write(json.dumps({'argv': sys.argv[1:], 'cwd': os.getcwd()}) + '\\n')\n"
-            "if sys.argv[1] == 'rev-parse': print('sandbox-sha')\n",
-        )
-        write_executable(
-            self.wrapper,
-            "import fcntl, os, pathlib, subprocess, sys\n"
-            "root = pathlib.Path(os.environ['HOME'])\n"
-            "with (root / 'builder.lock').open('w') as lock:\n"
-            "    fcntl.flock(lock, fcntl.LOCK_EX)\n"
-            "    sys.exit(subprocess.call(sys.argv[1:]))\n",
-        )
-        write_executable(
-            self.bin / "cargo",
-            "import json, os, pathlib, sys, time\n"
-            "root = pathlib.Path(os.environ['HOME'])\n"
-            "name = 'lib' if '--lib' in sys.argv else sys.argv[sys.argv.index('--test') + 1]\n"
-            "prefix = os.environ['WORKER'] + '.' + name\n"
-            "(root / (prefix + '.started')).write_text(json.dumps({\n"
-            "    'argv': sys.argv[1:], 'jobs': os.environ.get('CARGO_BUILD_JOBS'),\n"
-            "    'cwd': os.getcwd(), 'target_dir': os.environ.get('CARGO_TARGET_DIR'),\n"
-            "    'fixture_capacity': os.environ.get('WOW_SIM_TIMEOUT_FIXTURE_CAPACITY')}))\n"
-            "deadline = time.monotonic() + 5\n"
-            "while not (root / (prefix + '.release')).exists():\n"
-            "    if time.monotonic() > deadline: sys.exit(98)\n"
-            "    time.sleep(0.01)\n"
-            "print(name + ' stdout retained')\n"
-            "print(name + ' stderr retained', file=sys.stderr)\n"
-            "if os.environ['FAIL_SUITES'] == '1':\n"
-            "    if name == 'prefork_full_ui':\n"
-            "        print('test sandbox::prefork_failure ... FAILED')\n"
-            "        sys.exit(7)\n"
-            "    print('FAIL [0.01s] integration sandbox::' + name + '_failure', file=sys.stderr)\n"
-            "    sys.exit(8)\n",
-        )
-        self.harness = self.root / "worker.py"
-        self.harness.write_text(
-            "import os, pathlib, runpy, sys\n"
-            f"worker = runpy.run_path({str(RUNNER)!r})\n"
-            # Sandbox the obsolete dependency if a regression reintroduces it.
-            "worker['run'].__globals__['BUILD_LOCK'] = pathlib.Path(sys.argv[1])\n"
-            "(pathlib.Path(os.environ['HOME']) / (os.environ['WORKER'] + '.ready')).touch()\n"
-            f"worker['run']('sandbox-ref', 2, {str(self.target_dir)!r})\n"
-        )
-        self.env = dict(
-            os.environ,
-            HOME=str(self.root),
-            PATH=f"{self.bin}{os.pathsep}{os.environ['PATH']}",
-            FULL_SUITE_JOBS="3",
-            CARGO_BUILD_JOBS="29",
-            CARGO_TARGET_DIR=str(self.root / "unapproved-inherited-target"),
-            FAIL_SUITES="0",
-        )
-
-    def start_worker(self, name="first", profile=None):
-        if profile is not None:
-            self.harness.write_text(
-                "import runpy\n"
-                f"worker = runpy.run_path({str(RUNNER)!r})\n"
-                f"worker['run']('sandbox-ref', 2, {str(self.target_dir)!r}, profile={profile!r})\n"
-            )
-        process = subprocess.Popen(
-            [sys.executable, str(self.harness), str(self.wrapper)],
-            env=dict(self.env, WORKER=name),
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-            start_new_session=True,
-        )
-        self.addCleanup(self.stop_worker, process)
-        return process
-
+class CertifiedSuiteTests(unittest.TestCase):
     @staticmethod
     def stop_worker(process):
         if process.poll() is None:
             os.killpg(process.pid, signal.SIGKILL)
         process.communicate(timeout=5)
 
-    def assert_controller_locked(self):
-        with (self.results / ".lock").open("w") as lock:
-            with self.assertRaises(BlockingIOError):
-                fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.home = Path(self.temp.name)
+        self.bin = self.home / 'bin'
+        self.bin.mkdir()
+        self.repo = self.home / 'Projects/wow/wow-ui-sim'
+        self.repo.mkdir(parents=True)
+        self.slot = self.home / '.cache/wow-ui-sim-targets/slot-2'
+        self.slot.mkdir(parents=True)
+        capacity = self.home / '.worktrees/logs/capacity.sh'
+        capacity.parent.mkdir(parents=True)
+        write_executable(capacity, "print('agents | ADD: available')\n")
+        cvars = self.home / '.local/share/wow-sim/cvars.json'
+        cvars.parent.mkdir(parents=True)
+        cvars.write_text('{}')
+        self.env = dict(os.environ, HOME=str(self.home),
+                        PATH=f"{self.bin}{os.pathsep}{os.environ['PATH']}",
+                        GIT_CONFIG_NOSYSTEM='1')
+        def git(*args):
+            return subprocess.run(['git', *args], cwd=self.repo, env=self.env,
+                                  check=True, capture_output=True, text=True).stdout.strip()
+        git('init', '-q')
+        git('config', 'user.name', 'Test')
+        git('config', 'user.email', 'test@example.invalid')
+        (self.repo / 'source').write_text('frozen source\n')
+        git('add', 'source')
+        git('commit', '-qm', 'fixture')
+        self.sha = git('rev-parse', 'HEAD')
+        git('remote', 'add', 'origin', str(self.repo))
+        write_executable(self.bin / 'cargo',
+                         "import sys\nsys.exit('unexpected cargo invocation')\n")
+        write_executable(self.bin / 'systemctl', "print('LoadState=not-found')\n")
+        write_executable(self.bin / 'slot-build.py',
+                         "import json, os, pathlib, sys\n"
+                         "root = pathlib.Path(os.environ['HOME'])\n"
+                         "(root / 'slot-argv.json').write_text(json.dumps(sys.argv[1:]))\n"
+                         "print('guard rejected: owner mismatch', file=sys.stderr)\n"
+                         "sys.exit(1)\n")
 
-    def finish_scopes(self, process, worker="first", profile="retail"):
-        expected_argv = {
-            "integration": [
-                "nextest",
-                "run",
-                "-j2",
-                "--test",
-                "integration",
-                "--no-fail-fast",
-                "--test-threads",
-                "3",
-                "--offline",
-                "--locked",
-            ],
-            "prefork_full_ui": [
-                "test",
-                "-j2",
-                "--test",
-                "prefork_full_ui",
-                "--offline",
-                "--locked",
-            ],
-            "lib": [
-                "nextest",
-                "run",
-                "-j2",
-                "--lib",
-                "--no-fail-fast",
-                "--test-threads",
-                "3",
-                "--offline",
-                "--locked",
-            ],
-        }
-        scopes = SCOPES if profile in ("retail", "mists") else ("integration", "lib")
-        for name in scopes:
-            if profile != "retail":
-                expected_argv[name][-2:-2] = [
-                    "--no-default-features", "--features", f"sound,gui,casc,client-{profile}"
-                ]
-            started = self.root / f"{worker}.{name}.started"
-            wait_for(started, process)
-            self.assert_controller_locked()
-            record = json.loads(started.read_text())
-            self.assertEqual(record["argv"], expected_argv[name])
-            self.assertEqual(record["jobs"], "2")
-            self.assertEqual(record["target_dir"], str(self.target_dir))
-            self.assertEqual(record["cwd"], str(self.checkout))
-            (self.root / f"{worker}.{name}.release").touch()
-        stdout, stderr = process.communicate(timeout=5)
+    def status_output(self, ref=None):
+        command = [sys.executable, str(RUNNER), 'status']
+        if ref:
+            command.append(ref)
+        return subprocess.run(command, env=self.env, capture_output=True,
+                              text=True, check=True).stdout
+
+    def status_record(self, sha, name, status, phase, timestamp, mtime):
+        results = self.home / 'Projects/wow/full-suite-results'
+        results.mkdir(parents=True, exist_ok=True)
+        record = {'sha': sha, 'profile': 'ptr', 'status': status,
+                  'finished': timestamp, 'steps': {phase: {'status': status}}}
+        path = results / name
+        path.write_text(json.dumps(record))
+        os.utime(path, (mtime, mtime))
+
+    def test_status_newer_failure_and_different_canonical(self):
+        old = 'a' * 40
+        self.status_record(old, f'{old}-ptr.json', 'PASSED', 'lib', 'old-time', 100)
+        self.status_record(self.sha, f'{self.sha}-ptr-attempt-200.json',
+                           'FAILED', 'build', 'new-time', 200)
+        output = self.status_output()
+        self.assertIn('"status": "FAILED"', output)
+        self.assertIn('"phase": "build"', output)
+        self.assertIn('"finished": "new-time"', output)
+        self.assertIn(old, output)
+        self.assertIn('"status": "PASSED"', output)
+        self.assertNotIn('no result yet', output)
+
+    def test_status_failed_attempt_only_with_and_without_ref(self):
+        self.status_record(self.sha, f'{self.sha}-ptr-attempt-200.json',
+                           'FAILED', 'build', 'new-time', 200)
+        for ref in (None, self.sha):
+            with self.subTest(ref=ref):
+                output = self.status_output(ref)
+                self.assertIn('"status": "FAILED"', output)
+                self.assertIn('"phase": "build"', output)
+                self.assertIn('"finished": "new-time"', output)
+                self.assertNotIn('no result yet', output)
+
+    def test_status_canonical_only(self):
+        self.status_record(self.sha, f'{self.sha}-ptr.json',
+                           'PASSED', 'lib', 'old-time', 100)
+        for ref in (None, self.sha):
+            with self.subTest(ref=ref):
+                output = self.status_output(ref)
+                self.assertIn('"status": "PASSED"', output)
+                self.assertIn('"finished": "old-time"', output)
+                self.assertNotIn('no result yet', output)
+
+    def test_status_failed_rerun_shows_same_sha_canonical(self):
+        self.status_record(self.sha, f'{self.sha}-ptr.json', 'PASSED', 'lib', 'old-time', 100)
+        self.status_record(self.sha, f'{self.sha}-ptr-attempt-200.json',
+                           'FAILED', 'build', 'new-time', 200)
+        for ref in (None, self.sha):
+            with self.subTest(ref=ref):
+                output = self.status_output(ref)
+                self.assertIn('"status": "FAILED"', output)
+                self.assertIn('"phase": "build"', output)
+                self.assertIn('"status": "PASSED"', output)
+                self.assertIn('"finished": "old-time"', output)
+
+    def latest_attempt(self):
+        results = self.home / "Projects/wow/full-suite-results"
+        return max(results.glob(f"{self.sha}-ptr-attempt-*.json"), key=lambda p: p.stat().st_mtime_ns)
+
+    def test_failed_launcher_with_unknown_unit_retains_owner(self):
+        write_executable(self.bin / 'systemctl', "import sys\nsys.exit(1)\n")
+        process = subprocess.run([sys.executable, str(RUNNER), 'run', self.sha,
+                                  '--profile', 'ptr', '--target-dir', str(self.slot)],
+                                 env=self.env, capture_output=True, text=True, timeout=10)
+        self.assertNotEqual(process.returncode, 0)
+        self.assertTrue((self.slot / '.owner').exists())
+        argv = json.loads((self.home / 'slot-argv.json').read_text())
+        unit = argv[argv.index('--unit') + 1]
+        record = json.loads(self.latest_attempt().read_text())
+        self.assertEqual(record['status'], 'FAILED')
+        self.assertIn(f'slot 2 retained: unit {unit}', record['error'])
+
+    def test_failed_test_launcher_with_unknown_unit_retains_owner(self):
+        write_executable(self.bin / 'slot-build.py',
+                         "import json, os, pathlib, sys\n"
+                         "root = pathlib.Path(os.environ['HOME'])\n"
+                         "unit = sys.argv[sys.argv.index('--unit') + 1]\n"
+                         "p = root / '.cache/wow-ui-sim-targets/slot-2/receipts' / (unit + '.json')\n"
+                         "p.parent.mkdir(exist_ok=True)\n"
+                         "p.write_text(json.dumps({'result': 'success', 'returncode': 0, 'reported_artifacts': [{'executable': '/unused', 'profile': {'test': True}, 'target': {'name': 'integration', 'kind': ['test']}}]}))\n")
+        write_executable(self.bin / 'systemd-run', "import sys\nsys.exit(1)\n")
+        write_executable(self.bin / 'systemctl',
+                         "import sys\n"
+                         "sys.exit(1) if 'full-suite-test-' in ' '.join(sys.argv) else print('ActiveState=inactive\\nResult=success')\n")
+        process = subprocess.run([sys.executable, str(RUNNER), 'run', self.sha,
+                                  '--profile', 'ptr', '--target-dir', str(self.slot)],
+                                 env=self.env, capture_output=True, text=True, timeout=10)
+        self.assertNotEqual(process.returncode, 0)
+        self.assertTrue((self.slot / '.owner').exists())
+        record = json.loads(self.latest_attempt().read_text())
+        self.assertEqual(record['status'], 'FAILED')
+        self.assertIn('slot 2 retained: unit full-suite-test-', record['error'])
+
+    def test_failed_launcher_stops_active_unit_before_releasing_owner(self):
+        write_executable(self.bin / 'systemctl',
+                         "import os, pathlib, sys\n"
+                         "p = pathlib.Path(os.environ['HOME']) / 'stopped'\n"
+                         "if 'stop' in sys.argv: p.touch()\n"
+                         "elif p.exists(): print('ActiveState=inactive')\n"
+                         "else: print('ActiveState=active')\n")
+        process = subprocess.run([sys.executable, str(RUNNER), 'run', self.sha,
+                                  '--profile', 'ptr', '--target-dir', str(self.slot)],
+                                 env=self.env, capture_output=True, text=True, timeout=10)
+        self.assertNotEqual(process.returncode, 0, process.stderr)
+        self.assertTrue((self.home / 'stopped').exists())
+        self.assertFalse((self.slot / '.owner').exists())
+
+    def test_guard_failure_receipt_contains_all_phase_records(self):
+        write_executable(self.bin / 'systemctl', "print('LoadState=not-found')\n")
+        subprocess.run([sys.executable, str(RUNNER), 'run', self.sha, '--profile', 'ptr',
+                        '--target-dir', str(self.slot)], env=self.env, capture_output=True, text=True, timeout=10)
+        record = json.loads(self.latest_attempt().read_text())
+        self.assertEqual(record['steps']['build']['status'], 'FAILED')
+        self.assertEqual(record['steps']['integration']['status'], 'not_run')
+        self.assertEqual(record['steps']['prefork']['status'], 'not_applicable')
+        self.assertEqual(record['steps']['lib']['status'], 'not_run')
+        self.assertEqual(record['failures'], {'integration': [], 'lib': []})
+
+    def test_failed_master_run_preserves_baseline_and_linked_passed_result(self):
+        write_executable(self.bin / 'systemctl', "print('LoadState=not-found')\n")
+        results = self.home / 'Projects/wow/full-suite-results'
+        results.mkdir(parents=True)
+        prior = results / ('a' * 40 + '-ptr.json')
+        content = json.dumps({'sha': 'a' * 40, 'profile': 'ptr', 'status': 'PASSED', 'failures': {'integration': ['old']}})
+        prior.write_text(content)
+        (results / 'master-latest-ptr.json').symlink_to(prior.name)
+        subprocess.run([sys.executable, str(RUNNER), 'run', 'master', '--profile', 'ptr',
+                        '--target-dir', str(self.slot)], env=self.env, capture_output=True, text=True, timeout=10)
+        self.assertEqual(prior.read_text(), content)
+        self.assertEqual((results / 'master-latest-ptr.json').read_text(), content)
+        record = json.loads(self.latest_attempt().read_text())
+        self.assertEqual(record['status'], 'FAILED')
+
+    def test_failed_same_sha_rerun_preserves_pass_and_records_attempt(self):
+        results = self.home / 'Projects/wow/full-suite-results'
+        results.mkdir(parents=True)
+        prior = results / f'{self.sha}-ptr.json'
+        content = json.dumps({'sha': self.sha, 'profile': 'ptr', 'status': 'PASSED', 'failures': {}})
+        prior.write_text(content)
+        previous_log = results / f'{self.sha}-ptr.log'
+        previous_log.write_text('passed log\n')
+        process = subprocess.run([sys.executable, str(RUNNER), 'run', self.sha, '--profile', 'ptr',
+                                  '--target-dir', str(self.slot)], env=self.env, capture_output=True, text=True, timeout=10)
+        self.assertNotEqual(process.returncode, 0, process.stderr)
+        self.assertEqual(prior.read_text(), content)
+        self.assertEqual(previous_log.read_text(), 'passed log\n')
+        attempts = list(results.glob(f'{self.sha}-ptr-attempt-*.json'))
+        self.assertEqual(len(attempts), 1)
+        self.assertEqual(json.loads(attempts[0].read_text())['status'], 'FAILED')
+
+    def test_build_log_io_failure_checks_unit_before_releasing_owner(self):
+        write_executable(self.bin / 'slot-build.py', "print('launched')\n")
+        write_executable(self.bin / 'systemctl',
+                         "import os, pathlib, sys\n"
+                         "root = pathlib.Path(os.environ['HOME'])\n"
+                         "if os.environ.get('UNKNOWN_UNIT'): sys.exit(1)\n"
+                         "if 'stop' in sys.argv:\n"
+                         "    (root / 'owner-at-stop').write_text(str((root / '.cache/wow-ui-sim-targets/slot-2/.owner').exists()))\n"
+                         "    (root / 'stopped').touch()\n"
+                         "elif (root / 'stopped').exists(): print('ActiveState=inactive')\n"
+                         "else: print('ActiveState=active')\n")
+        script = self.home / 'inject.py'
+        script.write_text('''import builtins, importlib.util, sys
+spec = importlib.util.spec_from_file_location("runner", sys.argv[1])
+runner = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(runner)
+original = builtins.open
+class Log:
+    def __init__(self, stream): self.stream, self.failed = stream, False
+    def __enter__(self): return self
+    def __exit__(self, *args): return self.stream.__exit__(*args)
+    def write(self, value):
+        if sys.argv[4] == "write" and value.startswith("===== build:") and not self.failed:
+            self.failed = True
+            raise OSError("injected write failure")
+        return self.stream.write(value)
+    def flush(self):
+        if sys.argv[4] == "flush" and not self.failed:
+            self.failed = True
+            raise OSError("injected flush failure")
+        return self.stream.flush()
+def injected(path, *args, **kwargs):
+    stream = original(path, *args, **kwargs)
+    return Log(stream) if str(path).endswith(".log") else stream
+builtins.open = injected
+sys.exit(runner.run(sys.argv[2], 1, sys.argv[3], "ptr"))
+''')
+        for failure in ('write', 'flush'):
+            with self.subTest(failure=failure):
+                for name in ('stopped', 'owner-at-stop'):
+                    (self.home / name).unlink(missing_ok=True)
+                process = subprocess.run([sys.executable, str(script), str(RUNNER), self.sha, str(self.slot), failure],
+                                         env=self.env, capture_output=True, text=True, timeout=10)
+                self.assertNotEqual(process.returncode, 0, process.stderr)
+                self.assertTrue((self.home / 'owner-at-stop').exists(), 'unit was not stopped before release')
+                self.assertEqual((self.home / 'owner-at-stop').read_text(), 'True')
+                self.assertFalse((self.slot / '.owner').exists())
+        process = subprocess.run([sys.executable, str(script), str(RUNNER), self.sha, str(self.slot), 'write'],
+                                 env=dict(self.env, UNKNOWN_UNIT='1'), capture_output=True, text=True, timeout=10)
+        self.assertNotEqual(process.returncode, 0)
+        self.assertTrue((self.slot / '.owner').exists())
+        record = json.loads(self.latest_attempt().read_text())
+        self.assertIn('state unknown', record['error'])
+
+    def test_log_open_and_close_failures_record_receipts(self):
+        script = self.home / 'log-boundaries.py'
+        script.write_text('''import builtins, importlib.util, sys
+spec = importlib.util.spec_from_file_location("runner", sys.argv[1])
+runner = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(runner)
+original = builtins.open
+class Log:
+    def __init__(self, stream): self.stream = stream
+    def __enter__(self): return self.stream
+    def __exit__(self, *args):
+        self.stream.close()
+        raise OSError("injected log close failure")
+def injected(path, *args, **kwargs):
+    if str(path).endswith(".log"):
+        if sys.argv[4] == "open": raise OSError("injected log open failure")
+        return Log(original(path, *args, **kwargs))
+    return original(path, *args, **kwargs)
+builtins.open = injected
+sys.exit(runner.run(sys.argv[2], 1, sys.argv[3], "ptr"))
+''')
+        for failure in ('open', 'close'):
+            with self.subTest(failure=failure):
+                process = subprocess.run([sys.executable, str(script), str(RUNNER), self.sha, str(self.slot), failure],
+                                         env=self.env, capture_output=True, text=True, timeout=10)
+                record = json.loads(self.latest_attempt().read_text())
+                self.assertEqual(record['status'], 'FAILED')
+                self.assertIn(f'injected log {failure} failure', json.dumps(record))
+                self.assertFalse((self.slot / '.owner').exists())
+
+    def run_commit_point_fixture(self, fault):
+        results = self.home / 'Projects/wow/full-suite-results'
+        results.mkdir(parents=True, exist_ok=True)
+        canonical = results / f'{self.sha}-ptr.json'
+        baseline = results / 'master-latest-ptr.json'
+        canonical.write_bytes(json.dumps({'sha': self.sha, 'status': 'PASSED', 'failures': {}}).encode())
+        baseline.write_bytes(b'{"status":"PASSED","failures":{"integration":["prior"]}}\n')
+        if fault == 'baseline-read':
+            baseline.write_bytes(b'{malformed')
+        before = canonical.read_bytes(), baseline.read_bytes()
+        script = self.home / 'commit-point-fault.py'
+        script.write_text('''import importlib.util, sys
+spec = importlib.util.spec_from_file_location("runner", sys.argv[1])
+runner = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(runner)
+runner.build = lambda *args: {"reported_artifacts": [{"executable": "/unused", "profile": {"test": True}, "target": {"name": name, "kind": [kind]}} for name, kind in [("integration", "test"), ("wow_ui_sim", "lib")]]}
+runner.run_step = lambda *args: ({"exit": 0}, "")
+runner.confirm_terminated = lambda *args: None
+original = runner.Path.replace
+def injected(path, target):
+    fault = sys.argv[4]
+    if fault == "baseline-write" and target.name == "master-latest-ptr.json":
+        raise OSError("injected baseline promotion failure")
+    if fault == "canonical-write" and target.name == sys.argv[2] + "-ptr.json":
+        raise OSError("injected canonical promotion failure")
+    return original(path, target)
+runner.Path.replace = injected
+sys.exit(runner.run("master", 1, sys.argv[3], "ptr"))
+''')
+        process = subprocess.run([sys.executable, str(script), str(RUNNER), self.sha, str(self.slot), fault],
+                                 env=self.env, capture_output=True, text=True, timeout=10)
+        attempts = list(results.glob(f'{self.sha}-ptr-attempt-*.json'))
+        return process, canonical, baseline, before, attempts
+
+    def test_guard_rejection_exits_nonzero_with_failed_attempt(self):
+        results = self.home / 'Projects/wow/full-suite-results'
+        results.mkdir(parents=True)
+        (results / f'{self.sha}-ptr.json').write_text(json.dumps({'status': 'PASSED', 'failures': {}}))
+        process = subprocess.run([sys.executable, str(RUNNER), 'run', self.sha, '--profile', 'ptr',
+                                  '--target-dir', str(self.slot)], env=self.env, capture_output=True, text=True, timeout=10)
+        attempts = list(results.glob(f'{self.sha}-ptr-attempt-*.json'))
+        self.assertEqual(len(attempts), 1, process.stderr)
+        self.assertEqual(json.loads(attempts[0].read_text())['status'], 'FAILED')
+        self.assertNotEqual(process.returncode, 0)
+
+    def test_baseline_promotion_failure_preserves_both_prior_results(self):
+        process, canonical, baseline, before, attempts = self.run_commit_point_fixture('baseline-write')
+        self.assertNotEqual(process.returncode, 0)
+        self.assertEqual(canonical.read_bytes(), before[0])
+        self.assertEqual(baseline.read_bytes(), before[1])
+        self.assertEqual(len(attempts), 1)
+        self.assertEqual(json.loads(attempts[0].read_text())['status'], 'FAILED')
+
+    def test_malformed_baseline_after_claim_records_failed_attempt(self):
+        process, canonical, baseline, before, attempts = self.run_commit_point_fixture('baseline-read')
+        self.assertNotEqual(process.returncode, 0)
+        self.assertEqual(len(attempts), 1, process.stderr)
+        self.assertEqual(json.loads(attempts[0].read_text())['status'], 'FAILED')
+
+    def test_canonical_promotion_failure_records_failed_attempt(self):
+        process, canonical, baseline, before, attempts = self.run_commit_point_fixture('canonical-write')
+        self.assertNotEqual(process.returncode, 0)
+        self.assertEqual(canonical.read_bytes(), before[0])
+        self.assertEqual(baseline.read_bytes(), before[1])
+        self.assertEqual(len(attempts), 1, process.stderr)
+        self.assertEqual(json.loads(attempts[0].read_text())['status'], 'FAILED')
+
+    def test_release_failure_preserves_previous_pass(self):
+        results = self.home / 'Projects/wow/full-suite-results'
+        results.mkdir(parents=True)
+        canonical = results / f'{self.sha}-ptr.json'
+        passed = json.dumps({'sha': self.sha, 'profile': 'ptr', 'status': 'PASSED', 'failures': {}})
+        canonical.write_text(passed)
+        script = self.home / 'release-failure.py'
+        script.write_text('''import importlib.util, sys
+spec = importlib.util.spec_from_file_location("runner", sys.argv[1])
+runner = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(runner)
+runner.build = lambda *args: {"reported_artifacts": [{"executable": "/unused", "profile": {"test": True}, "target": {"name": name, "kind": [kind]}} for name, kind in [("integration", "test"), ("wow_ui_sim", "lib")]]}
+runner.run_step = lambda *args: ({"exit": 0}, "")
+runner.confirm_terminated = lambda *args: None
+def fail(*args): raise OSError("injected release failure")
+runner.release_slot = fail
+sys.exit(runner.run(sys.argv[2], 1, sys.argv[3], "ptr"))
+''')
+        process = subprocess.run([sys.executable, str(script), str(RUNNER), self.sha, str(self.slot)],
+                                 env=self.env, capture_output=True, text=True, timeout=10)
+        self.assertEqual(canonical.read_text(), passed, process.stderr)
+        attempts = list(results.glob(f'{self.sha}-ptr-attempt-*.json'))
+        self.assertEqual(len(attempts), 1)
+        record = json.loads(attempts[0].read_text())
+        self.assertEqual(record['status'], 'FAILED')
+        self.assertIn('injected release failure', record['error'])
+        self.assertTrue((self.slot / '.owner').exists())
+
+    def test_persistent_log_failure_records_receipt(self):
+        script = self.home / 'persistent-log.py'
+        script.write_text('''import builtins, importlib.util, sys
+spec = importlib.util.spec_from_file_location("runner", sys.argv[1])
+runner = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(runner)
+original = builtins.open
+class Log:
+    def __init__(self, stream): self.stream = stream
+    def __enter__(self): return self
+    def __exit__(self, *args): return self.stream.__exit__(*args)
+    def write(self, value): raise OSError("persistent log failure")
+    def flush(self): return self.stream.flush()
+def injected(path, *args, **kwargs):
+    stream = original(path, *args, **kwargs)
+    return Log(stream) if str(path).endswith(".log") else stream
+builtins.open = injected
+sys.exit(runner.run(sys.argv[2], 1, sys.argv[3], "ptr"))
+''')
+        process = subprocess.run([sys.executable, str(script), str(RUNNER), self.sha, str(self.slot)],
+                                 env=self.env, capture_output=True, text=True, timeout=10)
+        record = json.loads(self.latest_attempt().read_text())
+        self.assertEqual(record['status'], 'FAILED')
+        self.assertIn('persistent log failure', record['error'])
+        self.assertIn('persistent log failure', record['log_error'])
+        self.assertFalse((self.slot / '.owner').exists())
+
+    def test_persistent_log_failure_exits_nonzero_with_failed_attempt(self):
+        script = self.home / 'persistent-log.py'
+        script.write_text('''import builtins, importlib.util, sys
+spec = importlib.util.spec_from_file_location("runner", sys.argv[1])
+runner = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(runner)
+original = builtins.open
+class Log:
+    def __init__(self, stream): self.stream = stream
+    def __enter__(self): return self
+    def __exit__(self, *args): return self.stream.__exit__(*args)
+    def write(self, value): raise OSError("persistent log failure")
+    def flush(self): return self.stream.flush()
+def injected(path, *args, **kwargs):
+    stream = original(path, *args, **kwargs)
+    return Log(stream) if str(path).endswith(".log") else stream
+builtins.open = injected
+sys.exit(runner.run(sys.argv[2], 1, sys.argv[3], "ptr"))
+''')
+        process = subprocess.run([sys.executable, str(script), str(RUNNER), self.sha, str(self.slot)],
+                                 env=self.env, capture_output=True, text=True, timeout=10)
+        self.assertNotEqual(process.returncode, 0, process.stderr)
+        results = self.home / 'Projects/wow/full-suite-results'
+        self.assertFalse((results / f'{self.sha}-ptr.json').exists())
+        attempts = list(results.glob(f'{self.sha}-ptr-attempt-*.json'))
+        self.assertEqual(len(attempts), 1)
+        record = json.loads(attempts[0].read_text())
+        self.assertEqual(record['status'], 'FAILED')
+        self.assertIn('persistent log failure', record['error'])
+        self.assertIn('persistent log failure', record['log_error'])
+        self.assertFalse((self.slot / '.owner').exists())
+
+    def test_cvar_log_failure_does_not_mask_unknown_unit(self):
+        write_executable(self.bin / 'slot-build.py',
+                         "import json, os, pathlib, sys\n"
+                         "root = pathlib.Path(os.environ['HOME'])\n"
+                         "unit = sys.argv[sys.argv.index('--unit') + 1]\n"
+                         "p = root / '.cache/wow-ui-sim-targets/slot-2/receipts' / (unit + '.json')\n"
+                         "p.parent.mkdir(exist_ok=True)\n"
+                         "p.write_text(json.dumps({'result': 'success', 'returncode': 0, 'reported_artifacts': [{'executable': '/unused', 'profile': {'test': True}, 'target': {'name': 'integration', 'kind': ['test']}}]}))\n")
+        write_executable(self.bin / 'systemd-run', "import sys\nsys.exit(1)\n")
+        write_executable(self.bin / 'systemctl',
+                         "import sys\nsys.exit(1) if 'full-suite-test-' in ' '.join(sys.argv) else print('ActiveState=inactive\\nResult=success')\n")
+        script = self.home / 'cvar-log.py'
+        script.write_text('''import builtins, importlib.util, sys
+spec = importlib.util.spec_from_file_location("runner", sys.argv[1])
+runner = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(runner)
+original = builtins.open
+class Log:
+    def __init__(self, stream): self.stream = stream
+    def __enter__(self): return self
+    def __exit__(self, *args): return self.stream.__exit__(*args)
+    def write(self, value):
+        if value.startswith("cvar-after"): raise OSError("cvar log failure")
+        return self.stream.write(value)
+    def flush(self): return self.stream.flush()
+def injected(path, *args, **kwargs):
+    stream = original(path, *args, **kwargs)
+    return Log(stream) if str(path).endswith(".log") else stream
+builtins.open = injected
+sys.exit(runner.run(sys.argv[2], 1, sys.argv[3], "ptr"))
+''')
+        process = subprocess.run([sys.executable, str(script), str(RUNNER), self.sha, str(self.slot)],
+                                 env=self.env, capture_output=True, text=True, timeout=10)
+        self.assertNotEqual(process.returncode, 0)
+        self.assertTrue((self.slot / '.owner').exists())
+        record = json.loads(self.latest_attempt().read_text())
+        self.assertIn('state unknown', record['error'])
+        self.assertIn('cvar log failure', record['cleanup_error'])
+
+    def test_receipt_failure_retains_owner(self):
+        script = self.home / 'receipt-failure.py'
+        script.write_text('''import importlib.util, sys
+spec = importlib.util.spec_from_file_location("runner", sys.argv[1])
+runner = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(runner)
+def fail(*args): raise OSError("receipt write failure")
+runner.write_result = fail
+sys.exit(runner.run(sys.argv[2], 1, sys.argv[3], "ptr"))
+''')
+        process = subprocess.run([sys.executable, str(script), str(RUNNER), self.sha, str(self.slot)],
+                                 env=self.env, capture_output=True, text=True, timeout=10)
+        self.assertNotEqual(process.returncode, 0)
+        self.assertIn('receipt write failure', process.stderr)
+        self.assertTrue((self.slot / '.owner').exists())
+
+    def test_guard_rejection_records_failure_without_running_tests(self):
+        result = subprocess.run([sys.executable, str(RUNNER), 'run', self.sha,
+                                 '--profile', 'ptr', '--target-dir', str(self.slot)],
+                                env=self.env, capture_output=True, text=True, timeout=10)
+        receipt = json.loads(self.latest_attempt().read_text())
+        self.assertIn('FAILED', json.dumps(receipt).upper())
+        self.assertIn('guard', json.dumps(receipt).lower())
+        self.assertFalse(any(step.get('exit') == 0 for step in receipt['steps'].values()))
+        argv = json.loads((self.home / 'slot-argv.json').read_text())
+        self.assertIn('--owner', argv)
+        self.assertEqual(argv[argv.index('--slot') + 1], '2')
+        self.assertIn('sound,gui,casc,client-ptr', argv)
+        self.assertEqual(argv[argv.index('--') + 1:argv.index('--') + 8],
+                         ['cargo', 'test', '--no-run', '--all-targets', '--locked',
+                          '--offline', '--message-format=json'])
+        worktree = Path(argv[argv.index('--worktree') + 1])
+        self.assertEqual(subprocess.check_output(['git', '-C', str(worktree), 'rev-parse', 'HEAD'],
+                                                 env=self.env, text=True).strip(), self.sha)
+        self.assertEqual((worktree / 'source').read_text(), 'frozen source\n')
+        self.assertEqual(subprocess.check_output(['git', '-C', str(worktree), 'status', '--porcelain'],
+                                                 env=self.env, text=True), '')
+        self.assertFalse((self.slot / '.owner').exists())
+        released = self.home / f'.local/state/wow-ui-sim/handoff/full-suite/{self.sha[:12]}-ptr/slot-2.owner.released'
+        self.assertEqual(released.read_text(), f'full-suite {self.sha[:12]} ptr')
+        again = subprocess.run([sys.executable, str(RUNNER), 'run', self.sha,
+                                '--profile', 'ptr', '--target-dir', str(self.slot)],
+                               env=self.env, capture_output=True, text=True, timeout=10)
+        self.assertNotEqual(again.returncode, 0, again.stderr)
+        second = json.loads((self.home / 'slot-argv.json').read_text())
+        self.assertEqual(second[second.index('--worktree') + 1], str(worktree))
+
+    def test_result_waits_for_certified_build_and_test_execution(self):
+        test_binary = self.slot / 'integration-test'
+        write_executable(test_binary,
+                         "import os, pathlib, time\n"
+                         "root = pathlib.Path(os.environ['HOME'])\n"
+                         "(root / 'test-started').touch()\n"
+                         "while not (root / 'test-release').exists(): time.sleep(.01)\n")
+        write_executable(self.bin / 'slot-build.py',
+                         "import json, os, pathlib, sys, time\n"
+                         "root = pathlib.Path(os.environ['HOME'])\n"
+                         "argv = sys.argv[1:]\n"
+                         "(root / 'slot-argv.json').write_text(json.dumps(argv))\n"
+                         "(root / 'build-started').touch()\n"
+                         "while not (root / 'build-release').exists(): time.sleep(.01)\n"
+                         "slot = root / '.cache/wow-ui-sim-targets/slot-2'\n"
+                         "unit = argv[argv.index('--unit') + 1]\n"
+                         "receipt = slot / 'receipts' / (unit + '.json')\n"
+                         "receipt.parent.mkdir(exist_ok=True)\n"
+                         "records = [{'executable': str(slot / 'integration-test'), "
+                         "'target': {'name': n, 'kind': [k]}, 'profile': {'test': True}} "
+                         "for n, k in [('integration', 'test'), ('wow_ui_sim', 'lib')]]\n"
+                         "receipt.write_text(json.dumps({'result': 'success', 'returncode': 0, "
+                         "'reported_artifacts': records}))\n")
+        write_executable(self.bin / 'systemctl',
+                         "print('ActiveState=inactive\\nSubState=exited\\nResult=success')\n")
+        write_executable(self.bin / 'systemd-run',
+                         "import json, os, pathlib, subprocess, sys\n"
+                         "(pathlib.Path(os.environ['HOME']) / 'test-unit.json').write_text(json.dumps(sys.argv[1:]))\n"
+                         "sys.exit(subprocess.call(sys.argv[sys.argv.index('--') + 1:]))\n")
+        process = subprocess.Popen([sys.executable, str(RUNNER), 'run', self.sha,
+                                    '--profile', 'ptr', '--target-dir', str(self.slot)],
+                                   env=self.env, stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE, text=True, start_new_session=True)
+        self.addCleanup(self.stop_worker, process)
+        receipt = self.home / f'Projects/wow/full-suite-results/{self.sha}-ptr.json'
+        wait_for(self.home / 'build-started', process)
+        self.assertFalse(receipt.exists())
+        (self.home / 'build-release').touch()
+        wait_for(self.home / 'test-started', process)
+        self.assertFalse(receipt.exists())
+        (self.home / 'test-release').touch()
+        stdout, stderr = process.communicate(timeout=10)
         self.assertEqual(process.returncode, 0, stderr)
-        return stdout
+        self.assertTrue(receipt.exists())
+        self.assertEqual(json.loads(receipt.read_text())['status'], 'PASSED')
+        log = Path(json.loads(receipt.read_text())['log']).read_text()
+        self.assertIn('cvar-before', log)
+        self.assertIn('cvar-after', log)
+        self.assertEqual((self.home / '.local/share/wow-sim/cvars.json').read_text(), '{}')
+        unit = json.loads((self.home / 'test-unit.json').read_text())
+        self.assertIn('MemoryMax=9G', unit)
+        self.assertIn('MemorySwapMax=0', unit)
+        argv = json.loads((self.home / 'slot-argv.json').read_text())
+        worktree = Path(argv[argv.index('--worktree') + 1])
+        mount = self.home / '.cache/wow-ui-sim-srcmount/slot-2'
+        self.assertIn(f'BindPaths={worktree}:{mount}', unit)
+        self.assertIn(f'--working-directory={mount}', unit)
+        self.assertTrue(all(step.get('exit', 0) == 0
+                            for step in json.loads(receipt.read_text())['steps'].values()))
+        argv = json.loads((self.home / 'slot-argv.json').read_text())
+        worktree = Path(argv[argv.index('--worktree') + 1])
+        self.assertEqual((worktree / 'source').read_bytes(), b'frozen source\n')
+        self.assertEqual(subprocess.check_output(['git', '-C', str(worktree), 'rev-parse', 'HEAD'],
+                                                 env=self.env, text=True).strip(), self.sha)
 
-    def exercise_worker(self, fail_suites):
-        self.env["FAIL_SUITES"] = str(int(fail_suites))
-        with self.lock_path.open("w") as lock:
+    def test_test_failures_preserve_phase_records_and_continue(self):
+        binary = self.slot / 'test-binary'
+        write_executable(binary,
+                         "import sys\nprint('test sample::fails ... FAILED')\nsys.exit(7)\n")
+        write_executable(self.bin / 'slot-build.py',
+                         "import json, os, pathlib, sys\n"
+                         "root = pathlib.Path(os.environ['HOME'])\n"
+                         "slot = root / '.cache/wow-ui-sim-targets/slot-2'\n"
+                         "unit = sys.argv[sys.argv.index('--unit') + 1]\n"
+                         "receipt = slot / 'receipts' / (unit + '.json')\n"
+                         "receipt.parent.mkdir(exist_ok=True)\n"
+                         "records = [{'executable': str(slot / 'test-binary'), 'profile': {'test': True}, "
+                         "'target': {'name': n, 'kind': [k]}} for n, k in "
+                         "[('integration', 'test'), ('wow_ui_sim', 'lib')]]\n"
+                         "receipt.write_text(json.dumps({'result': 'success', 'returncode': 0, 'reported_artifacts': records}))\n")
+        write_executable(self.bin / 'systemctl', "print('ActiveState=inactive\\nSubState=exited\\nResult=success')\n")
+        write_executable(self.bin / 'systemd-run',
+                         "import subprocess, sys\nsys.exit(subprocess.call(sys.argv[sys.argv.index('--') + 1:]))\n")
+        process = subprocess.run([sys.executable, str(RUNNER), 'run', self.sha,
+                                  '--profile', 'ptr', '--target-dir', str(self.slot)],
+                                 env=self.env, capture_output=True, text=True, timeout=10)
+        self.assertNotEqual(process.returncode, 0, process.stderr)
+        record = json.loads(self.latest_attempt().read_text())
+        self.assertEqual(record['status'], 'FAILED')
+        self.assertEqual(record['steps']['integration']['exit'], 7)
+        self.assertEqual(record['steps']['integration']['status'], 'FAILED')
+        self.assertEqual(record['steps']['lib']['exit'], 7)
+        self.assertEqual(record['steps']['lib']['status'], 'FAILED')
+        self.assertEqual(record['steps']['prefork']['status'], 'not_applicable')
+        self.assertEqual(record['failures'], {'integration': ['sample::fails'], 'lib': ['sample::fails']})
+        self.assertIsNone(record['new_failures'])
+        results = self.home / 'Projects/wow/full-suite-results'
+        canonical = results / f'{self.sha}-ptr.json'
+        passed = json.dumps({'sha': self.sha, 'profile': 'ptr', 'status': 'PASSED', 'failures': {}})
+        canonical.write_text(passed)
+        rerun = subprocess.run([sys.executable, str(RUNNER), 'run', self.sha,
+                                '--profile', 'ptr', '--target-dir', str(self.slot)],
+                               env=self.env, capture_output=True, text=True, timeout=10)
+        self.assertNotEqual(rerun.returncode, 0, rerun.stderr)
+        self.assertEqual(canonical.read_text(), passed)
+        attempts = list(results.glob(f'{self.sha}-ptr-attempt-*.json'))
+        self.assertEqual(len(attempts), 2)
+        self.assertEqual(json.loads(self.latest_attempt().read_text())['steps']['integration']['exit'], 7)
+
+    def test_failed_certification_never_runs_test_binaries(self):
+        write_executable(self.bin / 'slot-build.py',
+                         "import json, os, pathlib, sys\n"
+                         "root = pathlib.Path(os.environ['HOME'])\n"
+                         "unit = sys.argv[sys.argv.index('--unit') + 1]\n"
+                         "receipt = root / '.cache/wow-ui-sim-targets/slot-2/receipts' / (unit + '.json')\n"
+                         "receipt.parent.mkdir(exist_ok=True)\n"
+                         "receipt.write_text(json.dumps({'result': 'stale-artifacts', 'returncode': 0, 'dep_info_errors': ['bad input']}))\n")
+        write_executable(self.bin / 'systemctl',
+                         "print('ActiveState=inactive\\nSubState=exited\\nResult=success')\n")
+        write_executable(self.bin / 'systemctl',
+                         "print('ActiveState=failed\\nSubState=failed\\nResult=exit-code')\n")
+        result = subprocess.run([sys.executable, str(RUNNER), 'run', self.sha,
+                                 '--profile', 'ptr', '--target-dir', str(self.slot)],
+                                env=self.env, capture_output=True, text=True, timeout=10)
+        self.assertNotEqual(result.returncode, 0, result.stderr)
+        record = json.loads(self.latest_attempt().read_text())
+        self.assertEqual(record['status'], 'FAILED')
+        self.assertIn('bad input', record['error'])
+        self.assertEqual(record['steps']['build']['status'], 'FAILED')
+        self.assertEqual(record['steps']['integration']['status'], 'not_run')
+        self.assertFalse((self.slot / '.owner').exists())
+
+    def test_unknown_build_unit_state_retains_slot_and_fails(self):
+        write_executable(self.bin / 'slot-build.py',
+                         "import json, os, pathlib, sys\n"
+                         "(pathlib.Path(os.environ['HOME']) / 'slot-argv.json').write_text(json.dumps(sys.argv[1:]))\n")
+        write_executable(self.bin / 'systemctl',
+                         "import os, pathlib, sys\n"
+                         "p = pathlib.Path(os.environ['HOME']) / 'systemctl-calls'\n"
+                         "with p.open('a') as f: f.write('call\\n')\n"
+                         "sys.exit(1)\n")
+        process = subprocess.run([sys.executable, str(RUNNER), 'run', self.sha,
+                                  '--profile', 'ptr', '--target-dir', str(self.slot)],
+                                 env=self.env, capture_output=True, text=True, timeout=10)
+        self.assertNotEqual(process.returncode, 0)
+        self.assertTrue((self.home / 'systemctl-calls').exists())
+        self.assertEqual((self.slot / '.owner').read_text(), f'full-suite {self.sha[:12]} ptr')
+        argv = json.loads((self.home / 'slot-argv.json').read_text())
+        unit = argv[argv.index('--unit') + 1]
+        result = json.loads(self.latest_attempt().read_text())
+        self.assertEqual(result['status'], 'FAILED')
+        self.assertIn(f'slot 2 retained: unit {unit} state unknown', result['error'])
+
+    def test_owned_slot_is_never_stolen(self):
+        owner = self.slot / '.owner'
+        owner.write_text('another owner')
+        result = subprocess.run([sys.executable, str(RUNNER), 'run', self.sha,
+                                 '--target-dir', str(self.slot)], env=self.env,
+                                capture_output=True, text=True, timeout=10)
+        self.assertEqual(owner.read_text(), 'another owner')
+        self.assertFalse((self.home / 'slot-argv.json').exists())
+        self.assertIn('owner', (result.stdout + result.stderr).lower())
+
+    def test_capacity_refusal_does_not_claim_slot(self):
+        write_executable(self.home / '.worktrees/logs/capacity.sh',
+                         "print('agents | HOLD: busy')\n")
+        result = subprocess.run([sys.executable, str(RUNNER), 'run', self.sha,
+                                 '--target-dir', str(self.slot)], env=self.env,
+                                capture_output=True, text=True, timeout=10)
+        self.assertFalse((self.slot / '.owner').exists())
+        self.assertFalse((self.home / 'slot-argv.json').exists())
+        self.assertIn('HOLD: busy', result.stdout + result.stderr)
+
+    def test_suite_lock_blocks_the_worker_before_checkout(self):
+        results = self.home / 'Projects/wow/full-suite-results'
+        results.mkdir(parents=True)
+        with (results / '.lock').open('w') as lock:
             fcntl.flock(lock, fcntl.LOCK_EX)
-            process = self.start_worker()
-            # Real fake-Cargo children must run before the old builder lock releases.
-            stdout = self.finish_scopes(process)
-            with self.lock_path.open("w") as contender:
-                with self.assertRaises(BlockingIOError):
-                    fcntl.flock(contender, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        with (self.results / ".lock").open("w") as lock:
-            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        result = json.loads((self.results / "sandbox-sha-retail.json").read_text())
-        expected_exits = {"integration": 8, "prefork": 7, "lib": 8}
-        self.assertEqual(set(result["steps"]), set(expected_exits))
-        for step, failure_exit in expected_exits.items():
-            self.assertEqual(
-                result["steps"][step]["exit"], failure_exit if fail_suites else 0
-            )
-            self.assertEqual(
-                result["failures"][step],
-                [f"sandbox::{step}_failure"] if fail_suites else [],
-            )
-        self.assertEqual(json.loads(stdout)["steps"], result["steps"])
-        log = (self.results / "sandbox-sha-retail.log").read_text()
-        for name in SCOPES:
-            self.assertIn(f"{name} stdout retained", log)
-            self.assertIn(f"{name} stderr retained", log)
-        if fail_suites:
-            self.assertIn("exit 7", log)
-            self.assertIn("exit 8", log)
-            self.assertIn("test sandbox::prefork_failure ... FAILED", log)
-
-    def assert_step_metadata(self, fixture_capacity):
-        self.env.pop("WOW_SIM_TIMEOUT_FIXTURE_CAPACITY", None)
-        if fixture_capacity is not None:
-            self.env["WOW_SIM_TIMEOUT_FIXTURE_CAPACITY"] = fixture_capacity
-        process = self.start_worker()
-        stdout = self.finish_scopes(process)
-        result = json.loads((self.results / "sandbox-sha-retail.json").read_text())
-        steps = (
-            ("integration", "integration"),
-            ("prefork", "prefork_full_ui"),
-            ("lib", "lib"),
-        )
-        for step, child in steps:
-            actual = json.loads((self.root / f"first.{child}.started").read_text())
-            self.assertIn("command", result["steps"][step])
-            self.assertEqual(
-                result["steps"][step]["command"], ["cargo", *actual["argv"]]
-            )
-            self.assertEqual(
-                result["steps"][step]["environment"],
-                {"WOW_SIM_TIMEOUT_FIXTURE_CAPACITY": actual["fixture_capacity"]},
-            )
-            self.assertEqual(actual["fixture_capacity"], fixture_capacity)
-        self.assertEqual(json.loads(stdout)["steps"], result["steps"])
-
-    def test_step_metadata_records_unset_reservation_as_null(self):
-        self.assert_step_metadata(None)
-
-    def test_step_metadata_records_reserved_value_without_changing_children(self):
-        self.assert_step_metadata("reserved")
-
-    def test_step_metadata_preserves_empty_reservation_distinct_from_unset(self):
-        self.assert_step_metadata("")
-
-    def test_direct_children_run_while_old_builder_lock_held(self):
-        self.exercise_worker(False)
-
-    def test_all_failures_and_both_streams_retained_without_builder_lock(self):
-        self.exercise_worker(True)
-
-    def test_controller_lock_serializes_checkout_and_children(self):
-        with (self.results / ".lock").open("w") as lock:
-            fcntl.flock(lock, fcntl.LOCK_EX)
-            first = self.start_worker()
-            wait_for(self.root / "first.ready", first)
-            time.sleep(0.1)
-            self.assertIsNone(first.poll())
-            self.assertFalse((self.root / "first.git").exists())
+            process = subprocess.Popen([sys.executable, str(RUNNER), 'run', self.sha,
+                                        '--target-dir', str(self.slot)], env=self.env,
+                                       stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                       text=True, start_new_session=True)
+            self.addCleanup(self.stop_worker, process)
+            time.sleep(.1)
+            self.assertIsNone(process.poll())
+            self.assertFalse((self.home / 'slot-argv.json').exists())
+            self.assertFalse(list((self.home / '.worktrees').glob('wow-ui-sim-fullsuite-*')))
             fcntl.flock(lock, fcntl.LOCK_UN)
-        wait_for(self.root / "first.integration.started", first)
-        second = self.start_worker("second")
-        wait_for(self.root / "second.ready", second)
-        time.sleep(0.1)
-        self.assertIsNone(second.poll())
-        self.assertFalse((self.root / "second.git").exists())
-        self.assertFalse((self.root / "second.integration.started").exists())
-        self.finish_scopes(first)
-        self.finish_scopes(second, "second")
-        for worker in ("first", "second"):
-            records = [
-                json.loads(line)
-                for line in (self.root / f"{worker}.git").read_text().splitlines()
-            ]
-            checkout_commands = [
-                r["argv"][0] for r in records if r["cwd"] == str(self.checkout)
-            ]
-            self.assertEqual(checkout_commands, ["fetch", "checkout", "clean"])
+        process.communicate(timeout=10)
 
-    def test_missing_old_wrapper_does_not_prevent_cargo_execution(self):
-        self.wrapper.unlink()
-        process = self.start_worker()
-        self.finish_scopes(process)
+    def test_invalid_target_and_profile_are_rejected_before_launch(self):
+        for options in (['--target-dir', str(self.slot.with_name('slot-4'))],
+                        ['--target-dir', str(self.slot), '--profile', 'unknown'],
+                        ['--target-dir', str(self.slot), '--build-jobs', '0']):
+            with self.subTest(options=options):
+                result = subprocess.run([sys.executable, str(RUNNER), 'run', self.sha, *options],
+                                        env=self.env, capture_output=True, text=True, timeout=10)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertFalse((self.home / 'slot-argv.json').exists())
 
-    def test_submit_spawns_detached_worker_with_native_resource_limits(self):
-        record_path = self.root / "submitted.json"
-        write_executable(
-            self.bin / "systemd-run",
-            "import json, os, pathlib, sys\n"
-            "root = pathlib.Path(os.environ['HOME'])\n"
-            "(root / 'submitted.json').write_text(json.dumps(sys.argv[1:]))\n",
-        )
-        process = subprocess.Popen(
-            [
-                sys.executable,
-                str(RUNNER),
-                "submit",
-                "sandbox-ref",
-                "--build-jobs",
-                "2",
-                "--target-dir",
-                str(self.target_dir),
-            ],
-            env=self.env,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-        )
-        try:
-            stdout, stderr = process.communicate(timeout=5)
-        finally:
-            if process.poll() is None:
-                process.kill()
-                process.communicate(timeout=5)
-        self.assertEqual(process.returncode, 0, stderr)
-        argv = json.loads(record_path.read_text())
-        unit = stdout.strip()
-        self.assertTrue(unit.startswith("full-suite-"))
-        self.assertEqual(
-            argv,
-            [
-                "--user",
-                f"--unit={unit}",
-                "--collect",
-                "--slice=agents.slice",
-                "-p",
-                "CPUQuota=1200%",
-                "-p",
-                "MemoryHigh=16G",
-                "-p",
-                "MemoryMax=16G",
-                "--setenv=FULL_SUITE_JOBS=3",
-                sys.executable,
-                str(RUNNER),
-                "run",
-                "sandbox-ref",
-                "--profile",
-                "retail",
-                "--build-jobs",
-                "2",
-                "--target-dir",
-                str(self.target_dir),
-            ],
-        )
-        self.assertFalse(list(self.root.glob("*.started")))
-        self.assertFalse(list(self.root.glob("*.git")))
+    def test_status_groups_profile_and_legacy_results(self):
+        results = self.home / 'Projects/wow/full-suite-results'
+        results.mkdir(parents=True)
+        profile = {'sha': self.sha, 'profile': 'ptr', 'steps': {'lib': {'exit': 7}}}
+        legacy = {'sha': self.sha, 'steps': {'lib': {'exit': 0}}}
+        (results / f'{self.sha}-ptr.json').write_text(json.dumps(profile))
+        (results / f'{self.sha}.json').write_text(json.dumps(legacy))
+        process = subprocess.run([sys.executable, str(RUNNER), 'status', self.sha],
+                                 env=self.env, capture_output=True, text=True, timeout=10)
+        self.assertEqual(process.returncode, 0, process.stderr)
+        output = json.loads(process.stdout)
+        self.assertEqual(output['profiles']['ptr'], profile)
+        self.assertIsNone(output['profiles']['retail'])
+        self.assertEqual(output['legacy_retail'], legacy)
 
-    def invoke_controller(self, action, *options):
-        return subprocess.run(
-            [sys.executable, str(RUNNER), action, "sandbox-ref", *options],
-            env=dict(self.env, WORKER="validation"),
-            capture_output=True,
-            text=True,
-            timeout=5,
-        )
-
-    def test_submit_accepts_all_four_slots_and_defaults_build_jobs_to_one(self):
-        write_executable(
-            self.bin / "systemd-run",
-            "import json, os, pathlib, sys\n"
-            "(pathlib.Path(os.environ['HOME']) / 'submitted.json').write_text(\n"
-            "    json.dumps(sys.argv[1:]))\n",
-        )
-        self.env.pop("FULL_SUITE_JOBS", None)
-        for slot in range(4):
-            target = self.target_dir.with_name(f"slot-{slot}")
-            with self.subTest(slot=slot):
-                result = self.invoke_controller("submit", "--target-dir", str(target))
-                self.assertEqual(result.returncode, 0, result.stderr)
-                argv = json.loads((self.root / "submitted.json").read_text())
-                self.assertEqual(
-                    argv[-4:], ["--build-jobs", "1", "--target-dir", str(target)]
-                )
-                self.assertIn("--setenv=FULL_SUITE_JOBS=16", argv)
-
-    def test_invalid_options_rejected_before_launch_or_checkout(self):
-        write_executable(
-            self.bin / "systemd-run",
-            "import os, pathlib\n"
-            "(pathlib.Path(os.environ['HOME']) / 'unexpected-service').touch()\n",
-        )
-        targets = [
-            self.root / "Projects/wow/wow-ui-sim/target",
-            self.checkout / "target",
-            Path("/home/osso/Projects/wow/wow-ui-sim/target"),
-            self.target_dir.with_name("slot-4"),
-            self.target_dir / "nested",
-            self.root / "other-target",
-            Path("relative-target"),
-        ]
-        cases = [([], "--target-dir")]
-        cases.extend((["--target-dir", str(target)], "target") for target in targets)
-        cases.extend(
-            (["--target-dir", str(self.target_dir), "--build-jobs", jobs], "--build-jobs")
-            for jobs in ("0", "-1", "invalid")
-        )
-        for action in ("submit", "run"):
-            for options, diagnostic in cases:
-                with self.subTest(action=action, options=options):
-                    result = self.invoke_controller(action, *options)
-                    self.assertNotEqual(result.returncode, 0)
-                    self.assertIn(diagnostic, result.stderr)
-        self.assertFalse((self.root / "unexpected-service").exists())
-        self.assertFalse((self.root / "validation.git").exists())
-        self.assertFalse((self.results / ".lock").exists())
-
-    def test_slot_symlinks_cannot_redirect_to_checkout_targets_or_outside_slots(self):
-        targets = [
-            self.root / "Projects/wow/wow-ui-sim/target",
-            self.checkout / "target",
-            self.root / "outside-slots",
-        ]
-        link = self.target_dir.with_name("slot-0")
-        for target in targets:
-            link.symlink_to(target, target_is_directory=True)
-            try:
-                for action in ("submit", "run"):
-                    with self.subTest(action=action, target=target):
-                        result = self.invoke_controller(action, "--target-dir", str(link))
-                        self.assertNotEqual(result.returncode, 0)
-                        self.assertIn("target", result.stderr)
-            finally:
-                link.unlink()
-        self.assertFalse((self.root / "validation.git").exists())
-        self.assertFalse((self.results / ".lock").exists())
-
-    def test_profiles_select_features_scopes_and_distinct_receipts(self):
-        for profile in PROFILES:
-            with self.subTest(profile=profile):
-                process = self.start_worker(profile, profile=profile)
-                stdout = self.finish_scopes(process, profile, profile)
-                path = self.results / f"sandbox-sha-{profile}.json"
-                result = json.loads(path.read_text())
-                self.assertEqual(result["profile"], profile)
-                self.assertEqual(json.loads(stdout)["profile"], profile)
-                self.assertEqual(result["steps"]["integration"]["exit"], 0)
-                self.assertEqual(result["steps"]["lib"]["exit"], 0)
-                log = (self.results / f"sandbox-sha-{profile}.log").read_text()
-                self.assertIn("integration stdout retained", log)
-                self.assertIn("lib stdout retained", log)
-                if profile in ("retail", "mists"):
-                    self.assertEqual(result["steps"]["prefork"]["exit"], 0)
-                    self.assertIn("prefork_full_ui stdout retained", log)
-                else:
-                    self.assertEqual(result["steps"]["prefork"]["status"], "not_applicable")
-                    self.assertIn("Retail/Mists", result["steps"]["prefork"]["reason"])
-                    self.assertNotIn("exit", result["steps"]["prefork"])
-                    self.assertNotIn("prefork", result["failures"])
-                    self.assertIn("prefork: N/A", log)
-                    self.assertFalse((self.root / f"{profile}.prefork_full_ui.started").exists())
-        self.assertEqual(len(list(self.results.glob("sandbox-sha-*.json"))), 7)
-        self.assertEqual(len(list(self.results.glob("sandbox-sha-*.log"))), 7)
-
-    def test_nonretail_failures_are_retained_and_later_scopes_still_run(self):
-        self.env["FAIL_SUITES"] = "1"
-        for profile in ("mists", "wrath"):
-            with self.subTest(profile=profile):
-                process = self.start_worker(profile, profile=profile)
-                self.finish_scopes(process, profile, profile)
-                result = json.loads(
-                    (self.results / f"sandbox-sha-{profile}.json").read_text()
-                )
-                self.assertEqual(result["steps"]["integration"]["exit"], 8)
-                self.assertEqual(result["steps"]["lib"]["exit"], 8)
-                expected = {
-                    "integration": ["sandbox::integration_failure"],
-                    "lib": ["sandbox::lib_failure"],
-                }
-                if profile == "mists":
-                    self.assertEqual(result["steps"]["prefork"]["exit"], 7)
-                    expected["prefork"] = ["sandbox::prefork_failure"]
-                self.assertEqual(result["failures"], expected)
-
-    def test_submit_forwards_each_profile_without_changing_resource_policy(self):
-        write_executable(
-            self.bin / "systemd-run",
-            "import json, os, pathlib, sys\n"
-            "(pathlib.Path(os.environ['HOME']) / 'submitted.json').write_text(\n"
-            "    json.dumps(sys.argv[1:]))\n",
-        )
-        for profile in PROFILES:
-            with self.subTest(profile=profile):
-                result = self.invoke_controller(
-                    "submit", "--target-dir", str(self.target_dir), "--profile", profile
-                )
-                self.assertEqual(result.returncode, 0, result.stderr)
-                argv = json.loads((self.root / "submitted.json").read_text())
-                self.assertIn(f"--unit=full-suite-{profile}-", " ".join(argv))
-                self.assertEqual(argv[argv.index("--profile") + 1], profile)
-                for option in ("CPUQuota=1200%", "MemoryHigh=16G", "MemoryMax=16G"):
-                    self.assertIn(option, argv)
-        self.assertFalse(list(self.root.glob("*.started")))
-        self.assertFalse(list(self.root.glob("*.git")))
-
-    def test_invalid_profile_rejected_before_launch(self):
-        for action in ("run", "submit"):
-            result = self.invoke_controller(
-                action, "--target-dir", str(self.target_dir), "--profile", "unknown"
-            )
-            self.assertNotEqual(result.returncode, 0)
-            self.assertIn("invalid choice", result.stderr)
-        self.assertFalse(list(self.root.glob("*.git")))
-        self.assertFalse((self.results / ".lock").exists())
-
-    def test_status_lists_all_profiles_and_preserves_legacy_retail_receipt(self):
-        legacy = {"sha": "sandbox-sha", "steps": {"lib": {"exit": 9}}}
-        (self.results / "sandbox-sha.json").write_text(json.dumps(legacy))
-        receipts = {}
-        for profile in PROFILES:
-            receipt = {"sha": "sandbox-sha", "profile": profile, "steps": {"lib": {"exit": 0}}}
-            receipts[profile] = receipt
-            (self.results / f"sandbox-sha-{profile}.json").write_text(json.dumps(receipt))
-        result = self.invoke_controller("status")
+    def test_submit_sets_memory_limits(self):
+        write_executable(self.bin / 'systemd-run',
+                         "import json, os, pathlib, sys\n"
+                         "(pathlib.Path(os.environ['HOME']) / 'unit.json').write_text(json.dumps(sys.argv[1:]))\n")
+        result = subprocess.run([sys.executable, str(RUNNER), 'submit', self.sha,
+                                 '--target-dir', str(self.slot)], env=self.env,
+                                capture_output=True, text=True, timeout=10)
         self.assertEqual(result.returncode, 0, result.stderr)
-        listing = json.loads(result.stdout)
-        self.assertEqual(listing["sha"], "sandbox-sha")
-        self.assertEqual(listing["profiles"], receipts)
-        self.assertEqual(listing["legacy_retail"], legacy)
-
-    def test_status_without_ref_groups_latest_sha_and_excludes_baselines(self):
-        receipt = {"sha": "latest-sha", "profile": "ptr", "steps": {}}
-        (self.results / "latest-sha-ptr.json").write_text(json.dumps(receipt))
-        baseline = self.results / "master-latest-mists.json"
-        baseline.write_text(json.dumps({"sha": "other-sha", "profile": "mists"}))
-        os.utime(baseline, (time.time() + 60, time.time() + 60))
-        result = subprocess.run(
-            [sys.executable, str(RUNNER), "status"], env=self.env,
-            capture_output=True, text=True, timeout=5,
-        )
-        self.assertEqual(result.returncode, 0, result.stderr)
-        listing = json.loads(result.stdout)
-        self.assertEqual(listing["sha"], "latest-sha")
-        self.assertEqual(listing["profiles"]["ptr"], receipt)
-        self.assertIsNone(listing["profiles"]["retail"])
-        self.assertIsNone(listing["profiles"]["mists"])
-
-    def test_status_reads_legacy_only_results_without_claiming_other_profiles(self):
-        legacy = {"sha": "sandbox-sha", "steps": {"lib": {"exit": 0}}}
-        (self.results / "sandbox-sha.json").write_text(json.dumps(legacy))
-        result = self.invoke_controller("status")
-        self.assertEqual(result.returncode, 0, result.stderr)
-        listing = json.loads(result.stdout)
-        self.assertEqual(listing["legacy_retail"], legacy)
-        self.assertEqual(listing["profiles"], dict.fromkeys(PROFILES))
-
-    def test_failure_comparisons_use_only_same_profile_baseline(self):
-        import runpy
-        worker = runpy.run_path(str(RUNNER))
-        compare = worker["new_failures"]
-        compare.__globals__["RESULTS"] = self.results
-        (self.results / "master-latest.json").write_text(
-            json.dumps({"failures": {"lib": ["shared", "old-retail"]}})
-        )
-        self.assertIsNone(compare({"profile": "ptr", "failures": {"lib": ["shared"]}}))
-        for profile in PROFILES:
-            (self.results / f"master-latest-{profile}.json").write_text(
-                json.dumps({"failures": {"lib": [f"old-{profile}"]}})
-            )
-            result = {"profile": profile, "failures": {"lib": [f"old-{profile}", "shared"]}}
-            self.assertEqual(compare(result), {"lib": ["shared"]})
-
-    def test_master_updates_only_selected_profile_baseline(self):
-        legacy = self.results / "master-latest.json"
-        legacy.write_text('{"historical": true}\n')
-        self.harness.write_text(
-            "import runpy\n"
-            f"worker = runpy.run_path({str(RUNNER)!r})\n"
-            f"worker['run']('master', 2, {str(self.target_dir)!r}, profile='mists')\n"
-        )
-        process = self.start_worker()
-        self.finish_scopes(process, profile="mists")
-        receipt = json.loads((self.results / "sandbox-sha-mists.json").read_text())
-        self.assertEqual(
-            json.loads((self.results / "master-latest-mists.json").read_text()), receipt
-        )
-        self.assertEqual(legacy.read_text(), '{"historical": true}\n')
-        self.assertFalse((self.results / "master-latest-retail.json").exists())
-
-    def test_deploy_installs_only_full_suite_in_home_bin(self):
-        result = subprocess.run(
-            [sys.executable, str(RUNNER.parent.parent / "deploy.sh")],
-            cwd=self.root,
-            env=self.env,
-            capture_output=True,
-            text=True,
-            timeout=5,
-        )
-        self.assertEqual(result.returncode, 0, result.stderr)
-        installed = self.root / "bin/full-suite"
-        self.assertEqual(installed.read_bytes(), RUNNER.read_bytes())
-        self.assertEqual(installed.stat().st_mode & 0o777, 0o755)
-        self.assertFalse(list(self.root.glob("*.started")))
-        self.assertFalse(list(self.root.glob("*.git")))
+        argv = json.loads((self.home / 'unit.json').read_text())
+        self.assertIn('MemoryMax=9G', argv)
+        self.assertIn('MemorySwapMax=0', argv)
 
 
 if __name__ == "__main__":
