@@ -174,10 +174,19 @@ impl WowLuaEnv {
     /// Release a physical key without dispatching another key-down event.
     pub fn send_key_up(&self, key: &str) {
         let normalized = normalized_key_name(key);
-        self.state
-            .borrow_mut()
-            .pressed_keys
-            .remove(unmodified_key_name(&normalized));
+        let key = unmodified_key_name(&normalized);
+        let was_pressed = self.state.borrow_mut().pressed_keys.remove(key);
+        if was_pressed {
+            let mut lua = self.lua.borrow_mut();
+            if let Err(error) =
+                super::globals::keybindings::dispatch_key_binding_release(&mut lua, key)
+            {
+                super::script_helpers::call_error_handler_state(
+                    lua.state_mut(),
+                    &error.to_string(),
+                );
+            }
+        }
     }
 
     // ── Escape ────────────────────────────────────────────────────────────────
@@ -195,7 +204,7 @@ impl WowLuaEnv {
             }
         }
         let mut lua = self.lua.borrow_mut();
-        super::globals::keybindings::dispatch_key_binding(&mut lua, "ESCAPE")?;
+        super::globals::keybindings::dispatch_key_binding(&mut lua, "ESCAPE", "ESCAPE")?;
         Ok(())
     }
 
@@ -222,7 +231,11 @@ impl WowLuaEnv {
         let editbox_input = self.focused_editbox_accepts_key(focused, key);
         if !editbox_input {
             let mut lua = self.lua.borrow_mut();
-            if super::globals::keybindings::dispatch_key_binding(&mut lua, key)? {
+            if super::globals::keybindings::dispatch_key_binding(
+                &mut lua,
+                key,
+                unmodified_key_name(key),
+            )? {
                 return Ok(());
             }
         }

@@ -16,7 +16,84 @@ pub fn parse_xml_file(path: &std::path::Path) -> Result<UiXml, XmlLoadError> {
         path: path.to_path_buf(),
         source,
     })?;
-    Ok(parse_xml(&contents)?)
+    let mut ui = parse_xml(&contents)?;
+    if ui
+        .elements
+        .iter()
+        .any(|element| matches!(element, super::types::XmlElement::Binding(_)))
+    {
+        let locations = binding_source_lines(&contents)?;
+        let mut locations = locations.into_iter();
+        for element in &mut ui.elements {
+            if let super::types::XmlElement::Binding(binding) = element {
+                binding.source_path = Some(path.to_path_buf());
+                binding.source_line = locations.next().ok_or_else(|| {
+                    quick_xml::DeError::Custom("missing binding source location".to_string())
+                })?;
+            }
+        }
+    }
+    Ok(ui)
+}
+
+fn binding_source_lines(contents: &str) -> Result<Vec<usize>, quick_xml::DeError> {
+    use quick_xml::events::Event;
+
+    let mut reader = quick_xml::Reader::from_str(contents);
+    let mut lines = Vec::new();
+    let mut offset = 0;
+    let mut line = 1;
+    let mut active = None;
+    loop {
+        let event = reader
+            .read_event()
+            .map_err(quick_xml::DeError::InvalidXml)?;
+        let end = reader.buffer_position() as usize;
+        let event_line = line;
+        line += contents.as_bytes()[offset..end]
+            .iter()
+            .filter(|byte| **byte == b'\n')
+            .count();
+        offset = end;
+        if matches!(event, Event::Eof) {
+            break;
+        }
+        record_binding_event(event, event_line, line, &mut active, &mut lines);
+    }
+    Ok(lines)
+}
+
+fn record_binding_event(
+    event: quick_xml::events::Event<'_>,
+    event_line: usize,
+    line: usize,
+    active: &mut Option<usize>,
+    lines: &mut Vec<usize>,
+) {
+    use quick_xml::events::Event;
+    match event {
+        Event::Start(element) if element.name().as_ref() == b"Binding" => {
+            *active = Some(lines.len());
+            lines.push(line);
+        }
+        Event::Empty(element) if element.name().as_ref() == b"Binding" => lines.push(line),
+        Event::Text(text) if active.is_some() => {
+            let bytes = text.as_ref();
+            let leading = bytes
+                .iter()
+                .take_while(|byte| byte.is_ascii_whitespace())
+                .count();
+            if leading < bytes.len() {
+                let leading_lines = bytes[..leading]
+                    .iter()
+                    .filter(|byte| **byte == b'\n')
+                    .count();
+                lines[active.take().expect("active binding")] = event_line + leading_lines;
+            }
+        }
+        Event::End(element) if element.name().as_ref() == b"Binding" => *active = None,
+        _ => {}
+    }
 }
 
 fn preprocess_xml(xml: &str) -> String {

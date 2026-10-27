@@ -682,14 +682,18 @@ pub struct LfgListCounts {
     pub applicants_viewed: i32,
 }
 
-/// Minimal keybinding store. In retail WoW the binding registry is
-/// populated from `Bindings.xml` at load; here we only back the
-/// *user-set* side (`SetBinding(key, action)` / `SetOverrideBinding`)
-/// because the sim has no Bindings.xml to pre-register from. Overrides
-/// shadow the base bindings during lookup, matching WoW's
-/// `GetBindingAction(key, checkOverride=true)` semantics.
+/// A binding body and its original XML source location.
+#[derive(Debug, Clone)]
+pub struct BindingBody {
+    pub function: rilua::Val,
+    pub run_on_up: bool,
+}
+
+/// Keybinding assignments and loaded XML binding bodies.
 #[derive(Debug, Default, Clone)]
 pub struct Keybindings {
+    pub bodies: std::collections::HashMap<String, BindingBody>,
+    pub pending_releases: std::collections::HashMap<String, BindingBody>,
     /// Explicit active context IDs; no binding priority or routing is inferred.
     pub active_contexts: std::collections::HashSet<i32>,
     /// Insertion-ordered base bindings set by `SetBinding(key, action)`.

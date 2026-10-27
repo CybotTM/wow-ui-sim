@@ -5,7 +5,7 @@
 mod keybindings_c_api;
 
 use crate::lua_api::methods::{
-    borrow_state, borrow_state_mut, create_string, pcall_function, table_get,
+    borrow_state, borrow_state_mut, create_string, pcall_function, table_get, table_set_static,
 };
 use crate::lua_api::script_helpers::call_error_handler_state;
 use crate::lua_bridge::{FromStack, IntoStack};
@@ -432,6 +432,7 @@ pub fn init_keybindings(state: &mut crate::lua_api::SimState) {
     state.keybindings.base.clear();
     state.keybindings.unbound.clear();
     state.keybindings.overrides.clear();
+    state.keybindings.pending_releases.clear();
 }
 
 /// Look up `key` in the binding registry and execute the bound Lua code.
@@ -443,7 +444,11 @@ pub fn init_keybindings(state: &mut crate::lua_api::SimState) {
 ///    do not inflate `GetNumBindings`.
 ///
 /// Returns `true` if a binding was found and executed, `false` otherwise.
-pub fn dispatch_key_binding(lua: &mut rilua::Lua, key: &str) -> crate::Result<bool> {
+pub fn dispatch_key_binding(
+    lua: &mut rilua::Lua,
+    key: &str,
+    release_key: &str,
+) -> crate::Result<bool> {
     let (user_action, shadows_default) = {
         let sim = borrow_state(lua.state_mut())?;
         let user_action = sim.keybindings.action_for_key(key);
@@ -460,6 +465,21 @@ pub fn dispatch_key_binding(lua: &mut rilua::Lua, key: &str) -> crate::Result<bo
     };
     if action.is_empty() {
         return Ok(false);
+    }
+    let body = borrow_state(lua.state_mut())?
+        .keybindings
+        .bodies
+        .get(&action)
+        .cloned();
+    if let Some(body) = body {
+        if body.run_on_up {
+            borrow_state_mut(lua.state_mut())?
+                .keybindings
+                .pending_releases
+                .insert(release_key.to_string(), body.clone());
+        }
+        execute_binding_body(lua.state_mut(), &body, "down");
+        return Ok(true);
     }
     let Some(ba) = BINDING_ACTIONS.iter().find(|b| b.action == action) else {
         return Ok(false);
@@ -479,6 +499,32 @@ pub fn dispatch_key_binding(lua: &mut rilua::Lua, key: &str) -> crate::Result<bo
         exec_started.elapsed()
     ));
     Ok(true)
+}
+
+pub(crate) fn dispatch_key_binding_release(lua: &mut rilua::Lua, key: &str) -> crate::Result<()> {
+    let body = borrow_state_mut(lua.state_mut())?
+        .keybindings
+        .pending_releases
+        .remove(key);
+    if let Some(body) = body {
+        execute_binding_body(lua.state_mut(), &body, "up");
+    }
+    Ok(())
+}
+
+fn execute_binding_body(
+    state: &mut LuaState,
+    body: &crate::lua_api::sim_substates::BindingBody,
+    key_state: &str,
+) {
+    let globals = Val::Table(state.global);
+    let value = create_string(state, key_state);
+    table_set_static(state, globals, "keystate", value);
+    let result =
+        crate::lua_api::script_helpers::call_void_function_state(state, body.function, &[]);
+    if let Err(error) = result {
+        call_error_handler_state(state, &error);
+    }
 }
 
 fn push_opt_string(state: &mut LuaState, val: Option<String>) {
