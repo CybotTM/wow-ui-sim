@@ -168,7 +168,10 @@ fn unknown_class_and_specialization_report_valid_choices() {
             .unwrap();
         let stdout = String::from_utf8_lossy(&output.stdout);
         let stderr = String::from_utf8_lossy(&output.stderr);
-        assert!(!output.status.success(), "{stdout}\n{stderr}");
+        assert!(
+            matches!(output.status.code(), Some(1 | 2)),
+            "{stdout}\n{stderr}"
+        );
         assert!(stderr.contains(expected), "{stdout}\n{stderr}");
     }
 }

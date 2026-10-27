@@ -230,6 +230,7 @@ fn set_cwd_to_exe_dir_for_gui_launch() {
 
 fn run_main() -> Result<(), Box<dyn std::error::Error>> {
     let args = Args::parse();
+    let selection = class_spec::parse_selection(args.class.as_deref(), args.spec.as_deref())?;
     if let Some(Commands::CacheTexture { ref path, force }) = args.command {
         return run_cache_texture(path, force);
     }
@@ -241,10 +242,12 @@ fn run_main() -> Result<(), Box<dyn std::error::Error>> {
     #[cfg(not(feature = "gui"))]
     let (env, _font_system, saved_vars) = init;
 
-    class_spec::configure(&env, args.class.as_deref(), args.spec.as_deref())?;
     let mut exec_lua = resolve_exec_lua(&args.exec_lua);
-    if exec_lua.is_none() && (args.class.is_some() || args.spec.is_some()) {
-        exec_lua = Some(String::new());
+    if let Some(selection) = selection {
+        class_spec::schedule_selection(&env, selection);
+        if exec_lua.is_none() {
+            exec_lua = Some(String::new());
+        }
     }
 
     let dispatch = CommandDispatch {

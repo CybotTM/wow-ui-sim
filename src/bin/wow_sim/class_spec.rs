@@ -34,28 +34,34 @@ pub(super) fn resolve_spec(class: i32, value: &str) -> Result<i32, String> {
         format!(
             "unknown specialization '{value}' for class {}; valid specializations: {valid}",
             CLASS_LABELS
-                .get((class - 1) as usize)
+                .get(class.saturating_sub(1) as usize)
                 .copied()
                 .unwrap_or("Unknown")
         )
     })
 }
 
-pub(super) fn configure(
-    env: &WowLuaEnv,
+pub(super) struct Selection {
+    class: Option<i32>,
+    spec: Option<String>,
+}
+
+fn profile_supports_spec(profile: ClientProfile) -> bool {
+    !matches!(
+        profile,
+        ClientProfile::Wrath | ClientProfile::Era | ClientProfile::Anniversary
+    )
+}
+
+pub(super) fn parse_selection(
     class: Option<&str>,
     spec: Option<&str>,
-) -> Result<(), String> {
+) -> Result<Option<Selection>, String> {
     if class.is_none() && spec.is_none() {
-        return Ok(());
+        return Ok(None);
     }
     let class = class.map(resolve_class).transpose()?;
-    if spec.is_some()
-        && matches!(
-            ACTIVE,
-            ClientProfile::Wrath | ClientProfile::Era | ClientProfile::Anniversary
-        )
-    {
+    if spec.is_some() && !profile_supports_spec(ACTIVE) {
         return Err(format!(
             "--spec is not available for the {:?} profile",
             ACTIVE
@@ -64,36 +70,47 @@ pub(super) fn configure(
     if let (Some(class), Some(spec)) = (class, spec) {
         resolve_spec(class, spec)?;
     }
-    let spec = spec.map(str::to_owned);
-    env.set_post_startup_exec_hook(move |env| {
-        let current_class = class.unwrap_or_else(|| env.state().borrow().player.class_index);
-        let spec_index = spec
-            .as_deref()
-            .map(|name| resolve_spec(current_class, name))
-            .transpose()
-            .unwrap_or_else(|error| {
-                eprintln!("{error}");
-                std::process::exit(2);
-            });
-        let mut code = String::new();
-        if let Some(class) = class {
-            code.push_str(&format!("A_Admin.SetPlayerClass({class})\n"));
-        }
-        if let Some(spec) = spec_index {
-            code.push_str(&format!("A_Admin.SetSpec({spec})\n"));
-        }
-        code.push_str("A_Admin.FireEvent('PLAYER_SPECIALIZATION_CHANGED', 'player')");
-        if let Err(error) = env.exec(&code) {
-            eprintln!("failed to apply class/spec context: {error}");
-            std::process::exit(1);
-        }
-    });
-    Ok(())
+    Ok(Some(Selection {
+        class,
+        spec: spec.map(str::to_owned),
+    }))
+}
+
+pub(super) fn schedule_selection(env: &WowLuaEnv, selection: Selection) {
+    env.set_post_startup_exec_hook(move |env| apply_selection(env, selection));
+}
+
+fn apply_selection(env: &WowLuaEnv, selection: Selection) {
+    let current_class = selection
+        .class
+        .unwrap_or_else(|| env.state().borrow().player.class_index);
+    let spec_index = selection
+        .spec
+        .as_deref()
+        .map(|name| resolve_spec(current_class, name))
+        .transpose()
+        .unwrap_or_else(|error| {
+            eprintln!("{error}");
+            std::process::exit(2);
+        });
+    let mut code = String::new();
+    if let Some(class) = selection.class {
+        code.push_str(&format!("A_Admin.SetPlayerClass({class})\n"));
+    }
+    if let Some(spec) = spec_index {
+        code.push_str(&format!("A_Admin.SetSpec({spec})\n"));
+    }
+    code.push_str("A_Admin.FireEvent('PLAYER_SPECIALIZATION_CHANGED', 'player')");
+    if let Err(error) = env.exec(&code) {
+        eprintln!("failed to apply class/spec context: {error}");
+        std::process::exit(1);
+    }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{resolve_class, resolve_spec};
+    use super::{profile_supports_spec, resolve_class, resolve_spec};
+    use wow_ui_sim::client_profile::ClientProfile;
 
     #[test]
     fn class_names_and_indices() {
@@ -102,6 +119,25 @@ mod tests {
         assert_eq!(resolve_class("8").unwrap(), 8);
         assert!(resolve_class("0").unwrap_err().contains("Warrior"));
         assert!(resolve_class("unknown").unwrap_err().contains("Druid"));
+    }
+
+    #[test]
+    fn specialization_support_matches_client_profiles() {
+        for profile in [
+            ClientProfile::Retail,
+            ClientProfile::Ptr,
+            ClientProfile::Mists,
+            ClientProfile::WowForever,
+        ] {
+            assert!(profile_supports_spec(profile), "{profile:?}");
+        }
+        for profile in [
+            ClientProfile::Wrath,
+            ClientProfile::Era,
+            ClientProfile::Anniversary,
+        ] {
+            assert!(!profile_supports_spec(profile), "{profile:?}");
+        }
     }
 
     #[test]
