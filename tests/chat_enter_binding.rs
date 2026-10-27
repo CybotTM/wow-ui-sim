@@ -80,6 +80,25 @@ fn explicit_enter_binding_overrides_default_chat_action(env: &WowLuaEnv) {
 }
 }
 
+#[cfg(feature = "client-retail")]
+prefork_full_ui_case! {
+fn spectating_state_changes_original_game_menu_escape(env: &WowLuaEnv) {
+    clear_chat_focus(env);
+    env.exec("assert(SetBinding('ENTER', 'TOGGLEGAMEMENU'))")
+        .expect("explicit user binding");
+    for spectating in [false, true] {
+        env.state().borrow_mut().spectating = spectating;
+        env.exec("GameMenuFrame:Hide(); A_Admin.SetTarget('Spectating target', 60, 1, true); assert(UnitExists('target'))")
+            .expect("target scenario");
+        env.send_key_press("ENTER", None).expect("configured Enter dispatch");
+        let (target_exists, menu_shown): (bool, bool) = env
+            .eval("return not not UnitExists('target'), not not GameMenuFrame:IsShown()")
+            .expect("original escape outcomes");
+        assert_eq!((target_exists, menu_shown), (spectating, spectating));
+    }
+}
+}
+
 prefork_full_ui_case! {
 fn explicitly_cleared_enter_binding_stays_unbound(env: &WowLuaEnv) {
     clear_chat_focus(env);

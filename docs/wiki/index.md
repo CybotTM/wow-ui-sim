@@ -1,3 +1,7 @@
+## [2026-10-26] implementation | Spectating UI scenario
+
+[Scenario state and selected consumer](systems/spectating-ui.md) describe the user-authorized false default and undocumented native contract. Retail original-consumer RED/GREEN and unchanged Retail/PTR stock are proven; seven all-target checks have zero warnings.
+
 ## [2026-10-26] proof | Forever Camelot spellbook supplied observations
 
 [Original selected consumers](systems/forever-camelot-spellbook.md) link the [contract](../specs/forever-camelot-spellbook.md): shared availability and an independent three-state supplied outfit list, without catalog ungating or native defaults. Three byte-identical original-consumer RED/GREEN pairs pass; paired stock remains 26/26 with zero raw-key deltas, all 34 CVar guards are unchanged and all seven all-target checks have zero compiler warnings. Full item browsing and device startup remain outside this proof.
