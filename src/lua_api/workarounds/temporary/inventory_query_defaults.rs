@@ -13,6 +13,13 @@ if IsArtifactRelicItem == nil then
 end
 "#;
 
+const INVENTORY_SLOT_DEFAULT_LUA: &str = r#"
+if GetInventoryItemsForSlot == nil then
+    function GetInventoryItemsForSlot()
+    end
+end
+"#;
+
 const INVENTORY_QUERY_DEFAULTS_LUA: &str = r#"
 if IsInventoryItemProfessionBag == nil then
     function IsInventoryItemProfessionBag(_unit, _slot)
@@ -23,6 +30,9 @@ end
 "#;
 
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
+    if crate::client_profile::ACTIVE != crate::client_profile::ClientProfile::Wrath {
+        lua.exec(INVENTORY_SLOT_DEFAULT_LUA)?;
+    }
     #[cfg(not(feature = "retail-12-0-0"))]
     lua.exec(LEGACY_RELIC_QUERY_LUA)?;
     lua.exec(INVENTORY_QUERY_DEFAULTS_LUA)?;
