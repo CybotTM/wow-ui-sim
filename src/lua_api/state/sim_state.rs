@@ -565,6 +565,8 @@ pub struct SimState {
     pub lfr_availability: Option<bool>,
     /// Supplied transmog availability; None leaves native policy unknown.
     pub transmog_availability: crate::c_api::transmog_availability::TransmogAvailability,
+    /// Supplied spectating scenario; false is a simulator default, not a native observation.
+    pub spectating: bool,
     /// Forever: None is unset, Some(None) is an explicit no-result observation.
     pub forever_outfits: Option<Option<Vec<crate::c_api::outfit_entry::OutfitEntry>>>,
     /// Supplied Mists scenario eligibility and failure reason; None leaves policy unknown.
