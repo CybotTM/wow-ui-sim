@@ -7,6 +7,10 @@
 //!
 //! Generates: crates/sim-data/data/items.rs
 
+#[cfg(test)]
+#[path = "gen_items_tests.rs"]
+mod tests;
+
 use super::csv_util::{escape_str, parse_csv_line, read_csv_records, wow_data_dir};
 use std::collections::{BTreeSet, HashMap, HashSet};
 use std::fs::File;
