@@ -4,8 +4,9 @@ PTR and WoWForever declare these queries in their pinned `SpellBookDocumentation
 
 ## What it must do
 
-- [ ] `C_SpellBook.IsSpellBookItemLowRank(slot, bank)` returns the supplied low-rank status of the corresponding spellbook item. The scenario starts with no low-rank spell IDs; this is not a native rank claim.
+- [ ] `C_SpellBook.IsSpellBookItemLowRank(slot, bank)` returns the supplied low-rank status of the corresponding modeled player spellbook item. The scenario starts with no low-rank spell IDs; this is not a native rank claim. Unmodeled banks and slots return false as a scenario policy, not a native claim.
 - [ ] `C_SpecializationInfo.IsSpecSelectionEnabled(classID)` returns the supplied scenario boolean. It starts true so the selected specialization tab can be available when the other conditions in `Blizzard_PlayerSpellsFrame.lua:241` permit it. This is not a native eligibility rule.
+- [ ] Both queries accept secret numeric arguments only from an untainted caller, as their `AllowedWhenUntainted` declarations require.
 - [ ] Publish these queries only on PTR and WoWForever.
 - [ ] `A_Admin.SetSpellBookItemLowRank(spellID, lowRank)` sets or clears a supplied spell flag; `A_Admin.SetSpecSelectionEnabled(enabled)` sets the scenario boolean.
 
