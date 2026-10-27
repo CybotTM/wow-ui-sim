@@ -53,6 +53,19 @@ pub fn register_c_specialization_info(state: &mut LuaState) -> LuaResult<()> {
     // the table with a fresh one.
     let t_ref = ensure_namespace(state, "C_SpecializationInfo")?;
     register_c_specialization_info_methods(state, t_ref)?;
+    if matches!(
+        crate::client_profile::ACTIVE,
+        crate::client_profile::ClientProfile::Ptr
+            | crate::client_profile::ClientProfile::WowForever
+    ) && !holds_rust_fn(state, t_ref, "IsSpecSelectionEnabled")
+    {
+        table_set_rust_fn_static(
+            state,
+            t_ref,
+            "IsSpecSelectionEnabled",
+            c_spec_is_spec_selection_enabled,
+        )?;
+    }
     if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Ptr
         && !holds_rust_fn(state, t_ref, "HasPlayerEarnedATalentPoint")
     {
@@ -99,6 +112,16 @@ fn holds_rust_fn(state: &mut LuaState, table_ref: LuaTableRef, name: &'static st
         ),
         _ => false,
     }
+}
+
+fn c_spec_is_spec_selection_enabled(state: &mut LuaState) -> LuaResult<u32> {
+    let class_id = rilua::table_security::unwrap_secret(state, stack_val(state, 1))?;
+    if !matches!(class_id, Val::Num(_)) {
+        return Err(rilua::runtime_error("class ID must be a number"));
+    }
+    let enabled = borrow_state(state)?.talents.spec_selection_enabled;
+    state.push(Val::Bool(enabled));
+    Ok(1)
 }
 
 fn c_spec_has_player_earned_a_talent_point(state: &mut LuaState) -> LuaResult<u32> {

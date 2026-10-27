@@ -143,6 +143,8 @@ pub struct TalentState {
     /// Supplied lifetime talent-award history; false means empty host history.
     /// Native acquisition and its relationship to level/current ranks are unknown.
     pub has_earned_talent_point: bool,
+    /// Scenario input, not a native specialization eligibility rule.
+    pub spec_selection_enabled: bool,
     /// Active spec ID for the current loadout state.
     pub active_spec_id: u32,
     /// Spec currently loaded into the talent viewer surface.
@@ -202,6 +204,7 @@ impl TalentState {
 
         Self {
             has_earned_talent_point: false,
+            spec_selection_enabled: true,
             active_spec_id,
             view_spec_id: None,
             node_ranks,
