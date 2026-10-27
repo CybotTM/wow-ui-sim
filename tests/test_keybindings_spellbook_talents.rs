@@ -83,6 +83,34 @@ fn ptr_spellbook_filter_uses_supplied_rank() {
 
 #[cfg(feature = "client-ptr")]
 #[test]
+fn ptr_spellbook_filter_uses_supplied_flyout_membership() {
+    let env = setup_env();
+    env.send_key_press("S", None).expect("load spellbook");
+    env.state().borrow_mut().spellbook_loose_flyout_members.insert(6603);
+    env.exec(r#"
+        assert(SpellBookFrameMixin.ShouldDisplaySpellBookItem(nil, false, false, false, false, 1, 0) == false)
+        assert(SpellBookFrameMixin.ShouldDisplaySpellBookItem(nil, false, false, false, false, 2, 0) == true)
+        assert(SpellBookFrameMixin.ShouldDisplaySpellBookItem(nil, false, false, false, true, 1, 0) == true)
+    "#).expect("original spellbook filter consumes supplied flyout membership");
+}
+
+#[cfg(feature = "client-ptr")]
+#[test]
+fn ptr_item_context_uses_supplied_target_spell() {
+    let env = setup_env();
+    env.state().borrow_mut().forever_startup.target_spell_id = Some(6991);
+    env.exec("assert(ItemButtonUtil.GetItemContext() == ItemButtonUtil.ItemContextEnum.FeedPet)")
+        .expect("feed pet context");
+    env.state().borrow_mut().forever_startup.target_spell_id = Some(19750);
+    env.exec("assert(ItemButtonUtil.GetItemContext() ~= ItemButtonUtil.ItemContextEnum.FeedPet)")
+        .expect("other target context");
+    env.state().borrow_mut().forever_startup.target_spell_id = None;
+    env.exec("assert(C_Spell.GetTargetSpellID() == nil)")
+        .expect("no supplied target");
+}
+
+#[cfg(feature = "client-ptr")]
+#[test]
 fn ptr_spec_tab_uses_supplied_spec_selection() {
     let env = setup_env();
     env.send_key_press("S", None).expect("load player spells through key binding");
