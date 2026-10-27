@@ -496,8 +496,11 @@ fn toggle_encounter_journal_opens_and_closes_panel() {
 fn wrath_trade_skill_initial_selection_is_empty() {
     if cfg!(feature = "client-wrath") {
         let env = setup_env();
-        env.exec(r#"assert(GetTradeSkillSelectionIndex() == 0, "initial selection")"#)
-            .expect("initial selection is empty");
+        env.exec(r#"
+            assert(GetTradeSkillSelectionIndex() == 0, "initial selection")
+            SelectTradeSkill(1)
+            assert(GetTradeSkillSelectionIndex() == 1, "selection changes")
+        "#).expect("initial selection is empty and changes");
     }
 }
 
@@ -518,6 +521,17 @@ fn open_trade_skill_opens_blacksmithing_panel() {
             env.exec(r#"
                 assert(TradeSkillFrame:IsShown(), "native trade-skill panel should open")
                 assert(GetTradeSkillLine() == "Blacksmithing", "selected profession identity")
+                for _, index in ipairs({0, -2147483648}) do
+                    local name, difficulty, count, expanded, verb = GetTradeSkillInfo(index)
+                    assert(name == nil and difficulty == nil and count == 0 and expanded == nil and verb == nil, "invalid info")
+                    GetTradeSkillIcon(index)
+                    GetTradeSkillNumMade(index)
+                    GetTradeSkillNumReagents(index)
+                    GetTradeSkillReagentInfo(index, index)
+                    GetTradeSkillDescription(index)
+                    GetTradeSkillCooldown(index)
+                    GetTradeSkillTools(index)
+                end
                 SelectTradeSkill(0)
                 assert(GetTradeSkillSelectionIndex() == 0, "zero clears selection")
                 SelectTradeSkill(1)
