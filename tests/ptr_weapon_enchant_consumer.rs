@@ -3,8 +3,17 @@
 use wow_ui_sim::c_api::weapon_enchants::{TEMPORARY_ENCHANT_TYPE, WeaponEnchant};
 use wow_ui_sim::lua_api::WowLuaEnv;
 
-prefork_full_ui_case! {
-fn ptr_weapon_enchant_event_updates_buff_frame(env: &WowLuaEnv) {
+#[test]
+fn ptr_weapon_enchant_event_updates_buff_frame() {
+    let env = WowLuaEnv::new().unwrap();
+    let ui = wow_ui_sim::paths::default_blizzard_ui_addons_path().unwrap();
+    for (_, toc) in wow_ui_sim::loader::discover_blizzard_addons(&ui) {
+        wow_ui_sim::loader::load_addon(&env.loader_env(), &toc).unwrap();
+    }
+    env.apply_post_load_workarounds();
+    for event in ["VARIABLES_LOADED", "PLAYER_LOGIN", "PLAYER_ENTERING_WORLD"] {
+        let _ = env.fire_event(event);
+    }
     env.exec("assert(BuffFrame:IsEventRegistered('WEAPON_ENCHANT_CHANGED'))")
         .unwrap();
     for (charges, time_left) in [(2, 60000.0), (5, 30000.0)] {
@@ -21,8 +30,9 @@ fn ptr_weapon_enchant_event_updates_buff_frame(env: &WowLuaEnv) {
         assert!(errors.is_empty(), "weapon enchant event errors: {errors:?}");
         let actual = env.eval::<u32>("for _, aura in ipairs(BuffFrame.auraInfo) do if aura.auraType == 'TempEnchant' and aura.ID == 16 then return aura.count end end; return 0").unwrap();
         assert_eq!(actual, charges);
-        let legacy = env.eval::<u32>("local _, _, charges = GetWeaponEnchantInfo(); return charges").unwrap();
+        let legacy = env
+            .eval::<u32>("local _, _, charges = GetWeaponEnchantInfo(); return charges")
+            .unwrap();
         assert_eq!(legacy, charges);
     }
-}
 }
