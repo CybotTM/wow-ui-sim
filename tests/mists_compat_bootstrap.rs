@@ -388,7 +388,7 @@ fn mists_honor_frame_shared_reproduces_missing_honor_system_enabled() {
 
     assert!(!ok, "HonorFrame_OnLoad should reproduce the nil global");
     assert!(
-        err.contains("attempt to call a nil value"),
+        err.contains("attempt to call global 'HonorSystemEnabled' (a nil value)"),
         "expected a nil-call failure, got: {err}"
     );
     assert_eq!(
