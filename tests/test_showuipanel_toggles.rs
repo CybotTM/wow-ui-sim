@@ -521,6 +521,11 @@ fn open_trade_skill_opens_blacksmithing_panel() {
             env.exec(r#"
                 assert(TradeSkillFrame:IsShown(), "native trade-skill panel should open")
                 assert(GetTradeSkillLine() == "Blacksmithing", "selected profession identity")
+                local count = GetNumTradeSkills()
+                TradeSkillCollapseAllButton:Click()
+                assert(GetNumTradeSkills() == count, "collapse without headers keeps recipes")
+                TradeSkillCollapseAllButton:Click()
+                assert(GetNumTradeSkills() == count, "expand without headers keeps recipes")
                 for _, index in ipairs({0, -2147483648}) do
                     local name, difficulty, count, expanded, verb = GetTradeSkillInfo(index)
                     assert(name == nil and difficulty == nil and count == 0 and expanded == nil and verb == nil, "invalid info")
