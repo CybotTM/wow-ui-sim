@@ -140,8 +140,8 @@ fn delay_dispatches_addon_timer_and_updates_before_exec_lua() {
             .iter()
             .position(|value| *value == "DELAY_RESULT")
             .unwrap();
-        assert_eq!(values[index + 1], scheduled, "delay {delay:?}: {line}");
         assert_eq!(values[index + 2], fired, "delay {delay:?}: {line}");
+        assert_eq!(values[index + 1], scheduled, "delay {delay:?}: {line}");
         let elapsed: f64 = values[index + 3].parse().expect("numeric elapsed");
         if delay.is_some_and(|delay| delay > 0) {
             assert!(elapsed > 0.0, "delay {delay:?}: {line}");
