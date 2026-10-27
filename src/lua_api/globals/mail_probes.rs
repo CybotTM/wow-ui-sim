@@ -200,10 +200,37 @@ fn has_send_mail_item(state: &mut LuaState) -> LuaResult<u32> {
 
 fn get_send_mail_item(state: &mut LuaState) -> LuaResult<u32> {
     let raw_index = Option::<f64>::from_stack(state, 1)?.unwrap_or(0.0);
-    let Some(attachment) = send_mail_attachment_at(state, raw_index) else {
-        return Ok(0);
+    let attachment = send_mail_attachment_at(state, raw_index);
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
+        return push_wrath_send_mail_item(state, attachment);
+    }
+    match attachment {
+        Some(attachment) => push_mail_attachment(state, attachment),
+        None => Ok(0),
+    }
+}
+
+fn push_wrath_send_mail_item(
+    state: &mut LuaState,
+    attachment: Option<crate::lua_api::state_types::MailAttachment>,
+) -> LuaResult<u32> {
+    let Some(attachment) = attachment else {
+        // Scenario default: the native empty-slot tuple is not established.
+        state.push(Val::Nil);
+        state.push(Val::Nil);
+        state.push(Val::Num(0.0));
+        return Ok(3);
     };
-    push_mail_attachment(state, attachment)
+    let item = items::get_item(attachment.item_id);
+    let name = create_string_static(state, item.map(|row| row.name).unwrap_or("Unknown"));
+    state.push(name);
+    state.push(Val::Num(icon_for_item(attachment.item_id)));
+    state.push(Val::Num(attachment.count as f64));
+    state.push(Val::Num(
+        item.map(|row| row.quality as f64)
+            .unwrap_or(attachment.quality as f64),
+    ));
+    Ok(4)
 }
 
 fn get_send_mail_item_link(state: &mut LuaState) -> LuaResult<u32> {

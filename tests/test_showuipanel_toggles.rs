@@ -719,15 +719,42 @@ fn character_reputation_tab_click_selects_reputation_panel() {
 fn admin_open_mailbox_opens_and_closes_mail_panel() {
     test_timeout! {
         let env = setup_env();
-        if cfg!(feature = "client-wrath") {
+        if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Wrath {
+            common::panel_fixtures::clear_recorded_lua_errors(&env);
+            // FrameXML/MailFrame.lua:28-30,44-59,79-82 owns these native events.
+            // FrameXML/MailFrame.xml:373 declares the initially hidden root.
             env.exec(r#"
                 A_Admin.ClearInbox()
                 A_Admin.AddMail("Thrall", "Unread Orders", "Meet me in Orgrimmar.")
+                assert(not MailFrame:IsShown(), "mailbox starts closed")
+
+                local events = {}
+                local observer = CreateFrame("Frame")
+                observer:RegisterEvent("MAIL_SHOW")
+                observer:RegisterEvent("MAIL_CLOSED")
+                observer:SetScript("OnEvent", function(_, event)
+                    events[event] = true
+                end)
+
                 A_Admin.OpenMailbox()
-                assert(MailFrame:IsShown() and InboxFrame:IsShown())
+                assert(events.MAIL_SHOW, "admin open must publish native MAIL_SHOW")
+                assert(MailFrame:IsShown() and InboxFrame:IsShown(), "native inbox opens")
+                assert(MailFrame.selectedTab == 1, "native open selects inbox tab")
                 A_Admin.CloseMailbox()
-                assert(not MailFrame:IsShown())
-            "#).expect("native mailbox interaction opens and closes the inbox");
+                assert(events.MAIL_CLOSED, "admin close must publish native MAIL_CLOSED")
+                assert(not MailFrame:IsShown(), "native mailbox closes")
+
+                events.MAIL_SHOW = nil
+                A_Admin.OpenMailbox()
+                assert(events.MAIL_SHOW, "reopen must publish native MAIL_SHOW again")
+                assert(MailFrame:IsShown() and InboxFrame:IsShown(), "native inbox reopens")
+                events.MAIL_CLOSED = nil
+                A_Admin.CloseMailbox()
+                assert(events.MAIL_CLOSED, "second close publishes native MAIL_CLOSED")
+                assert(not MailFrame:IsShown(), "reopened native mailbox closes")
+            "#).expect("native mailbox interaction opens and closes the inbox twice");
+            let errors = common::panel_fixtures::recorded_lua_errors(&env);
+            assert!(errors.is_empty(), "native mailbox interaction errors: {errors:?}");
             return;
         }
 
@@ -764,6 +791,47 @@ fn admin_open_mailbox_opens_and_closes_mail_panel() {
             "ok",
             "A_Admin mailbox interaction should open and close the mail panel: {result}"
         );
+    }
+}
+
+#[test]
+fn wrath_admin_mailbox_drives_original_mail_frame() {
+    if wow_ui_sim::client_profile::ACTIVE != wow_ui_sim::client_profile::ClientProfile::Wrath {
+        return;
+    }
+    test_timeout! {
+        let env = setup_env();
+        env.exec(r#"
+            assert(not MailFrame:IsShown(), "mailbox starts closed")
+            A_Admin.OpenMailbox()
+            assert(MailFrame:IsShown(), "MailFrame MAIL_SHOW consumer opens mailbox")
+            assert(InboxFrame:IsShown(), "MailFrame MAIL_SHOW consumer opens inbox")
+            A_Admin.CloseMailbox()
+            assert(not MailFrame:IsShown(), "MailFrame MAIL_CLOSED consumer closes mailbox")
+        "#).expect("original Wrath MailFrame consumes admin mailbox events");
+    }
+}
+
+#[test]
+fn wrath_send_mail_update_renders_empty_and_occupied_attachment_counts() {
+    if wow_ui_sim::client_profile::ACTIVE != wow_ui_sim::client_profile::ClientProfile::Wrath {
+        return;
+    }
+    test_timeout! {
+        let env = setup_env();
+        env.exec(r#"
+            A_Admin.ClearBags()
+            A_Admin.AddBagItem(0, 1, 6948, 5)
+            A_Admin.AddBagItem(0, 2, 6948, 3)
+            PickupContainerItem(0, 1)
+            ClickSendMailItemButton(2)
+            PickupContainerItem(0, 2)
+            ClickSendMailItemButton(3)
+            SendMailFrame_Update()
+            assert(SendMailAttachment1Count:GetText() == "", "empty slot count")
+            assert(SendMailAttachment2Count:GetText() == "5", "first occupied slot count")
+            assert(SendMailAttachment3Count:GetText() == "3", "second occupied slot count")
+        "#).expect("Wrath SendMailFrame_Update renders attachment counts");
     }
 }
 
