@@ -62,6 +62,8 @@ macro_rules! build_empty_sim_state {
             guild_roster_selection: 0,
             wrath_glyph_sockets: Default::default(),
             wrath_unspent_talent_points: Default::default(),
+            wrath_talent_tabs: Default::default(),
+            wrath_talent_rows: Default::default(),
             #[cfg(any(
                 feature = "client-wrath",
                 feature = "client-era",
@@ -129,6 +131,7 @@ macro_rules! build_empty_sim_state {
             #[cfg(feature = "client-retail")]
             weapon_attack_power: ::std::collections::HashMap::new(),
             quest_blobs: $collections.quest_blobs,
+            minimap_quest_blob_inside: HashMap::new(),
             fog_of_war_frames: $collections.fog_of_war_frames,
             unit_position_frames: $collections.unit_position_frames,
             pending_player_reports: $collections.pending_player_reports,
@@ -694,6 +697,8 @@ macro_rules! build_empty_sim_state {
             challenge_completion: Default::default(),
             challenge_run: Default::default(),
             manual_clock: None,
+            wrath_spell_slots: Default::default(),
+            wrath_spell_selection: (None, None),
             known_spells: ::std::collections::HashSet::new(),
             harmful_spells: ::std::collections::HashSet::new(),
             helpful_spells: ::std::collections::HashSet::new(),

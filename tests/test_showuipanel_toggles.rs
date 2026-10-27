@@ -505,6 +505,18 @@ fn toggle_encounter_journal_opens_and_closes_panel() {
 }
 
 #[test]
+fn wrath_trade_skill_initial_selection_is_empty() {
+    if cfg!(feature = "client-wrath") {
+        let env = setup_env();
+        env.exec(r#"
+            assert(GetTradeSkillSelectionIndex() == 0, "initial selection")
+            SelectTradeSkill(1)
+            assert(GetTradeSkillSelectionIndex() == 1, "selection changes")
+        "#).expect("initial selection is empty and changes");
+    }
+}
+
+#[test]
 fn open_trade_skill_opens_blacksmithing_panel() {
     test_timeout! {
         let env = setup_env();
@@ -521,7 +533,65 @@ fn open_trade_skill_opens_blacksmithing_panel() {
             env.exec(r#"
                 assert(TradeSkillFrame:IsShown(), "native trade-skill panel should open")
                 assert(GetTradeSkillLine() == "Blacksmithing", "selected profession identity")
+                local count = GetNumTradeSkills()
+                TradeSkillCollapseAllButton:Click()
+                assert(GetNumTradeSkills() == count, "collapse without headers keeps recipes")
+                TradeSkillCollapseAllButton:Click()
+                assert(GetNumTradeSkills() == count, "expand without headers keeps recipes")
+                for _, index in ipairs({0, -2147483648}) do
+                    local name, difficulty, count, expanded, verb = GetTradeSkillInfo(index)
+                    assert(name == nil and difficulty == nil and count == 0 and expanded == nil and verb == nil, "invalid info")
+                    GetTradeSkillIcon(index)
+                    GetTradeSkillNumMade(index)
+                    GetTradeSkillNumReagents(index)
+                    GetTradeSkillReagentInfo(index, index)
+                    GetTradeSkillDescription(index)
+                    GetTradeSkillCooldown(index)
+                    GetTradeSkillTools(index)
+                end
+                SelectTradeSkill(0)
+                assert(GetTradeSkillSelectionIndex() == 0, "zero clears selection")
+                SelectTradeSkill(1)
+                SelectTradeSkill(-2147483648)
+                assert(GetTradeSkillSelectionIndex() == 0, "minimum index clears selection")
+                TradeSkillFrame_SetSelection(1)
+                assert(GetTradeSkillSelectionIndex() == 1, "first selection")
+                TradeSkillFrame_SetSelection(2)
+                assert(GetTradeSkillSelectionIndex() == 2, "second selection")
+                filter_events = 0
+                filter_listener = CreateFrame("Frame")
+                filter_listener:RegisterEvent("TRADE_SKILL_FILTER_UPDATE")
+                filter_listener:SetScript("OnEvent", function() filter_events = filter_events + 1 end)
+                TradeSkillFrameEditBox:SetText("rOuGh ShArPeNiNg StOnE")
             "#).expect("native trade-skill event consumer opens Blacksmithing");
+            env.fire_on_update(0.016).expect("flush first filter edit");
+            env.exec(r#"
+                assert(GetNumTradeSkills() == 1, "first filter count")
+                assert(GetTradeSkillInfo(1) == "Rough Sharpening Stone", "first filter result")
+                assert(filter_events == 1, "changed filter emits event")
+                SetTradeSkillItemNameFilter("rOuGh ShArPeNiNg StOnE")
+                assert(filter_events == 1, "unchanged filter emits no event")
+                TradeSkillFrameEditBox:SetText("no such recipe")
+            "#).expect("first filter changes the native list");
+            env.fire_on_update(0.016).expect("flush second filter edit");
+            env.exec(r#"
+                assert(GetNumTradeSkills() == 0, "second filter count")
+                assert(filter_events == 2, "second changed filter emits event")
+                TradeSkillFrame:Hide()
+                SelectTradeSkill(2)
+                local selected = GetTradeSkillInfo(2)
+                SetTradeSkillItemNameFilter(nil)
+                assert(GetNumTradeSkills() > 1, "nil clears filter")
+                assert(GetTradeSkillInfo(GetTradeSkillSelectionIndex()) == selected, "selection survives nil clear")
+                SetTradeSkillItemNameFilter("no such recipe")
+                assert(GetNumTradeSkills() == 0, "filter reapplied")
+                assert(GetTradeSkillInfo(GetTradeSkillSelectionIndex()) == selected, "selection survives filtering")
+                SetTradeSkillItemNameFilter("")
+                assert(GetNumTradeSkills() > 1, "empty string clears filter")
+                assert(GetTradeSkillInfo(GetTradeSkillSelectionIndex()) == selected, "selection survives empty clear")
+            "#).expect("filter changes preserve selected recipe and clear with nil or empty string");
+            let errors = common::panel_fixtures::recorded_lua_errors(&env);
+            assert!(errors.is_empty(), "native trade-skill filter errors: {errors:?}");
             return;
         }
 
@@ -948,4 +1018,116 @@ fn housing_dashboard_loads_and_opens_panel() {
         );
     }
 }
+}
+
+#[test]
+fn supplied_reputation_rows_are_indexed_and_preserve_fields() {
+    if !cfg!(feature = "client-wrath") {
+        return;
+    }
+    let env = WowLuaEnv::new().unwrap();
+    use wow_ui_sim::lua_api::state::FactionEntry;
+    let first = FactionEntry {
+        faction_id: 101,
+        name: "First".into(),
+        description: "Description A".into(),
+        standing: 4,
+        bottom: 100,
+        top: 300,
+        earned: 150,
+        at_war: true,
+        can_toggle_at_war: false,
+        is_header: true,
+        is_collapsed: true,
+        has_rep: false,
+        is_watched: true,
+        is_child: false,
+        has_bonus_rep_gain: true,
+        can_be_lfg_bonus: false,
+    };
+    let second = FactionEntry {
+        faction_id: 202,
+        name: "Second".into(),
+        description: "Description B".into(),
+        standing: 6,
+        bottom: 300,
+        top: 900,
+        earned: 550,
+        at_war: false,
+        can_toggle_at_war: true,
+        is_header: false,
+        is_collapsed: false,
+        has_rep: true,
+        is_watched: false,
+        is_child: true,
+        has_bonus_rep_gain: false,
+        can_be_lfg_bonus: true,
+    };
+    env.state().borrow_mut().factions.clear();
+    env.exec("assert(GetNumFactions() == 0); assert(select('#', GetFactionInfo(1)) == 0)")
+        .unwrap();
+    env.state().borrow_mut().factions = vec![first.clone(), second.clone()];
+    env.exec(r#"
+        assert(GetNumFactions() == 2)
+        local function check(index, expected)
+            local values = {GetFactionInfo(index)}
+            assert(#values == 13)
+            for i = 1, 13 do assert(values[i] == expected[i], index .. ':' .. i) end
+        end
+        check(1, {'First', 'Description A', 4, 100, 300, 150, true, false, true, true, false, true, false})
+        check(2, {'Second', 'Description B', 6, 300, 900, 550, false, true, false, false, true, false, true})
+        assert(select('#', GetFactionInfo(0)) == 0)
+        assert(select('#', GetFactionInfo(-1)) == 0)
+        assert(select('#', GetFactionInfo(3)) == 0)
+    "#).unwrap();
+    env.state().borrow_mut().factions = vec![
+        second,
+        first,
+        FactionEntry {
+            name: "Third".into(),
+            ..Default::default()
+        },
+    ];
+    env.exec(
+        r#"
+        assert(GetNumFactions() == 3)
+        assert(GetFactionInfo(1) == 'Second')
+        assert(GetFactionInfo(2) == 'First')
+        assert(GetFactionInfo(3) == 'Third')
+        assert(select('#', GetFactionInfo(4)) == 0)
+    "#,
+    )
+    .unwrap();
+}
+
+#[test]
+fn wrath_reputation_panel_renders_supplied_factions() {
+    if !cfg!(feature = "client-wrath") {
+        return;
+    }
+    let env = setup_env();
+    for (name, standing, earned) in [("Kirin Tor", 5, 1250), ("Wyrmrest Accord", 6, 3400)] {
+        env.state().borrow_mut().factions = vec![wow_ui_sim::lua_api::state::FactionEntry {
+            name: name.into(),
+            description: "Supplied faction".into(),
+            standing,
+            bottom: 0,
+            top: 12000,
+            earned,
+            has_rep: true,
+            ..Default::default()
+        }];
+        env.exec("ToggleCharacter('ReputationFrame')")
+            .expect("open reputation panel");
+        let rendered: String = env
+            .eval("return ReputationBar1FactionName:GetText()")
+            .unwrap();
+        assert_eq!(rendered, name);
+        let value: f64 = env
+            .eval("return ReputationBar1ReputationBar:GetValue()")
+            .unwrap();
+        assert_eq!(value, earned as f64);
+        env.exec("ToggleCharacter('ReputationFrame')")
+            .expect("close reputation panel");
+    }
 }

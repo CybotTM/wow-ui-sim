@@ -307,6 +307,7 @@ fn register_group_activity_surfaces(state: &mut LuaState) -> LuaResult<()> {
     c_api::c_report_system::register_c_report_system_surface(state)?;
     zone_ability::register_zone_ability_surface(state)?;
     c_api::c_stable_info::register_c_stable_info_surface(state)?;
+    c_api::c_minimap_quest_blob::register(state)?;
     small_namespaces::register_small_namespaces(state)?;
     small_probes::register_small_probes_surface(state)?;
     Ok(())

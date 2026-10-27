@@ -1,6 +1,6 @@
 //! Crafting / profession dynamic state.
 
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 /// Mutable crafting state. Static profession/recipe catalogue still
 /// lives in `globals::profession_data`; this struct only carries
@@ -26,6 +26,15 @@ pub struct CraftingState {
     pub selected_craft_index: Option<i32>,
     /// Currently selected legacy TradeSkillFrame list index.
     pub selected_trade_skill_index: Option<i32>,
+    /// Wrath selection is a recipe ID, independent of filtered display order.
+    pub wrath_selected_trade_skill_recipe: Option<i32>,
+    pub wrath_trade_skill_name_filter: String,
+    pub wrath_trade_skill_level_filter: (i32, i32),
+    pub wrath_trade_skill_makeable_only: bool,
+    pub wrath_trade_skill_repeat_count: u32,
+    pub wrath_trade_skill_linked: bool,
+    pub wrath_trade_skill_cooldowns: HashMap<i32, f64>,
+    pub wrath_trade_skill_tools: HashMap<i32, Vec<String>>,
     /// Currently selected legacy ClassTrainerFrame service index.
     pub selected_trainer_service_index: Option<i32>,
 }
