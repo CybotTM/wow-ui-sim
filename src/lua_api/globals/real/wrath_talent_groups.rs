@@ -71,11 +71,14 @@ fn get_glyph_socket_info(state: &mut LuaState) -> LuaResult<u32> {
     let group = selected_group(state, 2)?;
     let socket = {
         let sim = borrow_state(state)?;
-        let socket = sim.wrath_glyph_sockets.get(&(group, index)).cloned();
-        if group == 0 || (group > sim.wrath_legacy.talent_group_counts.player && socket.is_none()) {
+        let group_supplied = sim
+            .wrath_glyph_sockets
+            .keys()
+            .any(|(supplied_group, _)| *supplied_group == group);
+        if group == 0 || (group > sim.wrath_legacy.talent_group_counts.player && !group_supplied) {
             return Ok(0);
         }
-        socket
+        sim.wrath_glyph_sockets.get(&(group, index)).cloned()
     };
     let enabled = socket
         .as_ref()
