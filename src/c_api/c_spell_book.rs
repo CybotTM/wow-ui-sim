@@ -27,6 +27,18 @@ pub(crate) fn register_c_spell_book(state: &mut LuaState) -> LuaResult<()> {
     register_spell_book_item_queries(state, table_ref)?;
     register_spell_book_item_actions(state, table_ref)?;
     register_spell_book_state_queries(state, table_ref)?;
+    if matches!(
+        crate::client_profile::ACTIVE,
+        crate::client_profile::ClientProfile::Ptr
+            | crate::client_profile::ClientProfile::WowForever
+    ) {
+        table_set_rust_fn_static(
+            state,
+            table_ref,
+            "IsSpellBookItemLowRank",
+            is_spell_book_item_low_rank,
+        )?;
+    }
     register_spell_flyout_queries(state, table_ref)?;
     #[cfg(feature = "client-mists")]
     crate::c_api::legacy_spell_book::register_legacy_spell_book_globals(state)?;
@@ -458,7 +470,18 @@ fn c_spell_book_get_spell_book_item_cast_count(state: &mut LuaState) -> LuaResul
     Ok(1)
 }
 
-#[cfg(feature = "retail-12-0-0")]
+fn is_spell_book_item_low_rank(state: &mut LuaState) -> LuaResult<u32> {
+    let slot = f64::from_stack(state, 1)?;
+    let bank = f64::from_stack(state, 2)?;
+    let spell_id = resolve_player_spellbook_entry(Val::Num(slot), Val::Num(bank));
+    let is_low_rank = {
+        let sim = borrow_state(state)?;
+        spell_id.is_some_and(|id| sim.spellbook_low_rank.contains(&id))
+    };
+    state.push(Val::Bool(is_low_rank));
+    Ok(1)
+}
+
 fn resolve_player_spellbook_entry(slot: Val, bank: Val) -> Option<u32> {
     const PLAYER_SPELL_BANK: f64 = 0.0;
     if !matches!(bank, Val::Num(bank) if bank == PLAYER_SPELL_BANK) {

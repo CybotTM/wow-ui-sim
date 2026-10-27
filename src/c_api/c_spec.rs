@@ -4,7 +4,7 @@ use crate::lua_api::game_data::CastingState;
 use crate::lua_api::globals::real::specialization_helpers::push_specialization_identity;
 use crate::lua_api::globals::spellbook_data;
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_table};
-use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
+use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
 use crate::specializations;
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
@@ -53,6 +53,19 @@ pub fn register_c_specialization_info(state: &mut LuaState) -> LuaResult<()> {
     // the table with a fresh one.
     let t_ref = ensure_namespace(state, "C_SpecializationInfo")?;
     register_c_specialization_info_methods(state, t_ref)?;
+    if matches!(
+        crate::client_profile::ACTIVE,
+        crate::client_profile::ClientProfile::Ptr
+            | crate::client_profile::ClientProfile::WowForever
+    ) && !holds_rust_fn(state, t_ref, "IsSpecSelectionEnabled")
+    {
+        table_set_rust_fn_static(
+            state,
+            t_ref,
+            "IsSpecSelectionEnabled",
+            c_spec_is_spec_selection_enabled,
+        )?;
+    }
     if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Ptr
         && !holds_rust_fn(state, t_ref, "HasPlayerEarnedATalentPoint")
     {
@@ -99,6 +112,13 @@ fn holds_rust_fn(state: &mut LuaState, table_ref: LuaTableRef, name: &'static st
         ),
         _ => false,
     }
+}
+
+fn c_spec_is_spec_selection_enabled(state: &mut LuaState) -> LuaResult<u32> {
+    let _class_id = f64::from_stack(state, 1)?;
+    let enabled = borrow_state(state)?.talents.spec_selection_enabled;
+    state.push(Val::Bool(enabled));
+    Ok(1)
 }
 
 fn c_spec_has_player_earned_a_talent_point(state: &mut LuaState) -> LuaResult<u32> {
