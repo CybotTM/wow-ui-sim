@@ -1,6 +1,6 @@
 ## [2026-10-27] implementation | Target spell and flyout inputs
 
-Reconciled the [historical target-spell boundary](investigations/forever-startup-gaps.md#historical-startup-packet-and-unknown-consumers) with the [scenario contract](../specs/spell-target-flyout.md). PTR original consumer RED/GREEN proof is recorded; native no-target behavior and remaining profile verification are open.
+Reconciled the [historical target-spell boundary](investigations/forever-startup-gaps.md#historical-startup-packet-and-unknown-consumers) with the [scenario contract](../specs/spell-target-flyout.md). PTR original consumer RED/GREEN and Forever target/secret cases pass. All seven profile checks have zero compiler warnings; PTR stock removes two missing-API error keys, and Retail/Forever stock is unchanged. Native no-target behavior remains unknown.
 
 ## [2026-10-26] implementation | Spectating UI scenario
 
