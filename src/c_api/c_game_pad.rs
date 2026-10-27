@@ -36,10 +36,9 @@ pub(crate) fn register(state: &mut LuaState) -> LuaResult<()> {
         "StickIndexToConfigName",
         stick_index_to_config_name,
     )?;
-    if crate::client_profile::ACTIVE != crate::client_profile::ClientProfile::WowForever {
-        return Ok(());
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::WowForever {
+        table_set_rust_fn_static(state, namespace, "IsEnabled", is_enabled)?;
     }
-    table_set_rust_fn_static(state, namespace, "IsEnabled", is_enabled)?;
     table_set_rust_fn_static(
         state,
         namespace,
@@ -82,6 +81,9 @@ fn set_allow_hover_events_with_free_look(state: &mut LuaState) -> LuaResult<u32>
             return Ok(0);
         }
         sim.gamepad_allow_hover_events_with_free_look = enabled;
+    }
+    if crate::client_profile::ACTIVE != crate::client_profile::ClientProfile::WowForever {
+        return Ok(0);
     }
     // Change-only publication and state-before-callback are simulator guesses.
     fire_named_event_state(

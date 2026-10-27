@@ -37,9 +37,9 @@ Five hover cases now pass in the current run; checked criteria reflect their bou
 
 ## PTR publication
 
-PTR `Blizzard_APIDocumentationGenerated/GamePadDocumentation.lua:168,273` declares `GetDeviceMappedState` and `StickIndexToConfigName`; `Blizzard_GamepadSharedUtility/InputBindingStack/InputAxisBinding.lua:5,10` consumes them during load. PTR publishes only these two `C_GamePad` members using the same supplied-stick model and absent-snapshot nil policy. Native hardware and enablement behavior remain unknown. Retail publication is unchanged.
+PTR `Blizzard_APIDocumentationGenerated/GamePadDocumentation.lua:168,273` declares `GetDeviceMappedState` and `StickIndexToConfigName`; `Blizzard_GamepadSharedUtility/InputBindingStack/InputAxisBinding.lua:5,10` consumes them during load. PTR publishes these two `C_GamePad` members using the same supplied-stick model and absent-snapshot nil policy. Native hardware and enablement behavior remain unknown. Retail publication is unchanged.
 
-The same original TOC initializes `FrameControlsManager.lua:230`, which registers `GLOBAL_REGION_MOUSE_DOWN`. PTR `Blizzard_APIDocumentationGenerated/SystemDocumentation.lua:86` declares this event; PTR accepts its registration. This does not change the free-look-hover event.
+The same original TOC initializes `FrameControlsManager.lua:230`, which registers `GLOBAL_REGION_MOUSE_DOWN`. PTR `Blizzard_APIDocumentationGenerated/SystemDocumentation.lua:86` declares this event; PTR accepts its registration. PTR `GamePadDocumentation.lua:135,231` also declares the hover getter and setter, which `FrameControlsManager.lua:871` uses. PTR stores the supplied boolean in the existing environment-local flag; it does not publish hover-change events. `C_GamePad.IsEnabled` remains absent.
 
 ## Implementation inventory
 
