@@ -67,13 +67,14 @@ const POLICY: ValidationPolicy = ValidationPolicy {
         }
     },
 };
-// PTR Blizzard_APIDocumentationGenerated: SystemDocumentation.lua:177,189;
+// PTR Blizzard_APIDocumentationGenerated: SystemDocumentation.lua:86,177,189;
 // VoiceChatDocumentation.lua:919; UnitDocumentation.lua:4290.
 fn is_ptr_event(name: &str) -> bool {
     crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Ptr
         && matches!(
             name,
-            "SHARD_TRANSFER"
+            "GLOBAL_REGION_MOUSE_DOWN"
+                | "SHARD_TRANSFER"
                 | "SHARD_TRANSFER_IMMINENT"
                 | "VOICE_CHAT_ACTIVE_VOICE_PROVIDER_CHANGED"
                 | "UNIT_HAPPINESS"

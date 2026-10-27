@@ -39,6 +39,8 @@ Five hover cases now pass in the current run; checked criteria reflect their bou
 
 PTR `Blizzard_APIDocumentationGenerated/GamePadDocumentation.lua:168,273` declares `GetDeviceMappedState` and `StickIndexToConfigName`; `Blizzard_GamepadSharedUtility/InputBindingStack/InputAxisBinding.lua:5,10` consumes them during load. PTR publishes only these two `C_GamePad` members using the same supplied-stick model and absent-snapshot nil policy. Native hardware and enablement behavior remain unknown. Retail publication is unchanged.
 
+The same original TOC initializes `FrameControlsManager.lua:230`, which registers `GLOBAL_REGION_MOUSE_DOWN`. PTR `Blizzard_APIDocumentationGenerated/SystemDocumentation.lua:86` declares this event; PTR accepts its registration. This does not change the free-look-hover event.
+
 ## Implementation inventory
 
 - `src/c_api/c_game_pad.rs` — public concrete stick inputs, mapped queries, and secret-aware hover getter/setter using synchronous `script_helpers::fire_named_event_state` after releasing the state borrow.
