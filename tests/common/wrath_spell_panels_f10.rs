@@ -132,6 +132,18 @@ fn talent_tab_background_tracks_supplied_records_on_show() {
                 preview_points_spent: 1,
             },
         );
+        if prerequisite {
+            env.state().borrow_mut().wrath_talent_tabs.insert(
+                (1, 2),
+                wow_ui_sim::lua_api::state::WrathTalentTab {
+                    name: "Second tree".to_string(),
+                    icon: "Interface\\Icons\\SecondTree".to_string(),
+                    points_spent: 0,
+                    background: "AnotherTree".to_string(),
+                    preview_points_spent: 0,
+                },
+            );
+        }
         let mut rows = vec![wow_ui_sim::lua_api::state::WrathTalentRow {
             name: "First talent".to_string(),
             icon: "Interface\\Icons\\FirstTalent".to_string(),
@@ -169,6 +181,9 @@ fn talent_tab_background_tracks_supplied_records_on_show() {
         env.exec("PlayerTalentFrame:Hide(); PlayerTalentFrame:Show()")
             .expect("show native talent panel");
         assert_no_errors(&env);
+        let expected_tabs = if prerequisite { 2 } else { 1 };
+        env.exec(&format!("assert(GetNumTalentTabs(false, false) == {expected_tabs})"))
+            .expect("supplied tab count");
         env.exec(&format!(
             "assert(PlayerTalentFrameBackgroundTopLeft:GetTexture() == 'Interface\\\\TalentFrame\\\\{background}-TopLeft')"
         ))
