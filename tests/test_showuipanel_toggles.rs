@@ -493,6 +493,15 @@ fn toggle_encounter_journal_opens_and_closes_panel() {
 }
 
 #[test]
+fn wrath_trade_skill_initial_selection_is_empty() {
+    if cfg!(feature = "client-wrath") {
+        let env = setup_env();
+        env.exec(r#"assert(GetTradeSkillSelectionIndex() == 0, "initial selection")"#)
+            .expect("initial selection is empty");
+    }
+}
+
+#[test]
 fn open_trade_skill_opens_blacksmithing_panel() {
     test_timeout! {
         let env = setup_env();
@@ -509,7 +518,49 @@ fn open_trade_skill_opens_blacksmithing_panel() {
             env.exec(r#"
                 assert(TradeSkillFrame:IsShown(), "native trade-skill panel should open")
                 assert(GetTradeSkillLine() == "Blacksmithing", "selected profession identity")
+                SelectTradeSkill(0)
+                assert(GetTradeSkillSelectionIndex() == 0, "zero clears selection")
+                SelectTradeSkill(1)
+                SelectTradeSkill(-2147483648)
+                assert(GetTradeSkillSelectionIndex() == 0, "minimum index clears selection")
+                TradeSkillFrame_SetSelection(1)
+                assert(GetTradeSkillSelectionIndex() == 1, "first selection")
+                TradeSkillFrame_SetSelection(2)
+                assert(GetTradeSkillSelectionIndex() == 2, "second selection")
+                filter_events = 0
+                filter_listener = CreateFrame("Frame")
+                filter_listener:RegisterEvent("TRADE_SKILL_FILTER_UPDATE")
+                filter_listener:SetScript("OnEvent", function() filter_events = filter_events + 1 end)
+                TradeSkillFrameEditBox:SetText("rOuGh ShArPeNiNg StOnE")
             "#).expect("native trade-skill event consumer opens Blacksmithing");
+            env.fire_on_update(0.016).expect("flush first filter edit");
+            env.exec(r#"
+                assert(GetNumTradeSkills() == 1, "first filter count")
+                assert(GetTradeSkillInfo(1) == "Rough Sharpening Stone", "first filter result")
+                assert(filter_events == 1, "changed filter emits event")
+                SetTradeSkillItemNameFilter("rOuGh ShArPeNiNg StOnE")
+                assert(filter_events == 1, "unchanged filter emits no event")
+                TradeSkillFrameEditBox:SetText("no such recipe")
+            "#).expect("first filter changes the native list");
+            env.fire_on_update(0.016).expect("flush second filter edit");
+            env.exec(r#"
+                assert(GetNumTradeSkills() == 0, "second filter count")
+                assert(filter_events == 2, "second changed filter emits event")
+                TradeSkillFrame:Hide()
+                SelectTradeSkill(2)
+                local selected = GetTradeSkillInfo(2)
+                SetTradeSkillItemNameFilter(nil)
+                assert(GetNumTradeSkills() > 1, "nil clears filter")
+                assert(GetTradeSkillInfo(GetTradeSkillSelectionIndex()) == selected, "selection survives nil clear")
+                SetTradeSkillItemNameFilter("no such recipe")
+                assert(GetNumTradeSkills() == 0, "filter reapplied")
+                assert(GetTradeSkillInfo(GetTradeSkillSelectionIndex()) == selected, "selection survives filtering")
+                SetTradeSkillItemNameFilter("")
+                assert(GetNumTradeSkills() > 1, "empty string clears filter")
+                assert(GetTradeSkillInfo(GetTradeSkillSelectionIndex()) == selected, "selection survives empty clear")
+            "#).expect("filter changes preserve selected recipe and clear with nil or empty string");
+            let errors = common::panel_fixtures::recorded_lua_errors(&env);
+            assert!(errors.is_empty(), "native trade-skill filter errors: {errors:?}");
             return;
         }
 
