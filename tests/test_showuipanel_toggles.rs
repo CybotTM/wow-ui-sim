@@ -924,3 +924,115 @@ fn housing_dashboard_loads_and_opens_panel() {
     }
 }
 }
+
+#[test]
+fn supplied_reputation_rows_are_indexed_and_preserve_fields() {
+    if !cfg!(feature = "client-wrath") {
+        return;
+    }
+    let env = WowLuaEnv::new().unwrap();
+    use wow_ui_sim::lua_api::state::FactionEntry;
+    let first = FactionEntry {
+        faction_id: 101,
+        name: "First".into(),
+        description: "Description A".into(),
+        standing: 4,
+        bottom: 100,
+        top: 300,
+        earned: 150,
+        at_war: true,
+        can_toggle_at_war: false,
+        is_header: true,
+        is_collapsed: true,
+        has_rep: false,
+        is_watched: true,
+        is_child: false,
+        has_bonus_rep_gain: true,
+        can_be_lfg_bonus: false,
+    };
+    let second = FactionEntry {
+        faction_id: 202,
+        name: "Second".into(),
+        description: "Description B".into(),
+        standing: 6,
+        bottom: 300,
+        top: 900,
+        earned: 550,
+        at_war: false,
+        can_toggle_at_war: true,
+        is_header: false,
+        is_collapsed: false,
+        has_rep: true,
+        is_watched: false,
+        is_child: true,
+        has_bonus_rep_gain: false,
+        can_be_lfg_bonus: true,
+    };
+    env.state().borrow_mut().factions.clear();
+    env.exec("assert(GetNumFactions() == 0); assert(select('#', GetFactionInfo(1)) == 0)")
+        .unwrap();
+    env.state().borrow_mut().factions = vec![first.clone(), second.clone()];
+    env.exec(r#"
+        assert(GetNumFactions() == 2)
+        local function check(index, expected)
+            local values = {GetFactionInfo(index)}
+            assert(#values == 13)
+            for i = 1, 13 do assert(values[i] == expected[i], index .. ':' .. i) end
+        end
+        check(1, {'First', 'Description A', 4, 100, 300, 150, true, false, true, true, false, true, false})
+        check(2, {'Second', 'Description B', 6, 300, 900, 550, false, true, false, false, true, false, true})
+        assert(select('#', GetFactionInfo(0)) == 0)
+        assert(select('#', GetFactionInfo(-1)) == 0)
+        assert(select('#', GetFactionInfo(3)) == 0)
+    "#).unwrap();
+    env.state().borrow_mut().factions = vec![
+        second,
+        first,
+        FactionEntry {
+            name: "Third".into(),
+            ..Default::default()
+        },
+    ];
+    env.exec(
+        r#"
+        assert(GetNumFactions() == 3)
+        assert(GetFactionInfo(1) == 'Second')
+        assert(GetFactionInfo(2) == 'First')
+        assert(GetFactionInfo(3) == 'Third')
+        assert(select('#', GetFactionInfo(4)) == 0)
+    "#,
+    )
+    .unwrap();
+}
+
+#[test]
+fn wrath_reputation_panel_renders_supplied_factions() {
+    if !cfg!(feature = "client-wrath") {
+        return;
+    }
+    let env = setup_env();
+    for (name, standing, earned) in [("Kirin Tor", 5, 1250), ("Wyrmrest Accord", 6, 3400)] {
+        env.state().borrow_mut().factions = vec![wow_ui_sim::lua_api::state::FactionEntry {
+            name: name.into(),
+            description: "Supplied faction".into(),
+            standing,
+            bottom: 0,
+            top: 12000,
+            earned,
+            has_rep: true,
+            ..Default::default()
+        }];
+        env.exec("ToggleCharacter('ReputationFrame')")
+            .expect("open reputation panel");
+        let rendered: String = env
+            .eval("return ReputationBar1FactionName:GetText()")
+            .unwrap();
+        assert_eq!(rendered, name);
+        let value: f64 = env
+            .eval("return ReputationBar1ReputationBar:GetValue()")
+            .unwrap();
+        assert_eq!(value, earned as f64);
+        env.exec("ToggleCharacter('ReputationFrame')")
+            .expect("close reputation panel");
+    }
+}
