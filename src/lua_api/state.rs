@@ -689,6 +689,7 @@ macro_rules! build_empty_sim_state {
             challenge_completion: Default::default(),
             challenge_run: Default::default(),
             manual_clock: None,
+            wrath_spell_slots: Default::default(),
             known_spells: ::std::collections::HashSet::new(),
             harmful_spells: ::std::collections::HashSet::new(),
             helpful_spells: ::std::collections::HashSet::new(),

@@ -821,6 +821,7 @@ pub struct SimState {
     /// Accepted public SpeakText requests in call order; no audio playback.
     #[cfg(feature = "retail-12-0-5")]
     pub voice_chat_speak_requests: Vec<crate::c_api::c_voice_chat_speak::SpeakTextRequest>,
+    pub wrath_spell_slots: crate::lua_api::globals::real::wrath_spell_slots::SpellSlots,
     pub known_spells: ::std::collections::HashSet<u32>,
     pub harmful_spells: ::std::collections::HashSet<u32>,
     pub helpful_spells: ::std::collections::HashSet<u32>,

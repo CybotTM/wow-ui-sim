@@ -117,6 +117,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     let builder = crate::c_api::c_stable_info::pet_spec_infos::register_admin(builder)?;
     let builder = crate::c_api::challenge_run::register_admin(builder)?;
     let builder = crate::lua_api::manual_clock::register_admin(builder)?;
+    let builder = super::real::wrath_spell_slots::register_admin(builder)?;
     let admin_val = builder.build();
 
     LuaApiMut::set_global_val(lua, "A_Admin", admin_val)?;

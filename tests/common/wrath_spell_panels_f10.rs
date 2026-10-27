@@ -102,6 +102,12 @@ fn supplied_spellbook_slot_records_can_be_set() {
     let env = load_spellbook_fixture();
     env.exec(r#"A_Admin.SetWrathSpellBookSlot('spell', 1, 6603, 'Auto Attack', '', 'Interface\\Icons\\INV_Sword_04')"#)
         .expect("supply a Wrath spellbook slot record");
+    let state = env.state().borrow();
+    let record = state.wrath_spell_slots.get(&("spell".to_string(), 1)).unwrap();
+    assert_eq!(record.spell_id, 6603);
+    assert_eq!(record.name, "Auto Attack");
+    assert_eq!(record.rank, "");
+    assert_eq!(record.icon, "Interface\\Icons\\INV_Sword_04");
 }
 
 #[test]
