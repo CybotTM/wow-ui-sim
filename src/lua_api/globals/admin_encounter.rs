@@ -120,6 +120,7 @@ pub(super) fn add_loot_item(state: &mut LuaState) -> LuaResult<u32> {
         item_id,
         stack_count,
         hyperlink,
+        durability: None,
     });
     sim.loot_frame_open = true;
     Ok(0)

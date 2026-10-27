@@ -13,12 +13,14 @@ if IsArtifactRelicItem == nil then
 end
 "#;
 
-const INVENTORY_QUERY_DEFAULTS_LUA: &str = r#"
+const INVENTORY_SLOT_DEFAULT_LUA: &str = r#"
 if GetInventoryItemsForSlot == nil then
     function GetInventoryItemsForSlot()
     end
 end
+"#;
 
+const INVENTORY_QUERY_DEFAULTS_LUA: &str = r#"
 if IsInventoryItemProfessionBag == nil then
     function IsInventoryItemProfessionBag(_unit, _slot)
         return false
@@ -28,6 +30,9 @@ end
 "#;
 
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
+    if crate::client_profile::ACTIVE != crate::client_profile::ClientProfile::Wrath {
+        lua.exec(INVENTORY_SLOT_DEFAULT_LUA)?;
+    }
     #[cfg(not(feature = "retail-12-0-0"))]
     lua.exec(LEGACY_RELIC_QUERY_LUA)?;
     lua.exec(INVENTORY_QUERY_DEFAULTS_LUA)?;
@@ -42,16 +47,17 @@ mod tests {
     fn installs_unmodeled_inventory_items_for_slot_default() {
         let env = WowLuaEnv::new().expect("lua env should initialize");
 
-        let result: (String, bool) = env
-            .eval(
-                r#"
-                return type(GetInventoryItemsForSlot),
-                       GetInventoryItemsForSlot(1) == nil
-                "#,
-            )
-            .expect("inventory slot lookup fallback probe should run");
+        let function_type: String = env
+            .eval("return type(GetInventoryItemsForSlot)")
+            .expect("inventory slot lookup type probe should run");
+        assert_eq!(function_type, "function");
 
-        assert_eq!(result, ("function".to_string(), true));
+        if crate::client_profile::ACTIVE != crate::client_profile::ClientProfile::Wrath {
+            let is_nil: bool = env
+                .eval("return GetInventoryItemsForSlot(1) == nil")
+                .expect("inventory slot lookup fallback probe should run");
+            assert!(is_nil);
+        }
     }
 
     #[test]

@@ -25,6 +25,7 @@ fn seed_item_cooldown_env() -> WowLuaEnv {
                     item_id,
                     stack_count: 1,
                     hyperlink: None,
+                    durability: None,
                 },
             );
         }

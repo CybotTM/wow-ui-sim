@@ -157,6 +157,7 @@ fn insert_reagent_stack(sim: &mut SimState, item_id: u32, qty: i32) {
             item_id,
             stack_count: qty,
             hyperlink: None,
+            durability: None,
         },
     );
 }

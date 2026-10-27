@@ -253,6 +253,7 @@ fn insert_heirloom_copy(state: &mut LuaState, item_id: u32) -> LuaResult<Option<
             item_id,
             stack_count: 1,
             hyperlink: None,
+            durability: None,
         },
     );
     Ok(Some(slot))

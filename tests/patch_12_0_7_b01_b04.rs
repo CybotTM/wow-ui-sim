@@ -326,6 +326,7 @@ fn item() -> BagItem {
         item_id: 2589,
         stack_count: 3,
         hyperlink: None,
+        durability: None,
     }
 }
 

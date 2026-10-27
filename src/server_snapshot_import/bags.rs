@@ -238,6 +238,7 @@ fn parse_item(state: &mut LuaState, row: Val, path: &str) -> crate::Result<BagIt
         item_id,
         stack_count: field_integer(state, row, "stackCount", 1, path)?,
         hyperlink: optional_text(state, row, "hyperlink", path)?,
+        durability: None,
     })
 }
 

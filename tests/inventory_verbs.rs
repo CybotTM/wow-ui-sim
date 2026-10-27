@@ -20,6 +20,7 @@ fn pickup_container_item_moves_bag_item_to_cursor() {
                 item_id: 6948, // Hearthstone
                 stack_count: 1,
                 hyperlink: None,
+                durability: None,
             },
         );
     }
@@ -136,6 +137,7 @@ fn fishing_cursor_transfer_swaps_and_drops_bag_stacks() {
                 item_id: 2589,
                 stack_count: 7,
                 hyperlink: None,
+                durability: None,
             },
         );
         env.exec(&format!("{pickup}(0, 5); {pickup}(0, 6)"))
@@ -197,6 +199,7 @@ fn fishing_inventory(equipped: bool) -> WowLuaEnv {
                 item_id: 6256,
                 stack_count: 1,
                 hyperlink: None,
+                durability: None,
             },
         );
         st.player.equipped_items.remove(&16);

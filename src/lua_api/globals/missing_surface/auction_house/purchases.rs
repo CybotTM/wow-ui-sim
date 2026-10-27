@@ -126,6 +126,7 @@ fn deposit_purchased_into_bag(state: &mut LuaState, item_id: i32, quantity: i32)
             item_id: item_id as u32,
             stack_count: 0,
             hyperlink: None,
+            durability: None,
         });
     if slot.item_id != item_id as u32 {
         slot.item_id = item_id as u32;

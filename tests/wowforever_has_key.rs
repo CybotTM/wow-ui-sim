@@ -11,6 +11,7 @@ fn forever_has_key_tracks_keyring_inventory() {
         item_id: 7146,
         stack_count: 1,
         hyperlink: None,
+        durability: None,
     };
     env.state()
         .borrow_mut()
@@ -58,6 +59,7 @@ fn forever_keyring_tutorial_consumer_checks_inventory() {
             item_id: 7146,
             stack_count: 1,
             hyperlink: None,
+            durability: None,
         },
     );
     env.exec("KeyRingMixin.TriggerTutorial(ring); assert(GetCVarBool('showKeyring'))")

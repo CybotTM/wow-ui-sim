@@ -247,7 +247,7 @@ fn c_container_get_item_cooldown(state: &mut LuaState) -> LuaResult<u32> {
     Ok(3)
 }
 
-fn c_container_get_container_item_cooldown(state: &mut LuaState) -> LuaResult<u32> {
+pub(crate) fn c_container_get_container_item_cooldown(state: &mut LuaState) -> LuaResult<u32> {
     let bag = i32::from_stack(state, 1)?;
     let slot = i32::from_stack(state, 2)?;
     let (start, duration) = {

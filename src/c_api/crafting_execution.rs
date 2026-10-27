@@ -257,6 +257,7 @@ fn add_output_item(
             item_id,
             stack_count: count,
             hyperlink: None,
+            durability: None,
         },
     );
     key.0

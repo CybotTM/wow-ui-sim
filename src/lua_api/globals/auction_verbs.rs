@@ -415,6 +415,7 @@ fn click_auction_sell_item_button(state: &mut LuaState) -> LuaResult<u32> {
                 item_id,
                 stack_count,
                 hyperlink: None,
+                durability: None,
             }),
             _ => None,
         }

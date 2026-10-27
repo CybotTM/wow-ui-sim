@@ -125,6 +125,7 @@ fn read_cursor_bag_item(sim: &SimState) -> Option<BagItem> {
             item_id: *item_id,
             stack_count: *stack_count,
             hyperlink: None,
+            durability: None,
         }),
         _ => None,
     }
