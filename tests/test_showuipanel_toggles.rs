@@ -801,13 +801,11 @@ fn wrath_send_mail_update_renders_empty_and_occupied_attachment_counts() {
     }
     test_timeout! {
         let env = setup_env();
-        env.state().borrow_mut().player.send_mail_items[1] =
-            Some(wow_ui_sim::lua_api::state_types::MailAttachment {
-                item_id: 6948,
-                count: 5,
-                quality: 1,
-            });
         env.exec(r#"
+            A_Admin.ClearBags()
+            A_Admin.AddBagItem(0, 1, 6948, 5)
+            PickupContainerItem(0, 1)
+            ClickSendMailItemButton(2)
             SendMailFrame_Update()
             assert(SendMailAttachment1Count:GetText() == "", "empty slot count")
             assert(SendMailAttachment2Count:GetText() == "5", "occupied slot count")
