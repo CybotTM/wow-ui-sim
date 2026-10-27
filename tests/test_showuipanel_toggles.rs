@@ -378,6 +378,7 @@ fn collections_mount_list_count_matches_displayed_mount_count() {
                 }
                 state.wrath_legacy.eligible_mounts = state.world.mounts.iter().take(2)
                     .map(|mount| mount.mount_id as i32).collect();
+                // Creature IDs are synthetic scenario fixture data, not native values.
                 let spells = [state.world.mounts[0].spell_id, state.world.mounts[1].spell_id];
                 for (spell, creature_id, name) in [(spells[0], 91001, "Zulu"), (spells[1], 91002, "Alpha")] {
                     state.wrath_legacy.companion_metadata.insert(spell,
