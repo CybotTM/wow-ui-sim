@@ -327,7 +327,9 @@ impl SavedVariablesManager {
             ],
         )?;
         if matches!(missing_layouts, Val::Bool(true)) {
-            tracing::warn!("EditMode account cache declares layout rows that are missing");
+            crate::logging::eprintln_elapsed(
+                "Warning: EditMode account cache declares layout rows that are missing",
+            );
         }
         Ok(true)
     }
