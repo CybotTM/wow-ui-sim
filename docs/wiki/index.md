@@ -1,6 +1,6 @@
 ## [2026-10-27] implementation | Minimap quest-blob observations
 
-[Minimap containment](investigations/minimap.md#supplied-quest-blob-containment) links the supplied-state contract. Retail original-consumer RED/GREEN and unchanged Retail stock are proven; other profile proof is pending.
+[Minimap containment](investigations/minimap.md#supplied-quest-blob-containment) links the supplied-state contract. Retail and PTR original-consumer RED/GREEN and unchanged paired stock are proven; Forever proof is pending.
 
 ## [2026-10-27] implementation | Target spell and flyout inputs
 

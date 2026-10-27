@@ -1,6 +1,6 @@
 ## [2026-10-27] implementation | Minimap quest-blob observations
 
-[Containment input and Retail consumer](investigations/minimap.md#supplied-quest-blob-containment) link the scenario contract. Retail RED/GREEN and stock are proven; PTR and Forever proof remains pending.
+[Containment input and Retail consumer](investigations/minimap.md#supplied-quest-blob-containment) link the scenario contract. Retail and PTR RED/GREEN and paired stock are proven; Forever proof remains pending.
 
 ## [2026-10-27] implementation | Target spell and flyout inputs
 
