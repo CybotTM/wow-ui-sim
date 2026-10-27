@@ -276,6 +276,8 @@ pub struct PlayerState {
     pub inbox: Vec<MailMessage>,
     /// Supplied stationery catalog; empty by simulator scenario default.
     pub stationery_catalog: Vec<MailStationery>,
+    /// Selected zero-based catalog index for this session.
+    pub selected_stationery: Option<usize>,
     /// Items attached to outgoing mail (12 slots max).
     pub send_mail_items: [Option<MailAttachment>; 12],
     /// Money attached to outgoing mail (copper).
