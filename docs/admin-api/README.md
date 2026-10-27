@@ -13,7 +13,7 @@ The `A_Admin` namespace provides administrative functions for controlling simula
 - [Party](party.md) — SetPartySize, SetPartyMember, SetPartyMemberHealth, KillPartyMember, ResPartyMember, SetRotDamage
 - [Movement](movement.md) — SetMoving, SetMounted, SetFlying, SetFalling, SetSwimming
 - [Talents](talents.md) — SetSpec, SetTalentRank, SetTalentSelection, ResetTalents
-- Wrath spellbook: `A_Admin.SetWrathSpellBookSlot(book, slot, spellID, name, rank, icon[, selected])` supplies one ordered slot record. The optional boolean records scenario selection state; omission means unknown. `book` is `spell` or `pet`; `slot` is 1–1024. This does not alter known-spell membership or emit events. Rank and icon are supplied strings; an empty rank is a scenario default, not a native claim.
+- Wrath spellbook: `A_Admin.SetWrathSpellBookSlot(book, slot, spellID, name, rank, icon[, eligibleTradeSkillLine, shapeshiftForm])` supplies a slot record. The optional trade-skill line represents an eligible ability with no trade-skill link; the optional form represents its first aura-36 effect. `A_Admin.SetWrathSpellBookSelection(tradeSkillLine, shapeshiftForm)` supplies current state; nil clears each input. `pet` selects the pet book, case-insensitively; other book strings select the player book. Slots are 1–1024. These setters do not alter known-spell membership or emit events. Empty rank is a scenario default, not a native claim.
 - [Buffs](buffs.md) — AddBuff, RemoveBuff, ClearBuffs
 - [Loss of Control](../specs/active-loss-of-control.md) — AddLossOfControl, ClearLossOfControl
 - [Zone](zone.md) — SetZone, SetSubZone, SetInstanceInfo, SetInInstance

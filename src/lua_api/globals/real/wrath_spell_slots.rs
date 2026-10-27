@@ -14,7 +14,8 @@ pub struct SpellSlot {
     pub name: String,
     pub rank: String,
     pub icon: String,
-    pub selected: Option<bool>,
+    pub eligible_trade_skill_line: Option<u32>,
+    pub shapeshift_form: Option<u32>,
 }
 
 pub type SpellSlots = HashMap<(String, u32), SpellSlot>;
@@ -23,7 +24,9 @@ pub(crate) fn register_admin(builder: TableBuilder) -> LuaResult<TableBuilder> {
     if ACTIVE != ClientProfile::Wrath {
         return Ok(builder);
     }
-    builder.set_function("SetWrathSpellBookSlot", set_spell_slot)
+    builder
+        .set_function("SetWrathSpellBookSlot", set_spell_slot)?
+        .set_function("SetWrathSpellBookSelection", set_selection)
 }
 
 pub(crate) fn register_queries(state: &mut LuaState) -> LuaResult<()> {
@@ -81,21 +84,32 @@ fn is_selected_spell(state: &mut LuaState) -> LuaResult<u32> {
 
 fn set_spell_slot(state: &mut LuaState) -> LuaResult<u32> {
     let book = String::from_stack(state, 1)?;
+    let book = if book.eq_ignore_ascii_case("pet") {
+        "pet"
+    } else {
+        "spell"
+    };
     let slot = u32::from_stack(state, 2)?;
-    if !matches!(book.as_str(), "spell" | "pet") || !(1..=1024).contains(&slot) {
-        return Err(rilua::runtime_error(
-            "SetWrathSpellBookSlot: invalid book or slot",
-        ));
+    if !(1..=1024).contains(&slot) {
+        return Err(rilua::runtime_error("SetWrathSpellBookSlot: invalid slot"));
     }
     let record = SpellSlot {
         spell_id: u32::from_stack(state, 3)?,
         name: String::from_stack(state, 4)?,
         rank: String::from_stack(state, 5)?,
         icon: String::from_stack(state, 6)?,
-        selected: Option::<bool>::from_stack(state, 7)?,
+        eligible_trade_skill_line: Option::<u32>::from_stack(state, 7)?,
+        shapeshift_form: Option::<u32>::from_stack(state, 8)?,
     };
     borrow_state_mut(state)?
         .wrath_spell_slots
-        .insert((book, slot), record);
+        .insert((book.to_string(), slot), record);
+    Ok(0)
+}
+
+fn set_selection(state: &mut LuaState) -> LuaResult<u32> {
+    let trade_skill_line = Option::<u32>::from_stack(state, 1)?;
+    let shapeshift_form = Option::<u32>::from_stack(state, 2)?;
+    borrow_state_mut(state)?.wrath_spell_selection = (trade_skill_line, shapeshift_form);
     Ok(0)
 }

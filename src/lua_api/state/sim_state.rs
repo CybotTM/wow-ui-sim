@@ -822,6 +822,7 @@ pub struct SimState {
     #[cfg(feature = "retail-12-0-5")]
     pub voice_chat_speak_requests: Vec<crate::c_api::c_voice_chat_speak::SpeakTextRequest>,
     pub wrath_spell_slots: crate::lua_api::globals::real::wrath_spell_slots::SpellSlots,
+    pub wrath_spell_selection: (Option<u32>, Option<u32>),
     pub known_spells: ::std::collections::HashSet<u32>,
     pub harmful_spells: ::std::collections::HashSet<u32>,
     pub helpful_spells: ::std::collections::HashSet<u32>,
