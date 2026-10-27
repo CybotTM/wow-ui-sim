@@ -210,6 +210,7 @@ pub mod c_social;
 mod c_social_restrictions;
 pub mod c_sound;
 pub mod c_spec;
+mod c_spectating_ui;
 pub mod c_spell;
 pub(crate) mod c_spell_activation_overlay;
 pub mod c_spell_book;
