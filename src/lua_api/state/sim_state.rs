@@ -88,6 +88,9 @@ pub struct SimState {
     pub legacy_gamma: f64,
     /// Zero means none; other values are one-based guild roster indexes.
     pub guild_roster_selection: usize,
+    /// Explicit Wrath scenario inputs; empty means unsupplied.
+    pub wrath_glyph_sockets: HashMap<(u32, u32), WrathGlyphSocket>,
+    pub wrath_unspent_talent_points: HashMap<u32, u32>,
     #[cfg(any(
         feature = "client-wrath",
         feature = "client-era",

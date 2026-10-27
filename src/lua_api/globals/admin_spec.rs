@@ -12,6 +12,38 @@ use rilua::vm::state::LuaState;
 
 // ── Spec & talents ────────────────────────────────────────────────────────────
 
+pub(super) fn set_wrath_glyph_socket(state: &mut LuaState) -> LuaResult<u32> {
+    let group = u32::from_stack(state, 1)?;
+    let index = u32::from_stack(state, 2)?;
+    if group == 0 || !(1..=6).contains(&index) {
+        return Err(rilua::runtime_error(
+            "expected a positive talent group and glyph socket 1..6",
+        ));
+    }
+    let socket = crate::lua_api::state::WrathGlyphSocket {
+        enabled: bool::from_stack(state, 3)?,
+        glyph_type: Option::<u32>::from_stack(state, 4)?,
+        glyph_spell_id: Option::<u32>::from_stack(state, 5)?,
+        icon: Option::<String>::from_stack(state, 6)?,
+    };
+    borrow_state_mut(state)?
+        .wrath_glyph_sockets
+        .insert((group, index), socket);
+    Ok(0)
+}
+
+pub(super) fn set_wrath_unspent_talent_points(state: &mut LuaState) -> LuaResult<u32> {
+    let group = u32::from_stack(state, 1)?;
+    let points = u32::from_stack(state, 2)?;
+    if group == 0 {
+        return Err(rilua::runtime_error("expected a positive talent group"));
+    }
+    borrow_state_mut(state)?
+        .wrath_unspent_talent_points
+        .insert(group, points);
+    Ok(0)
+}
+
 pub(super) fn set_spec(state: &mut LuaState) -> LuaResult<u32> {
     let spec_index = i32::from_stack(state, 1)?;
     borrow_state_mut(state)?.player.active_spec_index = spec_index;

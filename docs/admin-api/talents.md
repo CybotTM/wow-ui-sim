@@ -1,5 +1,9 @@
 # Specialization & Talents
 
+### Wrath scenario inputs
+
+`A_Admin.SetWrathGlyphSocket(group, index, enabled, glyphType, glyphSpellID, icon)` supplies one socket in a one-based talent group. The socket index is 1 through 6; the last three values may be nil. `A_Admin.SetWrathUnspentTalentPoints(group, points)` supplies a group's unspent points. These setters are available only on Wrath. Unsupplied sockets are empty and unsupplied points are zero; these are simulator scenario defaults, not native initial values. Setters do not fire events.
+
 ### A_Admin.SetSpec(specIndex)
 
 Sets the player's active specialization.

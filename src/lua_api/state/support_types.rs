@@ -1,5 +1,14 @@
 use super::*;
 
+/// Scenario-supplied Wrath glyph socket data.
+#[derive(Clone, Debug)]
+pub struct WrathGlyphSocket {
+    pub enabled: bool,
+    pub glyph_type: Option<u32>,
+    pub glyph_spell_id: Option<u32>,
+    pub icon: Option<String>,
+}
+
 #[derive(Clone, Debug)]
 pub struct AccountStoreCurrencyInfo {
     pub id: i64,

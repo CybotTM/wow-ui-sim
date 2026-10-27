@@ -60,6 +60,8 @@ macro_rules! build_empty_sim_state {
             #[cfg(feature = "client-wrath")]
             legacy_gamma: 0.0,
             guild_roster_selection: 0,
+            wrath_glyph_sockets: Default::default(),
+            wrath_unspent_talent_points: Default::default(),
             #[cfg(any(
                 feature = "client-wrath",
                 feature = "client-era",
