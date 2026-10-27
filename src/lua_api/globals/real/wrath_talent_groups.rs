@@ -69,38 +69,31 @@ fn get_glyph_socket_info(state: &mut LuaState) -> LuaResult<u32> {
         }
     };
     let group = selected_group(state, 2)?;
-    let socket = {
-        let sim = borrow_state(state)?;
-        let group_supplied = sim
-            .wrath_glyph_sockets
-            .keys()
-            .any(|(supplied_group, _)| *supplied_group == group);
-        if group == 0 || (group > sim.wrath_legacy.talent_group_counts.player && !group_supplied) {
-            return Ok(0);
-        }
-        sim.wrath_glyph_sockets.get(&(group, index)).cloned()
+    let socket = borrow_state(state)?
+        .wrath_glyph_sockets
+        .get(&(group, index))
+        .cloned();
+    let Some(socket) = socket else {
+        return Ok(0);
     };
-    let enabled = socket
-        .as_ref()
-        .is_some_and(|value| value.enabled && value.glyph_spell_id.is_some());
-    state.push(if enabled { Val::Num(1.0) } else { Val::Nil });
+    let has_glyph = socket.enabled && socket.glyph_spell_id.is_some();
+    state.push(if socket.enabled {
+        Val::Num(1.0)
+    } else {
+        Val::Nil
+    });
     state.push(
         socket
-            .as_ref()
-            .and_then(|value| value.glyph_type)
+            .glyph_type
             .map_or(Val::Nil, |value| Val::Num(value as f64)),
     );
     state.push(
         socket
-            .as_ref()
-            .filter(|_| enabled)
-            .and_then(|value| value.glyph_spell_id)
+            .glyph_spell_id
+            .filter(|_| has_glyph)
             .map_or(Val::Nil, |value| Val::Num(value as f64)),
     );
-    let icon = socket
-        .as_ref()
-        .filter(|_| enabled)
-        .and_then(|value| value.icon.as_deref());
+    let icon = socket.icon.as_deref().filter(|_| has_glyph);
     let icon = icon.map_or(Val::Nil, |value| {
         Val::Str(state.gc.intern_string(value.as_bytes()))
     });
