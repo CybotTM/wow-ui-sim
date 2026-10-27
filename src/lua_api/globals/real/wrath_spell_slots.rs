@@ -40,13 +40,18 @@ fn find_spell_slot(state: &mut LuaState) -> LuaResult<Option<SpellSlot>> {
         Val::Num(slot) if (1.0..=1024.0).contains(&slot) && slot.fract() == 0.0 => slot as u32,
         _ => return Err(rilua::runtime_error("Invalid spell slot")),
     };
-    let book = String::from_stack(state, 2)?;
-    if !matches!(book.as_str(), "spell" | "pet") {
+    if !matches!(stack_val(state, 2), Val::Str(_)) {
         return Err(rilua::runtime_error("Invalid spell slot"));
     }
+    let book = String::from_stack(state, 2)?;
+    let book = if book.eq_ignore_ascii_case("pet") {
+        "pet"
+    } else {
+        "spell"
+    };
     Ok(borrow_state(state)?
         .wrath_spell_slots
-        .get(&(book, slot))
+        .get(&(book.to_string(), slot))
         .cloned())
 }
 
@@ -73,12 +78,19 @@ fn get_spell_name(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn is_selected_spell(state: &mut LuaState) -> LuaResult<u32> {
-    let selected = find_spell_slot(state)?.and_then(|record| record.selected);
-    state.push(if selected == Some(true) {
-        Val::Num(1.0)
+    let record = find_spell_slot(state)?;
+    let selected = if let Some(record) = record {
+        let (trade_skill_line, form) = borrow_state(state)?.wrath_spell_selection;
+        let trade_match = record.eligible_trade_skill_line.is_some()
+            && record.eligible_trade_skill_line == trade_skill_line;
+        let form_match = record
+            .shapeshift_form
+            .is_some_and(|id| id != 0 && Some(id) == form);
+        trade_match || form_match
     } else {
-        Val::Nil
-    });
+        false
+    };
+    state.push(if selected { Val::Num(1.0) } else { Val::Nil });
     Ok(1)
 }
 
