@@ -56,6 +56,80 @@ fn copy_current_cvars(data: &Path) {
     std::fs::write(storage.join("cvars.json"), bytes).expect("copy current CVars byte-for-byte");
 }
 
+#[test]
+fn delay_dispatches_addon_timer_and_updates_before_exec_lua() {
+    let root = tempfile::tempdir().expect("create delay fixture");
+    let addons = root.path().join("AddOns");
+    let addon = addons.join("DelayFixture");
+    std::fs::create_dir_all(&addon).expect("create fixture addon");
+    std::fs::write(
+        addon.join("DelayFixture.toc"),
+        format!(
+            "## Interface: {}\nDelayFixture.lua\n",
+            wow_ui_sim::toc::ACTIVE_INTERFACE_VERSION
+        ),
+    )
+    .expect("write fixture TOC");
+    std::fs::write(
+        addon.join("DelayFixture.lua"),
+        r#"
+        DelayFixtureElapsed = 0
+        DelayFixtureFired = false
+        local frame = CreateFrame("Frame")
+        frame:SetScript("OnUpdate", function(_, elapsed)
+            DelayFixtureElapsed = DelayFixtureElapsed + elapsed
+        end)
+        C_Timer.After(0.1, function() DelayFixtureFired = true end)
+    "#,
+    )
+    .expect("write fixture Lua");
+
+    for (delay, fired) in [(20, "false"), (200, "true")] {
+        let data = root.path().join(format!("data-{delay}"));
+        copy_current_cvars(&data);
+        let output = Command::new("timeout")
+            .args([
+                "90",
+                env!("CARGO_BIN_EXE_wow-sim"),
+                "--no-saved-vars",
+                "--addons-path",
+            ])
+            .arg(&addons)
+            .args([
+                "--delay",
+                &delay.to_string(),
+                "--exec-lua",
+                "print('DELAY_RESULT', tostring(DelayFixtureFired), DelayFixtureElapsed)",
+                "dump-tree",
+                "--filter",
+                "UIParent",
+            ])
+            .env("XDG_DATA_HOME", data)
+            .env("WOW_SIM_WTF_PATH", root.path().join("wtf"))
+            .output()
+            .expect("run dump-tree fixture");
+        let stdout = String::from_utf8_lossy(&output.stdout);
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        let text = format!("{stdout}\n{stderr}");
+        assert!(output.status.success(), "dump-tree failed: {text}");
+        let line = text
+            .lines()
+            .find(|line| line.contains("DELAY_RESULT"))
+            .unwrap_or_else(|| panic!("missing result: {text}"));
+        let values: Vec<_> = line.split_whitespace().collect();
+        let index = values
+            .iter()
+            .position(|value| *value == "DELAY_RESULT")
+            .unwrap();
+        assert_eq!(values[index + 1], fired, "delay {delay}: {line}");
+        let elapsed: f64 = values[index + 2].parse().expect("numeric elapsed");
+        assert!(
+            elapsed >= f64::from(delay) / 1000.0,
+            "delay {delay}: {line}"
+        );
+    }
+}
+
 fn assert_failure(output: &Output, name: &str, error: &str, summary: &str) {
     let stdout = String::from_utf8_lossy(&output.stdout);
     let stderr = String::from_utf8_lossy(&output.stderr);
