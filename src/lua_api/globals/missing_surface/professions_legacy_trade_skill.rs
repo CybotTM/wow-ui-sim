@@ -27,6 +27,8 @@ pub(super) fn register_legacy_trade_skill_globals(state: &mut LuaState) -> LuaRe
 
 const WRATH_TRADE_SKILL_GLOBALS: &[TradeSkillGlobal] = &[
     ("CloseTradeSkill", close_trade_skill),
+    ("CollapseTradeSkillSubClass", collapse_trade_skill_sub_class),
+    ("ExpandTradeSkillSubClass", expand_trade_skill_sub_class),
     ("GetFirstTradeSkill", get_first_trade_skill),
     ("GetNumTradeSkills", get_num_trade_skills),
     ("GetTradeskillRepeatCount", get_tradeskill_repeat_count),
