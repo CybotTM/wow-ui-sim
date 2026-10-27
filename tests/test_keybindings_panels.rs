@@ -350,15 +350,25 @@ fn native_action_button_binding_tracks_down_and_up() {
         record_native_binding_caller(&env, "ActionButtonDown");
         record_native_binding_caller(&env, "ActionButtonUp");
 
-        env.send_key_down("1", None).expect("press action key");
-        assert_native_binding_caller(&env, 126);
-        env.exec("assert(ActionButton1:GetButtonState() == 'PUSHED')")
-            .expect("native key-down pushes action button");
+        for spell_id in [19750, 635] {
+            {
+                let mut state = env.state().borrow_mut();
+                state.action_bars.insert(1, spell_id);
+                state.casting = None;
+                state.gcd = None;
+            }
+            env.send_key_down("1", None).expect("press action key");
+            assert_native_binding_caller(&env, 126);
+            env.exec("assert(ActionButton1:GetButtonState() == 'PUSHED')")
+                .expect("native key-down pushes action button");
 
-        env.send_key_up("1");
-        assert_native_binding_caller(&env, 128);
-        env.exec("assert(ActionButton1:GetButtonState() == 'NORMAL')")
-            .expect("native key-up releases action button");
+            env.send_key_up("1");
+            assert_native_binding_caller(&env, 128);
+            env.exec("assert(ActionButton1:GetButtonState() == 'NORMAL')")
+                .expect("native key-up releases action button");
+            let state = env.state().borrow();
+            assert_eq!(state.casting.as_ref().map(|cast| cast.spell_id), Some(spell_id));
+        }
     }
 }
 
