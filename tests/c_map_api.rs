@@ -99,6 +99,20 @@ fn test_get_map_info_answers_unseeded_retail_maps_from_the_ui_map_table() {
 }
 
 #[test]
+fn test_map_util_finds_unseeded_continent_parent() {
+    let env = env();
+    let path = wow_ui_sim::client_profile::blizzard_ui_addons_dir()
+        .join("Blizzard_FrameXMLUtil/Mainline/MapUtil.lua");
+    let source = std::fs::read_to_string(&path)
+        .unwrap_or_else(|error| panic!("read {}: {error}", path.display()));
+    env.exec(&source).expect("execute original MapUtil.lua");
+    let (id, name): (i32, String) = env
+        .eval("local map = MapUtil.GetMapParentInfo(630, 2); return map and map.mapID or 0, map and map.name or ''")
+        .unwrap();
+    assert_eq!((id, name.as_str()), (619, "Broken Isles"));
+}
+
+#[test]
 fn test_get_map_info_returns_generic_details_for_maps_the_table_lacks() {
     let env = env();
     let (map_id, name, parent_id): (i32, String, i32) = env
