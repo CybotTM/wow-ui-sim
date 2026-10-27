@@ -1,9 +1,8 @@
 //! File-cache import before whole Game startup; no mocked EditMode consumer.
 #![cfg(any(feature = "client-retail", feature = "client-ptr"))]
 
-use std::io::{self, Write};
 use std::path::Path;
-use std::sync::{Arc, Mutex};
+use std::process::Command;
 use wow_ui_sim::loader::{
     StartupAddonLoadKind, discover_blizzard_startup_addons_for_screen, load_startup_addon,
 };
@@ -114,32 +113,11 @@ fn dispatch_specialization_change(env: &WowLuaEnv) {
         .expect("registered EditMode handler ran");
 }
 
-struct WarningWriter(Arc<Mutex<Vec<u8>>>);
-
-impl Write for WarningWriter {
-    fn write(&mut self, bytes: &[u8]) -> io::Result<usize> {
-        self.0.lock().unwrap().extend_from_slice(bytes);
-        Ok(bytes.len())
-    }
-
-    fn flush(&mut self) -> io::Result<()> {
-        Ok(())
-    }
-}
-
 #[test]
 fn truncated_account_cache_does_not_fabricate_layouts() {
     test_timeout! {
         let text = std::str::from_utf8(ACCOUNT_CACHE).expect("fixture text");
         let header = text.split_whitespace().take(38).collect::<Vec<_>>().join(" ");
-        let warnings = Arc::new(Mutex::new(Vec::new()));
-        let captured = Arc::clone(&warnings);
-        let subscriber = tracing_subscriber::fmt()
-            .with_ansi(false)
-            .with_max_level(tracing::Level::WARN)
-            .with_writer(move || WarningWriter(Arc::clone(&captured)))
-            .finish();
-        let _guard = tracing::subscriber::set_default(subscriber);
         let temp = tempfile::tempdir().expect("isolated cache");
         let env = WowLuaEnv::new().expect("fresh environment");
         import_cache(&env, temp.path(), None, header.as_bytes(), CHARACTER_CACHE);
@@ -150,8 +128,37 @@ fn truncated_account_cache_does_not_fabricate_layouts() {
             assert(#EditModeManagerFrame.layoutInfo.layouts == 2, 'only preset layouts')
             assert(PlayerFrame:GetNumPoints() > 0, 'PlayerFrame must retain anchors')
         "#).expect("original EditMode manager initialization");
-        let log = String::from_utf8(warnings.lock().unwrap().clone()).unwrap();
-        assert!(log.contains("EditMode account cache") && log.contains("layout"), "missing cache warning: {log}");
+    }
+}
+
+#[test]
+fn truncated_account_cache_warns_during_default_startup() {
+    test_timeout! {
+        let text = std::str::from_utf8(ACCOUNT_CACHE).expect("fixture text");
+        let header = text.split_whitespace().take(38).collect::<Vec<_>>();
+        for count in [1, 2] {
+            let temp = tempfile::tempdir().expect("isolated cache");
+            let wtf = temp.path().join("WTF");
+            let account = wtf.join("Account/TestAccount");
+            let character = account.join("Test Realm/Testchar");
+            std::fs::create_dir_all(&character).expect("create cache tree");
+            let cache = format!("{count} {}", header[1..].join(" "));
+            std::fs::write(account.join("edit-mode-cache-account.txt"), cache).expect("write cache");
+            std::fs::write(character.join("edit-mode-cache-character.txt"), CHARACTER_CACHE).expect("write character cache");
+            let output = Command::new(env!("CARGO_BIN_EXE_wow-sim"))
+                .args(["--no-addons", "--no-saved-vars", "lua-errors"])
+                .env("WOW_SIM_WTF_PATH", &wtf)
+                .env("WOW_SIM_WTF_ACCOUNT", "TestAccount")
+                .env("WOW_SIM_WTF_REALM", "Test Realm")
+                .env("WOW_SIM_WTF_CHARACTER", "Testchar")
+                .env_remove("RUST_LOG")
+                .env_remove("WOW_SIM_EDIT_MODE_LAYOUT")
+                .output().expect("run default startup");
+            assert!(output.status.success(), "startup failed for count {count}");
+            let stderr = String::from_utf8_lossy(&output.stderr);
+            assert!(stderr.contains("EditMode account cache declares layout rows that are missing"),
+                "missing default warning for count {count}: {stderr}");
+        }
     }
 }
 
