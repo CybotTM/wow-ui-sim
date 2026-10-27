@@ -2,6 +2,10 @@
 
 `A_Admin` functions are simulator-only, not native WoW APIs.
 
+## SetMinimapQuestBlobInside
+
+Retail, PTR and Forever: `A_Admin.SetMinimapQuestBlobInside(questID, inside)` supplies a boolean containment observation for the quest. It does not emit an event or calculate geometry. An unsupplied quest uses the simulator's false scenario default; the native default is unknown. See the [contract](../specs/minimap-quest-blob-observation.md).
+
 ## SetQuestObjectives
 
 Retail/Forever only: `A_Admin.SetQuestObjectives(questID, rows, percentage?)` replaces

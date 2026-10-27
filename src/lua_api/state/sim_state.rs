@@ -128,6 +128,8 @@ pub struct SimState {
     #[cfg(feature = "client-retail")]
     pub weapon_attack_power: HashMap<String, crate::lua_api::state_types::WeaponAttackPower>,
     pub quest_blobs: HashMap<u64, QuestBlobState>,
+    /// Supplied per-quest minimap containment observations.
+    pub minimap_quest_blob_inside: HashMap<i32, bool>,
     pub fog_of_war_frames: HashMap<u64, FogOfWarFrameState>,
     pub unit_position_frames: HashMap<u64, UnitPositionFrameState>,
     pub pending_player_reports: HashMap<i64, PendingPlayerReport>,

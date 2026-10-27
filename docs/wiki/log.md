@@ -1,3 +1,7 @@
+## [2026-10-27] implementation | Minimap quest-blob observations
+
+[Containment input and Retail consumer](investigations/minimap.md#supplied-quest-blob-containment) link the scenario contract. Retail, PTR and Forever RED/GREEN and paired Retail/PTR stock are proven; seven all-target checks have zero compiler warnings. The paired publication sweep retains the same pre-existing LFG failure.
+
 ## [2026-10-27] implementation | Target spell and flyout inputs
 
 Reconciled the [historical target-spell boundary](investigations/forever-startup-gaps.md#historical-startup-packet-and-unknown-consumers) with the [scenario contract](../specs/spell-target-flyout.md). PTR original consumer RED/GREEN and Forever target/secret cases pass. All seven profile checks have zero compiler warnings; PTR stock removes two missing-API error keys, and Retail/Forever stock is unchanged. Native no-target behavior remains unknown.
@@ -284,7 +288,7 @@ blocked until wrath-relic-slot merges; unchanged error assertions still apply.
 Updated [consumer evidence](investigations/consumer-selection-and-red-proof.md#cf-2-supplied-pvp-match-completion) and [contract](../specs/pvp-match-completion.md) with the Retail/PTR supplied-state producer, unchanged original-consumer selector, paired producer-only subtraction and standalone constant/no-op contradictions. Existing HasMatchStarted and Forever remain unchanged. No build, runtime test, slot, push or native-parity claim.
 ## [2026-10-25] build | Debug metadata and persistent-slot incremental reuse
 
-Dev/test profiles use `debug = 0` (cherry-pick `7a49b872c`); source-line backtraces are unavailable. The sim-data optimization level is unchanged. [Slot builds](../remote-builds.md#local-slot-builds) enable incremental compilation only through the fixed per-slot BindPaths source path. Python RED/GREEN evidence is recorded in `/home/osso/.local/state/wow-ui-sim/handoff/ct-incr-debug0/REPORT.md`; no Rust build was run.
+Dev/test profiles use `debug = 0` (cherry-pick `7a49b872c`); source-line backtraces are unavailable. The sim-data optimization level is unchanged. [Slot builds](../remote-builds.md#local-slot-builds) enable incremental compilation only through the fixed per-slot BindPaths source path. Python RED/GREEN evidence is recorded in `~/.local/state/wow-ui-sim/handoff/ct-incr-debug0/REPORT.md`; no Rust build was run.
 
 ## [2026-10-25] maintenance | Utility command admission and lock rebase
 
