@@ -38,6 +38,7 @@ fn supplied_spec_selection_is_observed() {
 #[test]
 fn ptr_spellbook_filter_uses_supplied_rank() {
     let env = setup_env();
+    env.send_key_press("S", None).expect("load spellbook through key binding");
     env.exec(r#"
         A_Admin.SetSpellBookItemLowRank(6603, true)
         assert(SpellBookFrameMixin.ShouldDisplaySpellBookItem(nil, false, false, true, true, 1, 0) == false)
@@ -52,6 +53,7 @@ fn ptr_spellbook_filter_uses_supplied_rank() {
 #[test]
 fn ptr_spec_tab_uses_supplied_spec_selection() {
     let env = setup_env();
+    env.send_key_press("S", None).expect("load player spells through key binding");
     env.exec(r#"
         A_Admin.SetSpecSelectionEnabled(true)
         assert(PlayerSpellsFrame:IsTabAvailable(PlayerSpellsFrame.specTabID) == true)
