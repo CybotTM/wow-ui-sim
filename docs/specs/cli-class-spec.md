@@ -4,14 +4,14 @@
 
 ## What it must do
 
-- [ ] Accept case-insensitive class names and one-based indices from `CLASS_LABELS`.
-- [ ] Accept case-insensitive specialization names and one-based indices from the selected class's specialization catalog.
-- [ ] Resolve a specialization without `--class` against the class at the post-startup execution point.
-- [ ] Reject invalid values with valid choices and a nonzero exit status.
+- [x] Accept case-insensitive class names and one-based indices from `CLASS_LABELS`.
+- [x] Accept case-insensitive specialization names and one-based indices from the selected class's specialization catalog.
+- [x] Resolve a specialization without `--class` against the class at the post-startup execution point.
+- [x] Reject invalid values with valid choices and a nonzero exit status.
 - [ ] Reject specialization selection on Wrath, Era, and Anniversary.
-- [ ] Apply selections through `A_Admin`, then dispatch `PLAYER_SPECIALIZATION_CHANGED` with `player` before `--exec-lua`.
-- [ ] Do not repeat `PLAYER_ENTERING_WORLD` for a class or specialization change.
-- [ ] Monk Mistweaver and Windwalker indices resolve to their matching specialization identities in the Blizzard specialization content frame.
+- [x] Apply selections through `A_Admin`, then dispatch `PLAYER_SPECIALIZATION_CHANGED` with `player` before `--exec-lua`.
+- [x] Do not repeat `PLAYER_ENTERING_WORLD` for a class or specialization change.
+- [x] Monk Mistweaver and Windwalker indices resolve to their matching specialization identities in the Blizzard specialization content frame.
 
 ## How it works
 
@@ -31,7 +31,7 @@
 
 ## Known gaps (current cycle)
 
-- [ ] Runtime and profile verification pending.
+- [ ] Unsupported-profile CLI execution and seven-profile all-target checks are pending.
 
 ## Out of scope
 

@@ -1,6 +1,6 @@
-## [2026-10-27] staged | Monk specialization ordering
+## [2026-10-27] bounded proof | Monk specialization ordering
 
-[Class specialization order](systems/specialization-mastery-spells.md#class-specialization-order): two CLI-driven original content-frame cases exposed swapped Monk identities. Ordered lookup is implemented; GREEN and profile verification remain pending.
+[Class specialization order](systems/specialization-mastery-spells.md#class-specialization-order): two CLI-driven original content-frame cases exposed swapped Monk identities and pass with ordered lookup. Profile verification remains pending.
 
 ## [2026-10-26] implementation | Spectating UI scenario
 
