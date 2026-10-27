@@ -1,3 +1,7 @@
+## [2026-10-26] implementation | Wrath setup inputs
+
+[Wrath retained fixtures](investigations/wrath-retained-fixtures.md#shared-setup-boundaries) records the original container and target consumers and links their supplied bag, leadership and tap contracts. Full F15/F18 acceptance remains separate; exact 3.4.x native semantics are unknown.
+
 ## [2026-10-26] bounded proof | Shared ammo requirement observation
 
 [Original slots and exact error probes](investigations/forever-startup-gaps.md#shared-ptrforever-ammo-observation): both PTR/Forever XML-bound RED/GREEN pairs and two existing Forever preservation cases pass. The asserted-failure xpcall follows `mists_scenario_minlevel`, with false status, exact message and original frame assertions. Stock PTR122/138→122/138 and Forever26/26→44/44 has complete per-key attribution, not clean startup. All seven full-feature all-target checks have zero Cargo JSON/plain compiler warnings;23 CVar guards and10 pinned-input hashes are unchanged. No native ammo default or derivation is inferred.

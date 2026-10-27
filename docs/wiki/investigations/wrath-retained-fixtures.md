@@ -55,6 +55,10 @@ Mixed-test decisions remain open for F16 (three), F18 (eight), F19 (one) and F20
 
 **F18-P1:** on Wrath, legacy `GetContainerItemInfo` returns a table while original `ContainerFrame.lua` expects positional values. Static inspection establishes a producer/consumer contract mismatch, not a successful runtime repair. The separate container-iteminfo lane has an edit-only RED fixture; execution-bound RED, producer GREEN and preservation proof remain pending. Two unchanged Wrath table-return assertions conflict with the proposed positional projection and require a user decision. Keep the original bag consumer; do not adapt vendor Lua to the simulator's incorrect shape.
 
+## Shared setup boundaries
+
+The original Wrath container and target frames consume the state-backed [bag name and portrait](../../specs/wrath-bag-name.md), [party leader](../../specs/wrath-unit-party-leader.md), and [unit tap](../../specs/wrath-unit-tap.md) queries. The selected TOC loads both original XML and Lua files. Their consumer tests exercise changing supplied state; they do not establish complete F15 or F18 acceptance. Historical 3.3.5a comparison evidence and simulator scenario defaults are not proof of 3.4.x native semantics.
+
 ## Sources
 
 - Programme handoff batch triage, slot-queue decisions and slot-recipe index, consulted 2026-10-23 — batch scope, integration state, exclusions and pending proof; operational evidence remains outside tracked docs.
