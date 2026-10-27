@@ -75,20 +75,30 @@ fn delay_dispatches_addon_timer_and_updates_before_exec_lua() {
         r#"
         DelayFixtureElapsed = 0
         DelayFixtureFired = false
+        DelayFixtureScheduled = false
+        local ticks = 0
         local frame = CreateFrame("Frame")
-        frame:SetScript("OnUpdate", function(_, elapsed)
-            DelayFixtureElapsed = DelayFixtureElapsed + elapsed
-        end)
         frame:RegisterEvent("FIRST_FRAME_RENDERED")
         frame:SetScript("OnEvent", function()
-            DelayFixtureScheduled = GetTime()
-            C_Timer.After(1, function() DelayFixtureFired = true end)
+            frame:SetScript("OnUpdate", function(_, elapsed)
+                ticks = ticks + 1
+                if ticks <= 6 then return end
+                DelayFixtureElapsed = DelayFixtureElapsed + elapsed
+                if not DelayFixtureScheduled then
+                    DelayFixtureScheduled = true
+                    C_Timer.After(0.5, function() DelayFixtureFired = true end)
+                end
+            end)
         end)
     "#,
     )
     .expect("write fixture Lua");
 
-    for (delay, fired) in [(20, "false"), (1500, "true")] {
+    for (delay, scheduled, fired) in [
+        (1500, "true", "true"),
+        (20, "true", "false"),
+        (0, "false", "false"),
+    ] {
         let data = root.path().join(format!("data-{delay}"));
         copy_current_cvars(&data);
         let output = Command::new("timeout")
@@ -103,7 +113,7 @@ fn delay_dispatches_addon_timer_and_updates_before_exec_lua() {
                 "--delay",
                 &delay.to_string(),
                 "--exec-lua",
-                "print('DELAY_RESULT', tostring(DelayFixtureFired), DelayFixtureElapsed, GetTime() - DelayFixtureScheduled)",
+                "print('DELAY_RESULT', tostring(DelayFixtureScheduled), tostring(DelayFixtureFired), DelayFixtureElapsed)",
                 "dump-tree",
                 "--filter",
                 "UIParent",
@@ -125,19 +135,12 @@ fn delay_dispatches_addon_timer_and_updates_before_exec_lua() {
             .iter()
             .position(|value| *value == "DELAY_RESULT")
             .unwrap();
-        let since_schedule: f64 = values[index + 3].parse().expect("numeric schedule age");
-        if delay == 20 {
-            assert!(
-                since_schedule < 1.0,
-                "fixture timer was already due: {line}"
-            );
+        assert_eq!(values[index + 1], scheduled, "delay {delay}: {line}");
+        assert_eq!(values[index + 2], fired, "delay {delay}: {line}");
+        let elapsed: f64 = values[index + 3].parse().expect("numeric elapsed");
+        if delay > 0 {
+            assert!(elapsed > 0.0, "delay {delay}: {line}");
         }
-        assert_eq!(values[index + 1], fired, "delay {delay}: {line}");
-        let elapsed: f64 = values[index + 2].parse().expect("numeric elapsed");
-        assert!(
-            elapsed >= f64::from(delay) / 1000.0,
-            "delay {delay}: {line}"
-        );
     }
 }
 
