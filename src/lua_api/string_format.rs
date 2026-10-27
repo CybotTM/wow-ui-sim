@@ -12,7 +12,9 @@
 //! Lua's `coroutine.create` — matching WoW's real runtime where
 //! `string.format` is a builtin C function, not a Lua-defined wrapper.
 
-use crate::lua_api::methods::{call_function_state, create_string, registry_get, registry_set};
+use crate::lua_api::methods::{
+    call_function_state, create_string_bytes, registry_get, registry_set,
+};
 use crate::lua_bridge::stack_val;
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val, runtime_error};
@@ -109,14 +111,14 @@ fn wow_string_format(state: &mut LuaState) -> LuaResult<u32> {
     validate_required_string_arg(&fmt, &args)?;
 
     // Fast path: plain format string.
-    if !fmt.contains('F') && !fmt.contains('$') {
+    if !fmt.contains(&b'F') && !fmt.contains(&b'$') {
         let normalized_args = normalize_nil_numeric_args(&fmt, &args);
         return delegate(state, original, &normalized_args);
     }
 
     let rest: Vec<Val> = args.iter().skip(1).copied().collect();
     let (new_fmt, new_rest) = process_wow_format(&fmt, &rest)?;
-    let new_fmt_val = create_string(state, &new_fmt);
+    let new_fmt_val = create_string_bytes(state, &new_fmt);
     let mut delegated: Vec<Val> = Vec::with_capacity(new_rest.len() + 1);
     delegated.push(new_fmt_val);
     delegated.extend(new_rest);
@@ -132,13 +134,12 @@ fn read_stack_args(state: &LuaState) -> Vec<Val> {
 fn read_string(
     state: &LuaState,
     s: rilua::vm::gc::arena::GcRef<rilua::vm::string::LuaString>,
-) -> Option<String> {
+) -> Option<Vec<u8>> {
     let lua_str = state.gc.string_arena.get(s)?;
-    std::str::from_utf8(lua_str.data()).ok().map(str::to_owned)
+    Some(lua_str.data().to_vec())
 }
 
-fn format_requires_string_arg(fmt: &str) -> bool {
-    let bytes = fmt.as_bytes();
+fn format_requires_string_arg(bytes: &[u8]) -> bool {
     let mut i = 0;
     while i < bytes.len() {
         if bytes[i] != b'%' {
@@ -166,7 +167,7 @@ fn format_requires_string_arg(fmt: &str) -> bool {
     false
 }
 
-fn validate_required_string_arg(fmt: &str, args: &[Val]) -> LuaResult<()> {
+fn validate_required_string_arg(fmt: &[u8], args: &[Val]) -> LuaResult<()> {
     if !format_requires_string_arg(fmt) {
         return Ok(());
     }
@@ -182,7 +183,7 @@ fn validate_required_string_arg(fmt: &str, args: &[Val]) -> LuaResult<()> {
     }
 }
 
-fn normalize_nil_numeric_args(fmt: &str, args: &[Val]) -> Vec<Val> {
+fn normalize_nil_numeric_args(fmt: &[u8], args: &[Val]) -> Vec<Val> {
     if !args.iter().any(|arg| matches!(arg, Val::Nil)) {
         return args.to_vec();
     }
@@ -196,8 +197,7 @@ fn normalize_nil_numeric_args(fmt: &str, args: &[Val]) -> Vec<Val> {
     normalized
 }
 
-fn numeric_format_arg_indices(fmt: &str) -> Vec<usize> {
-    let bytes = fmt.as_bytes();
+fn numeric_format_arg_indices(bytes: &[u8]) -> Vec<usize> {
     let mut indices = Vec::new();
     let mut arg_index = 1;
     let mut i = 0;
@@ -338,9 +338,8 @@ mod tests {
 /// in positional order (or the original args when no positional spec
 /// was found — matching master behaviour and avoiding unnecessary
 /// cloning on the hot path).
-fn process_wow_format(fmt: &str, args: &[Val]) -> LuaResult<(String, Vec<Val>)> {
-    let bytes = fmt.as_bytes();
-    let mut out = String::with_capacity(bytes.len());
+fn process_wow_format(bytes: &[u8], args: &[Val]) -> LuaResult<(Vec<u8>, Vec<Val>)> {
+    let mut out = Vec::with_capacity(bytes.len());
     let mut reordered: Vec<Val> = Vec::new();
     let mut seq: usize = 0;
     let mut has_positional = false;
@@ -348,10 +347,10 @@ fn process_wow_format(fmt: &str, args: &[Val]) -> LuaResult<(String, Vec<Val>)> 
 
     while i < bytes.len() {
         if bytes[i] != b'%' {
-            out.push(bytes[i] as char);
+            out.push(bytes[i]);
             i += 1;
         } else if i + 1 < bytes.len() && bytes[i + 1] == b'%' {
-            out.push_str("%%");
+            out.extend_from_slice(b"%%");
             i += 2;
         } else {
             i = parse_format_specifier(
@@ -379,7 +378,7 @@ fn parse_format_specifier(
     bytes: &[u8],
     start: usize,
     args: &[Val],
-    out: &mut String,
+    out: &mut Vec<u8>,
     reordered: &mut Vec<Val>,
     seq: &mut usize,
     has_positional: &mut bool,
@@ -399,21 +398,17 @@ fn parse_format_specifier(
         // lowest arg slot not yet "seen" by positional refs.
         *seq = std::cmp::max(*seq, n);
         reordered.push(args.get(n - 1).copied().unwrap_or(Val::Nil));
-        out.push('%');
+        out.push(b'%');
         i = after;
     } else {
         *seq += 1;
         reordered.push(args.get(*seq - 1).copied().unwrap_or(Val::Nil));
-        out.push('%');
+        out.push(b'%');
     }
 
     i = skip_flags_width_precision(bytes, i, out);
     if i < bytes.len() && is_format_conversion(bytes[i]) {
-        out.push(if bytes[i] == b'F' {
-            'f'
-        } else {
-            bytes[i] as char
-        });
+        out.push(if bytes[i] == b'F' { b'f' } else { bytes[i] });
         i += 1;
     }
     Ok(i)
@@ -421,21 +416,21 @@ fn parse_format_specifier(
 
 /// Skip flags (`-+ #0`), width digits, and precision (`.N`) — appending
 /// to `out` as we go.
-fn skip_flags_width_precision(bytes: &[u8], start: usize, out: &mut String) -> usize {
+fn skip_flags_width_precision(bytes: &[u8], start: usize, out: &mut Vec<u8>) -> usize {
     let mut i = start;
     while i < bytes.len() && matches!(bytes[i], b'-' | b'+' | b' ' | b'#' | b'0') {
-        out.push(bytes[i] as char);
+        out.push(bytes[i]);
         i += 1;
     }
     while i < bytes.len() && bytes[i].is_ascii_digit() {
-        out.push(bytes[i] as char);
+        out.push(bytes[i]);
         i += 1;
     }
     if i < bytes.len() && bytes[i] == b'.' {
-        out.push('.');
+        out.push(b'.');
         i += 1;
         while i < bytes.len() && bytes[i].is_ascii_digit() {
-            out.push(bytes[i] as char);
+            out.push(bytes[i]);
             i += 1;
         }
     }
