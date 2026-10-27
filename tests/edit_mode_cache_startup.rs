@@ -117,17 +117,23 @@ fn dispatch_specialization_change(env: &WowLuaEnv) {
 fn truncated_account_cache_does_not_fabricate_layouts() {
     test_timeout! {
         let text = std::str::from_utf8(ACCOUNT_CACHE).expect("fixture text");
-        let header = text.split_whitespace().take(38).collect::<Vec<_>>().join(" ");
-        let temp = tempfile::tempdir().expect("isolated cache");
-        let env = WowLuaEnv::new().expect("fresh environment");
-        import_cache(&env, temp.path(), None, header.as_bytes(), CHARACTER_CACHE);
-        load_whole_game_ui(&env);
-        dispatch_specialization_change(&env);
-        env.exec(r#"
-            assert(#C_EditMode.GetLayouts().layouts == 0, 'no phantom saved layouts')
-            assert(#EditModeManagerFrame.layoutInfo.layouts == 2, 'only preset layouts')
-            assert(PlayerFrame:GetNumPoints() > 0, 'PlayerFrame must retain anchors')
-        "#).expect("original EditMode manager initialization");
+        let cache = text.split_whitespace().take(561).collect::<Vec<_>>().join(" ");
+        for name in ["LayoutOne", "LayoutTwo"] {
+            let cache = cache.replace("Ultrawide", name);
+            let temp = tempfile::tempdir().expect("isolated cache");
+            let env = WowLuaEnv::new().expect("fresh environment");
+            import_cache(&env, temp.path(), None, cache.as_bytes(), CHARACTER_CACHE);
+            load_whole_game_ui(&env);
+            dispatch_specialization_change(&env);
+            env.exec(&format!(r#"
+                local layouts = C_EditMode.GetLayouts().layouts
+                assert(#layouts == 1, 'one real layout and no phantom saved layouts')
+                assert(layouts[1].layoutName == '{name}' and #layouts[1].systems == 52,
+                    'complete first layout must survive')
+                assert(#EditModeManagerFrame.layoutInfo.layouts == 3, 'presets plus one saved layout')
+                assert(PlayerFrame:GetNumPoints() > 0, 'PlayerFrame must retain anchors')
+            "#)).expect("original EditMode manager initialization");
+        }
     }
 }
 
