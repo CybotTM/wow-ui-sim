@@ -159,6 +159,31 @@ fn original_spellbook_displays_supplied_slot_layouts() {
     "#);
 }
 
+#[test]
+fn supplied_spellbook_slot_queries_validate_and_return_unresolved_values() {
+    let env = load_spellbook_fixture();
+    env.exec(r#"
+        assert(select('#', GetSpellTexture(1024, 'spell')) == 1)
+        assert(GetSpellTexture(1024, 'spell') == nil)
+        assert(select('#', GetSpellName(1024, 'spell')) == 2)
+        local name, rank = GetSpellName(1024, 'spell')
+        assert(name == nil and rank == nil)
+        assert(IsSelectedSpell(1, 'spell') == nil)
+        A_Admin.SetWrathSpellBookSlot('spell', 1, 6603, 'Auto Attack', '', 'icon', true)
+        assert(IsSelectedSpell(1, 'spell') == true)
+        A_Admin.SetWrathSpellBookSlot('spell', 1, 6603, 'Auto Attack', '', 'icon', false)
+        assert(IsSelectedSpell(1, 'spell') == nil)
+    "#).expect("unresolved in-range slots return nil values");
+    for expression in [
+        "GetSpellTexture(0, 'spell')", "GetSpellTexture(1025, 'spell')",
+        "GetSpellTexture(true, 'spell')", "GetSpellName(0, 'spell')",
+        "GetSpellName(1025, 'spell')", "GetSpellName({}, 'spell')",
+        "GetSpellName(1, nil)",
+    ] {
+        assert!(env.exec(expression).is_err(), "invalid input must error: {expression}");
+    }
+}
+
 /// F10: spellbook::spellbook_spells_visible_on_first_open.
 #[test]
 fn spellbook_shows_supplied_spell_on_first_native_open() {
