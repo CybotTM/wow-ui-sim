@@ -129,7 +129,7 @@ fn talent_tab_background_tracks_supplied_records_on_show() {
                 icon: "Interface\\Icons\\Supplied".to_string(),
                 points_spent: 3,
                 background: background.to_string(),
-                preview_points_spent: 1,
+                preview_points_spent: u32::from(prerequisite),
             },
         );
         if prerequisite {
@@ -182,8 +182,11 @@ fn talent_tab_background_tracks_supplied_records_on_show() {
             .expect("show native talent panel");
         assert_no_errors(&env);
         let expected_tabs = if prerequisite { 2 } else { 1 };
-        env.exec(&format!("assert(GetNumTalentTabs(false, false) == {expected_tabs})"))
-            .expect("supplied tab count");
+        env.exec(&format!(
+            "assert(GetNumTalentTabs(false, false) == {expected_tabs}); assert(GetNumTalents(1, false, false) == {expected_tabs}); assert(GetGroupPreviewTalentPointsSpent(false, 1) == {})",
+            u32::from(prerequisite)
+        ))
+        .expect("supplied tab, row and preview counts");
         env.exec(&format!(
             "assert(PlayerTalentFrameBackgroundTopLeft:GetTexture() == 'Interface\\\\TalentFrame\\\\{background}-TopLeft')"
         ))
