@@ -61,6 +61,22 @@ fn test_get_map_info_has_shadowlands_compat_maps() {
 }
 
 #[test]
+fn test_get_map_info_world_roots_have_correct_identity() {
+    let env = env();
+    let roots: (String, i32, i32, String, i32, i32) = env
+        .eval(
+            r#"
+            local cosmic = C_Map.GetMapInfo(946)
+            local azeroth = C_Map.GetMapInfo(947)
+            return cosmic.name, cosmic.mapType, cosmic.parentMapID,
+                   azeroth.name, azeroth.mapType, azeroth.parentMapID
+            "#,
+        )
+        .unwrap();
+    assert_eq!(roots, ("Cosmic".into(), 0, 0, "Azeroth".into(), 1, 946));
+}
+
+#[test]
 fn test_get_map_info_answers_unseeded_retail_maps_from_the_ui_map_table() {
     let env = env();
     let (map_id, name, parent_id, map_type): (i32, String, i32, i32) = env
