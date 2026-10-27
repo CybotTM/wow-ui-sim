@@ -102,6 +102,8 @@ fn supplied_spellbook_slot_records_can_be_set() {
     let env = load_spellbook_fixture();
     env.exec(r#"A_Admin.SetWrathSpellBookSlot('spell', 1, 6603, 'Auto Attack', '', 'Interface\\Icons\\INV_Sword_04')"#)
         .expect("supply a Wrath spellbook slot record");
+    env.exec(r#"A_Admin.SetWrathSpellBookSlot('pet', 2, 635, 'Holy Light', 'Rank 2', 'Interface\\Icons\\Spell_Holy_HolyBolt')"#)
+        .expect("supply a second Wrath spellbook slot record");
     let state = env.state().borrow();
     let record = state
         .wrath_spell_slots
@@ -111,6 +113,14 @@ fn supplied_spellbook_slot_records_can_be_set() {
     assert_eq!(record.name, "Auto Attack");
     assert_eq!(record.rank, "");
     assert_eq!(record.icon, "Interface\\Icons\\INV_Sword_04");
+    let second = state
+        .wrath_spell_slots
+        .get(&("pet".to_string(), 2))
+        .unwrap();
+    assert_eq!(second.spell_id, 635);
+    assert_eq!(second.name, "Holy Light");
+    assert_eq!(second.rank, "Rank 2");
+    assert_eq!(second.icon, "Interface\\Icons\\Spell_Holy_HolyBolt");
 }
 
 #[test]
@@ -196,11 +206,20 @@ fn supplied_spellbook_slot_queries_validate_and_return_unresolved_values() {
         assert(name == nil and rank == nil)
         assert(IsSelectedSpell(1, 'spell') == nil)
         A_Admin.SetWrathSpellBookSlot('spell', 1, 6603, 'Auto Attack', '', 'icon', 164, 2)
+        A_Admin.SetWrathSpellBookSlot('spell', 2, 635, 'Holy Light', 'Rank 2', 'icon-two', 165, 3)
+        assert(GetSpellTexture(1, 'spell') == 'icon')
+        assert(GetSpellTexture(2, 'spell') == 'icon-two')
+        local first, firstRank = GetSpellName(1, 'spell')
+        local second, secondRank = GetSpellName(2, 'spell')
+        assert(first == 'Auto Attack' and firstRank == '')
+        assert(second == 'Holy Light' and secondRank == 'Rank 2')
         A_Admin.SetWrathSpellBookSelection(164, nil)
+        assert(IsSelectedSpell(2, 'spell') == nil)
         assert(IsSelectedSpell(1, 'spell') == 1)
         assert(GetSpellName(1, 'other') == 'Auto Attack')
         A_Admin.SetWrathSpellBookSelection(165, nil)
         assert(IsSelectedSpell(1, 'spell') == nil)
+        assert(IsSelectedSpell(2, 'spell') == 1)
         A_Admin.SetWrathSpellBookSelection(nil, 2)
         assert(IsSelectedSpell(1, 'spell') == 1)
         A_Admin.SetWrathSpellBookSelection(nil, 3)
