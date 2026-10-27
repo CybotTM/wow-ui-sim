@@ -105,7 +105,7 @@ fn glyph_socket_consumer_tracks_supplied_records() {
         assert(enabled == nil and kind == 2 and spell == nil and icon == nil)
         A_Admin.SetWrathGlyphSocket(1, 1, false, 2, 202, 'Interface\\Icons\\GlyphTwo')
         enabled, kind, spell, icon = GetGlyphSocketInfo(1, 1)
-        assert(enabled == nil and kind == 2 and spell == 202 and icon == 'Interface\\Icons\\GlyphTwo')
+        assert(enabled == nil and kind == 2 and spell == 202 and icon == 'Interface\\Icons\\GlyphTwo', 'locked populated socket must retain glyph')
         assert(select('#', GetGlyphSocketInfo(2, 1)) == 0)
         assert(select('#', GetGlyphSocketInfo(0, 1)) == 0)
         assert(GetNumGlyphSockets() == 6)
