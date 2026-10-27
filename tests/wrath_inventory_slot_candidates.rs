@@ -250,3 +250,27 @@ fn original_wrath_bag_location_reads_gems() {
         "#).unwrap();
     }
 }
+
+#[test]
+fn original_wrath_container_cooldown_displays_supplied_item_state() {
+    test_timeout! {
+        let env = WowLuaEnv::new().unwrap();
+        seed_two_bag_observations(&env);
+        env.exec(r#"
+            local source = debug.getinfo(ContainerFrame_UpdateCooldown, "S").source
+            assert(source:find("ContainerFrame.lua", 1, true), "selected original container consumer")
+            local button = CreateFrame("Button", "WrathCooldownProbe", UIParent)
+            button:CreateTexture("WrathCooldownProbeIconTexture")
+            local cooldown = CreateFrame("Cooldown", "WrathCooldownProbeCooldown", button)
+            local function check(bag, slot, expectedStart, expectedDuration)
+                button:SetID(slot)
+                ContainerFrame_UpdateCooldown(bag, button)
+                local start, duration = cooldown:GetCooldownTimes()
+                assert(start == expectedStart * 1000 and duration == expectedDuration * 1000,
+                    "original container cooldown must show supplied item state")
+            end
+            check(0, 1, 11, 31)
+            check(1, 2, 19, 47)
+        "#).unwrap();
+    }
+}
