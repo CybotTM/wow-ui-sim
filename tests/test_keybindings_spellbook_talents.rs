@@ -36,6 +36,20 @@ fn supplied_spec_selection_is_observed() {
 
 #[cfg(feature = "client-ptr")]
 #[test]
+fn ptr_spellbook_filter_uses_supplied_rank() {
+    let env = setup_env();
+    env.exec(r#"
+        A_Admin.SetSpellBookItemLowRank(6603, true)
+        assert(SpellBookFrameMixin.ShouldDisplaySpellBookItem(nil, false, false, true, true, 1, 0) == false)
+        A_Admin.SetSpellBookItemLowRank(6603, false)
+        local ok, result = pcall(SpellBookFrameMixin.ShouldDisplaySpellBookItem, nil, false, false, true, true, 1, 0)
+        assert((ok and result == true) or (not ok and tostring(result):find("IsSpellBookItemLooseFlyoutMember", 1, true)),
+            "non-low-rank item must reach the later flyout query")
+    "#).expect("original spellbook filter consumes supplied rank");
+}
+
+#[cfg(feature = "client-ptr")]
+#[test]
 fn ptr_spec_tab_uses_supplied_spec_selection() {
     let env = setup_env();
     env.exec(r#"
