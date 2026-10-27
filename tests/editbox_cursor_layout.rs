@@ -11,7 +11,7 @@ const TICK_SECONDS: f64 = 0.016;
 
 #[test]
 fn headless_cursor_uses_real_font_geometry_without_explicit_injection() {
-    let env = WowLuaEnv::new().expect("create headless environment");
+    let env = crate::common::new_headless_cursor_env();
     env.exec(CREATE_FIXTURE)
         .expect("create existing cursor fixture");
     env.fire_on_update(TICK_SECONDS).unwrap();

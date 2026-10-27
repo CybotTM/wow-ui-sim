@@ -31,6 +31,11 @@ use std::path::{Path, PathBuf};
 use wow_ui_sim::loader::{find_toc_file, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
 
+/// Construct the headless environment used by cursor consumer fixtures.
+pub fn new_headless_cursor_env() -> WowLuaEnv {
+    WowLuaEnv::new().expect("create headless cursor environment")
+}
+
 /// Run a test closure with a per-call timeout.
 /// Default 120s — enough for full Blizzard UI load + test logic.
 #[cfg(target_os = "linux")]

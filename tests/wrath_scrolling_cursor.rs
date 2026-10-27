@@ -185,7 +185,7 @@ fn original_wrath_startup_error_panel_has_cursor_before_direct_scrolling_update(
 
 #[test]
 fn original_mail_body_first_text_delivers_cursor_and_scrolls() {
-    let env = WowLuaEnv::new().expect("SETUP FAILURE: Wrath environment");
+    let env = crate::common::new_headless_cursor_env();
     env.set_screen_size(1024.0, 768.0);
     let toc = wow_ui_sim::client_profile::blizzard_ui_framexml_toc()
         .expect("SETUP FAILURE: Wrath FrameXML cache");
