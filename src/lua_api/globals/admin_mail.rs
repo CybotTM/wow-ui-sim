@@ -73,7 +73,9 @@ pub(super) fn set_stationery_catalog(state: &mut LuaState) -> LuaResult<u32> {
         .into_iter()
         .map(|entry| parse_stationery(state, entry))
         .collect::<LuaResult<Vec<_>>>()?;
-    borrow_state_mut(state)?.player.stationery_catalog = catalog;
+    let mut model = borrow_state_mut(state)?;
+    model.player.stationery_catalog = catalog;
+    model.player.selected_stationery = None;
     Ok(0)
 }
 

@@ -44,6 +44,37 @@ fn get_stationery_info(state: &mut LuaState) -> LuaResult<u32> {
     Ok(3)
 }
 
+fn select_stationery(state: &mut LuaState) -> LuaResult<u32> {
+    let raw_index = i64::from_stack(state, 1)?;
+    let index = usize::try_from(raw_index)
+        .ok()
+        .and_then(|index| index.checked_sub(1));
+    let mut model = borrow_state_mut(state)?;
+    model.player.selected_stationery =
+        index.filter(|index| *index < model.player.stationery_catalog.len());
+    Ok(0)
+}
+
+fn get_selected_stationery_texture(state: &mut LuaState) -> LuaResult<u32> {
+    let texture = {
+        let model = borrow_state(state)?;
+        model
+            .player
+            .selected_stationery
+            .and_then(|index| model.player.stationery_catalog.get(index))
+            .map(|entry| entry.texture.clone())
+    };
+    let value = match texture {
+        Some(crate::lua_api::state_types::MailStationeryTexture::Path(path)) => {
+            create_string(state, &path)
+        }
+        Some(crate::lua_api::state_types::MailStationeryTexture::FileId(id)) => Val::Num(id),
+        None => Val::Nil,
+    };
+    state.push(value);
+    Ok(1)
+}
+
 fn has_new_mail(state: &mut LuaState) -> LuaResult<u32> {
     let unread = borrow_state(state)?
         .player
@@ -339,6 +370,12 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
         LuaApiMut::register_function(lua, "GetNumStationeries", get_num_stationeries)?;
         LuaApiMut::register_function(lua, "GetStationeryInfo", get_stationery_info)?;
+        LuaApiMut::register_function(lua, "SelectStationery", select_stationery)?;
+        LuaApiMut::register_function(
+            lua,
+            "GetSelectedStationeryTexture",
+            get_selected_stationery_texture,
+        )?;
     }
     LuaApiMut::register_function(lua, "HasNewMail", has_new_mail)?;
     LuaApiMut::register_function(lua, "GetInboxNumItems", get_inbox_num_items)?;
