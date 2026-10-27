@@ -38,6 +38,8 @@
 //!   the location can't be resolved to an item id.
 
 use crate::c_api::ensure_namespace;
+use crate::c_api::item_spell::parse_item_id_from_val;
+use crate::client_profile::{ACTIVE, ClientProfile};
 use crate::lua_api::globals::state_backed_queries::dispatch_event_now;
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_table_with_fields};
 use crate::lua_api::state::{
@@ -75,6 +77,14 @@ pub(crate) fn register_c_azerite_empowered_item_surface(state: &mut LuaState) ->
     for &(name, func) in AZERITE_EMPOWERED_METHODS {
         table_set_rust_fn_static(state, ns, name, func)?;
     }
+    if matches!(ACTIVE, ClientProfile::Retail | ClientProfile::Ptr) {
+        table_set_rust_fn_static(
+            state,
+            ns,
+            "IsAzeriteEmpoweredItemByID",
+            is_azerite_empowered_item_by_id,
+        )?;
+    }
     Ok(())
 }
 
@@ -102,6 +112,26 @@ fn is_azerite_empowered_item(state: &mut LuaState) -> LuaResult<u32> {
             let empowered_items = &sim.azerite_empowered.empowered_items;
             std::collections::HashSet::contains(empowered_items, &id)
         }
+        None => false,
+    };
+    state.push(Val::Bool(empowered));
+    Ok(1)
+}
+
+fn is_azerite_empowered_item_by_id(state: &mut LuaState) -> LuaResult<u32> {
+    let value =
+        rilua::table_security::unwrap_secret(state, crate::lua_bridge::stack_val(state, 1))?;
+    if !matches!(value, Val::Num(_) | Val::Str(_)) {
+        return Err(rilua::runtime_error(
+            "C_AzeriteEmpoweredItem.IsAzeriteEmpoweredItemByID: itemInfo must be an item ID or link",
+        ));
+    }
+    let item_id = parse_item_id_from_val(state, value).and_then(|id| i32::try_from(id).ok());
+    let empowered = match item_id {
+        Some(id) => borrow_state(state)?
+            .azerite_empowered
+            .empowered_items
+            .contains(&id),
         None => false,
     };
     state.push(Val::Bool(empowered));
