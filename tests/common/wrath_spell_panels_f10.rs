@@ -125,13 +125,13 @@ fn original_spellbook_reads_supplied_slot_names() {
         A_Admin.SetWrathSpellBookSlot('spell', 3, 19750, 'Flash of Light', '', 'Interface\\Icons\\Spell_Holy_FlashHeal')
         SpellBookFrame:Show()
         assert(SpellButton1SpellName:GetText() == 'Auto Attack', 'SpellBookFrame.lua:495 slot 1')
-        assert(SpellButton2SpellName:GetText() == 'Holy Light', 'SpellBookFrame.lua:495 slot 2')
+        assert(SpellButton3SpellName:GetText() == 'Holy Light', 'SpellBookFrame.lua:495 slot 2')
         SpellBookFrame:Hide()
         A_Admin.SetWrathSpellBookSlot('spell', 1, 19750, 'Flash of Light', '', 'Interface\\Icons\\Spell_Holy_FlashHeal')
         A_Admin.SetWrathSpellBookSlot('spell', 2, 6603, 'Auto Attack', '', 'Interface\\Icons\\INV_Sword_04')
         SpellBookFrame:Show()
         assert(SpellButton1SpellName:GetText() == 'Flash of Light')
-        assert(SpellButton2SpellName:GetText() == 'Auto Attack')
+        assert(SpellButton3SpellName:GetText() == 'Auto Attack')
     "#);
 }
 
@@ -146,7 +146,7 @@ fn original_spellbook_displays_supplied_slot_layouts() {
         assert(SpellButton1IconTexture:IsVisible(), 'slot 1 icon must be visible at SpellBookFrame.lua:447')
         assert(SpellButton1IconTexture:GetTexture() == 'Interface\\Icons\\INV_Sword_04')
         assert(SpellButton1SpellName:GetText() == 'Auto Attack', 'slot 1 name at SpellBookFrame.lua:495')
-        assert(SpellButton2SpellName:GetText() == 'Holy Light', 'slot 2 name at SpellBookFrame.lua:495')
+        assert(SpellButton3SpellName:GetText() == 'Holy Light', 'slot 2 name at SpellBookFrame.lua:495')
         SpellBookFrame:Hide()
         A_Admin.SetWrathSpellBookSlot('spell', 1, 19750, 'Flash of Light', '', 'Interface\\Icons\\Spell_Holy_FlashHeal')
         A_Admin.SetWrathSpellBookSlot('spell', 2, 6603, 'Auto Attack', '', 'Interface\\Icons\\INV_Sword_04')
@@ -155,7 +155,7 @@ fn original_spellbook_displays_supplied_slot_layouts() {
         assert(SpellButton1IconTexture:IsVisible(), 'changed slot 1 icon must be visible')
         assert(SpellButton1IconTexture:GetTexture() == 'Interface\\Icons\\Spell_Holy_FlashHeal')
         assert(SpellButton1SpellName:GetText() == 'Flash of Light')
-        assert(SpellButton2SpellName:GetText() == 'Auto Attack')
+        assert(SpellButton3SpellName:GetText() == 'Auto Attack')
     "#);
 }
 
