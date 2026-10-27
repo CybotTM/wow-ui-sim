@@ -55,32 +55,45 @@ fn binding_source_lines(contents: &str) -> Result<Vec<usize>, quick_xml::DeError
             .filter(|byte| **byte == b'\n')
             .count();
         offset = end;
-        match event {
-            Event::Start(element) if element.name().as_ref() == b"Binding" => {
-                active = Some(lines.len());
-                lines.push(line);
-            }
-            Event::Empty(element) if element.name().as_ref() == b"Binding" => lines.push(line),
-            Event::Text(text) if active.is_some() => {
-                let bytes = text.as_ref();
-                let leading = bytes
-                    .iter()
-                    .take_while(|byte| byte.is_ascii_whitespace())
-                    .count();
-                if leading < bytes.len() {
-                    let leading_lines = bytes[..leading]
-                        .iter()
-                        .filter(|byte| **byte == b'\n')
-                        .count();
-                    lines[active.take().expect("active binding")] = event_line + leading_lines;
-                }
-            }
-            Event::End(element) if element.name().as_ref() == b"Binding" => active = None,
-            Event::Eof => break,
-            _ => {}
+        if matches!(event, Event::Eof) {
+            break;
         }
+        record_binding_event(event, event_line, line, &mut active, &mut lines);
     }
     Ok(lines)
+}
+
+fn record_binding_event(
+    event: quick_xml::events::Event<'_>,
+    event_line: usize,
+    line: usize,
+    active: &mut Option<usize>,
+    lines: &mut Vec<usize>,
+) {
+    use quick_xml::events::Event;
+    match event {
+        Event::Start(element) if element.name().as_ref() == b"Binding" => {
+            *active = Some(lines.len());
+            lines.push(line);
+        }
+        Event::Empty(element) if element.name().as_ref() == b"Binding" => lines.push(line),
+        Event::Text(text) if active.is_some() => {
+            let bytes = text.as_ref();
+            let leading = bytes
+                .iter()
+                .take_while(|byte| byte.is_ascii_whitespace())
+                .count();
+            if leading < bytes.len() {
+                let leading_lines = bytes[..leading]
+                    .iter()
+                    .filter(|byte| **byte == b'\n')
+                    .count();
+                lines[active.take().expect("active binding")] = event_line + leading_lines;
+            }
+        }
+        Event::End(element) if element.name().as_ref() == b"Binding" => *active = None,
+        _ => {}
+    }
 }
 
 fn preprocess_xml(xml: &str) -> String {
