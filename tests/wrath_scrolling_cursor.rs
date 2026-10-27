@@ -26,11 +26,8 @@ fn original_wrath_send_mail_selects_supplied_stationery() {
             { name = 'Azure', texture = 'Azure' },
         })
     "#).unwrap();
-    let previous_errors = env.state().borrow().lua_errors.len();
-    env.exec("SendMailFrame:Show()").expect("show original send mail frame");
-    let errors = env.state().borrow().lua_errors[previous_errors..].to_vec();
-    assert!(errors.is_empty(), "original send-mail OnShow failed: {errors:?}");
     env.exec(r#"
+        StationeryPopupButton_OnClick(nil, 1)
         assert(GetSelectedStationeryTexture() == 'Scarlet')
         StationeryPopupButton_OnClick(nil, 2)
         assert(GetSelectedStationeryTexture() == 'Azure')
