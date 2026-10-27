@@ -1,0 +1,5 @@
+# Wrath reputation rows
+
+Wrath `GetNumFactions()` and `GetFactionInfo(index)` read supplied `SimState.factions` rows in order. `FrameXML/ReputationFrame.lua:124` consumes the count; lines 158 and 278 consume the 13 fields. The historical signature is in `data/patch-api/sources/3.0.2-api-changes.wikitext:454`. `FrameXML/ReputationFrame.xml:776–778` wires the load, show and event handlers; `FrameXML/ReputationFrame.lua:23–41` registers `UPDATE_FACTION` and invokes the update on show or on the event while visible.
+
+The initial empty list and the absence of Lua return values for indices outside the supplied list are best-guess simulator scenario defaults: native behavior is unknown. All 13 row fields come from supplied state, including at-war, header, collapsed, watched, and child flags; none is a fixed native default. `FactionEntry::default()` provides zero, empty, and false values when a scenario omits fields; those are simulator scenario defaults, not native values. The returned flags describe supplied rows only: native population, filtering, header expansion and collapse policies are outside this contract.
