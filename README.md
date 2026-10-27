@@ -101,7 +101,15 @@ docker run --rm \
 docker run --rm \
   -v ./MyAddon:/app/Interface/AddOns/MyAddon \
   ghcr.io/osso/wow-ui-sim --no-saved-vars run-tests MyAddon
+
+# Render a screenshot with Mesa software Vulkan (no GPU required)
+mkdir -p screenshots
+docker run --rm -v "$(pwd)/screenshots:/out" \
+  ghcr.io/osso/wow-ui-sim screenshot -o /out/screenshot.webp
 ```
+
+The image does not include WoW game assets; screenshots may omit textures unless
+assets are available to the container.
 
 ## Exclusive addon test runs
 

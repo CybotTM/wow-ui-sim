@@ -132,7 +132,7 @@ docker build -t wow-ui-sim .
 docker run --rm wow-ui-sim --no-addons --no-saved-vars run-tests Wowless
 ```
 
-The image is optimized for headless test commands (`run-tests`, `self-test`, `lua-errors`). It excludes audio (built with `--no-default-features`), textures, and GPU drivers to keep the image small (~220MB). The `screenshot` command is not supported in the Docker image.
+The image supports headless tests and `screenshot` using Mesa software Vulkan. It excludes audio and does not bundle WoW game textures.
 
 ## Addon Directories
 

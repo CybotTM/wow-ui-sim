@@ -18,6 +18,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     pkg-config \
     cmake \
     libicu-dev \
+    libudev-dev \
     fonts-dejavu-core \
     && rm -rf /var/lib/apt/lists/*
 
@@ -42,8 +43,7 @@ COPY scripts/docker-stub-cargo-targets.sh /tmp/docker-stub-cargo-targets.sh
 RUN sh /tmp/docker-stub-cargo-targets.sh /build/Cargo.toml && cargo fetch --locked
 
 # Copy the full source tree and build the simulator binary.
-# --no-default-features skips sound, GUI, and CASC dependencies not needed for
-# headless test runs. client-retail still selects the required runtime profile.
+# Enable the retail profile and GUI rendering without sound.
 COPY build.rs ./
 # Retail selects retail-12-1-5, including the native ICU build/runtime dependency.
 COPY build/ build/
@@ -52,7 +52,7 @@ COPY data/ data/
 # Overwrite every binary stub with real sources. Test/example/bench stubs are
 # manifest-only inputs: the binary-only build below never compiles them.
 COPY src/ src/
-RUN cargo build --release --bin wow-sim --no-default-features --features client-retail --locked \
+RUN cargo build --release --bin wow-sim --no-default-features --features client-retail,gui --locked \
     && strip /build/target/release/wow-sim \
     && mkdir /icu-runtime \
     && cp -L /usr/lib/x86_64-linux-gnu/libicui18n.so.72 \
@@ -87,7 +87,11 @@ RUN git init /wow-ui-source \
 # =============================================================================
 # Runtime Stage
 # =============================================================================
-FROM gcr.io/distroless/cc-debian12
+FROM debian:bookworm-slim
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libvulkan1 mesa-vulkan-drivers ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
@@ -114,6 +118,7 @@ COPY Interface/AddOns/TestFramework/ /app/Interface/AddOns/TestFramework/
 COPY --from=builder /usr/share/fonts/truetype/dejavu/ /usr/share/fonts/truetype/dejavu/
 
 # Skip SavedVariables loading — no WTF directory is available in the image.
-ENV WOW_SIM_NO_SAVED_VARS=1
+ENV WOW_SIM_NO_SAVED_VARS=1 \
+    WOW_SIM_SOFTWARE_RENDER=1
 
 ENTRYPOINT ["/app/wow-sim"]
