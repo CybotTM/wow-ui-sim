@@ -7,6 +7,7 @@ use wow_ui_sim::loader::find_toc_file;
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::toc::TocFile;
 
+const UNKNOWN: &str = "native-unknown: C_PartyInfo.GetMinLevel has no supplied active-party minimum or documented default";
 const UNSUPPORTED: &str = "unsupported: C_PartyInfo.GetMinLevel explicit category";
 
 fn load_original_scenario() -> WowLuaEnv {
@@ -93,6 +94,19 @@ fn supplied_minimum_is_exact_environment_local_and_solo_defaults_to_player() {
     second.state().borrow_mut().player.level = 37;
     assert_eq!(query_minimum(&second), 37.0);
     assert_eq!(query_minimum(&first), 90.0);
+}
+
+#[test]
+fn group_minimum_still_requires_a_supplied_value() {
+    let env = WowLuaEnv::new().unwrap();
+    env.state().borrow_mut().party_group_active = true;
+    let error = env.exec("C_PartyInfo.GetMinLevel()")
+        .expect_err("group minimum remains an explicit supplied input");
+    assert!(error.to_string().contains(UNKNOWN), "{error}");
+    for minimum in [36.0, 58.0] {
+        env.state().borrow_mut().mists_party_min_level = Some(minimum);
+        assert_eq!(query_minimum(&env), minimum);
+    }
 }
 
 #[test]
