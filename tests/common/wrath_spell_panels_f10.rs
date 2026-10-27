@@ -103,7 +103,10 @@ fn supplied_spellbook_slot_records_can_be_set() {
     env.exec(r#"A_Admin.SetWrathSpellBookSlot('spell', 1, 6603, 'Auto Attack', '', 'Interface\\Icons\\INV_Sword_04')"#)
         .expect("supply a Wrath spellbook slot record");
     let state = env.state().borrow();
-    let record = state.wrath_spell_slots.get(&("spell".to_string(), 1)).unwrap();
+    let record = state
+        .wrath_spell_slots
+        .get(&("spell".to_string(), 1))
+        .unwrap();
     assert_eq!(record.spell_id, 6603);
     assert_eq!(record.name, "Auto Attack");
     assert_eq!(record.rank, "");
@@ -113,7 +116,9 @@ fn supplied_spellbook_slot_records_can_be_set() {
 #[test]
 fn original_spellbook_reads_supplied_slot_names() {
     let env = load_spellbook_fixture();
-    exec_consumer(&env, r#"
+    exec_consumer(
+        &env,
+        r#"
         -- Isolate the name consumer from the separate texture producer.
         GetSpellTexture = function(slot, book)
             if book == 'spell' and slot >= 1 and slot <= 3 then
@@ -132,17 +137,35 @@ fn original_spellbook_reads_supplied_slot_names() {
         SpellBookFrame:Show()
         assert(SpellButton1SpellName:GetText() == 'Flash of Light')
         assert(SpellButton3SpellName:GetText() == 'Auto Attack')
-    "#);
+    "#,
+    );
 }
 
 #[test]
 fn original_spellbook_displays_supplied_slot_layouts() {
     let env = load_spellbook_fixture();
-    exec_consumer(&env, r#"
+    exec_consumer(
+        &env,
+        r#"
         A_Admin.SetWrathSpellBookSlot('spell', 1, 6603, 'Auto Attack', '', 'Interface\\Icons\\INV_Sword_04')
         A_Admin.SetWrathSpellBookSlot('spell', 2, 635, 'Holy Light', '', 'Interface\\Icons\\Spell_Holy_HolyBolt')
         A_Admin.SetWrathSpellBookSlot('spell', 3, 19750, 'Flash of Light', '', 'Interface\\Icons\\Spell_Holy_FlashHeal')
+        local trace = {}
+        debug.sethook(function(_, line)
+            local info = debug.getinfo(2, 'S')
+            local source = info.source:gsub('\\', '/')
+            if not source:match('FrameXML/SpellBookFrame.lua$') then return end
+            if line ~= 447 and line ~= 453 and line ~= 465 then return end
+            local _, button = debug.getlocal(2, 1)
+            if button ~= SpellButton1 then return end
+            trace[#trace + 1] = line .. ':' .. tostring(SpellButton1IconTexture:IsShown())
+            print('spellbook visibility trace', trace[#trace])
+        end, 'l')
         SpellBookFrame:Show()
+        debug.sethook()
+        assert(trace[1] and trace[1]:match('^447:'), 'original line 447 must execute')
+        assert(trace[2] ~= '453:false', 'original missing-texture branch hid slot 1: '..table.concat(trace, ','))
+        assert(trace[2] and trace[2]:match('^465:'), 'populated slot must take visible branch: '..table.concat(trace, ','))
         assert(SpellButton1IconTexture:IsVisible(), 'slot 1 icon must be visible at SpellBookFrame.lua:447')
         assert(SpellButton1IconTexture:GetTexture() == 'Interface\\Icons\\INV_Sword_04')
         assert(SpellButton1SpellName:GetText() == 'Auto Attack', 'slot 1 name at SpellBookFrame.lua:495')
@@ -156,13 +179,15 @@ fn original_spellbook_displays_supplied_slot_layouts() {
         assert(SpellButton1IconTexture:GetTexture() == 'Interface\\Icons\\Spell_Holy_FlashHeal')
         assert(SpellButton1SpellName:GetText() == 'Flash of Light')
         assert(SpellButton3SpellName:GetText() == 'Auto Attack')
-    "#);
+    "#,
+    );
 }
 
 #[test]
 fn supplied_spellbook_slot_queries_validate_and_return_unresolved_values() {
     let env = load_spellbook_fixture();
-    env.exec(r#"
+    env.exec(
+        r#"
         assert(select('#', GetSpellTexture(1024, 'spell')) == 1)
         assert(GetSpellTexture(1024, 'spell') == nil)
         assert(select('#', GetSpellName(1024, 'spell')) == 2)
@@ -180,15 +205,48 @@ fn supplied_spellbook_slot_queries_validate_and_return_unresolved_values() {
         A_Admin.SetWrathSpellBookSelection(nil, 3)
         assert(IsSelectedSpell(1, 'spell') == nil)
         assert(IsSelectedSpell(1, 'PET') == nil)
-    "#).expect("unresolved in-range slots return nil values");
+    "#,
+    )
+    .expect("unresolved in-range slots return nil values");
     for expression in [
-        "GetSpellTexture(0, 'spell')", "GetSpellTexture(1025, 'spell')",
-        "GetSpellTexture(true, 'spell')", "GetSpellName(0, 'spell')",
-        "GetSpellName(1025, 'spell')", "GetSpellName({}, 'spell')",
+        "GetSpellTexture(0, 'spell')",
+        "GetSpellTexture(1025, 'spell')",
+        "GetSpellTexture(true, 'spell')",
+        "GetSpellName(0, 'spell')",
+        "GetSpellName(1025, 'spell')",
+        "GetSpellName({}, 'spell')",
         "GetSpellName(1, nil)",
     ] {
-        assert!(env.exec(expression).is_err(), "invalid input must error: {expression}");
+        assert!(
+            env.exec(expression).is_err(),
+            "invalid input must error: {expression}"
+        );
     }
+}
+
+#[test]
+fn supplied_spellbook_names_resolve_and_validate() {
+    let env = load_spellbook_fixture();
+    env.exec(r#"
+        A_Admin.SetWrathSpellBookSlot('spell', 1, 6603, 'Auto Attack', 'Rank 1', 'icon-one', 164)
+        A_Admin.SetWrathSpellBookSlot('spell', 2, 635, 'Holy Light', 'Rank 2', 'icon-two', 165)
+        A_Admin.SetWrathSpellBookSelection(164, nil)
+        local name, rank = GetSpellName('Auto Attack', 'spell')
+        assert(name == 'Auto Attack' and rank == 'Rank 1')
+        name, rank = GetSpellName('Holy Light', 'spell')
+        assert(name == 'Holy Light' and rank == 'Rank 2')
+        assert(GetSpellTexture('Auto Attack', 'spell') == 'icon-one')
+        assert(GetSpellTexture('Holy Light', 'spell') == 'icon-two')
+        assert(IsSelectedSpell('Auto Attack', 'spell') == 1)
+        assert(IsSelectedSpell('Holy Light', 'spell') == nil)
+        for _, f in ipairs({GetSpellName, GetSpellTexture, IsSelectedSpell}) do
+            assert(select('#', f('Unknown spell', 'spell')) == 0)
+        end
+        for name, f in pairs({GetSpellName=GetSpellName, GetSpellTexture=GetSpellTexture, IsSelectedSpell=IsSelectedSpell}) do
+            local ok, message = pcall(f, {}, 'spell')
+            assert(not ok and message == name..'(): Invalid spell slot', tostring(message))
+        end
+    "#).expect("spell-name parser contract");
 }
 
 /// F10: spellbook::spellbook_spells_visible_on_first_open.
