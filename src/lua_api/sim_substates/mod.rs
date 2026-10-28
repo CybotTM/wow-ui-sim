@@ -395,7 +395,9 @@ impl Default for VoiceChatState {
             is_transcribing: false,
             is_speak_for_me_active: false,
             channels: seeded_voice_channels(),
-            active_channel_id: Some(1),
+            // No active voice channel: a client that is not in one shows the
+            // speaker icon on the chat channel button, and IsLoggedIn answers nil.
+            active_channel_id: None,
             connection_status: 2,
             master_volume_scale: 1.0,
             is_parental_disabled: false,

@@ -20,6 +20,8 @@ RESULTS = ROOT / "full-suite-results"
 LOCK = RESULTS / ".lock"
 JOBS = os.environ.get("FULL_SUITE_JOBS", "16")
 PROFILES = ("retail", "ptr", "wrath", "mists", "wowforever", "era", "anniversary")
+# Slot 2 was retired on 2026-10-27 (user decision: three build slots).
+SLOTS = (0, 1, 3)
 FAILED = re.compile(r"^test (\S+) \.\.\. FAILED", re.M)
 
 
@@ -49,9 +51,9 @@ def validate_target_dir(value):
     if not target.is_absolute():
         raise ValueError("target dir must be absolute")
     target = target.resolve()
-    slots = {Path.home() / f".cache/wow-ui-sim-targets/slot-{i}" for i in range(4)}
+    slots = {Path.home() / f".cache/wow-ui-sim-targets/slot-{i}" for i in SLOTS}
     if target not in slots:
-        raise ValueError("target dir must resolve to an approved cache slot (0..3)")
+        raise ValueError(f"target dir must resolve to an approved cache slot {SLOTS}")
     return target
 
 

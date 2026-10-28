@@ -34,11 +34,16 @@ pub struct AtlasSliceInfo {
 pub struct AtlasLookup {
     pub info: &'static AtlasInfo,
     pub is_2x_fallback: bool,
+    /// Exact logical size when the texels come from a 2x entry that has a
+    /// 1x sibling; the 2x art is not always exactly twice the 1x size.
+    pub logical_size: Option<(u32, u32)>,
 }
 
 impl AtlasLookup {
     pub fn width(&self) -> u32 {
-        if self.is_2x_fallback {
+        if let Some((w, _)) = self.logical_size {
+            w
+        } else if self.is_2x_fallback {
             self.info.width / 2
         } else {
             self.info.width
@@ -46,7 +51,9 @@ impl AtlasLookup {
     }
 
     pub fn height(&self) -> u32 {
-        if self.is_2x_fallback {
+        if let Some((_, h)) = self.logical_size {
+            h
+        } else if self.is_2x_fallback {
             self.info.height / 2
         } else {
             self.info.height
@@ -61,6 +68,7 @@ pub fn get_atlas_info(name: &str) -> Option<AtlasLookup> {
         return Some(AtlasLookup {
             info,
             is_2x_fallback: false,
+            logical_size: None,
         });
     }
 
@@ -70,6 +78,7 @@ pub fn get_atlas_info(name: &str) -> Option<AtlasLookup> {
             return Some(AtlasLookup {
                 info,
                 is_2x_fallback: true,
+                logical_size: None,
             });
         }
     }
@@ -79,6 +88,7 @@ pub fn get_atlas_info(name: &str) -> Option<AtlasLookup> {
             return Some(AtlasLookup {
                 info,
                 is_2x_fallback: false,
+                logical_size: None,
             });
         }
     }

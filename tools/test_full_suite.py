@@ -49,7 +49,7 @@ class CertifiedSuiteTests(unittest.TestCase):
         self.bin.mkdir()
         self.repo = self.home / 'Projects/wow/wow-ui-sim'
         self.repo.mkdir(parents=True)
-        self.slot = self.home / '.cache/wow-ui-sim-targets/slot-2'
+        self.slot = self.home / '.cache/wow-ui-sim-targets/slot-3'
         self.slot.mkdir(parents=True)
         capacity = self.home / '.worktrees/logs/capacity.sh'
         capacity.parent.mkdir(parents=True)
@@ -158,14 +158,14 @@ class CertifiedSuiteTests(unittest.TestCase):
         unit = argv[argv.index('--unit') + 1]
         record = json.loads(self.latest_attempt().read_text())
         self.assertEqual(record['status'], 'FAILED')
-        self.assertIn(f'slot 2 retained: unit {unit}', record['error'])
+        self.assertIn(f'slot 3 retained: unit {unit}', record['error'])
 
     def test_failed_test_launcher_with_unknown_unit_retains_owner(self):
         write_executable(self.bin / 'slot-build.py',
                          "import json, os, pathlib, sys\n"
                          "root = pathlib.Path(os.environ['HOME'])\n"
                          "unit = sys.argv[sys.argv.index('--unit') + 1]\n"
-                         "p = root / '.cache/wow-ui-sim-targets/slot-2/receipts' / (unit + '.json')\n"
+                         "p = root / '.cache/wow-ui-sim-targets/slot-3/receipts' / (unit + '.json')\n"
                          "p.parent.mkdir(exist_ok=True)\n"
                          "p.write_text(json.dumps({'result': 'success', 'returncode': 0, 'reported_artifacts': [{'executable': '/unused', 'profile': {'test': True}, 'target': {'name': 'integration', 'kind': ['test']}}]}))\n")
         write_executable(self.bin / 'systemd-run', "import sys\nsys.exit(1)\n")
@@ -179,7 +179,7 @@ class CertifiedSuiteTests(unittest.TestCase):
         self.assertTrue((self.slot / '.owner').exists())
         record = json.loads(self.latest_attempt().read_text())
         self.assertEqual(record['status'], 'FAILED')
-        self.assertIn('slot 2 retained: unit full-suite-test-', record['error'])
+        self.assertIn('slot 3 retained: unit full-suite-test-', record['error'])
 
     def test_failed_launcher_stops_active_unit_before_releasing_owner(self):
         write_executable(self.bin / 'systemctl',
@@ -245,7 +245,7 @@ class CertifiedSuiteTests(unittest.TestCase):
                          "root = pathlib.Path(os.environ['HOME'])\n"
                          "if os.environ.get('UNKNOWN_UNIT'): sys.exit(1)\n"
                          "if 'stop' in sys.argv:\n"
-                         "    (root / 'owner-at-stop').write_text(str((root / '.cache/wow-ui-sim-targets/slot-2/.owner').exists()))\n"
+                         "    (root / 'owner-at-stop').write_text(str((root / '.cache/wow-ui-sim-targets/slot-3/.owner').exists()))\n"
                          "    (root / 'stopped').touch()\n"
                          "elif (root / 'stopped').exists(): print('ActiveState=inactive')\n"
                          "else: print('ActiveState=active')\n")
@@ -481,7 +481,7 @@ sys.exit(runner.run(sys.argv[2], 1, sys.argv[3], "ptr"))
                          "import json, os, pathlib, sys\n"
                          "root = pathlib.Path(os.environ['HOME'])\n"
                          "unit = sys.argv[sys.argv.index('--unit') + 1]\n"
-                         "p = root / '.cache/wow-ui-sim-targets/slot-2/receipts' / (unit + '.json')\n"
+                         "p = root / '.cache/wow-ui-sim-targets/slot-3/receipts' / (unit + '.json')\n"
                          "p.parent.mkdir(exist_ok=True)\n"
                          "p.write_text(json.dumps({'result': 'success', 'returncode': 0, 'reported_artifacts': [{'executable': '/unused', 'profile': {'test': True}, 'target': {'name': 'integration', 'kind': ['test']}}]}))\n")
         write_executable(self.bin / 'systemd-run', "import sys\nsys.exit(1)\n")
@@ -541,7 +541,7 @@ sys.exit(runner.run(sys.argv[2], 1, sys.argv[3], "ptr"))
         self.assertFalse(any(step.get('exit') == 0 for step in receipt['steps'].values()))
         argv = json.loads((self.home / 'slot-argv.json').read_text())
         self.assertIn('--owner', argv)
-        self.assertEqual(argv[argv.index('--slot') + 1], '2')
+        self.assertEqual(argv[argv.index('--slot') + 1], '3')
         self.assertIn('sound,gui,casc,client-ptr', argv)
         self.assertEqual(argv[argv.index('--') + 1:argv.index('--') + 8],
                          ['cargo', 'test', '--no-run', '--all-targets', '--locked',
@@ -553,7 +553,7 @@ sys.exit(runner.run(sys.argv[2], 1, sys.argv[3], "ptr"))
         self.assertEqual(subprocess.check_output(['git', '-C', str(worktree), 'status', '--porcelain'],
                                                  env=self.env, text=True), '')
         self.assertFalse((self.slot / '.owner').exists())
-        released = self.home / f'.local/state/wow-ui-sim/handoff/full-suite/{self.sha[:12]}-ptr/slot-2.owner.released'
+        released = self.home / f'.local/state/wow-ui-sim/handoff/full-suite/{self.sha[:12]}-ptr/slot-3.owner.released'
         self.assertEqual(released.read_text(), f'full-suite {self.sha[:12]} ptr')
         again = subprocess.run([sys.executable, str(RUNNER), 'run', self.sha,
                                 '--profile', 'ptr', '--target-dir', str(self.slot)],
@@ -576,7 +576,7 @@ sys.exit(runner.run(sys.argv[2], 1, sys.argv[3], "ptr"))
                          "(root / 'slot-argv.json').write_text(json.dumps(argv))\n"
                          "(root / 'build-started').touch()\n"
                          "while not (root / 'build-release').exists(): time.sleep(.01)\n"
-                         "slot = root / '.cache/wow-ui-sim-targets/slot-2'\n"
+                         "slot = root / '.cache/wow-ui-sim-targets/slot-3'\n"
                          "unit = argv[argv.index('--unit') + 1]\n"
                          "receipt = slot / 'receipts' / (unit + '.json')\n"
                          "receipt.parent.mkdir(exist_ok=True)\n"
@@ -616,7 +616,7 @@ sys.exit(runner.run(sys.argv[2], 1, sys.argv[3], "ptr"))
         self.assertIn('MemorySwapMax=0', unit)
         argv = json.loads((self.home / 'slot-argv.json').read_text())
         worktree = Path(argv[argv.index('--worktree') + 1])
-        mount = self.home / '.cache/wow-ui-sim-srcmount/slot-2'
+        mount = self.home / '.cache/wow-ui-sim-srcmount/slot-3'
         self.assertIn(f'BindPaths={worktree}:{mount}', unit)
         self.assertIn(f'--working-directory={mount}', unit)
         self.assertTrue(all(step.get('exit', 0) == 0
@@ -634,7 +634,7 @@ sys.exit(runner.run(sys.argv[2], 1, sys.argv[3], "ptr"))
         write_executable(self.bin / 'slot-build.py',
                          "import json, os, pathlib, sys\n"
                          "root = pathlib.Path(os.environ['HOME'])\n"
-                         "slot = root / '.cache/wow-ui-sim-targets/slot-2'\n"
+                         "slot = root / '.cache/wow-ui-sim-targets/slot-3'\n"
                          "unit = sys.argv[sys.argv.index('--unit') + 1]\n"
                          "receipt = slot / 'receipts' / (unit + '.json')\n"
                          "receipt.parent.mkdir(exist_ok=True)\n"
@@ -676,7 +676,7 @@ sys.exit(runner.run(sys.argv[2], 1, sys.argv[3], "ptr"))
                          "import json, os, pathlib, sys\n"
                          "root = pathlib.Path(os.environ['HOME'])\n"
                          "unit = sys.argv[sys.argv.index('--unit') + 1]\n"
-                         "receipt = root / '.cache/wow-ui-sim-targets/slot-2/receipts' / (unit + '.json')\n"
+                         "receipt = root / '.cache/wow-ui-sim-targets/slot-3/receipts' / (unit + '.json')\n"
                          "receipt.parent.mkdir(exist_ok=True)\n"
                          "receipt.write_text(json.dumps({'result': 'stale-artifacts', 'returncode': 0, 'dep_info_errors': ['bad input']}))\n")
         write_executable(self.bin / 'systemctl',
@@ -713,7 +713,7 @@ sys.exit(runner.run(sys.argv[2], 1, sys.argv[3], "ptr"))
         unit = argv[argv.index('--unit') + 1]
         result = json.loads(self.latest_attempt().read_text())
         self.assertEqual(result['status'], 'FAILED')
-        self.assertIn(f'slot 2 retained: unit {unit} state unknown', result['error'])
+        self.assertIn(f'slot 3 retained: unit {unit} state unknown', result['error'])
 
     def test_owned_slot_is_never_stolen(self):
         owner = self.slot / '.owner'
@@ -754,6 +754,7 @@ sys.exit(runner.run(sys.argv[2], 1, sys.argv[3], "ptr"))
 
     def test_invalid_target_and_profile_are_rejected_before_launch(self):
         for options in (['--target-dir', str(self.slot.with_name('slot-4'))],
+                        ['--target-dir', str(self.slot.with_name('slot-2'))],
                         ['--target-dir', str(self.slot), '--profile', 'unknown'],
                         ['--target-dir', str(self.slot), '--build-jobs', '0']):
             with self.subTest(options=options):

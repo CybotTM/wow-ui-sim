@@ -121,6 +121,17 @@ enum Commands {
         crop: Option<String>,
         #[arg(long, value_name = "FILTER")]
         dump_tree: Option<Option<String>>,
+        /// WebP quality, 1-100. Ignored with --png, which is written
+        /// losslessly.
+        #[arg(long, default_value_t = 15.0, value_name = "1-100")]
+        quality: f32,
+        /// UIParent scale, applied before the canvas size so the UI lays out
+        /// for it the way the client does on a uiScale change. The client
+        /// renders 1 UI unit as height/768 * uiScale pixels; 1440p at
+        /// uiScale 0.9 is 1.6875. Above 1.0 the 2x atlas art is used, as the
+        /// client does; WOW_SIM_HIRES_ATLASES=0/1 overrides that choice.
+        #[arg(long, default_value_t = 1.0)]
+        ui_scale: f32,
     },
 
     /// Show unique Lua errors as JSON (suppresses other output)
@@ -228,6 +239,25 @@ fn set_cwd_to_exe_dir_for_gui_launch() {
     let _ = std::env::set_current_dir(parent);
 }
 
+/// The UI scale a command will render at; 1.0 for commands without one.
+fn requested_ui_scale(command: &Option<Commands>) -> f32 {
+    match command {
+        #[cfg(feature = "gui")]
+        Some(Commands::Screenshot { ui_scale, .. }) => *ui_scale,
+        _ => 1.0,
+    }
+}
+
+/// 2x atlas art is what the client draws once a UI unit spans more than one
+/// pixel; `WOW_SIM_HIRES_ATLASES` forces either choice.
+fn hires_atlases_wanted(ui_scale: f32, env_override: Option<&str>) -> bool {
+    match env_override.map(str::trim) {
+        Some("0") | Some("false") | Some("off") => false,
+        Some("1") | Some("true") | Some("on") => true,
+        _ => ui_scale > 1.0,
+    }
+}
+
 fn run_main() -> Result<(), Box<dyn std::error::Error>> {
     let args = Args::parse();
     let selection = class_spec::parse_selection(args.class.as_deref(), args.spec.as_deref())?;
@@ -236,6 +266,10 @@ fn run_main() -> Result<(), Box<dyn std::error::Error>> {
     }
     let screen = args.effective_screen();
     let saved_stdout = redirect_if_quiet(&args);
+    wow_ui_sim::atlas::set_prefer_hires_atlases(hires_atlases_wanted(
+        requested_ui_scale(&args.command),
+        std::env::var("WOW_SIM_HIRES_ATLASES").ok().as_deref(),
+    ));
     let init = init_and_load(&args, screen)?;
     #[cfg(feature = "gui")]
     let (env, font_system, saved_vars) = init;
@@ -487,7 +521,7 @@ fn show_windows_error_message(message: &str) {
     }
 }
 
-use wow_ui_sim::startup::{apply_delay, run_extra_update_ticks, settle_headless_startup};
+use wow_ui_sim::startup::{apply_delay_with_tick, run_extra_update_ticks, settle_headless_startup};
 
 struct CommandDispatch {
     command: Option<Commands>,
@@ -636,6 +670,9 @@ fn run_dump_tree(
     settle_headless_startup(env);
     env.service_headless_reload(saved_vars)
         .expect("dump-tree startup ReloadUI failed");
+    apply_delay_with_tick(env, command.delay);
+    env.service_headless_reload(saved_vars)
+        .expect("dump-tree delay ReloadUI failed");
     if let Some(code) = command.exec_lua {
         let code = exec_lua::wrap_headless_exec_lua(code);
         if let Err(e) = env.exec_maybe_secure(&code, command.exec_lua_secure) {
@@ -647,7 +684,6 @@ fn run_dump_tree(
     run_extra_update_ticks(env, 3);
     env.service_headless_reload(saved_vars)
         .expect("dump-tree timer ReloadUI failed");
-    apply_delay(command.delay);
     update_dump_layout_rects(env);
     print_dump_tree(env, &command);
 }
@@ -758,6 +794,43 @@ mod tests {
         let args = Args::try_parse_from(["wow-sim", "--character-select"])
             .expect("legacy character-select flag should parse");
         assert_eq!(args.effective_screen(), ScreenKind::CharacterSelect);
+    }
+
+    #[test]
+    fn hires_atlases_follow_the_ui_scale_unless_overridden() {
+        assert!(!hires_atlases_wanted(1.0, None));
+        assert!(hires_atlases_wanted(1.6875, None));
+        assert!(!hires_atlases_wanted(1.6875, Some("0")));
+        assert!(hires_atlases_wanted(1.0, Some("1")));
+        assert!(hires_atlases_wanted(1.25, Some("garbage")));
+    }
+
+    #[cfg(feature = "gui")]
+    #[test]
+    fn screenshot_ui_scale_selects_hires_atlases() {
+        let args = Args::try_parse_from(["wow-sim", "screenshot", "--ui-scale", "1.6875"])
+            .expect("screenshot --ui-scale should parse");
+        assert_eq!(requested_ui_scale(&args.command), 1.6875);
+        let args = Args::try_parse_from(["wow-sim", "dump-tree"]).expect("dump-tree should parse");
+        assert_eq!(requested_ui_scale(&args.command), 1.0);
+    }
+
+    #[cfg(feature = "gui")]
+    #[test]
+    fn screenshot_ui_scale_parses_and_defaults_to_one() {
+        let args = Args::try_parse_from(["wow-sim", "screenshot", "--ui-scale", "1.6875"])
+            .expect("screenshot --ui-scale should parse");
+        let Some(Commands::Screenshot { ui_scale, .. }) = args.command else {
+            panic!("expected the screenshot subcommand");
+        };
+        assert_eq!(ui_scale, 1.6875);
+
+        let args =
+            Args::try_parse_from(["wow-sim", "screenshot"]).expect("screenshot should parse");
+        let Some(Commands::Screenshot { ui_scale, .. }) = args.command else {
+            panic!("expected the screenshot subcommand");
+        };
+        assert_eq!(ui_scale, 1.0);
     }
 
     #[test]
