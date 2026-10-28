@@ -71,6 +71,9 @@ pub(crate) fn register_c_spell_surface(state: &mut LuaState) -> LuaResult<()> {
     if cfg!(feature = "client-mists") {
         register_legacy_spell_globals(state)?;
     }
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
+        crate::lua_api::globals::real::wrath_spell_slots::register_queries(state)?;
+    }
     Ok(())
 }
 

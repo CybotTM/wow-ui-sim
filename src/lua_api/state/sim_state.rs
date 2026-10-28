@@ -91,6 +91,8 @@ pub struct SimState {
     /// Explicit Wrath scenario inputs; empty means unsupplied.
     pub wrath_glyph_sockets: HashMap<(u32, u32), WrathGlyphSocket>,
     pub wrath_unspent_talent_points: HashMap<u32, u32>,
+    pub wrath_talent_tabs: HashMap<(u32, u32), WrathTalentTab>,
+    pub wrath_talent_rows: HashMap<(u32, u32), Vec<WrathTalentRow>>,
     #[cfg(any(
         feature = "client-wrath",
         feature = "client-era",
@@ -531,6 +533,7 @@ pub struct SimState {
     pub unit_health_knowledge: HashMap<String, bool>,
     pub player: PlayerState,
     pub war_mode: crate::c_api::c_pvp::war_mode::WarModeState,
+    pub pvp_talents: crate::c_api::c_spec::PvpTalentState,
     pub player_xp: PlayerXpState,
     pub bind_location: String,
     pub pvp_honor: PvpHonorState,
@@ -832,6 +835,8 @@ pub struct SimState {
     /// Accepted public SpeakText requests in call order; no audio playback.
     #[cfg(feature = "retail-12-0-5")]
     pub voice_chat_speak_requests: Vec<crate::c_api::c_voice_chat_speak::SpeakTextRequest>,
+    pub wrath_spell_slots: crate::lua_api::globals::real::wrath_spell_slots::SpellSlots,
+    pub wrath_spell_selection: (Option<u32>, Option<u32>),
     pub known_spells: ::std::collections::HashSet<u32>,
     pub harmful_spells: ::std::collections::HashSet<u32>,
     pub helpful_spells: ::std::collections::HashSet<u32>,

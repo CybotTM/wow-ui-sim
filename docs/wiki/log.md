@@ -1,6 +1,14 @@
+## [2026-10-27] investigation | UI capture fidelity
+
+Created [UI capture fidelity](investigations/ui-capture-fidelity.md) for the render fixes ported from the capture comparison, and documented `--quality`, `--ui-scale` and `WOW_SIM_HIRES_ATLASES` in [CLI commands](reference/cli-commands.md#screenshot).
+
 ## [2026-10-27] implementation | Minimap quest-blob observations
 
 [Containment input and Retail consumer](investigations/minimap.md#supplied-quest-blob-containment) link the scenario contract. Retail, PTR and Forever RED/GREEN and paired Retail/PTR stock are proven; seven all-target checks have zero compiler warnings. The paired publication sweep retains the same pre-existing LFG failure.
+
+## [2026-10-27] bounded proof | Wrath talent rendering
+
+[Original show-path proof](investigations/wrath-spell-panels-f10.md) links the [supplied tab and row contract](../specs/wrath-talent-tabs.md). RED reaches the original nil query; GREEN renders supplied tab and talent states, including a rank-dependent prerequisite. Stock comparison and remaining profile checks are pending.
 
 ## [2026-10-27] implementation | Target spell and flyout inputs
 
