@@ -333,7 +333,7 @@ mod tests {
                 "#
                 .replace(
                     "EXPECT_ACCOUNT_WIDE",
-                    if crate::c_api::c_reputation::fixture_account_wide_default() {
+                    if crate::client_profile::ACTIVE != crate::client_profile::ClientProfile::Mists {
                         "true"
                     } else {
                         "false"
