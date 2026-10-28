@@ -180,3 +180,52 @@ fn explicit_csv_generation_uses_canvas_geometry_and_local_slices() {
             .contains("35224u32 => \"ui-hud-minimap-frame-cycle\"")
     );
 }
+
+#[test]
+fn override_sized_members_are_marked_so_their_2x_fallback_is_not_halved() {
+    // uimicromenu2x members carry OverrideWidth/OverrideHeight: the stored size
+    // is the display size already, so the 2x fallback must not halve it.
+    // bagslots2x members store the pixel rect of the 2x art and are halved.
+    let temp = tempfile::tempdir().unwrap();
+    let dir = temp.path();
+    for (name, content) in [
+        (
+            "UiTextureAtlas.csv",
+            "ID,FileDataID,UiTextureAtlasSetID,AtlasWidth,AtlasHeight,UiCanvasID\n1,800,1,512,512,1\n",
+        ),
+        ("UiTextureAtlasElement.csv", "Name,ID\n"),
+        (
+            "UiTextureAtlasMember.csv",
+            "CommittedName,ID,UiTextureAtlasID,Width,Height,CommittedLeft,CommittedRight,CommittedTop,CommittedBottom,UiTextureAtlasElementID,OverrideWidth,OverrideHeight,CommittedFlags,UiCanvasID\nplate-2x,1,1,64,82,0,64,0,82,0,32,41,0,0\nslot-2x,2,1,96,96,64,160,0,96,0,0,0,0,0\n",
+        ),
+        (
+            "UiTextureAtlasElementSliceData.csv",
+            "ID,UiTextureAtlasElementID,Left,Top,Right,Bottom,SliceMode\n",
+        ),
+        ("listfile.csv", "800;interface/hud/plates2x.blp\n"),
+    ] {
+        std::fs::write(dir.join(name), content).unwrap();
+    }
+    let output = dir.join("atlas.rs");
+    run(Options {
+        csv_dir: Some(dir.to_owned()),
+        listfile: None,
+        output: output.clone(),
+        elements_output: dir.join("elements.rs"),
+    })
+    .unwrap();
+    let generated = std::fs::read_to_string(output).unwrap();
+    let entry = |name: &str| {
+        generated
+            .lines()
+            .find(|line| line.contains(&format!("\"{name}\" => AtlasInfo")))
+            .unwrap()
+            .to_string()
+    };
+    assert!(generated.contains("pub size_is_override: bool,"));
+    assert!(entry("plate-2x").contains("width: 32, height: 41"));
+    assert!(entry("plate-2x").contains("size_is_override: true"));
+    assert!(entry("slot-2x").contains("width: 96, height: 96"));
+    assert!(entry("slot-2x").contains("size_is_override: false"));
+    assert!(generated.contains("} else if self.is_2x_fallback && !self.info.size_is_override {"));
+}

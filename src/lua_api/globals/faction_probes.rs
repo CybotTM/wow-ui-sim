@@ -66,6 +66,14 @@ fn get_faction_info_by_id(state: &mut LuaState) -> LuaResult<u32> {
     else {
         return Ok(0);
     };
+    push_faction_info(state, &entry);
+    state.push(Val::Num(entry.faction_id as f64)); // 14: factionID
+    state.push(Val::Bool(entry.has_bonus_rep_gain)); // 15: hasBonusRepGain
+    state.push(Val::Bool(entry.can_be_lfg_bonus)); // 16: canBeLFGBonus
+    Ok(16)
+}
+
+fn push_faction_info(state: &mut LuaState, entry: &crate::lua_api::state::FactionEntry) {
     let name = create_string(state, &entry.name);
     let description = create_string(state, &entry.description);
     state.push(name); // 1: name
@@ -81,10 +89,23 @@ fn get_faction_info_by_id(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Bool(entry.has_rep)); // 11: hasRep
     state.push(Val::Bool(entry.is_watched)); // 12: isWatched
     state.push(Val::Bool(entry.is_child)); // 13: isChild
-    state.push(Val::Num(entry.faction_id as f64)); // 14: factionID
-    state.push(Val::Bool(entry.has_bonus_rep_gain)); // 15: hasBonusRepGain
-    state.push(Val::Bool(entry.can_be_lfg_bonus)); // 16: canBeLFGBonus
-    Ok(16)
+}
+
+fn get_num_factions(state: &mut LuaState) -> LuaResult<u32> {
+    let count = borrow_state(state)?.factions.len();
+    state.push(Val::Num(count as f64));
+    Ok(1)
+}
+
+fn get_faction_info(state: &mut LuaState) -> LuaResult<u32> {
+    let Some(index) = stack_u32(state, 1).and_then(|index| index.checked_sub(1)) else {
+        return Ok(0);
+    };
+    let Some(entry) = borrow_state(state)?.factions.get(index as usize).cloned() else {
+        return Ok(0);
+    };
+    push_faction_info(state, &entry);
+    Ok(13)
 }
 
 /// `GetGuildFactionInfo()` — retail: `(name, description, standingID,
@@ -375,6 +396,10 @@ fn is_account_wide_reputation_id(state: &mut LuaState, id: i32) -> LuaResult<boo
 }
 
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath {
+        LuaApiMut::register_function(lua, "GetNumFactions", get_num_factions)?;
+        LuaApiMut::register_function(lua, "GetFactionInfo", get_faction_info)?;
+    }
     LuaApiMut::register_function(lua, "GetFactionInfoByID", get_faction_info_by_id)?;
     LuaApiMut::register_function(lua, "GetGuildFactionInfo", get_guild_faction_info)?;
     LuaApiMut::register_function(lua, "GetSelectedFaction", get_selected_faction)?;
