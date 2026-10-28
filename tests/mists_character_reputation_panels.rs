@@ -42,13 +42,14 @@ fn assert_watched_reputation_bar(faction_id: u32, name: &str, value: u32, max: u
         local info = debug.getinfo(bar.Update, 'S')
         assert(info.source:gsub('\\', '/'):match('Blizzard_ActionBar/Shared/ReputationBar.lua$'))
         bar:Update()
-        assert(bar.factionID == {faction_id} and bar.value == {value} and bar.max == {max})
-        assert(bar.name == '{name} %d / %d')
+        assert(bar.factionID == {faction_id} and bar.value == {value} and bar.max == {max},
+            ('bar: id=%s value=%s max=%s'):format(tostring(bar.factionID), tostring(bar.value), tostring(bar.max)))
+        assert(bar.name == '{name} %d / %d', 'bar name: '..tostring(bar.name))
         local data = C_Reputation.GetWatchedFactionData()
-        assert(data.factionID == {faction_id} and data.isAccountWide == false)
-        assert(C_Reputation.GetFactionDataByID({faction_id}).isAccountWide == false)
-        assert(C_Reputation.IsAccountWideReputation({faction_id}) == false)
-        assert(REPUTATION_STATUS_BAR_LABEL_ACCOUNT_WIDE == nil)
+        assert(data.factionID == {faction_id} and data.isAccountWide == false, 'watched data')
+        assert(C_Reputation.GetFactionDataByID({faction_id}).isAccountWide == false, 'faction data')
+        assert(C_Reputation.IsAccountWideReputation({faction_id}) == false, 'account wide query')
+        assert(REPUTATION_STATUS_BAR_LABEL_ACCOUNT_WIDE == nil, 'unexpected label')
     "#
     ))
     .unwrap();
