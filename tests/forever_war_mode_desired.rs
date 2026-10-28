@@ -105,12 +105,15 @@ fn check_pvp_talent_alert(can_use: bool, unspent: bool, new_talent: bool, expect
         let mut state = state.borrow_mut();
         state.war_mode.desired = true;
         state.pvp_talents.can_use = can_use;
+        state.pvp_talents.failure_reason = if can_use { "ready" } else { "unavailable" }.into();
         state.pvp_talents.has_unspent_slot = unspent;
         state.pvp_talents.has_new_talent = new_talent;
     }
     env.exec(&format!(
         r#"
         local alert = PlayerSpellsMicroButton:GetAnyPvpTalentAlert()
+        local canUse, reason = C_SpecializationInfo.CanPlayerUsePVPTalentUI()
+        assert(canUse == {can_use} and reason == (canUse and "ready" or "unavailable"))
         local expected = {expected}
         if expected then
             assert(alert and alert.text == expected)
