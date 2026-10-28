@@ -293,11 +293,20 @@ fn supplied_rows(state: &LuaState) -> LuaResult<Vec<crate::lua_api::state::Wrath
                 column: talent.column,
                 rank: 0,
                 max_rank: talent.max_rank,
-                exceptional: false,
+                exceptional: talent.exceptional,
                 meets_prereq: true,
                 preview_rank: 0,
                 meets_preview_prereq: true,
-                prerequisites: Vec::new(),
+                prerequisites: talent
+                    .prerequisites
+                    .iter()
+                    .map(|&(talent_index, required_rank)| {
+                        crate::lua_api::state::WrathTalentPrerequisite {
+                            talent_index,
+                            required_rank,
+                        }
+                    })
+                    .collect(),
             })
             .collect());
     }

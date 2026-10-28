@@ -3,7 +3,7 @@
 //! Talent: https://wago.tools/db2/Talent/csv?build=3.4.3.53788 sha256 1401f672d10a74ae4d1037ca32e8c037b5dba376960dbddcdc1cf890ef88e536
 //! SpellName: https://wago.tools/db2/SpellName/csv?build=3.4.3.53788 sha256 d78c8c02b7eddde9ad6b1cdc2ce910d059f0098ebc44d17d83b5aabf4b891544
 //! SpellMisc: https://wago.tools/db2/SpellMisc/csv?build=3.4.3.53788 sha256 48937d6c028916ef75c57de0559603221eab3e0e066fc1c3f514d121d9518bc4
-//! Talent 1756 prerequisite slot 0 references missing Talent 1409; native handling is unknown.
+//! Talent 1756 prerequisite slot 0 references missing Talent 1409; omitted.
 
 pub struct Tab {
     pub name: &'static str,
@@ -17,6 +17,8 @@ pub struct Talent {
     pub tier: u32,
     pub column: u32,
     pub max_rank: u32,
+    pub exceptional: bool,
+    pub prerequisites: &'static [(u32, u32)],
 }
 
 pub static TABS: &[Tab] = &[
@@ -31,6 +33,8 @@ pub static TABS: &[Tab] = &[
                 tier: 2,
                 column: 3,
                 max_rank: 2,
+                exceptional: false,
+                prerequisites: &[],
             },
             Talent {
                 name: "Vengeance",
@@ -38,6 +42,8 @@ pub static TABS: &[Tab] = &[
                 tier: 6,
                 column: 2,
                 max_rank: 3,
+                exceptional: false,
+                prerequisites: &[(6, 5)],
             },
             Talent {
                 name: "Deflection",
@@ -45,6 +51,8 @@ pub static TABS: &[Tab] = &[
                 tier: 1,
                 column: 2,
                 max_rank: 5,
+                exceptional: false,
+                prerequisites: &[],
             },
             Talent {
                 name: "Benediction",
@@ -52,6 +60,8 @@ pub static TABS: &[Tab] = &[
                 tier: 1,
                 column: 3,
                 max_rank: 5,
+                exceptional: false,
+                prerequisites: &[],
             },
             Talent {
                 name: "Two-Handed Weapon Specialization",
@@ -59,6 +69,8 @@ pub static TABS: &[Tab] = &[
                 tier: 5,
                 column: 1,
                 max_rank: 3,
+                exceptional: false,
+                prerequisites: &[],
             },
             Talent {
                 name: "Conviction",
@@ -66,6 +78,8 @@ pub static TABS: &[Tab] = &[
                 tier: 3,
                 column: 2,
                 max_rank: 5,
+                exceptional: false,
+                prerequisites: &[],
             },
             Talent {
                 name: "Repentance",
@@ -73,6 +87,8 @@ pub static TABS: &[Tab] = &[
                 tier: 7,
                 column: 2,
                 max_rank: 1,
+                exceptional: true,
+                prerequisites: &[],
             },
             Talent {
                 name: "Heart of the Crusader",
@@ -80,6 +96,8 @@ pub static TABS: &[Tab] = &[
                 tier: 2,
                 column: 2,
                 max_rank: 3,
+                exceptional: false,
+                prerequisites: &[],
             },
             Talent {
                 name: "Seal of Command",
@@ -87,6 +105,8 @@ pub static TABS: &[Tab] = &[
                 tier: 3,
                 column: 3,
                 max_rank: 1,
+                exceptional: true,
+                prerequisites: &[],
             },
             Talent {
                 name: "Improved Judgements",
@@ -94,6 +114,8 @@ pub static TABS: &[Tab] = &[
                 tier: 2,
                 column: 1,
                 max_rank: 2,
+                exceptional: false,
+                prerequisites: &[],
             },
             Talent {
                 name: "Eye for an Eye",
@@ -101,6 +123,8 @@ pub static TABS: &[Tab] = &[
                 tier: 4,
                 column: 1,
                 max_rank: 2,
+                exceptional: false,
+                prerequisites: &[],
             },
             Talent {
                 name: "Vindication",
@@ -108,6 +132,8 @@ pub static TABS: &[Tab] = &[
                 tier: 3,
                 column: 1,
                 max_rank: 2,
+                exceptional: false,
+                prerequisites: &[],
             },
             Talent {
                 name: "Pursuit of Justice",
@@ -115,6 +141,8 @@ pub static TABS: &[Tab] = &[
                 tier: 3,
                 column: 4,
                 max_rank: 2,
+                exceptional: false,
+                prerequisites: &[],
             },
             Talent {
                 name: "Crusade",
@@ -122,6 +150,8 @@ pub static TABS: &[Tab] = &[
                 tier: 4,
                 column: 4,
                 max_rank: 3,
+                exceptional: false,
+                prerequisites: &[],
             },
             Talent {
                 name: "Sanctified Retribution",
@@ -129,6 +159,8 @@ pub static TABS: &[Tab] = &[
                 tier: 5,
                 column: 3,
                 max_rank: 1,
+                exceptional: false,
+                prerequisites: &[],
             },
             Talent {
                 name: "Divine Purpose",
@@ -136,6 +168,8 @@ pub static TABS: &[Tab] = &[
                 tier: 6,
                 column: 3,
                 max_rank: 2,
+                exceptional: false,
+                prerequisites: &[],
             },
             Talent {
                 name: "Judgements of the Wise",
@@ -143,6 +177,8 @@ pub static TABS: &[Tab] = &[
                 tier: 7,
                 column: 3,
                 max_rank: 3,
+                exceptional: false,
+                prerequisites: &[],
             },
             Talent {
                 name: "Fanaticism",
@@ -150,6 +186,8 @@ pub static TABS: &[Tab] = &[
                 tier: 8,
                 column: 2,
                 max_rank: 3,
+                exceptional: false,
+                prerequisites: &[(7, 1)],
             },
             Talent {
                 name: "Sanctity of Battle",
@@ -157,6 +195,8 @@ pub static TABS: &[Tab] = &[
                 tier: 4,
                 column: 3,
                 max_rank: 3,
+                exceptional: false,
+                prerequisites: &[],
             },
             Talent {
                 name: "Crusader Strike",
@@ -164,6 +204,8 @@ pub static TABS: &[Tab] = &[
                 tier: 9,
                 column: 2,
                 max_rank: 1,
+                exceptional: true,
+                prerequisites: &[],
             },
             Talent {
                 name: "Sanctified Wrath",
@@ -171,6 +213,8 @@ pub static TABS: &[Tab] = &[
                 tier: 8,
                 column: 3,
                 max_rank: 2,
+                exceptional: false,
+                prerequisites: &[],
             },
             Talent {
                 name: "Swift Retribution",
@@ -178,6 +222,8 @@ pub static TABS: &[Tab] = &[
                 tier: 9,
                 column: 1,
                 max_rank: 3,
+                exceptional: false,
+                prerequisites: &[],
             },
             Talent {
                 name: "Righteous Vengeance",
@@ -185,6 +231,8 @@ pub static TABS: &[Tab] = &[
                 tier: 10,
                 column: 2,
                 max_rank: 3,
+                exceptional: false,
+                prerequisites: &[],
             },
             Talent {
                 name: "Divine Storm",
@@ -192,6 +240,8 @@ pub static TABS: &[Tab] = &[
                 tier: 11,
                 column: 2,
                 max_rank: 1,
+                exceptional: true,
+                prerequisites: &[],
             },
             Talent {
                 name: "The Art of War",
@@ -199,6 +249,8 @@ pub static TABS: &[Tab] = &[
                 tier: 7,
                 column: 1,
                 max_rank: 2,
+                exceptional: false,
+                prerequisites: &[],
             },
             Talent {
                 name: "Sheath of Light",
@@ -206,6 +258,8 @@ pub static TABS: &[Tab] = &[
                 tier: 9,
                 column: 3,
                 max_rank: 3,
+                exceptional: false,
+                prerequisites: &[],
             },
         ],
     },
@@ -220,6 +274,8 @@ pub static TABS: &[Tab] = &[
                 tier: 1,
                 column: 2,
                 max_rank: 5,
+                exceptional: false,
+                prerequisites: &[],
             },
             Talent {
                 name: "Divine Favor",
@@ -227,6 +283,8 @@ pub static TABS: &[Tab] = &[
                 tier: 5,
                 column: 2,
                 max_rank: 1,
+                exceptional: true,
+                prerequisites: &[(9, 5)],
             },
             Talent {
                 name: "Aura Mastery",
@@ -234,6 +292,8 @@ pub static TABS: &[Tab] = &[
                 tier: 3,
                 column: 1,
                 max_rank: 1,
+                exceptional: true,
+                prerequisites: &[],
             },
             Talent {
                 name: "Improved Lay on Hands",
@@ -241,6 +301,8 @@ pub static TABS: &[Tab] = &[
                 tier: 3,
                 column: 3,
                 max_rank: 2,
+                exceptional: false,
+                prerequisites: &[],
             },
             Talent {
                 name: "Healing Light",
@@ -248,6 +310,8 @@ pub static TABS: &[Tab] = &[
                 tier: 2,
                 column: 1,
                 max_rank: 3,
+                exceptional: false,
+                prerequisites: &[],
             },
             Talent {
                 name: "Improved Blessing of Wisdom",
@@ -255,6 +319,8 @@ pub static TABS: &[Tab] = &[
                 tier: 4,
                 column: 3,
                 max_rank: 2,
+                exceptional: false,
+                prerequisites: &[],
             },
             Talent {
                 name: "Divine Intellect",
@@ -262,6 +328,8 @@ pub static TABS: &[Tab] = &[
                 tier: 2,
                 column: 2,
                 max_rank: 5,
+                exceptional: false,
+                prerequisites: &[],
             },
             Talent {
                 name: "Improved Concentration Aura",
@@ -269,6 +337,8 @@ pub static TABS: &[Tab] = &[
                 tier: 4,
                 column: 1,
                 max_rank: 3,
+                exceptional: false,
+                prerequisites: &[],
             },
             Talent {
                 name: "Illumination",
@@ -276,6 +346,8 @@ pub static TABS: &[Tab] = &[
                 tier: 3,
                 column: 2,
                 max_rank: 5,
+                exceptional: false,
+                prerequisites: &[],
             },
             Talent {
                 name: "Seals of the Pure",
@@ -283,6 +355,8 @@ pub static TABS: &[Tab] = &[
                 tier: 1,
                 column: 3,
                 max_rank: 5,
+                exceptional: false,
+                prerequisites: &[],
             },
             Talent {
                 name: "Sanctified Light",
@@ -290,6 +364,8 @@ pub static TABS: &[Tab] = &[
                 tier: 5,
                 column: 3,
                 max_rank: 3,
+                exceptional: false,
+                prerequisites: &[],
             },
             Talent {
                 name: "Holy Shock",
@@ -297,6 +373,8 @@ pub static TABS: &[Tab] = &[
                 tier: 7,
                 column: 2,
                 max_rank: 1,
+                exceptional: true,
+                prerequisites: &[(2, 1)],
             },
             Talent {
                 name: "Holy Power",
@@ -304,6 +382,8 @@ pub static TABS: &[Tab] = &[
                 tier: 6,
                 column: 3,
                 max_rank: 5,
+                exceptional: false,
+                prerequisites: &[],
             },
             Talent {
                 name: "Unyielding Faith",
@@ -311,6 +391,8 @@ pub static TABS: &[Tab] = &[
                 tier: 2,
                 column: 3,
                 max_rank: 2,
+                exceptional: false,
+                prerequisites: &[],
             },
             Talent {
                 name: "Pure of Heart",
@@ -318,6 +400,8 @@ pub static TABS: &[Tab] = &[
                 tier: 5,
                 column: 1,
                 max_rank: 2,
+                exceptional: false,
+                prerequisites: &[],
             },
             Talent {
                 name: "Purifying Power",
@@ -325,6 +409,8 @@ pub static TABS: &[Tab] = &[
                 tier: 6,
                 column: 1,
                 max_rank: 2,
+                exceptional: false,
+                prerequisites: &[],
             },
             Talent {
                 name: "Blessed Life",
@@ -332,6 +418,8 @@ pub static TABS: &[Tab] = &[
                 tier: 7,
                 column: 3,
                 max_rank: 3,
+                exceptional: false,
+                prerequisites: &[],
             },
             Talent {
                 name: "Light's Grace",
@@ -339,6 +427,8 @@ pub static TABS: &[Tab] = &[
                 tier: 7,
                 column: 1,
                 max_rank: 3,
+                exceptional: false,
+                prerequisites: &[],
             },
             Talent {
                 name: "Holy Guidance",
@@ -346,6 +436,8 @@ pub static TABS: &[Tab] = &[
                 tier: 8,
                 column: 3,
                 max_rank: 5,
+                exceptional: false,
+                prerequisites: &[],
             },
             Talent {
                 name: "Divine Illumination",
@@ -353,6 +445,8 @@ pub static TABS: &[Tab] = &[
                 tier: 9,
                 column: 1,
                 max_rank: 1,
+                exceptional: true,
+                prerequisites: &[],
             },
             Talent {
                 name: "Sacred Cleansing",
@@ -360,6 +454,8 @@ pub static TABS: &[Tab] = &[
                 tier: 8,
                 column: 1,
                 max_rank: 3,
+                exceptional: false,
+                prerequisites: &[],
             },
             Talent {
                 name: "Enlightened Judgements",
@@ -367,6 +463,8 @@ pub static TABS: &[Tab] = &[
                 tier: 10,
                 column: 3,
                 max_rank: 2,
+                exceptional: false,
+                prerequisites: &[],
             },
             Talent {
                 name: "Beacon of Light",
@@ -374,6 +472,8 @@ pub static TABS: &[Tab] = &[
                 tier: 11,
                 column: 2,
                 max_rank: 1,
+                exceptional: true,
+                prerequisites: &[],
             },
             Talent {
                 name: "Infusion of Light",
@@ -381,6 +481,8 @@ pub static TABS: &[Tab] = &[
                 tier: 10,
                 column: 2,
                 max_rank: 2,
+                exceptional: false,
+                prerequisites: &[(12, 1)],
             },
             Talent {
                 name: "Blessed Hands",
@@ -388,6 +490,8 @@ pub static TABS: &[Tab] = &[
                 tier: 4,
                 column: 4,
                 max_rank: 2,
+                exceptional: false,
+                prerequisites: &[],
             },
             Talent {
                 name: "Judgements of the Pure",
@@ -395,6 +499,8 @@ pub static TABS: &[Tab] = &[
                 tier: 9,
                 column: 3,
                 max_rank: 5,
+                exceptional: false,
+                prerequisites: &[],
             },
         ],
     },
@@ -409,6 +515,8 @@ pub static TABS: &[Tab] = &[
                 tier: 8,
                 column: 1,
                 max_rank: 3,
+                exceptional: false,
+                prerequisites: &[],
             },
             Talent {
                 name: "Improved Devotion Aura",
@@ -416,6 +524,8 @@ pub static TABS: &[Tab] = &[
                 tier: 4,
                 column: 3,
                 max_rank: 3,
+                exceptional: false,
+                prerequisites: &[],
             },
             Talent {
                 name: "Toughness",
@@ -423,6 +533,8 @@ pub static TABS: &[Tab] = &[
                 tier: 3,
                 column: 3,
                 max_rank: 5,
+                exceptional: false,
+                prerequisites: &[],
             },
             Talent {
                 name: "Guardian's Favor",
@@ -430,6 +542,8 @@ pub static TABS: &[Tab] = &[
                 tier: 2,
                 column: 2,
                 max_rank: 2,
+                exceptional: false,
+                prerequisites: &[],
             },
             Talent {
                 name: "Reckoning",
@@ -437,6 +551,8 @@ pub static TABS: &[Tab] = &[
                 tier: 5,
                 column: 3,
                 max_rank: 5,
+                exceptional: false,
+                prerequisites: &[],
             },
             Talent {
                 name: "One-Handed Weapon Specialization",
@@ -444,6 +560,8 @@ pub static TABS: &[Tab] = &[
                 tier: 6,
                 column: 3,
                 max_rank: 3,
+                exceptional: false,
+                prerequisites: &[],
             },
             Talent {
                 name: "Holy Shield",
@@ -451,6 +569,8 @@ pub static TABS: &[Tab] = &[
                 tier: 7,
                 column: 2,
                 max_rank: 1,
+                exceptional: true,
+                prerequisites: &[(8, 1)],
             },
             Talent {
                 name: "Blessing of Sanctuary",
@@ -458,6 +578,8 @@ pub static TABS: &[Tab] = &[
                 tier: 5,
                 column: 2,
                 max_rank: 1,
+                exceptional: true,
+                prerequisites: &[],
             },
             Talent {
                 name: "Divinity",
@@ -465,6 +587,8 @@ pub static TABS: &[Tab] = &[
                 tier: 1,
                 column: 2,
                 max_rank: 5,
+                exceptional: false,
+                prerequisites: &[],
             },
             Talent {
                 name: "Improved Righteous Fury",
@@ -472,6 +596,8 @@ pub static TABS: &[Tab] = &[
                 tier: 3,
                 column: 2,
                 max_rank: 3,
+                exceptional: false,
+                prerequisites: &[],
             },
             Talent {
                 name: "Improved Hammer of Justice",
@@ -479,6 +605,8 @@ pub static TABS: &[Tab] = &[
                 tier: 4,
                 column: 2,
                 max_rank: 2,
+                exceptional: false,
+                prerequisites: &[],
             },
             Talent {
                 name: "Anticipation",
@@ -486,6 +614,8 @@ pub static TABS: &[Tab] = &[
                 tier: 2,
                 column: 3,
                 max_rank: 5,
+                exceptional: false,
+                prerequisites: &[],
             },
             Talent {
                 name: "Stoicism",
@@ -493,6 +623,8 @@ pub static TABS: &[Tab] = &[
                 tier: 2,
                 column: 1,
                 max_rank: 3,
+                exceptional: false,
+                prerequisites: &[],
             },
             Talent {
                 name: "Sacred Duty",
@@ -500,6 +632,8 @@ pub static TABS: &[Tab] = &[
                 tier: 6,
                 column: 1,
                 max_rank: 2,
+                exceptional: false,
+                prerequisites: &[],
             },
             Talent {
                 name: "Ardent Defender",
@@ -507,6 +641,8 @@ pub static TABS: &[Tab] = &[
                 tier: 7,
                 column: 3,
                 max_rank: 3,
+                exceptional: false,
+                prerequisites: &[],
             },
             Talent {
                 name: "Combat Expertise",
@@ -514,6 +650,8 @@ pub static TABS: &[Tab] = &[
                 tier: 8,
                 column: 3,
                 max_rank: 3,
+                exceptional: false,
+                prerequisites: &[],
             },
             Talent {
                 name: "Avenger's Shield",
@@ -521,6 +659,8 @@ pub static TABS: &[Tab] = &[
                 tier: 9,
                 column: 2,
                 max_rank: 1,
+                exceptional: true,
+                prerequisites: &[(7, 1)],
             },
             Talent {
                 name: "Divine Strength",
@@ -528,6 +668,8 @@ pub static TABS: &[Tab] = &[
                 tier: 1,
                 column: 3,
                 max_rank: 5,
+                exceptional: false,
+                prerequisites: &[],
             },
             Talent {
                 name: "Guarded by the Light",
@@ -535,6 +677,8 @@ pub static TABS: &[Tab] = &[
                 tier: 9,
                 column: 3,
                 max_rank: 2,
+                exceptional: false,
+                prerequisites: &[],
             },
             Talent {
                 name: "Touched by the Light",
@@ -542,6 +686,8 @@ pub static TABS: &[Tab] = &[
                 tier: 9,
                 column: 1,
                 max_rank: 3,
+                exceptional: false,
+                prerequisites: &[],
             },
             Talent {
                 name: "Hammer of the Righteous",
@@ -549,6 +695,8 @@ pub static TABS: &[Tab] = &[
                 tier: 11,
                 column: 2,
                 max_rank: 1,
+                exceptional: true,
+                prerequisites: &[],
             },
             Talent {
                 name: "Judgements of the Just",
@@ -556,6 +704,8 @@ pub static TABS: &[Tab] = &[
                 tier: 10,
                 column: 3,
                 max_rank: 2,
+                exceptional: false,
+                prerequisites: &[],
             },
             Talent {
                 name: "Shield of the Templar",
@@ -563,6 +713,8 @@ pub static TABS: &[Tab] = &[
                 tier: 10,
                 column: 2,
                 max_rank: 3,
+                exceptional: false,
+                prerequisites: &[(17, 1)],
             },
             Talent {
                 name: "Divine Sacrifice",
@@ -570,6 +722,8 @@ pub static TABS: &[Tab] = &[
                 tier: 3,
                 column: 1,
                 max_rank: 1,
+                exceptional: true,
+                prerequisites: &[],
             },
             Talent {
                 name: "Divine Guardian",
@@ -577,6 +731,8 @@ pub static TABS: &[Tab] = &[
                 tier: 4,
                 column: 1,
                 max_rank: 2,
+                exceptional: false,
+                prerequisites: &[(24, 1)],
             },
             Talent {
                 name: "Spiritual Attunement",
@@ -584,6 +740,8 @@ pub static TABS: &[Tab] = &[
                 tier: 7,
                 column: 1,
                 max_rank: 2,
+                exceptional: false,
+                prerequisites: &[],
             },
         ],
     },
