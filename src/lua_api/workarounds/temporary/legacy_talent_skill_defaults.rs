@@ -4,6 +4,21 @@
 //! model pre-MoP talent trees, retail PvP talent selections, arena rosters, or
 //! the removed legacy skill window.
 
+const LEGACY_TALENT_ROW_DEFAULTS_LUA: &str = r#"
+if rawget(_G, "GetNumTalentTabs") == nil then
+    function GetNumTalentTabs()
+        return 0
+    end
+end
+
+if rawget(_G, "GetTalentInfo") == nil then
+    function GetTalentInfo(_tabIndex, _talentIndex)
+        return nil
+    end
+end
+
+"#;
+
 const LEGACY_TALENT_SKILL_DEFAULTS_LUA: &str = r#"
 local function numberArgument(value)
     if type(value) == "number" then
@@ -15,18 +30,6 @@ end
 
 local function isValidPvpTalentSlot(slotIndex)
     return slotIndex == 1 or slotIndex == 2 or slotIndex == 3
-end
-
-if rawget(_G, "GetNumTalentTabs") == nil then
-    function GetNumTalentTabs()
-        return 0
-    end
-end
-
-if rawget(_G, "GetTalentInfo") == nil then
-    function GetTalentInfo(_tabIndex, _talentIndex)
-        return nil
-    end
 end
 
 if rawget(_G, "GetTalentInfoBySpecialization") == nil then
@@ -85,6 +88,9 @@ end
 "#;
 
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
+    if crate::client_profile::ACTIVE != crate::client_profile::ClientProfile::Wrath {
+        lua.exec(LEGACY_TALENT_ROW_DEFAULTS_LUA)?;
+    }
     lua.exec(LEGACY_TALENT_SKILL_DEFAULTS_LUA)?;
     #[cfg(not(any(
         feature = "client-wrath",
