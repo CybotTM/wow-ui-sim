@@ -61,6 +61,14 @@ pub fn register_c_specialization_info(state: &mut LuaState) -> LuaResult<()> {
     // the table with a fresh one.
     let t_ref = ensure_namespace(state, "C_SpecializationInfo")?;
     register_c_specialization_info_methods(state, t_ref)?;
+    if crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::WowForever {
+        table_set_rust_fn_static(
+            state,
+            t_ref,
+            "CanPlayerUsePVPTalentUI",
+            can_use_pvp_talent_ui,
+        )?;
+    }
     if matches!(
         crate::client_profile::ACTIVE,
         crate::client_profile::ClientProfile::Ptr
@@ -85,6 +93,20 @@ pub fn register_c_specialization_info(state: &mut LuaState) -> LuaResult<()> {
         )?;
     }
     Ok(())
+}
+
+fn can_use_pvp_talent_ui(state: &mut LuaState) -> LuaResult<u32> {
+    let (can_use, failure_reason) = {
+        let sim = borrow_state(state)?;
+        (
+            sim.pvp_talents.can_use,
+            sim.pvp_talents.failure_reason.clone(),
+        )
+    };
+    let reason = state.gc.intern_string(failure_reason.as_bytes());
+    state.push(Val::Bool(can_use));
+    state.push(Val::Str(reason));
+    Ok(2)
 }
 
 fn register_c_specialization_info_methods(
