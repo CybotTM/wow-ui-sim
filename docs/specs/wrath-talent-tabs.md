@@ -9,6 +9,8 @@ The Wrath talent panel reads scenario-supplied tabs, rows and prerequisites. The
 - [ ] Derive prerequisite satisfaction from the supplied prerequisite talent rank and preview rank.
 - [ ] Return the comparison's missing-tab and missing-row tuples, and allow a supplied icon to be nil.
 - [ ] Preserve the existing temporary defaults on non-Wrath profiles.
+- [ ] For the default Wrath Paladin, use the 3.4.3.53788 TalentTab and Talent rows in record order, with spell names and numeric icon file IDs. Supplied group data replaces the default catalog.
+- [ ] Treat the unsupplied default talent ranks and points as zero. The default exceptional and prerequisite values are scenario defaults; native flag and prerequisite-rank interpretation remain UNKNOWN.
 
 ## How it works
 
@@ -27,6 +29,7 @@ The Wrath talent panel reads scenario-supplied tabs, rows and prerequisites. The
 ## Known gaps (current cycle)
 
 - [ ] Verify the aso 3.3.5a comparison boundaries; inspected and pet catalogs remain unsupplied scenario state.
+- [ ] Talent 1756 prerequisite slot 0 references absent Talent 1409 in the 3.4.3.53788 export; native handling is UNKNOWN. Default prerequisites are not published until their rank semantics are established.
 - [ ] Verify the original render path and profile checks.
 
 ## Out of scope
