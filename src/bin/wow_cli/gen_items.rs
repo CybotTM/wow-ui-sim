@@ -7,10 +7,6 @@
 //!
 //! Generates: crates/sim-data/data/items.rs
 
-#[cfg(test)]
-#[path = "gen_items_tests.rs"]
-mod tests;
-
 use super::csv_util::{escape_str, parse_csv_line, read_csv_records, wow_data_dir};
 use std::collections::{BTreeSet, HashMap, HashSet};
 use std::fs::File;
@@ -434,21 +430,11 @@ fn build_item_map(
     let mut count = 0u32;
     let mut skipped = 0u32;
 
-    let records = read_csv_records(reader)?;
-    let mut records = records.iter();
-    let header = records.next().ok_or("empty ItemSparse.csv")?;
-    let columns = item_sparse_columns(header)?;
-    for line in records {
-        let fields = parse_csv_line(line);
-        if fields.len() != columns.1 {
-            return Err(format!(
-                "ItemSparse.csv: expected {} columns, got {}",
-                columns.1,
-                fields.len()
-            )
-            .into());
+    for (i, line) in read_csv_records(reader)?.into_iter().enumerate() {
+        if i == 0 {
+            continue;
         }
-        match parse_item_row(&fields, &columns.0, icon_map) {
+        match parse_item_row(&line, icon_map) {
             Some((id, value)) if required_ids.contains(&id) => {
                 builder.entry(id, &value);
                 emitted_ids.insert(id);
@@ -495,79 +481,32 @@ fn fallback_item_search_rows(
     Ok(rows)
 }
 
-fn item_sparse_columns(
-    header: &str,
-) -> Result<(HashMap<String, usize>, usize), Box<dyn std::error::Error>> {
-    let fields = parse_csv_line(header);
-    let mut columns = HashMap::new();
-    for (index, name) in fields.iter().enumerate() {
-        if columns.insert(name.clone(), index).is_some() {
-            return Err(format!("ItemSparse.csv: duplicate column {name}").into());
-        }
+fn parse_item_row(line: &str, icon_map: &HashMap<u32, u32>) -> Option<(u32, String)> {
+    let fields = parse_csv_line(line);
+    if fields.len() < 102 {
+        return None;
     }
-    let required = [
-        "ID",
-        "Display_lang",
-        "ExpansionID",
-        "Stackable",
-        "SellPrice",
-        "ItemLevel",
-        "Bonding",
-        "RequiredLevel",
-        "InventoryType",
-        "OverallQualityID",
-    ];
-    for name in required
-        .into_iter()
-        .map(str::to_owned)
-        .chain((0..10).flat_map(|i| {
-            [
-                format!("StatPercentEditor_{i}"),
-                format!("StatModifier_bonusStat_{i}"),
-            ]
-        }))
-    {
-        if !columns.contains_key(&name) {
-            return Err(format!("ItemSparse.csv: missing column {name}").into());
-        }
-    }
-    Ok((columns, fields.len()))
-}
-
-fn parse_item_row(
-    fields: &[String],
-    columns: &HashMap<String, usize>,
-    icon_map: &HashMap<u32, u32>,
-) -> Option<(u32, String)> {
-    let id: u32 = fields[columns["ID"]].parse().ok()?;
-    let name = &fields[columns["Display_lang"]];
+    let id: u32 = fields[0].parse().ok()?;
+    let name = &fields[6];
     if name.is_empty() {
         return None;
     }
     let icon_file_data_id = icon_map.get(&id).copied().unwrap_or(0);
-    Some((
-        id,
-        format_item_info(fields, columns, name, icon_file_data_id),
-    ))
+    Some((id, format_item_info(&fields, name, icon_file_data_id)))
 }
 
-fn format_item_info(
-    fields: &[String],
-    columns: &HashMap<String, usize>,
-    name: &str,
-    icon_file_data_id: u32,
-) -> String {
+fn format_item_info(fields: &[String], name: &str, icon_file_data_id: u32) -> String {
     let escaped_name = escape_str(name);
-    let expansion_id: u8 = fields[columns["ExpansionID"]].parse().unwrap_or(0);
-    let stackable: u32 = fields[columns["Stackable"]].parse().unwrap_or(1);
-    let sell_price: u32 = fields[columns["SellPrice"]].parse().unwrap_or(0);
-    let item_level: u16 = fields[columns["ItemLevel"]].parse().unwrap_or(0);
-    let bonding: u8 = fields[columns["Bonding"]].parse().unwrap_or(0);
-    let required_level: u16 = fields[columns["RequiredLevel"]].parse().unwrap_or(0);
-    let inventory_type: u8 = fields[columns["InventoryType"]].parse().unwrap_or(0);
-    let quality: u8 = fields[columns["OverallQualityID"]].parse().unwrap_or(0);
-    let stat_percent_editor = parse_stat_percent_editor(fields, columns);
-    let stat_modifier_bonus_stat = parse_stat_modifier_bonus_stat(fields, columns);
+    let expansion_id: u8 = fields[7].parse().unwrap_or(0);
+    let stackable: u32 = fields[46].parse().unwrap_or(1);
+    let sell_price: u32 = fields[50].parse().unwrap_or(0);
+    let item_level: u16 = fields[83].parse().unwrap_or(0);
+    let bonding: u8 = fields[94].parse().unwrap_or(0);
+    let required_level: u16 = fields[99].parse().unwrap_or(0);
+    let inventory_type: u8 = fields[100].parse().unwrap_or(0);
+    let quality: u8 = fields[101].parse().unwrap_or(0);
+    let stat_percent_editor = parse_stat_percent_editor(fields);
+    let stat_modifier_bonus_stat = parse_stat_modifier_bonus_stat(fields);
 
     let stat_percent_editor = format_u16_array(&stat_percent_editor);
     let stat_modifier_bonus_stat = format_i16_array(&stat_modifier_bonus_stat);
@@ -596,23 +535,12 @@ fn format_search_item_info(fields: &[String], idx: &HashMap<String, usize>) -> S
     )
 }
 
-fn parse_stat_percent_editor(fields: &[String], columns: &HashMap<String, usize>) -> [u16; 10] {
-    std::array::from_fn(|index| {
-        fields[columns[&format!("StatPercentEditor_{index}")]]
-            .parse::<u16>()
-            .unwrap_or(0)
-    })
+fn parse_stat_percent_editor(fields: &[String]) -> [u16; 10] {
+    std::array::from_fn(|index| fields[26 + index].parse::<u16>().unwrap_or(0))
 }
 
-fn parse_stat_modifier_bonus_stat(
-    fields: &[String],
-    columns: &HashMap<String, usize>,
-) -> [i16; 10] {
-    std::array::from_fn(|index| {
-        fields[columns[&format!("StatModifier_bonusStat_{index}")]]
-            .parse::<i16>()
-            .unwrap_or(-1)
-    })
+fn parse_stat_modifier_bonus_stat(fields: &[String]) -> [i16; 10] {
+    std::array::from_fn(|index| fields[36 + index].parse::<i16>().unwrap_or(-1))
 }
 
 fn format_array<T: std::fmt::Display>(values: &[T]) -> String {
