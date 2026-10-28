@@ -321,7 +321,7 @@ These aliases build both `wow-sim` and `wow-cli` with `--release --no-default-fe
 - `--exec-lua "code"` - Execute Lua code after startup events. Works in all modes: GUI (after first frame render), screenshot, and dump-tree. Prefix with `@` to load from file (e.g., `--exec-lua @/tmp/debug.lua`)
 - `--class <NAME|N>` / `--spec <NAME|N>` - Set class and specialization after startup, before `--exec-lua`. Names are case-insensitive; numeric indices are one-based. Without `--class`, `--spec` uses the current class. Wrath, Era, and Anniversary reject `--spec`. These flags fire `PLAYER_SPECIALIZATION_CHANGED` with `player`; they do not repeat the world-entry lifecycle event.
 - `--no-addons` / `--no-saved-vars` - Same as environment variables below
-- `--delay <ms>` - Delay in milliseconds after firing startup events (for dump-tree/screenshot)
+- `--delay <ms>` - Delay in milliseconds after firing startup events (for dump-tree/screenshot). The sleep is followed by one OnUpdate tick that reports the slept time as `elapsed` and by the timers that came due, and it runs before `--exec-lua`, so an addon that defers its setup with `C_Timer.After(n)` is initialised by the time the script runs
 
 ### Environment Variables
 
