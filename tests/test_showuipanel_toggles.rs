@@ -277,6 +277,13 @@ fn toggle_player_spells_frame_opens_and_closes_talent_panel() {
                 ToggleTalentFrame()
                 print('talent diagnostic after close', PlayerTalentFrame:IsShown())
                 assert(not PlayerTalentFrame:IsShown(), "native talent panel should close")
+                assert(GetNumTalentTabs() == 3)
+                local name, icon, _, background = GetTalentTabInfo(1)
+                assert(name == 'Retribution' and icon == 135873 and background == 'PaladinCombat')
+                local talent, talentIcon, tier, column, _, maximum = GetTalentInfo(1, 1)
+                assert(talent == 'Improved Blessing of Might' and talentIcon == 135906)
+                assert(tier == 2 and column == 3 and maximum == 2)
+                assert(GetNumTalents(1) == 26 and GetNumTalents(2) == 26)
             "#).expect("native talent lazy loader and toggle");
             return;
         }
