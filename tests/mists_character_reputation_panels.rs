@@ -34,8 +34,17 @@ fn assert_watched_reputation_bar(faction_id: u32, name: &str, value: u32, max: u
     }
     env.apply_post_load_workarounds();
     wow_ui_sim::startup::fire_startup_events_for_screen(&env, ScreenKind::Game);
+    env.state()
+        .borrow_mut()
+        .major_factions
+        .get_mut(&(faction_id as i64))
+        .expect("seeded major faction")
+        .renown_level_threshold = max as i32;
+    let other_id = if faction_id == 2590 { 2570 } else { 2590 };
     env.exec(&format!(
         r#"
+        C_Reputation.SetWatchedFactionByID({other_id})
+        assert(C_Reputation.GetWatchedFactionData().factionID == {other_id}, 'initial watch')
         C_Reputation.SetWatchedFactionByID({faction_id})
         local bar = CreateFrame('Frame', nil, UIParent, 'ReputationStatusBarTemplate')
         assert(bar.Update == ReputationStatusBarMixin.Update)
@@ -58,10 +67,12 @@ fn assert_watched_reputation_bar(faction_id: u32, name: &str, value: u32, max: u
 #[test]
 fn mists_reputation_bar_watches_dornogal() {
     assert_watched_reputation_bar(2590, "Council of Dornogal", 8200, 12000);
+    assert_watched_reputation_bar(2590, "Council of Dornogal", 8200, 21000);
 }
 
 #[test]
 fn mists_reputation_bar_watches_hallowfall() {
+    assert_watched_reputation_bar(2570, "Hallowfall Arathi", 4500, 12000);
     assert_watched_reputation_bar(2570, "Hallowfall Arathi", 4500, 21000);
 }
 
