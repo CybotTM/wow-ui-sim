@@ -37,10 +37,28 @@ fn timer_fixture(first: bool, second: bool) -> WowLuaEnv {
 
 fn assert_timer_classification(first: bool, second: bool) {
     let env = timer_fixture(first, second);
-    env.exec(&format!(
-        "assert(AuraUtil.IsBigDefensive({{spellId = 101}}) == {first}); assert(AuraUtil.IsBigDefensive({{spellId = 202}}) == {second})"
-    ))
+    env.exec(
+        r#"
+        debug.sethook(function(_, line)
+            local info = debug.getinfo(2, 'S')
+            local source = info.source:gsub('\\', '/')
+            local suffix = 'Blizzard_FrameXMLUtil/AuraUtil.lua'
+            if line == 332 and source:sub(-#suffix) == suffix then
+                MistsDefensiveBoundaryReached = true
+                debug.sethook()
+            end
+        end, 'l')
+    "#,
+    )
     .unwrap();
+    let result = env.exec(&format!(
+        "assert(AuraUtil.IsBigDefensive({{spellId = 101}}) == {first}); assert(AuraUtil.IsBigDefensive({{spellId = 202}}) == {second})"
+    ));
+    env.exec(
+        "debug.sethook(); assert(MistsDefensiveBoundaryReached, 'AuraUtil.lua:332 not reached')",
+    )
+    .unwrap();
+    result.expect("original consumer AuraUtil.lua:332 must complete");
 }
 
 #[test]
