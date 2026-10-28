@@ -2,13 +2,13 @@
 
 use std::collections::HashMap;
 
-#[cfg(feature = "aura-spell-classifications")]
+#[cfg(any(feature = "aura-spell-classifications", feature = "client-mists"))]
 use crate::lua_api::methods::borrow_state;
-#[cfg(feature = "aura-spell-classifications")]
+#[cfg(any(feature = "aura-spell-classifications", feature = "client-mists"))]
 use crate::lua_bridge::table_set_rust_fn_static;
-#[cfg(feature = "aura-spell-classifications")]
+#[cfg(any(feature = "aura-spell-classifications", feature = "client-mists"))]
 use rilua::vm::state::LuaState;
-#[cfg(feature = "aura-spell-classifications")]
+#[cfg(any(feature = "aura-spell-classifications", feature = "client-mists"))]
 use rilua::{LuaResult, Val};
 
 #[derive(Clone, Copy, Default)]
@@ -24,7 +24,7 @@ pub struct AuraSpellClassifications {
     pub spells: HashMap<u32, AuraSpellClassification>,
 }
 
-#[cfg(feature = "aura-spell-classifications")]
+#[cfg(any(feature = "aura-spell-classifications", feature = "client-mists"))]
 pub(crate) fn register(state: &mut LuaState) -> LuaResult<()> {
     let namespace = super::ensure_namespace(state, "C_UnitAuras")?;
     table_set_rust_fn_static(
@@ -34,11 +34,13 @@ pub(crate) fn register(state: &mut LuaState) -> LuaResult<()> {
         aura_is_big_defensive,
     )?;
     #[cfg(feature = "retail-12-0-5")]
-    table_set_rust_fn_static(state, namespace, "AuraIsPrivate", aura_is_private)?;
+    if crate::client_profile::ACTIVE != crate::client_profile::ClientProfile::Mists {
+        table_set_rust_fn_static(state, namespace, "AuraIsPrivate", aura_is_private)?;
+    }
     Ok(())
 }
 
-#[cfg(feature = "aura-spell-classifications")]
+#[cfg(any(feature = "aura-spell-classifications", feature = "client-mists"))]
 fn read_spell_classification(
     state: &LuaState,
     api_name: &str,
@@ -55,7 +57,7 @@ fn read_spell_classification(
         .unwrap_or_default())
 }
 
-#[cfg(feature = "aura-spell-classifications")]
+#[cfg(any(feature = "aura-spell-classifications", feature = "client-mists"))]
 fn aura_is_big_defensive(state: &mut LuaState) -> LuaResult<u32> {
     let classification = read_spell_classification(state, "C_UnitAuras.AuraIsBigDefensive")?;
     state.push(Val::Bool(classification.is_big_defensive));
