@@ -60,14 +60,20 @@ fn original_empty_catalog_preserves_cover_after_supplied_minimum() {
     let env = load_original_scenario();
     assert_eq!(env.state().borrow().mists_party_min_level, None);
     assert_empty_catalog_preservation(&env);
-    assert_eq!(query_minimum(&env), env.state().borrow().player.level as f64);
+    assert_eq!(
+        query_minimum(&env),
+        env.state().borrow().player.level as f64
+    );
     env.state().borrow_mut().mists_party_min_level = Some(85.0);
     assert_empty_catalog_preservation(&env);
     env.state().borrow_mut().mists_party_min_level = Some(90.0);
     assert_empty_catalog_preservation(&env);
     env.state().borrow_mut().mists_party_min_level = None;
     assert_empty_catalog_preservation(&env);
-    assert_eq!(query_minimum(&env), env.state().borrow().player.level as f64);
+    assert_eq!(
+        query_minimum(&env),
+        env.state().borrow().player.level as f64
+    );
 }
 
 fn query_minimum(env: &WowLuaEnv) -> f64 {
@@ -100,7 +106,8 @@ fn supplied_minimum_is_exact_environment_local_and_solo_defaults_to_player() {
 fn group_minimum_still_requires_a_supplied_value() {
     let env = WowLuaEnv::new().unwrap();
     env.state().borrow_mut().party_group_active = true;
-    let error = env.exec("C_PartyInfo.GetMinLevel()")
+    let error = env
+        .exec("C_PartyInfo.GetMinLevel()")
         .expect_err("group minimum remains an explicit supplied input");
     assert!(error.to_string().contains(UNKNOWN), "{error}");
     for minimum in [36.0, 58.0] {
@@ -120,4 +127,35 @@ fn explicit_category_is_unsupported_even_with_supplied_minimum() {
         assert!(error.to_string().contains(UNSUPPORTED), "{error}");
     }
     assert_eq!(query_minimum(&env), 85.0);
+}
+
+#[test]
+fn original_scenario_cover_tracks_solo_player_level() {
+    let env = load_original_scenario();
+    {
+        let mut sim = env.state().borrow_mut();
+        let mut dungeon = sim.lfd_dungeons[0].clone();
+        dungeon.dungeon_id = 987654;
+        dungeon.min_level = 50;
+        dungeon.max_level = 60;
+        sim.lfd_dungeons.push(dungeon);
+        sim.player.level = 40;
+    }
+    env.exec(
+        r#"
+        local name, scenarios = debug.getupvalue(ScenarioFinderFrame_UpdateAvailability, 1)
+        assert(name == 'allScenarios')
+        scenarios[1] = 987654
+    "#,
+    )
+    .unwrap();
+    env.exec("ScenarioFinderFrame_UpdateAvailability()")
+        .expect("original ScenarioFinder_Shared.lua:58 must consume the solo default");
+    env.exec("assert(ScenarioFinderFrame.NoScenariosCover:IsShown())")
+        .unwrap();
+    env.state().borrow_mut().player.level = 55;
+    env.exec("ScenarioFinderFrame_UpdateAvailability()")
+        .unwrap();
+    env.exec("assert(not ScenarioFinderFrame.NoScenariosCover:IsShown())")
+        .unwrap();
 }

@@ -73,10 +73,14 @@ fn exercise_original_scenario_and_isolation(initially_allowed: bool) {
     first
         .exec("GroupFinderFrame:GetScript('OnEvent')(GroupFinderFrame, 'PLAYER_LEVEL_CHANGED')")
         .expect("original PVEFrame.lua:270 must accept the scenario default");
-    let (allowed, reason): (bool, String) = first.eval("return C_LFGInfo.CanPlayerUseScenarioFinder()").unwrap();
+    let (allowed, reason): (bool, String) = first
+        .eval("return C_LFGInfo.CanPlayerUseScenarioFinder()")
+        .unwrap();
     assert!(allowed);
     assert_eq!(reason, "");
-    first.exec("assert(GroupFinderFrame.groupButton4:IsEnabled())").unwrap();
+    first
+        .exec("assert(GroupFinderFrame.groupButton4:IsEnabled())")
+        .unwrap();
     assert_original_scenario(&first, false, "supplied after unset", 90);
     assert_original_scenario(&first, true, "", 90);
 }
@@ -86,10 +90,13 @@ fn original_pve_frame_uses_stock_scenario_default() {
     let env = prepare_scenario_presentation();
     env.exec("local ok, reason = xpcall(function() GroupFinderFrame:GetScript('OnEvent')(GroupFinderFrame, 'PLAYER_LEVEL_CHANGED') end, debug.traceback); if not ok then error(reason, 0) end")
         .expect("original PVEFrame.lua:270 must accept the stock scenario default");
-    let (allowed, reason): (bool, String) = env.eval("return C_LFGInfo.CanPlayerUseScenarioFinder()").unwrap();
+    let (allowed, reason): (bool, String) = env
+        .eval("return C_LFGInfo.CanPlayerUseScenarioFinder()")
+        .unwrap();
     assert!(allowed);
     assert_eq!(reason, "");
-    env.exec("assert(GroupFinderFrame.groupButton4:IsEnabled())").unwrap();
+    env.exec("assert(GroupFinderFrame.groupButton4:IsEnabled())")
+        .unwrap();
 }
 
 #[test]
