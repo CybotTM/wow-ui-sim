@@ -29,7 +29,9 @@ pub(crate) fn register(state: &mut LuaState) -> LuaResult<()> {
         aura_is_big_defensive,
     )?;
     #[cfg(feature = "retail-12-0-5")]
-    table_set_rust_fn_static(state, namespace, "AuraIsPrivate", aura_is_private)?;
+    if crate::client_profile::ACTIVE != crate::client_profile::ClientProfile::Mists {
+        table_set_rust_fn_static(state, namespace, "AuraIsPrivate", aura_is_private)?;
+    }
     Ok(())
 }
 

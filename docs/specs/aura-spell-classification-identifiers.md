@@ -49,6 +49,10 @@ All model, representation, miss and security policies below are **INFERRED simul
 
 The shared capability exposes only the existing defensive getter on Forever; other profiles and Forever's unrelated nil members retain their behavior. The [original T6 callback attribution and proof](c-namespace-nil-members.md#forever-original-opaque-timer-pair--2026-10-22) owns the stock failure boundary and original-consumer regression. No model, catalog or security policy changes.
 
+## Mists publication
+
+The pinned Mists `Blizzard_APIDocumentationGenerated/UnitAuraDocumentation.lua:50–62` declares `AuraIsBigDefensive` with a required `SpellIdentifier` and boolean result. `Blizzard_FrameXMLUtil/Blizzard_FrameXMLUtil.toc:5,14` selects `AuraUtil.lua` for Game; `AuraUtil.lua:324–332` queries the API when no edit-mode value or cached result exists. Mists uses the existing explicit classification input. An absent record returns false as a simulator scenario default; native classifications and miss behavior are unknown. No native catalog is inferred.
+
 ## Era/Anniversary publication — 2026-10-25
 
 Both pinned profiles declare `AuraIsBigDefensive` in `Blizzard_APIDocumentationGenerated/UnitAuraDocumentation.lua:50`, with required `SpellIdentifier` at line55 and nonnil boolean at line60. Only these two profiles gain the existing `aura-spell-classifications` capability; `AuraIsPrivate` publication remains unchanged.
