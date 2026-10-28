@@ -62,18 +62,26 @@ class SlotBuildTests(unittest.TestCase):
 
     def test_launch_argv_keeps_source_and_target_paths_stable(self):
         self.assertEqual(
-            self.module.build_argv(2, Path("/home/osso/.worktrees/lane"),
+            self.module.build_argv(3, Path("/home/osso/.worktrees/lane"),
                                    "lane-build", ["cargo", "test", "--no-run"]),
             ["/usr/bin/systemd-run", "--user", "--no-block", "--remain-after-exit",
              "--unit=lane-build", "--slice=agents.slice",
              "--property=MemoryMax=9G", "--property=MemorySwapMax=0",
              "--property=CPUAccounting=yes",
              "--setenv=CARGO_INCREMENTAL=1", "--setenv=RUSTC_WRAPPER=",
-             "--setenv=CARGO_TARGET_DIR=/home/osso/.cache/wow-ui-sim-targets/slot-2",
-             "--property=BindPaths=/home/osso/.worktrees/lane:/home/osso/.cache/wow-ui-sim-srcmount/slot-2",
-             "--working-directory=/home/osso/.cache/wow-ui-sim-srcmount/slot-2",
+             "--setenv=CARGO_TARGET_DIR=/home/osso/.cache/wow-ui-sim-targets/slot-3",
+             "--property=BindPaths=/home/osso/.worktrees/lane:/home/osso/.cache/wow-ui-sim-srcmount/slot-3",
+             "--working-directory=/home/osso/.cache/wow-ui-sim-srcmount/slot-3",
              "--", "cargo", "test", "--no-run"],
         )
+
+    def test_retired_slot_two_is_rejected_before_launch(self):
+        with contextlib.redirect_stderr(io.StringIO()) as stderr, \
+                self.assertRaises(SystemExit) as exit_info:
+            self.module.main(["--slot", "2", "--worktree", str(self.slot),
+                              "--unit", "retired-slot", "--", "cargo", "build"])
+        self.assertEqual(exit_info.exception.code, 2)
+        self.assertRegex(stderr.getvalue(), r"--slot: invalid choice: '?2'?")
 
     def test_launch_disables_configured_rustc_wrapper(self):
         argv = self.module.build_argv(0, self.slot, "wrapper-test", ["cargo", "build"])

@@ -19,6 +19,8 @@ import tomllib
 
 TARGET_ROOT = Path("/home/osso/.cache/wow-ui-sim-targets")
 SOURCE_ROOT = Path("/home/osso/.cache/wow-ui-sim-srcmount")
+# Slot 2 was retired on 2026-10-27 (user decision: three build slots).
+SLOTS = (0, 1, 3)
 CAPACITY = "/home/osso/.worktrees/logs/capacity.sh"
 LIBRARY_SUFFIXES = {".rlib", ".rmeta", ".so", ".a", ".dll", ".dylib"}
 
@@ -893,7 +895,7 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--execute", type=Path, help=argparse.SUPPRESS)
     parser.add_argument("--status", metavar="UNIT")
-    parser.add_argument("--slot", type=int, choices=range(4))
+    parser.add_argument("--slot", type=int, choices=SLOTS)
     parser.add_argument("--worktree", type=Path)
     parser.add_argument("--unit")
     parser.add_argument("--owner")
