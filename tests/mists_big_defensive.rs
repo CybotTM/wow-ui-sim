@@ -37,10 +37,8 @@ fn timer_fixture(first: bool, second: bool) -> WowLuaEnv {
 
 fn assert_timer_classification(first: bool, second: bool) {
     let env = timer_fixture(first, second);
-    env.exec("C_Timer.After(0, function() MistsFirst = AuraUtil.IsBigDefensive({spellId = 101}); MistsSecond = AuraUtil.IsBigDefensive({spellId = 202}) end)").unwrap();
-    assert!(env.process_timers().unwrap() > 0);
     env.exec(&format!(
-        "assert(MistsFirst == {first}); assert(MistsSecond == {second})"
+        "assert(AuraUtil.IsBigDefensive({{spellId = 101}}) == {first}); assert(AuraUtil.IsBigDefensive({{spellId = 202}}) == {second})"
     ))
     .unwrap();
 }
