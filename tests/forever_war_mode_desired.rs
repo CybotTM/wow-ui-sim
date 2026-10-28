@@ -65,6 +65,7 @@ fn check_desired(desired: bool) {
         .expect("dispatch specialization change");
     env.fire_on_update(0.016)
         .expect("evaluate dirty micro buttons");
+    wow_ui_sim::startup::process_pending_timers(&env);
     let errors = crate::common::panel_fixtures::recorded_lua_errors(&env);
     assert!(
         errors.is_empty(),
