@@ -58,6 +58,7 @@ pub struct WowLuaEnv {
     pub(crate) lua: Rc<RefCell<rilua::Lua>>,
     pub(crate) state: Rc<RefCell<SimState>>,
     reload_loader: Option<Rc<ReloadLoader>>,
+    post_startup_exec_hook: RefCell<Option<Box<dyn FnOnce(&WowLuaEnv)>>>,
 }
 
 type ReloadLoader =
@@ -104,10 +105,23 @@ impl WowLuaEnv {
             lua,
             state,
             reload_loader: None,
+            post_startup_exec_hook: RefCell::new(None),
         };
         env.install_final_runtime_globals();
         crate::logging::eprintln_elapsed("[Startup] WowLuaEnv::new complete");
         Ok(env)
+    }
+
+    /// Schedule work immediately before the post-startup exec-lua script.
+    pub fn set_post_startup_exec_hook(&self, hook: impl FnOnce(&WowLuaEnv) + 'static) {
+        *self.post_startup_exec_hook.borrow_mut() = Some(Box::new(hook));
+    }
+
+    pub(super) fn run_post_startup_exec_hook(&self) {
+        let hook = self.post_startup_exec_hook.borrow_mut().take();
+        if let Some(hook) = hook {
+            hook(self);
+        }
     }
 
     /// Register the launch-specific addon bootstrap used by every UI reload.

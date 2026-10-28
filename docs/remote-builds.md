@@ -26,7 +26,9 @@ The Python profile launcher preserves `live`/`retail`, `ptr`, `mists`, and `all`
 
 ## Local slot builds
 
-Use `scripts/slot-build.py` for shared-slot Cargo builds. It bind-mounts the lane
+Use `scripts/slot-build.py` for shared-slot Cargo builds. Valid slots are 0, 1 and 3;
+slot 2 was retired on 2026-10-27 and both `slot-build.py --slot` and
+`full-suite --target-dir` reject it. It bind-mounts the lane
 worktree at `~/.cache/wow-ui-sim-srcmount/slot-N` inside an unprivileged
 user service, paired with target `~/.cache/wow-ui-sim-targets/slot-N` and
 `CARGO_INCREMENTAL=1`. Incremental reuse depends on that fixed BindPaths source
@@ -44,7 +46,7 @@ It checks `capacity.sh` once with `CAPACITY_ID` from `--capacity-id` and refuses
 anything except a literal `ADD` verdict. It does not poll for admission.
 
 ```sh
-scripts/slot-build.py --slot 2 --worktree "$HOME/.worktrees/wow-ui-sim-lane" --unit lane-build --owner lane-owner --capacity-id lane-capacity -- /usr/bin/cargo test --test integration --no-run
+scripts/slot-build.py --slot 3 --worktree "$HOME/.worktrees/wow-ui-sim-lane" --unit lane-build --owner lane-owner --capacity-id lane-capacity -- /usr/bin/cargo test --test integration --no-run
 scripts/slot-build.py --status lane-build
 ```
 
@@ -83,7 +85,7 @@ Receipts and source-identity files are never removed.
 Read-only inspection does not require ownership or launch a build:
 
 ```sh
-scripts/slot-build.py --slot 2 --prune-dry-run
+scripts/slot-build.py --slot 3 --prune-dry-run
 ```
 
 It prints the same removal plan and before/remaining byte totals without deleting
