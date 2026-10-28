@@ -149,7 +149,7 @@ fn original_scenario_cover_tracks_solo_player_level() {
     "#,
     )
     .unwrap();
-    env.exec("ScenarioFinderFrame_UpdateAvailability()")
+    env.exec("local ok, reason = xpcall(ScenarioFinderFrame_UpdateAvailability, debug.traceback); if not ok then error(reason, 0) end")
         .expect("original ScenarioFinder_Shared.lua:58 must consume the solo default");
     env.exec("assert(ScenarioFinderFrame.NoScenariosCover:IsShown())")
         .unwrap();

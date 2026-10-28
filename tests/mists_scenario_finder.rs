@@ -97,6 +97,8 @@ fn original_pve_frame_uses_stock_scenario_default() {
     assert_eq!(reason, "");
     env.exec("assert(GroupFinderFrame.groupButton4:IsEnabled())")
         .unwrap();
+    assert_original_scenario(&env, false, "scenario unavailable", 1);
+    assert_original_scenario(&env, true, "", 90);
 }
 
 #[test]
