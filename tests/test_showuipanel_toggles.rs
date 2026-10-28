@@ -273,7 +273,9 @@ fn toggle_player_spells_frame_opens_and_closes_talent_panel() {
             env.exec(r#"
                 ToggleTalentFrame()
                 assert(PlayerTalentFrame:IsShown(), "native talent panel should open")
+                print('talent diagnostic after open', GetNumTalentTabs(), PanelTemplates_GetSelectedTab(PlayerTalentFrame), PlayerTalentFrameTab1:IsShown())
                 ToggleTalentFrame()
+                print('talent diagnostic after close', PlayerTalentFrame:IsShown())
                 assert(not PlayerTalentFrame:IsShown(), "native talent panel should close")
             "#).expect("native talent lazy loader and toggle");
             return;
