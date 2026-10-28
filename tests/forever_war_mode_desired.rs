@@ -125,6 +125,32 @@ fn check_pvp_talent_alert(can_use: bool, unspent: bool, new_talent: bool, expect
     .expect("original micro-menu PvP talent consumer");
 }
 
+// The micro-menu consumer uses only availability, so reason is checked at the API boundary.
+fn check_pvp_talent_reason(reason: &str) {
+    let env = load_game_ui();
+    {
+        let state = env.state();
+        let mut state = state.borrow_mut();
+        state.pvp_talents.can_use = false;
+        state.pvp_talents.failure_reason = reason.into();
+    }
+    let (can_use, actual_reason): (bool, String) = env
+        .eval("return C_SpecializationInfo.CanPlayerUsePVPTalentUI()")
+        .expect("read PvP talent availability and reason");
+    assert!(!can_use);
+    assert_eq!(actual_reason, reason);
+}
+
+#[test]
+fn forever_pvp_talent_reason_first() {
+    check_pvp_talent_reason("first reason");
+}
+
+#[test]
+fn forever_pvp_talent_reason_second() {
+    check_pvp_talent_reason("second reason");
+}
+
 #[test]
 fn forever_pvp_talents_unavailable() {
     check_pvp_talent_alert(false, true, false, "nil");
