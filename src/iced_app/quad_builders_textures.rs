@@ -168,7 +168,7 @@ fn emit_textured_quad(
     }
 
     if bar_fill.is_none()
-        && let Some(uv4) = explicit_quad_uvs(f)
+        && let Some(uv4) = single_quad_uvs(f)
     {
         let (effective_path, effective_uv4) =
             remap_atlas_crop_uv4(tex_path, uv4, f.atlas_tex_coords);
@@ -208,6 +208,18 @@ fn explicit_quad_uvs(f: &crate::widget::Frame) -> Option<[[f32; 2]; 4]> {
     let tr = [raw[4], raw[5]];
     let br = [raw[6], raw[7]];
     Some([tl, tr, br, bl])
+}
+
+/// Corner UVs for the single-quad path without a status-bar fill. On a
+/// plain file texture every explicit quad qualifies. On an atlas slot only
+/// a rotated quad does: an axis-aligned one keeps the rect path, which
+/// already maps `tex_coords` into the slot and honours slice modes.
+fn single_quad_uvs(f: &crate::widget::Frame) -> Option<[[f32; 2]; 4]> {
+    if f.atlas_tex_coords.is_none() {
+        explicit_quad_uvs(f)
+    } else {
+        rotated_quad_uvs(f)
+    }
 }
 
 /// Returns the 4 corner UVs (TL, TR, BR, BL) when the frame has an 8-arg
@@ -842,6 +854,35 @@ mod tests {
                 assert_eq!(
                     batch.vertices[2].position,
                     [bounds.x + bounds.width, bounds.y + bounds.height]
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn explicit_axis_aligned_uvs_on_atlas_slot_stay_in_slot_space() {
+        let mut frame = Frame::new(WidgetType::Texture, None, None);
+        frame.texture = Some(r"Interface\Buttons\WHITE8X8".into());
+        frame.atlas_tex_coords = Some((0.2, 0.6, 0.3, 0.7));
+        frame.tex_coords = Some((0.2, 0.6, 0.3, 0.7));
+        frame.tex_coords_quad = Some([0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0]);
+        let mut batch = QuadBatch::new();
+
+        build_texture_quads(
+            &mut batch,
+            Rectangle::new(Point::ORIGIN, Size::new(24.0, 24.0)),
+            &frame,
+            None,
+            1.0,
+        );
+
+        assert_eq!(batch.vertices.len(), 4);
+        assert!(batch.texture_requests[0].path.contains("@crop:"));
+        for vertex in &batch.vertices {
+            for value in vertex.tex_coords {
+                assert!(
+                    (-0.0001..=1.0001).contains(&value),
+                    "slot-space UV {value} outside [0, 1]"
                 );
             }
         }
