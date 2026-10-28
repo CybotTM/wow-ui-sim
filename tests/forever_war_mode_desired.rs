@@ -97,3 +97,52 @@ fn forever_specialization_refresh_war_mode_disabled() {
 fn forever_specialization_refresh_war_mode_enabled() {
     check_desired(true);
 }
+
+fn check_pvp_talent_alert(can_use: bool, unspent: bool, new_talent: bool, expected: &str) {
+    let env = load_game_ui();
+    {
+        let state = env.state();
+        let mut state = state.borrow_mut();
+        state.war_mode.desired = true;
+        state.pvp_talents.can_use = can_use;
+        state.pvp_talents.has_unspent_slot = unspent;
+        state.pvp_talents.has_new_talent = new_talent;
+    }
+    env.exec(&format!(
+        r#"
+        local alert = PlayerSpellsMicroButton:GetAnyPvpTalentAlert()
+        local expected = {expected}
+        if expected then
+            assert(alert and alert.text == expected)
+        else
+            assert(alert == nil)
+        end
+    "#
+    ))
+    .expect("original micro-menu PvP talent consumer");
+}
+
+#[test]
+fn forever_pvp_talents_unavailable() {
+    check_pvp_talent_alert(false, true, false, "nil");
+}
+
+#[test]
+fn forever_pvp_talents_unspent() {
+    check_pvp_talent_alert(
+        true,
+        true,
+        false,
+        "TALENT_MICRO_BUTTON_UNSPENT_PVP_TALENT_SLOT",
+    );
+}
+
+#[test]
+fn forever_pvp_talents_new() {
+    check_pvp_talent_alert(true, false, true, "TALENT_MICRO_BUTTON_NEW_PVP_TALENT");
+}
+
+#[test]
+fn forever_pvp_talents_no_alert() {
+    check_pvp_talent_alert(true, false, false, "nil");
+}
