@@ -16,7 +16,7 @@ fn ptr_weapon_enchant_event_updates_buff_frame() {
     }
     env.exec("assert(BuffFrame:IsEventRegistered('WEAPON_ENCHANT_CHANGED'))")
         .unwrap();
-    for (charges, time_left) in [(2, 60000.0), (5, 30000.0)] {
+    for (charges, time_left) in [(2, 60000.0), (5, 60000.0), (5, 30000.0)] {
         env.state().borrow_mut().weapon_enchants[0] = vec![WeaponEnchant {
             enchant_type: TEMPORARY_ENCHANT_TYPE,
             time_left,
@@ -30,6 +30,8 @@ fn ptr_weapon_enchant_event_updates_buff_frame() {
         assert!(errors.is_empty(), "weapon enchant event errors: {errors:?}");
         let actual = env.eval::<u32>("for _, aura in ipairs(BuffFrame.auraInfo) do if aura.auraType == 'TempEnchant' and aura.ID == 16 then return aura.count end end; return 0").unwrap();
         assert_eq!(actual, charges);
+        let remaining = env.eval::<f64>("for _, aura in ipairs(BuffFrame.auraInfo) do if aura.auraType == 'TempEnchant' and aura.ID == 16 then return aura.expirationTime - GetTime() end end; return 0").unwrap();
+        assert!((remaining - time_left / 1000.0).abs() < 1.0);
         let legacy = env
             .eval::<u32>("local _, _, charges = GetWeaponEnchantInfo(); return charges")
             .unwrap();
