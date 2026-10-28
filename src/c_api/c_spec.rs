@@ -68,6 +68,12 @@ pub fn register_c_specialization_info(state: &mut LuaState) -> LuaResult<()> {
             "CanPlayerUsePVPTalentUI",
             can_use_pvp_talent_ui,
         )?;
+        table_set_rust_fn_static(
+            state,
+            t_ref,
+            "GetPvpTalentAlertStatus",
+            pvp_talent_alert_status,
+        )?;
     }
     if matches!(
         crate::client_profile::ACTIVE,
@@ -106,6 +112,19 @@ fn can_use_pvp_talent_ui(state: &mut LuaState) -> LuaResult<u32> {
     let reason = state.gc.intern_string(failure_reason.as_bytes());
     state.push(Val::Bool(can_use));
     state.push(Val::Str(reason));
+    Ok(2)
+}
+
+fn pvp_talent_alert_status(state: &mut LuaState) -> LuaResult<u32> {
+    let (unspent, new_talent) = {
+        let sim = borrow_state(state)?;
+        (
+            sim.pvp_talents.has_unspent_slot,
+            sim.pvp_talents.has_new_talent,
+        )
+    };
+    state.push(Val::Bool(unspent));
+    state.push(Val::Bool(new_talent));
     Ok(2)
 }
 
