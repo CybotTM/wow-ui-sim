@@ -1,0 +1,96 @@
+//! Mists AuraUtil defensive classification through queued timers.
+#![cfg(feature = "client-mists")]
+
+use wow_ui_sim::c_api::c_unit_aura_classification::AuraSpellClassification;
+use wow_ui_sim::lua_api::WowLuaEnv;
+use wow_ui_sim::screen::ScreenKind;
+
+fn timer_fixture(first: bool, second: bool) -> WowLuaEnv {
+    let ui = crate::common::blizzard_addon_harness::blizzard_ui_dir();
+    let (env, _) = crate::common::blizzard_addon_harness::build_blizzard_addon_closure_env(
+        &ui,
+        &["Blizzard_FrameXMLUtil"],
+        &[],
+    );
+    env.state()
+        .borrow_mut()
+        .aura_spell_classifications
+        .spells
+        .extend([
+            (
+                101,
+                AuraSpellClassification {
+                    is_big_defensive: first,
+                    is_private: false,
+                },
+            ),
+            (
+                202,
+                AuraSpellClassification {
+                    is_big_defensive: second,
+                    is_private: false,
+                },
+            ),
+        ]);
+    env
+}
+
+fn assert_timer_classification(first: bool, second: bool) {
+    let env = timer_fixture(first, second);
+    env.exec(
+        r#"
+        debug.sethook(function(_, line)
+            local info = debug.getinfo(2, 'S')
+            local source = info.source:gsub('\\', '/')
+            local suffix = 'Blizzard_FrameXMLUtil/AuraUtil.lua'
+            if line == 332 and source:sub(-#suffix) == suffix then
+                MistsDefensiveBoundaryReached = true
+                debug.sethook()
+            end
+        end, 'l')
+    "#,
+    )
+    .unwrap();
+    let result = env.exec(&format!(
+        "assert(AuraUtil.IsBigDefensive({{spellId = 101}}) == {first}); assert(AuraUtil.IsBigDefensive({{spellId = 202}}) == {second})"
+    ));
+    env.exec(
+        "debug.sethook(); assert(MistsDefensiveBoundaryReached, 'AuraUtil.lua:332 not reached')",
+    )
+    .unwrap();
+    result.expect("original consumer AuraUtil.lua:332 must complete");
+}
+
+#[test]
+fn stock_startup_timers_do_not_call_a_nil_function() {
+    let env = WowLuaEnv::new().unwrap();
+    let ui = wow_ui_sim::blizzard_ui_sync::default_cache_addons_path().unwrap();
+    env.state().borrow_mut().addon_base_paths = vec![ui.clone()];
+    crate::common::load_profile_framexml(&env);
+    for (name, toc) in
+        wow_ui_sim::loader::discover_blizzard_addons_for_screen(&ui, ScreenKind::Game)
+    {
+        wow_ui_sim::loader::load_addon(&env.loader_env(), &toc)
+            .unwrap_or_else(|error| panic!("{name}: {error}"));
+    }
+    env.apply_post_load_workarounds();
+    let before = env.state().borrow().lua_errors.len();
+    wow_ui_sim::startup::collect_lua_error_startup(&env);
+    let errors = env.state().borrow().lua_errors[before..].to_vec();
+    assert!(
+        !errors
+            .iter()
+            .any(|error| error.contains("attempt to call a nil value")),
+        "startup timer errors: {errors:#?}"
+    );
+}
+
+#[test]
+fn timer_consumer_reads_supplied_defensive() {
+    assert_timer_classification(true, false);
+}
+
+#[test]
+fn timer_consumer_reads_supplied_non_defensive() {
+    assert_timer_classification(false, true);
+}
