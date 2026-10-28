@@ -13,6 +13,14 @@ use rilua::{LuaResult, Val};
 
 use super::helpers::ensure_namespace;
 
+#[derive(Debug, Clone, Default)]
+pub struct PvpTalentState {
+    pub can_use: bool,
+    pub failure_reason: String,
+    pub has_unspent_slot: bool,
+    pub has_new_talent: bool,
+}
+
 type LuaTableRef = GcRef<Table>;
 type RustLuaFn = rilua::vm::closure::RustFn;
 
