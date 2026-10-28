@@ -23,11 +23,11 @@ Mists `C_PartyInfo.GetMinLevel()` returns an environment-local supplied number. 
 
 The publication/unchanged-other-profile requirement has Mists runtime and seven-profile compile proof; other-profile runtime parity is not claimed.
 
-`tests/mists_scenario_minlevel.rs` covers selected TOC/Lua/XML identity, unsupplied original58 boundary, empty-catalog preservation at85/90, exact direct-query values and count, explicit-category rejection, clearing and environment isolation.
+`tests/mists_scenario_minlevel.rs` covers selected TOC/Lua/XML identity, unsupplied original58 boundary, empty-catalog preservation at85/90, original cover transitions at40/55, exact direct-query values and count, explicit-category rejection, clearing and environment isolation.
 
 ## Known gaps (current cycle)
 
-- [ ] Original output discrimination is BLOCKED pending native contracts for legacy `GetScenariosChoiceOrder`, `GetNumRandomScenarios`, `GetRandomScenarioInfo`, and `GetLFGDungeonInfo`. The pinned generated-documentation scan found no declarations for these members. Main has asked the laptop. No catalog producer change is part of this contract.
+- [x] The selected original consumer discriminates solo levels 40 and 55 using an explicitly supplied presentation-list entry and dungeon fixture. This does not establish native catalog behavior; no catalog producer was changed.
 
 ## Out of scope
 
