@@ -5,7 +5,7 @@ use wow_ui_sim::c_api::c_unit_aura_classification::AuraSpellClassification;
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::screen::ScreenKind;
 
-fn timer_fixture() -> WowLuaEnv {
+fn timer_fixture(first: bool, second: bool) -> WowLuaEnv {
     let ui = crate::common::blizzard_addon_harness::blizzard_ui_dir();
     let (env, _) = crate::common::blizzard_addon_harness::build_blizzard_addon_closure_env(
         &ui,
@@ -20,14 +20,14 @@ fn timer_fixture() -> WowLuaEnv {
             (
                 101,
                 AuraSpellClassification {
-                    is_big_defensive: true,
+                    is_big_defensive: first,
                     is_private: false,
                 },
             ),
             (
                 202,
                 AuraSpellClassification {
-                    is_big_defensive: false,
+                    is_big_defensive: second,
                     is_private: false,
                 },
             ),
@@ -35,14 +35,12 @@ fn timer_fixture() -> WowLuaEnv {
     env
 }
 
-fn assert_timer_classification(spell_id: u32, expected: bool) {
-    let env = timer_fixture();
-    env.exec(&format!(
-        "C_Timer.After(0, function() MistsDefensiveResult = AuraUtil.IsBigDefensive({{spellId = {spell_id}}}) end)"
-    )).unwrap();
+fn assert_timer_classification(first: bool, second: bool) {
+    let env = timer_fixture(first, second);
+    env.exec("C_Timer.After(0, function() MistsFirst = AuraUtil.IsBigDefensive({spellId = 101}); MistsSecond = AuraUtil.IsBigDefensive({spellId = 202}) end)").unwrap();
     assert!(env.process_timers().unwrap() > 0);
     env.exec(&format!(
-        "assert(MistsDefensiveResult == {expected}, 'original AuraUtil timer classification')"
+        "assert(MistsFirst == {first}); assert(MistsSecond == {second})"
     ))
     .unwrap();
 }
@@ -73,10 +71,10 @@ fn stock_startup_timers_do_not_call_a_nil_function() {
 
 #[test]
 fn timer_consumer_reads_supplied_defensive() {
-    assert_timer_classification(101, true);
+    assert_timer_classification(true, false);
 }
 
 #[test]
 fn timer_consumer_reads_supplied_non_defensive() {
-    assert_timer_classification(202, false);
+    assert_timer_classification(false, true);
 }
