@@ -12,11 +12,53 @@ use super::professions_tables::{item_icon, item_link_value, selected_profession}
 type TradeSkillGlobal = (&'static str, fn(&mut LuaState) -> LuaResult<u32>);
 
 pub(super) fn register_legacy_trade_skill_globals(state: &mut LuaState) -> LuaResult<()> {
-    register_globals(state, LEGACY_TRADE_SKILL_FRAME_GLOBALS)?;
-    register_globals(state, LEGACY_TRADE_SKILL_RECIPE_GLOBALS)?;
-    register_globals(state, LEGACY_TRADE_SKILL_FILTER_GLOBALS)?;
-    register_globals(state, LEGACY_TRADE_SKILL_ACTION_GLOBALS)
+    use crate::client_profile::{ACTIVE, ClientProfile};
+    match ACTIVE {
+        ClientProfile::Mists => {
+            register_globals(state, LEGACY_TRADE_SKILL_FRAME_GLOBALS)?;
+            register_globals(state, LEGACY_TRADE_SKILL_RECIPE_GLOBALS)?;
+            register_globals(state, LEGACY_TRADE_SKILL_FILTER_GLOBALS)?;
+            register_globals(state, LEGACY_TRADE_SKILL_ACTION_GLOBALS)
+        }
+        ClientProfile::Wrath => register_globals(state, WRATH_TRADE_SKILL_GLOBALS),
+        _ => Ok(()),
+    }
 }
+
+const WRATH_TRADE_SKILL_GLOBALS: &[TradeSkillGlobal] = &[
+    ("CloseTradeSkill", close_trade_skill),
+    ("CollapseTradeSkillSubClass", collapse_trade_skill_sub_class),
+    ("ExpandTradeSkillSubClass", expand_trade_skill_sub_class),
+    ("GetFirstTradeSkill", get_first_trade_skill),
+    ("GetNumTradeSkills", get_num_trade_skills),
+    ("GetTradeskillRepeatCount", get_tradeskill_repeat_count),
+    ("GetTradeSkillLine", get_trade_skill_line),
+    (
+        "GetTradeSkillSelectionIndex",
+        get_trade_skill_selection_index,
+    ),
+    ("IsTradeSkillLinked", is_trade_skill_linked),
+    ("StopTradeSkillRepeat", stop_trade_skill_repeat),
+    ("GetTradeSkillCooldown", get_trade_skill_cooldown),
+    ("GetTradeSkillDescription", get_trade_skill_description),
+    ("GetTradeSkillIcon", get_trade_skill_icon),
+    ("GetTradeSkillInfo", get_trade_skill_info),
+    ("GetTradeSkillListLink", get_trade_skill_list_link),
+    ("GetTradeSkillNumMade", get_trade_skill_num_made),
+    ("GetTradeSkillNumReagents", get_trade_skill_num_reagents),
+    ("GetTradeSkillReagentInfo", get_trade_skill_reagent_info),
+    ("GetTradeSkillTools", get_trade_skill_tools),
+    (
+        "SetTradeSkillItemNameFilter",
+        set_trade_skill_item_name_filter,
+    ),
+    (
+        "SetTradeSkillItemLevelFilter",
+        set_trade_skill_item_level_filter,
+    ),
+    ("TradeSkillOnlyShowMakeable", trade_skill_only_show_makeable),
+    ("SelectTradeSkill", select_trade_skill),
+];
 
 const LEGACY_TRADE_SKILL_FRAME_GLOBALS: &[TradeSkillGlobal] = &[
     ("GetFirstTradeSkill", get_first_trade_skill),
@@ -101,12 +143,19 @@ fn register_globals(state: &mut LuaState, globals: &[TradeSkillGlobal]) -> LuaRe
 }
 
 fn get_num_trade_skills(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Num(legacy_trade_skill_recipes().len() as f64));
+    let count = if is_wrath() {
+        visible_trade_skill_recipes(state)?.len()
+    } else {
+        legacy_trade_skill_recipes().len()
+    };
+    state.push(Val::Num(count as f64));
     Ok(1)
 }
 
 fn get_first_trade_skill(state: &mut LuaState) -> LuaResult<u32> {
-    let first_index = if legacy_trade_skill_recipes().is_empty() {
+    let first_index = if is_wrath() && visible_trade_skill_recipes(state)?.is_empty()
+        || legacy_trade_skill_recipes().is_empty()
+    {
         0.0
     } else {
         1.0
@@ -117,17 +166,32 @@ fn get_first_trade_skill(state: &mut LuaState) -> LuaResult<u32> {
 
 fn select_trade_skill(state: &mut LuaState) -> LuaResult<u32> {
     let trade_skill_index = i32::from_stack(state, 1)?;
-    if legacy_trade_skill_recipe(trade_skill_index).is_some() {
+    if is_wrath() {
+        let selected = trade_skill_recipe(state, trade_skill_index)?.map(|recipe| recipe.recipe_id);
+        borrow_state_mut(state)?
+            .crafting
+            .wrath_selected_trade_skill_recipe = selected;
+    } else if legacy_trade_skill_recipe(trade_skill_index).is_some() {
         borrow_state_mut(state)?.crafting.selected_trade_skill_index = Some(trade_skill_index);
     }
     Ok(0)
 }
 
 fn get_trade_skill_selection_index(state: &mut LuaState) -> LuaResult<u32> {
-    let selected_index = borrow_state(state)?
-        .crafting
-        .selected_trade_skill_index
-        .unwrap_or(0);
+    let selected_index = if is_wrath() {
+        let selected = borrow_state(state)?
+            .crafting
+            .wrath_selected_trade_skill_recipe;
+        sorted_trade_skill_recipes(state)?
+            .iter()
+            .position(|recipe| Some(recipe.recipe_id) == selected)
+            .map_or(0, |index| index as i32 + 1)
+    } else {
+        borrow_state(state)?
+            .crafting
+            .selected_trade_skill_index
+            .unwrap_or(0)
+    };
     state.push(Val::Num(selected_index as f64));
     Ok(1)
 }
@@ -149,7 +213,15 @@ fn get_trade_skill_line(state: &mut LuaState) -> LuaResult<u32> {
 
 fn get_trade_skill_info(state: &mut LuaState) -> LuaResult<u32> {
     let trade_skill_index = i32::from_stack(state, 1)?;
-    let recipe = legacy_trade_skill_recipe(trade_skill_index);
+    let recipe = trade_skill_recipe(state, trade_skill_index)?;
+    if is_wrath() && recipe.is_none() {
+        state.push(Val::Nil);
+        state.push(Val::Nil);
+        state.push(Val::Num(0.0));
+        state.push(Val::Nil);
+        state.push(Val::Nil);
+        return Ok(5);
+    }
     let recipe_name = recipe_string_field(state, recipe, |recipe| recipe.name);
     let difficulty = recipe_string_field(state, recipe, legacy_trade_skill_difficulty);
 
@@ -169,7 +241,7 @@ fn get_trade_skill_info(state: &mut LuaState) -> LuaResult<u32> {
 
 fn get_trade_skill_icon(state: &mut LuaState) -> LuaResult<u32> {
     let trade_skill_index = i32::from_stack(state, 1)?;
-    let icon = legacy_trade_skill_recipe(trade_skill_index)
+    let icon = trade_skill_recipe(state, trade_skill_index)?
         .map(|recipe| item_icon(recipe.output_item_id))
         .unwrap_or(134400.0);
     state.push(Val::Num(icon));
@@ -178,7 +250,7 @@ fn get_trade_skill_icon(state: &mut LuaState) -> LuaResult<u32> {
 
 fn get_trade_skill_num_made(state: &mut LuaState) -> LuaResult<u32> {
     let trade_skill_index = i32::from_stack(state, 1)?;
-    let quantity = legacy_trade_skill_recipe(trade_skill_index)
+    let quantity = trade_skill_recipe(state, trade_skill_index)?
         .map(|recipe| recipe.output_quantity)
         .unwrap_or(1);
     state.push(Val::Num(quantity as f64));
@@ -188,7 +260,7 @@ fn get_trade_skill_num_made(state: &mut LuaState) -> LuaResult<u32> {
 
 fn get_trade_skill_num_reagents(state: &mut LuaState) -> LuaResult<u32> {
     let trade_skill_index = i32::from_stack(state, 1)?;
-    let count = legacy_trade_skill_recipe(trade_skill_index)
+    let count = trade_skill_recipe(state, trade_skill_index)?
         .map(|recipe| recipe.reagents.len())
         .unwrap_or(0);
     state.push(Val::Num(count as f64));
@@ -213,7 +285,7 @@ fn get_trade_skill_reagent_info(state: &mut LuaState) -> LuaResult<u32> {
 
 fn get_trade_skill_item_link(state: &mut LuaState) -> LuaResult<u32> {
     let trade_skill_index = i32::from_stack(state, 1)?;
-    let link = legacy_trade_skill_recipe(trade_skill_index)
+    let link = trade_skill_recipe(state, trade_skill_index)?
         .and_then(|recipe| item_link_value(state, recipe.output_item_id));
     state.push(link.unwrap_or(Val::Nil));
     Ok(1)
@@ -228,7 +300,7 @@ fn get_trade_skill_reagent_item_link(state: &mut LuaState) -> LuaResult<u32> {
 
 fn get_trade_skill_recipe_link(state: &mut LuaState) -> LuaResult<u32> {
     let trade_skill_index = i32::from_stack(state, 1)?;
-    let link = legacy_trade_skill_recipe(trade_skill_index).map(legacy_recipe_link);
+    let link = trade_skill_recipe(state, trade_skill_index)?.map(legacy_recipe_link);
     match link {
         Some(link) => {
             let link = create_string(state, &link);
@@ -264,7 +336,7 @@ fn get_trade_skill_list_link(state: &mut LuaState) -> LuaResult<u32> {
 
 fn get_trade_skill_description(state: &mut LuaState) -> LuaResult<u32> {
     let trade_skill_index = i32::from_stack(state, 1)?;
-    let description = legacy_trade_skill_recipe(trade_skill_index)
+    let description = trade_skill_recipe(state, trade_skill_index)?
         .and_then(|recipe| u32::try_from(recipe.recipe_id).ok())
         .and_then(crate::spell_descriptions::get_spell_description)
         .filter(|description| !description.is_empty());
@@ -280,21 +352,63 @@ fn get_trade_skill_description(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn get_trade_skill_cooldown(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Nil);
+    let cooldown = if is_wrath() {
+        let index = i32::from_stack(state, 1)?;
+        let recipe = trade_skill_recipe(state, index)?;
+        match recipe {
+            Some(recipe) => borrow_state(state)?
+                .crafting
+                .wrath_trade_skill_cooldowns
+                .get(&recipe.recipe_id)
+                .copied(),
+            None => None,
+        }
+    } else {
+        None
+    };
+    state.push(cooldown.map_or(Val::Nil, Val::Num));
     Ok(1)
 }
 
-fn get_trade_skill_tools(_state: &mut LuaState) -> LuaResult<u32> {
-    Ok(0)
+fn get_trade_skill_tools(state: &mut LuaState) -> LuaResult<u32> {
+    if !is_wrath() {
+        return Ok(0);
+    }
+    let index = i32::from_stack(state, 1)?;
+    let recipe = trade_skill_recipe(state, index)?;
+    let tools = match recipe {
+        Some(recipe) => borrow_state(state)?
+            .crafting
+            .wrath_trade_skill_tools
+            .get(&recipe.recipe_id)
+            .cloned()
+            .unwrap_or_default(),
+        None => Vec::new(),
+    };
+    for tool in &tools {
+        let value = create_string(state, tool);
+        state.push(value);
+    }
+    Ok(tools.len() as u32)
 }
 
 fn get_tradeskill_repeat_count(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Num(1.0));
+    let count = if is_wrath() {
+        borrow_state(state)?.crafting.wrath_trade_skill_repeat_count as f64
+    } else {
+        1.0
+    };
+    state.push(Val::Num(count));
     Ok(1)
 }
 
 fn is_trade_skill_linked(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Bool(false));
+    let linked = if is_wrath() {
+        borrow_state(state)?.crafting.wrath_trade_skill_linked
+    } else {
+        false
+    };
+    state.push(Val::Bool(linked));
     Ok(1)
 }
 
@@ -334,15 +448,38 @@ fn set_trade_skill_sub_class_filter(_state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
-fn set_trade_skill_item_name_filter(_state: &mut LuaState) -> LuaResult<u32> {
+fn set_trade_skill_item_name_filter(state: &mut LuaState) -> LuaResult<u32> {
+    if is_wrath() {
+        let filter = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
+        let mut sim = borrow_state_mut(state)?;
+        if sim.crafting.wrath_trade_skill_name_filter == filter {
+            return Ok(0);
+        }
+        sim.crafting.wrath_trade_skill_name_filter = filter;
+        drop(sim);
+        fire_named_event_state(state, "TRADE_SKILL_FILTER_UPDATE", &[]);
+    }
     Ok(0)
 }
 
-fn set_trade_skill_item_level_filter(_state: &mut LuaState) -> LuaResult<u32> {
+fn set_trade_skill_item_level_filter(state: &mut LuaState) -> LuaResult<u32> {
+    if is_wrath() {
+        let min = i32::from_stack(state, 1)?;
+        let max = i32::from_stack(state, 2)?;
+        borrow_state_mut(state)?
+            .crafting
+            .wrath_trade_skill_level_filter = (min, max);
+    }
     Ok(0)
 }
 
-fn trade_skill_only_show_makeable(_state: &mut LuaState) -> LuaResult<u32> {
+fn trade_skill_only_show_makeable(state: &mut LuaState) -> LuaResult<u32> {
+    if is_wrath() {
+        let makeable = bool::from_stack(state, 1)?;
+        borrow_state_mut(state)?
+            .crafting
+            .wrath_trade_skill_makeable_only = makeable;
+    }
     Ok(0)
 }
 
@@ -358,14 +495,19 @@ fn collapse_trade_skill_sub_class(_state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
-fn stop_trade_skill_repeat(_state: &mut LuaState) -> LuaResult<u32> {
+fn stop_trade_skill_repeat(state: &mut LuaState) -> LuaResult<u32> {
+    if is_wrath() {
+        borrow_state_mut(state)?
+            .crafting
+            .wrath_trade_skill_repeat_count = 0;
+    }
     Ok(0)
 }
 
 fn do_trade_skill(state: &mut LuaState) -> LuaResult<u32> {
     let trade_skill_index = i32::from_stack(state, 1)?;
     let count = Option::<i32>::from_stack(state, 2)?.unwrap_or(1).max(1);
-    if let Some(recipe) = legacy_trade_skill_recipe(trade_skill_index) {
+    if let Some(recipe) = trade_skill_recipe(state, trade_skill_index)? {
         let _ = craft_recipe(state, recipe.recipe_id, count);
     }
     Ok(0)
@@ -374,6 +516,62 @@ fn do_trade_skill(state: &mut LuaState) -> LuaResult<u32> {
 fn close_trade_skill(state: &mut LuaState) -> LuaResult<u32> {
     fire_named_event_state(state, "TRADE_SKILL_CLOSE", &[]);
     Ok(0)
+}
+
+fn is_wrath() -> bool {
+    crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Wrath
+}
+
+fn sorted_trade_skill_recipes(
+    state: &mut LuaState,
+) -> LuaResult<Vec<&'static profession_data::RecipeEntry>> {
+    let sim = borrow_state(state)?;
+    let filter = sim.crafting.wrath_trade_skill_name_filter.to_lowercase();
+    let makeable_only = sim.crafting.wrath_trade_skill_makeable_only;
+    let levels = sim.crafting.wrath_trade_skill_level_filter;
+    let mut recipes: Vec<_> = legacy_trade_skill_recipes().iter().collect();
+    recipes.sort_by_key(|recipe| !trade_skill_matches(recipe, &filter, makeable_only, levels));
+    Ok(recipes)
+}
+
+fn visible_trade_skill_recipes(
+    state: &mut LuaState,
+) -> LuaResult<Vec<&'static profession_data::RecipeEntry>> {
+    let sim = borrow_state(state)?;
+    let filter = sim.crafting.wrath_trade_skill_name_filter.to_lowercase();
+    let makeable_only = sim.crafting.wrath_trade_skill_makeable_only;
+    let levels = sim.crafting.wrath_trade_skill_level_filter;
+    Ok(legacy_trade_skill_recipes()
+        .iter()
+        .filter(|recipe| trade_skill_matches(recipe, &filter, makeable_only, levels))
+        .collect())
+}
+
+fn trade_skill_matches(
+    recipe: &profession_data::RecipeEntry,
+    filter: &str,
+    makeable_only: bool,
+    levels: (i32, i32),
+) -> bool {
+    recipe.name.to_lowercase().contains(filter)
+        && (!makeable_only || recipe.craftable)
+        && (levels == (0, 0) || (levels.0..=levels.1).contains(&recipe.item_level))
+}
+
+fn trade_skill_recipe(
+    state: &mut LuaState,
+    index: i32,
+) -> LuaResult<Option<&'static profession_data::RecipeEntry>> {
+    if !is_wrath() {
+        return Ok(legacy_trade_skill_recipe(index));
+    }
+    let Some(index) = index
+        .checked_sub(1)
+        .and_then(|index| usize::try_from(index).ok())
+    else {
+        return Ok(None);
+    };
+    Ok(sorted_trade_skill_recipes(state)?.get(index).copied())
 }
 
 fn legacy_trade_skill_recipes() -> &'static [profession_data::RecipeEntry] {
@@ -393,7 +591,7 @@ fn reagent_from_stack(
 ) -> LuaResult<Option<&'static profession_data::ReagentSlot>> {
     let trade_skill_index = i32::from_stack(state, 1)?;
     let reagent_index = i32::from_stack(state, 2)?.saturating_sub(1) as usize;
-    Ok(legacy_trade_skill_recipe(trade_skill_index)
+    Ok(trade_skill_recipe(state, trade_skill_index)?
         .and_then(|recipe| recipe.reagents.get(reagent_index)))
 }
 

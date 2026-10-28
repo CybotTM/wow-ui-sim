@@ -467,5 +467,14 @@ pub fn spec_by_id(id: u32) -> Option<&'static SpecInfo> {
 
 /// Get specs for a class, ordered by order_index.
 pub fn specs_for_class(class_id: u32) -> impl Iterator<Item = &'static SpecInfo> {
-    SPECS.iter().filter(move |s| s.class_id == class_id)
+    static SORTED_SPECS: std::sync::OnceLock<Vec<&'static SpecInfo>> = std::sync::OnceLock::new();
+    let specs = SORTED_SPECS.get_or_init(|| {
+        let mut specs: Vec<_> = SPECS.iter().collect();
+        specs.sort_by_key(|spec| (spec.class_id, spec.order_index));
+        specs
+    });
+    specs
+        .iter()
+        .copied()
+        .filter(move |s| s.class_id == class_id)
 }

@@ -1,3 +1,15 @@
+## [2026-10-27] proof | Mists scenario defaults
+
+[Scenario finder](systems/mists-scenario-finder.md) records the user-decided, native-UNKNOWN defaults and original-consumer proof.
+
+## [2026-10-27] investigation | UI capture fidelity
+
+[[ui-capture-fidelity]] records the screenshot `--quality` and `--ui-scale` options, 2x atlas art above 1 px per unit, bilinear atlas sampling, font `<Shadow>`/`<Color>`, shadow direction, and five startup-state fixes found by comparing renders with a 12.1.0 client capture. It also lists the findings left out because master pins the opposite behaviour.
+
+## [2026-10-27] implementation | Minimap quest-blob observations
+
+[Minimap containment](investigations/minimap.md#supplied-quest-blob-containment) links the supplied-state contract. Retail, PTR and Forever original-consumer RED/GREEN are proven; paired Retail/PTR stock is unchanged and seven all-target checks have zero compiler warnings. The Retail publication sweep still fails on the same pre-existing LFG gap in both siblings.
+
 ## [2026-10-27] implementation | Target spell and flyout inputs
 
 The [target-spell and flyout contract](../specs/spell-target-flyout.md) replaces the [historical missing-target error](investigations/forever-startup-gaps.md#historical-startup-packet-and-unknown-consumers) with a best-guess nil scenario default and supplies spellbook membership on PTR/Forever. Native no-target behavior remains unknown. PTR original consumers and Forever target/secret cases pass; all seven profile checks have zero compiler warnings. PTR stock removes two missing-API error keys; Retail and Forever stock are unchanged.
@@ -9,6 +21,10 @@ The [target-spell and flyout contract](../specs/spell-target-flyout.md) replaces
 ## [2026-10-26] implementation | Spectating UI scenario
 
 [Scenario state and selected consumer](systems/spectating-ui.md) describe the user-authorized false default and undocumented native contract. Retail original-consumer RED/GREEN and unchanged Retail/PTR stock are proven; seven all-target checks have zero warnings.
+
+## [2026-10-27] bounded proof | Wrath talent rendering
+
+[Original show-path proof](investigations/wrath-spell-panels-f10.md) links the [supplied tab and row contract](../specs/wrath-talent-tabs.md). Two distinct supplied states render, including a rank-dependent prerequisite. RED fails at the original tab query; stock comparison and remaining profile checks are pending.
 
 ## [2026-10-27] bounded proof | Wrath glyph and talent inputs
 
@@ -3932,7 +3948,7 @@ The sixteen retail 12.0.0 `Enum.EditModeDamageMeterSetting.*` and `Enum.EditMode
 | [[frame-data-flow]] | Parallel Lua/Rust systems, same-object engine-root XML configuration, addon-load ownership/cleanup, global tables (__frame_fields/__scripts), method lookup order, Mixin() application with early EditMode base aliases, event dispatch flow |
 | [[taint-system]] | Protected-frame gating, dual Lua environment (genv/secureenv), Elune-backed issecure/securecall, bounded per-environment click-binding interaction profile, Blizzard `issecure()` call-site matrix, SecureHandler fallback, state/attribute drivers |
 | [[casc-asset-cache]] | CASC cache layers, `.product.db` selected-product identity, measured timings, failure modes, and the 4,398-file Forever mapping/sync proof |
-| [[specialization-mastery-spells]] | Per-spec mastery spell IDs modeled from ChrSpecialization.db2 (`SpecInfo.mastery_spell_ids`); backs `C_SpecializationInfo.GetSpecializationMasterySpells` and the Character sheet Mastery tooltip |
+| [[specialization-mastery-spells]] | Per-spec mastery spell IDs and class specialization ordering from ChrSpecialization.db2 |
 | [[duration-core]] | Lua table-proxy timing, three-formatter duration consumption, player cast/channel queries, manual clocks, Copy/Assign, curve evaluation, simulator policies and native/consumer bounds |
 
 ## investigations/

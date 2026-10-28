@@ -136,7 +136,17 @@ pub fn extract_sub_region(
     })
 }
 
-const EDGE_BLEED_ALPHA_MAX: u8 = 128;
+/// Bumped whenever `extract_sub_region` changes what it writes; it is part
+/// of the persistent crop cache key.
+pub const CROP_CACHE_VERSION: u32 = 2;
+
+// Only fully transparent black texels take the neighbouring edge colour:
+// they contribute nothing on their own and only matter through bilinear
+// mixing at a crop edge. A black texel with ANY alpha is drawn art -- the
+// micro-menu icons and the bag rings carry a pure-black drop shadow at
+// alpha 2..128 on all four sides, and recolouring it with the icon's edge
+// colour turned the shadow into a coloured halo around every icon.
+const EDGE_BLEED_ALPHA: u8 = 0;
 const EDGE_BLEED_RGB_MAX: u8 = 4;
 const EDGE_SOURCE_ALPHA_MIN: u8 = 128;
 const EDGE_SOURCE_RGB_MIN: u8 = 64;
@@ -196,7 +206,7 @@ pub fn pixel_offset(width: u32, x: u32, y: u32) -> usize {
 }
 
 pub fn is_low_alpha_black_padding(pixel: &[u8]) -> bool {
-    pixel[3] <= EDGE_BLEED_ALPHA_MAX
+    pixel[3] == EDGE_BLEED_ALPHA
         && pixel[0] <= EDGE_BLEED_RGB_MAX
         && pixel[1] <= EDGE_BLEED_RGB_MAX
         && pixel[2] <= EDGE_BLEED_RGB_MAX

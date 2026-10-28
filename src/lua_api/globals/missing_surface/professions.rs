@@ -1,7 +1,6 @@
 #[cfg(feature = "client-mists")]
 #[path = "professions_legacy_craft.rs"]
 mod professions_legacy_craft;
-#[cfg(feature = "client-mists")]
 #[path = "professions_legacy_trade_skill.rs"]
 mod professions_legacy_trade_skill;
 #[cfg(feature = "client-mists")]
@@ -21,7 +20,6 @@ use crate::lua_api::script_helpers::{fire_named_event_state, protected_lua_pcall
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 #[cfg(feature = "client-mists")]
 use professions_legacy_craft::register_legacy_craft_globals;
-#[cfg(feature = "client-mists")]
 use professions_legacy_trade_skill::register_legacy_trade_skill_globals;
 #[cfg(feature = "client-mists")]
 use professions_legacy_trainer::register_legacy_trainer_globals;
@@ -71,7 +69,6 @@ pub(super) fn register_profession_surface(state: &mut LuaState) -> LuaResult<()>
     table_set_rust_fn_static(state, state.global, "AbandonSkill", abandon_skill)?;
     #[cfg(feature = "client-mists")]
     register_legacy_craft_globals(state)?;
-    #[cfg(feature = "client-mists")]
     register_legacy_trade_skill_globals(state)?;
     #[cfg(feature = "client-mists")]
     register_legacy_trainer_globals(state)?;
